@@ -14,6 +14,7 @@ verbatim=(
 identical=(
   .claude/rules/go.md
   .claude/rules/writing.md
+  .gitattributes
   .github/zizmor.yml
   .github/workflows/ci.yml
   .github/workflows/security.yml

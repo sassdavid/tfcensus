@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"log/slog"
-	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -144,12 +143,11 @@ func TestRunIgnoresRelativePathEntries(t *testing.T) {
 	t.Parallel()
 
 	bin := fakebin.Install(t, "terragrunt", fakebin.Spec{Rules: []fakebin.Rule{{}}})
-	rel, err := filepath.Rel(mustGetwd(t), filepath.Dir(bin))
-	require.NoError(t, err)
+	binDir := filepath.Dir(bin)
 	r := execx.NewRunner(slog.New(slog.DiscardHandler), execx.WithEnviron(func() []string {
-		return []string{"PATH=" + rel}
+		return []string{"PATH=" + filepath.Base(binDir)}
 	}))
-	_, err = r.Run(t.Context(), execx.Cmd{Name: "terragrunt"})
+	_, err := r.Run(t.Context(), execx.Cmd{Name: "terragrunt", Dir: filepath.Dir(binDir)})
 	require.ErrorIs(t, err, execx.ErrNotFound)
 }
 
@@ -250,11 +248,4 @@ func (w *signalWriter) Write(p []byte) (int, error) {
 	default:
 	}
 	return len(p), nil
-}
-
-func mustGetwd(t *testing.T) string {
-	t.Helper()
-	wd, err := os.Getwd()
-	require.NoError(t, err)
-	return wd
 }
