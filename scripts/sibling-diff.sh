@@ -39,6 +39,12 @@ identical=(
   internal/config/paths.go
   internal/config/schema_test.go
   internal/config/validate.go
+  internal/execx/doc.go
+  internal/execx/execx.go
+  internal/execx/execx_test.go
+  internal/execx/procattr_unix.go
+  internal/execx/procattr_windows.go
+  internal/execx/redact.go
   internal/prose/doc.go
   internal/prose/prose.go
   internal/prose/prose_test.go
@@ -46,10 +52,16 @@ identical=(
   internal/render/render.go
   internal/render/render_test.go
   internal/testutil/doc.go
+  internal/testutil/fakebin/doc.go
+  internal/testutil/fakebin/fakebin.go
   internal/testutil/golden.go
+  internal/yamlschema/doc.go
+  internal/yamlschema/yamlschema.go
+  internal/yamlschema/yamlschema_test.go
   schemas/doc.go
   schemas/report-v1.json
   schemas/schemas.go
+  scripts/fuzz.sh
   scripts/gendocs/doc.go
   scripts/gendocs/main.go
   scripts/proselint/doc.go

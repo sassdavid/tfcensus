@@ -15,8 +15,8 @@ Same as [relgap M0](https://github.com/sassdavid/relgap/blob/main/docs/plan/mile
 - [x] `tfcensus version --format json` validates against the envelope schema.
 
 ### M1: Discovery (F1) → [discovery](specs/discovery.md)
-- [ ] **Spike:** check whether `terragrunt render --json` (v1.2.1) includes `remote_state`. Record the answer and the chosen approach in [adr/0001](adr/0001-shell-out-to-terragrunt.md).
-- [ ] All discovery.md acceptance criteria. `tfcensus units` on fixtures, in tty and json.
+- [x] **Spike:** check whether `terragrunt render --json` (v1.2.1) includes `remote_state`. Record the answer and the chosen approach in [adr/0001](adr/0001-shell-out-to-terragrunt.md).
+- [x] All discovery.md acceptance criteria. `tfcensus units` on fixtures, in tty and json.
 
 ### M2: Accounts and credentials (F2) → [accounts](specs/accounts-and-credentials.md)
 - [ ] Profile/SSO loading, Org mode, backend role chains, the expired-SSO UX. `tfcensus doctor` with the capability probe (stubbed).

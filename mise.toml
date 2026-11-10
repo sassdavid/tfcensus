@@ -34,6 +34,10 @@ run = "actionlint"
 description = "Unit, component and CLI (testscript) tests with the race detector"
 run = "go test -race -count=1 ./..."
 
+[tasks.fuzz]
+description = "Run every Go fuzz target for 60s each (mise run fuzz -- 10s sets another duration)"
+run = "bash scripts/fuzz.sh"
+
 [tasks."test:golden"]
 description = "Compare golden files; pass -update to regenerate them (review the diff)"
 run = "bash scripts/test-golden.sh"

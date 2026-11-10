@@ -84,15 +84,22 @@ func exitCode(ctx context.Context, err error, started bool) int {
 	}
 }
 
+// problemLister is an error made of several problems, printed one per line under a header.
+type problemLister interface {
+	error
+	Header() string
+	ProblemLines() []string
+}
+
 func printError(w io.Writer, err error, code int, prog, cmdPath string) {
 	if code == ExitInterrupted {
 		_, _ = fmt.Fprintln(w, prog+": interrupted")
 		return
 	}
-	if ve, ok := errors.AsType[*config.ValidationError](err); ok {
-		_, _ = fmt.Fprintln(w, prog+": invalid configuration:")
-		for _, p := range ve.Problems {
-			_, _ = fmt.Fprintln(w, "  "+p.String())
+	if pl, ok := errors.AsType[problemLister](err); ok {
+		_, _ = fmt.Fprintln(w, prog+": "+pl.Header()+":")
+		for _, line := range pl.ProblemLines() {
+			_, _ = fmt.Fprintln(w, "  "+line)
 		}
 		return
 	}

@@ -20,8 +20,10 @@ const (
 
 func flagKeys() map[string]string {
 	return map[string]string{
-		flagTFPath: "binaries.terraform",
-		flagTGPath: "binaries.terragrunt",
+		flagTFPath:         "binaries.terraform",
+		flagTGPath:         "binaries.terragrunt",
+		flagGenerateStacks: "discovery.generate_stacks",
+		flagRender:         "discovery.render",
 	}
 }
 
@@ -100,6 +102,7 @@ stdout carries data, stderr carries logs. Use --format json for scripting.`,
 	root.AddCommand(
 		newVersionCmd(d, g),
 		newConfigCmd(d, g),
+		newUnitsCmd(d, g),
 	)
 	return root, g
 }

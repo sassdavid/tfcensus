@@ -1,0 +1,314 @@
+{
+  "schema_version": "1",
+  "tool": "tfcensus",
+  "version": "test",
+  "generated_at": "2026-11-10T12:00:00Z",
+  "data": {
+    "units": [
+      {
+        "repo": "tg-live",
+        "path": "live/nonprod/eu-west-1/dev/app",
+        "kind": "terragrunt",
+        "backend": {
+          "type": "s3",
+          "bucket": "acme-tfstate-acme-nonprod",
+          "key": "live/nonprod/eu-west-1/dev/app/terraform.tfstate",
+          "region": "eu-west-1",
+          "use_lockfile": true
+        },
+        "lock": "lockfile",
+        "target": {
+          "account": "111111111111",
+          "account_from": "provider.allowed_account_ids",
+          "region": "eu-west-1",
+          "region_from": "provider.region",
+          "confidence": "high"
+        },
+        "resolution": "fast-path",
+        "dependencies": [
+          "live/nonprod/eu-west-1/dev/vpc"
+        ],
+        "warnings": []
+      },
+      {
+        "repo": "tg-live",
+        "path": "live/nonprod/eu-west-1/dev/db",
+        "kind": "terragrunt",
+        "backend": {
+          "type": "s3",
+          "bucket": "acme-tfstate-acme-nonprod",
+          "key": "live/nonprod/eu-west-1/dev/db/terraform.tfstate",
+          "region": "eu-west-1",
+          "use_lockfile": true
+        },
+        "lock": "lockfile",
+        "target": {
+          "account": "111111111111",
+          "account_from": "provider.allowed_account_ids",
+          "region": "eu-west-1",
+          "region_from": "provider.region",
+          "confidence": "high"
+        },
+        "resolution": "fast-path",
+        "dependencies": [
+          "live/nonprod/eu-west-1/dev/vpc"
+        ],
+        "warnings": []
+      },
+      {
+        "repo": "tg-live",
+        "path": "live/nonprod/eu-west-1/dev/vpc",
+        "kind": "terragrunt",
+        "backend": {
+          "type": "s3",
+          "bucket": "acme-tfstate-acme-nonprod",
+          "key": "live/nonprod/eu-west-1/dev/vpc/terraform.tfstate",
+          "region": "eu-west-1",
+          "use_lockfile": true
+        },
+        "lock": "lockfile",
+        "target": {
+          "account": "111111111111",
+          "account_from": "provider.allowed_account_ids",
+          "region": "eu-west-1",
+          "region_from": "provider.region",
+          "confidence": "high"
+        },
+        "resolution": "fast-path",
+        "warnings": []
+      },
+      {
+        "repo": "tg-live",
+        "path": "live/nonprod/eu-west-1/staging/app",
+        "kind": "terragrunt",
+        "backend": {
+          "type": "s3",
+          "bucket": "acme-tfstate-acme-nonprod",
+          "key": "live/nonprod/eu-west-1/staging/app/terraform.tfstate",
+          "region": "eu-west-1",
+          "use_lockfile": true
+        },
+        "lock": "lockfile",
+        "target": {
+          "account": "111111111111",
+          "account_from": "provider.allowed_account_ids",
+          "region": "eu-west-1",
+          "region_from": "provider.region",
+          "confidence": "high"
+        },
+        "resolution": "fast-path",
+        "dependencies": [
+          "live/nonprod/eu-west-1/staging/vpc"
+        ],
+        "warnings": []
+      },
+      {
+        "repo": "tg-live",
+        "path": "live/nonprod/eu-west-1/staging/vpc",
+        "kind": "terragrunt",
+        "backend": {
+          "type": "s3",
+          "bucket": "acme-tfstate-acme-nonprod",
+          "key": "live/nonprod/eu-west-1/staging/vpc/terraform.tfstate",
+          "region": "eu-west-1",
+          "use_lockfile": true
+        },
+        "lock": "lockfile",
+        "target": {
+          "account": "111111111111",
+          "account_from": "provider.allowed_account_ids",
+          "region": "eu-west-1",
+          "region_from": "provider.region",
+          "confidence": "high"
+        },
+        "resolution": "fast-path",
+        "warnings": []
+      },
+      {
+        "repo": "tg-live",
+        "path": "live/nonprod/us-east-1/global/iam",
+        "kind": "terragrunt",
+        "backend": {
+          "type": "s3",
+          "bucket": "acme-tfstate-acme-nonprod",
+          "key": "live/nonprod/us-east-1/global/iam/terraform.tfstate",
+          "region": "eu-west-1",
+          "use_lockfile": true
+        },
+        "lock": "lockfile",
+        "target": {
+          "account": "111111111111",
+          "account_from": "provider.allowed_account_ids",
+          "region": "us-east-1",
+          "region_from": "provider.region",
+          "confidence": "high"
+        },
+        "resolution": "fast-path",
+        "warnings": []
+      },
+      {
+        "repo": "tg-live",
+        "path": "live/prod/eu-central-1/prod/edge",
+        "kind": "terragrunt",
+        "backend": {
+          "type": "s3",
+          "bucket": "acme-tfstate-acme-prod",
+          "key": "live/prod/eu-central-1/prod/edge/terraform.tfstate",
+          "region": "eu-west-1",
+          "use_lockfile": true
+        },
+        "lock": "lockfile",
+        "target": {
+          "account": "222222222222",
+          "account_from": "provider.allowed_account_ids",
+          "region": "eu-central-1",
+          "region_from": "provider.region",
+          "confidence": "high"
+        },
+        "resolution": "fast-path",
+        "warnings": []
+      },
+      {
+        "repo": "tg-live",
+        "path": "live/prod/eu-central-1/prod/services",
+        "kind": "terragrunt-stack",
+        "target": {},
+        "warnings": [
+          "not generated: run with --generate-stacks to list its units"
+        ]
+      },
+      {
+        "repo": "tg-live",
+        "path": "live/prod/eu-west-1/prod/app",
+        "kind": "terragrunt",
+        "backend": {
+          "type": "s3",
+          "bucket": "acme-tfstate-acme-prod",
+          "key": "live/prod/eu-west-1/prod/app/terraform.tfstate",
+          "region": "eu-west-1",
+          "use_lockfile": true
+        },
+        "lock": "lockfile",
+        "target": {
+          "account": "222222222222",
+          "account_from": "provider.allowed_account_ids",
+          "region": "eu-west-1",
+          "region_from": "provider.region",
+          "confidence": "high"
+        },
+        "resolution": "fast-path",
+        "dependencies": [
+          "live/prod/eu-west-1/prod/vpc"
+        ],
+        "warnings": []
+      },
+      {
+        "repo": "tg-live",
+        "path": "live/prod/eu-west-1/prod/db",
+        "kind": "terragrunt",
+        "backend": {
+          "type": "s3",
+          "bucket": "acme-tfstate-acme-prod",
+          "key": "live/prod/eu-west-1/prod/db/terraform.tfstate",
+          "region": "eu-west-1",
+          "dynamodb_table": "acme-tflock",
+          "use_lockfile": true
+        },
+        "lock": "both",
+        "target": {
+          "account": "222222222222",
+          "account_from": "provider.allowed_account_ids",
+          "region": "eu-west-1",
+          "region_from": "provider.region",
+          "confidence": "high"
+        },
+        "resolution": "fast-path",
+        "dependencies": [
+          "live/prod/eu-west-1/prod/vpc"
+        ],
+        "warnings": []
+      },
+      {
+        "repo": "tg-live",
+        "path": "live/prod/eu-west-1/prod/dns",
+        "kind": "terragrunt",
+        "backend": {
+          "type": "s3",
+          "bucket": "acme-tfstate-acme-prod",
+          "key": "prod/dns/terraform.tfstate",
+          "region": "eu-west-1",
+          "use_lockfile": true
+        },
+        "lock": "lockfile",
+        "target": {
+          "account": "222222222222",
+          "account_from": "provider.allowed_account_ids",
+          "region": "eu-west-1",
+          "region_from": "provider.region",
+          "confidence": "high"
+        },
+        "resolution": "render",
+        "warnings": [
+          "resolved by render; the fast path failed: remote_state config key: live/prod/eu-west-1/prod/dns/terragrunt.hcl:15: Error in function call: Call to function \"run_cmd\" failed: run_cmd: function needs terragrunt render"
+        ]
+      },
+      {
+        "repo": "tg-live",
+        "path": "live/prod/eu-west-1/prod/legacy",
+        "kind": "terragrunt",
+        "backend": {
+          "type": "s3",
+          "bucket": "acme-tfstate-acme-prod",
+          "key": "live/prod/eu-west-1/prod/legacy/terraform.tfstate",
+          "region": "eu-west-1",
+          "use_lockfile": true
+        },
+        "lock": "lockfile",
+        "target": {
+          "account": "222222222222",
+          "account_from": "provider.allowed_account_ids",
+          "region": "eu-west-1",
+          "region_from": "provider.region",
+          "confidence": "high"
+        },
+        "resolution": "fast-path",
+        "excluded": true,
+        "warnings": [
+          "excluded by terragrunt for: all"
+        ]
+      },
+      {
+        "repo": "tg-live",
+        "path": "live/prod/eu-west-1/prod/secrets",
+        "kind": "terragrunt",
+        "target": {},
+        "resolution": "unresolved",
+        "reason": "fast path: remote_state config bucket: live/prod/eu-west-1/prod/secrets/terragrunt.hcl:14: Error in function call: Call to function \"run_cmd\" failed: run_cmd: function needs terragrunt render; render: render failed: live/prod/eu-west-1/prod/secrets/terragrunt.hcl:14,20-28: Error in function call; Call to function \"run_cmd\" failed: running command: Failed to execute \"false\" in live/prod/eu-west-1/prod/secrets",
+        "warnings": []
+      },
+      {
+        "repo": "tg-live",
+        "path": "live/prod/eu-west-1/prod/vpc",
+        "kind": "terragrunt",
+        "backend": {
+          "type": "s3",
+          "bucket": "acme-tfstate-acme-prod",
+          "key": "live/prod/eu-west-1/prod/vpc/terraform.tfstate",
+          "region": "eu-west-1",
+          "use_lockfile": true
+        },
+        "lock": "lockfile",
+        "target": {
+          "account": "222222222222",
+          "account_from": "provider.allowed_account_ids",
+          "region": "eu-west-1",
+          "region_from": "provider.region",
+          "confidence": "high"
+        },
+        "resolution": "fast-path",
+        "warnings": []
+      }
+    ]
+  },
+  "errors": []
+}

@@ -1,0 +1,14 @@
+10:38:31.502 ERROR  Error: Error in function call
+10:38:31.502 ERROR    on live/prod/eu-central-1/prod/edge/terragrunt.hcl line 7, in locals:
+10:38:31.502 ERROR     7:   caller_account = get_aws_account_id()
+10:38:31.502 ERROR  Call to function "get_aws_account_id" failed: operation error STS: GetCallerIdentity, get identity: get credentials: failed to refresh cached credentials, no EC2 IMDS role found, operation error ec2imds: GetMetadata, access disabled to EC2 IMDS via client option, or "AWS_EC2_METADATA_DISABLED" environment variable.
+10:38:31.503 ERROR  Error: Error in function call
+10:38:31.503 ERROR    on live/prod/eu-central-1/prod/edge/terragrunt.hcl line 7, in locals:
+10:38:31.503 ERROR     7:   caller_account = get_aws_account_id()
+10:38:31.503 ERROR  Call to function "get_aws_account_id" failed: operation error STS: GetCallerIdentity, get identity: get credentials: failed to refresh cached credentials, no EC2 IMDS role found, operation error ec2imds: GetMetadata, access disabled to EC2 IMDS via client option, or "AWS_EC2_METADATA_DISABLED" environment variable.
+10:38:31.506 ERROR  2 errors occurred:
+
+* live/prod/eu-central-1/prod/edge/terragrunt.hcl:7,20-39: Error in function call; Call to function "get_aws_account_id" failed: operation error STS: GetCallerIdentity, get identity: get credentials: failed to refresh cached credentials, no EC2 IMDS role found, operation error ec2imds: GetMetadata, access disabled to EC2 IMDS via client option, or "AWS_EC2_METADATA_DISABLED" environment variable.
+
+* live/prod/eu-central-1/prod/edge/terragrunt.hcl:7,20-39: Error in function call; Call to function "get_aws_account_id" failed: operation error STS: GetCallerIdentity, get identity: get credentials: failed to refresh cached credentials, no EC2 IMDS role found, operation error ec2imds: GetMetadata, access disabled to EC2 IMDS via client option, or "AWS_EC2_METADATA_DISABLED" environment variable.
+

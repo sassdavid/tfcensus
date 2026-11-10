@@ -37,6 +37,6 @@ Keep the same in both:
 
 ## Intended differences
 
-- tfcensus only: `internal/execx`, `internal/testutil/fakebin`, the ghcr.io image (`dockers_v2`,
-  Dockerfile, the docker steps in `release.yml`), `docs/iam/`, `--tf-path` and `--tg-path`.
+- tfcensus only: the ghcr.io image (`dockers_v2`, Dockerfile, the docker steps in `release.yml`),
+  `docs/iam/`, `--tf-path` and `--tg-path`.
 - Each repo has its own Config struct, commands, specs and `docs/plan/`.

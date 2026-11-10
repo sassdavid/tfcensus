@@ -58,7 +58,7 @@ func DefaultEnvAllow() []string {
 		"HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY", "http_proxy", "https_proxy", "no_proxy",
 		"SSL_CERT_FILE", "SSL_CERT_DIR",
 		"AWS_*", "TF_*", "TG_*", "TERRAGRUNT_*", "TOFU_*", "OPENTOFU_*",
-		"GIT_*", "SSH_AUTH_SOCK",
+		"MISE_*", "GIT_*", "SSH_AUTH_SOCK",
 		"SYSTEMROOT", "SystemRoot", "COMSPEC", "PATHEXT", "WINDIR", "APPDATA", "LOCALAPPDATA",
 		"USERPROFILE", "PROGRAMDATA", "ProgramFiles", "ProgramFiles(x86)",
 	}

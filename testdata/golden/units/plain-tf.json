@@ -1,0 +1,74 @@
+{
+  "schema_version": "1",
+  "tool": "tfcensus",
+  "version": "test",
+  "generated_at": "2026-11-10T12:00:00Z",
+  "data": {
+    "units": [
+      {
+        "repo": "plain-tf",
+        "path": "app",
+        "kind": "terraform",
+        "backend": {
+          "type": "s3",
+          "bucket": "acme-app-state",
+          "key": "app/terraform.tfstate",
+          "region": "eu-west-1",
+          "workspace_key_prefix": "workspaces",
+          "use_lockfile": true,
+          "role_arn": "arn:aws:iam::555555555555:role/tfstate"
+        },
+        "lock": "lockfile",
+        "target": {
+          "account": "666666666666",
+          "account_from": "provider.allowed_account_ids",
+          "region": "eu-west-1",
+          "region_from": "provider.region",
+          "confidence": "medium"
+        },
+        "resolution": "static",
+        "warnings": []
+      },
+      {
+        "repo": "plain-tf",
+        "path": "hcp",
+        "kind": "terraform",
+        "backend": {
+          "type": "cloud"
+        },
+        "target": {
+          "region": "eu-central-1",
+          "region_from": "provider.region",
+          "confidence": "low"
+        },
+        "resolution": "static",
+        "warnings": [
+          "unsupported backend cloud: tfcensus reads state from s3 only"
+        ]
+      },
+      {
+        "repo": "plain-tf",
+        "path": "network",
+        "kind": "terraform",
+        "backend": {
+          "type": "s3",
+          "bucket": "acme-tfstate-444455556666",
+          "key": "network/terraform.tfstate",
+          "region": "us-east-1",
+          "dynamodb_table": "acme-tflock"
+        },
+        "lock": "dynamodb",
+        "target": {
+          "account": "444455556666",
+          "account_from": "backend.bucket",
+          "region": "us-east-1",
+          "region_from": "provider.region",
+          "confidence": "low"
+        },
+        "resolution": "static",
+        "warnings": []
+      }
+    ]
+  },
+  "errors": []
+}
