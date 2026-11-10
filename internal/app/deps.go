@@ -3,6 +3,7 @@ package app
 import (
 	"io"
 	"log/slog"
+	"net/http"
 	"os"
 	"slices"
 	"strings"
@@ -43,6 +44,8 @@ type Deps struct {
 	Env   Env
 	Clock func() time.Time
 	Getwd func() (string, error)
+	// HTTPTransport carries every outgoing request; nil means the network. Tests set a cassette.
+	HTTPTransport http.RoundTripper
 
 	// Logger is set by the root command before any RunE runs.
 	Logger *slog.Logger

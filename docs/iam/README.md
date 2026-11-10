@@ -14,9 +14,13 @@ Narrow it before use:
 - `LockTables`: limit to your lock tables (`arn:aws:dynamodb:*:*:table/terraform-locks*`). `dynamodb:Scan` is used only
   to look for stale locks.
 
-Org mode (`--org`) also needs `sts:AssumeRole` on the member-account role (default `OrganizationAccountAccessRole`).
-Grant it on the scanning principal for exactly that role name. It is not part of this policy, because what the assumed
-role may do is defined in each member account.
+Org mode (`--org`) also needs `sts:AssumeRole` on the member-account role (default `OrganizationAccountAccessRole`,
+or the roles in `accounts.org.ou_roles`). So does a backend whose `remote_state` names a `role_arn`. Grant it on the
+scanning principal for exactly those roles. It is not part of this policy, because what an assumed role may do is
+defined in its own account.
+
+`TestSpec_accounts_4` in `internal/accounts` takes every AWS action from the test cassettes in
+`testdata/cassettes/aws/` and fails when this policy doesn't allow one (`sts:AssumeRole` excepted).
 
 Optional validation (manual, needs an AWS account):
 

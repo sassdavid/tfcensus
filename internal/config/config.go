@@ -53,9 +53,10 @@ type Accounts struct {
 
 // Org configures AWS Organizations account listing.
 type Org struct {
-	Enabled           bool   `json:"enabled"`
-	ManagementProfile string `json:"management_profile"`
-	Role              string `json:"role"               jsonschema:"minLength=1"`
+	Enabled           bool              `json:"enabled"            jsonschema_description:"List the accounts of the organization and assume a role in each."`
+	ManagementProfile string            `json:"management_profile" jsonschema_description:"Profile that lists the accounts. Empty means the default AWS credentials."`
+	Role              string            `json:"role"               jsonschema_description:"Role assumed in each member account."                                                  jsonschema:"minLength=1"`
+	OURoles           map[string]string `json:"ou_roles"           jsonschema_description:"OU or root ID to the role assumed in the accounts directly under it, instead of role."`
 }
 
 // AccountRef maps an account ID to a profile and a display name.
@@ -127,7 +128,7 @@ func Default() Config {
 		Discovery:     Discovery{Roots: []string{}, GenerateStacks: false, Render: "auto"},
 		Accounts: Accounts{
 			Profiles: []string{},
-			Org:      Org{Role: "OrganizationAccountAccessRole"},
+			Org:      Org{Role: "OrganizationAccountAccessRole", OURoles: map[string]string{}},
 			Map:      map[string]AccountRef{},
 		},
 		Regions: []string{},

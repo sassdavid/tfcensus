@@ -38,7 +38,7 @@ This is why the layer order is decided per account/region by the probe, not hard
 - Equivalent to AWS-managed `ReadOnlyAccess` + `ViewOnlyAccess` combined. Docs say so.
 
 ## Acceptance criteria
-- [ ] An expired-SSO fixture (stubbed credential provider error) produces one clear message per profile, the run continues, and exit 4 only when all fail.
-- [ ] `doctor` golden output from stubbed responses, mirroring the real-world check facts above.
-- [ ] Org mode: 3 stubbed accounts, one AccessDenied on assume-role → reported, the others scanned.
-- [ ] Every AWS action the code can call (extracted from recorded HTTP traffic in tests) is covered by the IAM policy JSON (a static test). Optional, manual: `aws accessanalyzer validate-policy` and a read-only real-account run.
+- [x] An expired-SSO fixture (stubbed credential provider error) produces one clear message per profile, the run continues, and exit 4 only when all fail.
+- [x] `doctor` golden output from stubbed responses, mirroring the real-world check facts above.
+- [x] Org mode: 3 stubbed accounts, one AccessDenied on assume-role → reported, the others scanned.
+- [x] Every AWS action the code can call (extracted from recorded HTTP traffic in tests) is covered by the IAM policy JSON (a static test). Optional, manual: `aws accessanalyzer validate-policy` and a read-only real-account run.

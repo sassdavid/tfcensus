@@ -61,10 +61,11 @@ func trackedFiles(ctx context.Context) ([]string, error) {
 
 func checked(f string) bool {
 	excludedPrefixes := []string{
-		"docs/plan/",        // imported plan, not yet reworded
-		"docs/engineering/", // imported standards and ADRs, not yet reworded
-		".claude/rules/",    // the rules quote the forbidden words
-		"internal/prose/",   // so does the checker
+		"docs/plan/",          // imported plan, not yet reworded
+		"docs/engineering/",   // imported standards and ADRs, not yet reworded
+		".claude/rules/",      // the rules quote the forbidden words
+		"internal/prose/",     // so does the checker
+		"testdata/cassettes/", // recorded responses quote upstream text
 	}
 	excludedFiles := []string{"docs/README.md", ".golangci.yml", "LICENSE"}
 	for _, p := range excludedPrefixes {

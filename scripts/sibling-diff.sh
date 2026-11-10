@@ -55,6 +55,9 @@ identical=(
   internal/testutil/fakebin/doc.go
   internal/testutil/fakebin/fakebin.go
   internal/testutil/golden.go
+  internal/testutil/vcr/doc.go
+  internal/testutil/vcr/vcr.go
+  internal/testutil/vcr/vcr_test.go
   internal/yamlschema/doc.go
   internal/yamlschema/yamlschema.go
   internal/yamlschema/yamlschema_test.go

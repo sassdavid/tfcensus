@@ -26,7 +26,7 @@ A Go CLI that takes a census of Terraform/OpenTofu + Terragrunt fleets on AWS. I
 - Go code keeps comments few: package docs in `doc.go`, one-sentence doc comments on exported names, why-comments only. Details in `.claude/rules/go.md`.
 
 ## Safety rules (non-negotiable)
-- Never call real AWS unless the prompt names a profile and says read-only is allowed. Default to stubs (`testdata/aws/`).
+- Never call real AWS unless the prompt names a profile and says read-only is allowed. Default to stubs (`testdata/cassettes/aws/`).
 - Never print state attribute values, only identifiers. The grep test enforces this.
 - Code paths outside `internal/migrate` must not write to S3, DynamoDB or state. Write APIs are only reachable from `move apply|rollback|mark-applied`.
 - No mutating tool is exposed over MCP.
@@ -34,12 +34,12 @@ A Go CLI that takes a census of Terraform/OpenTofu + Terragrunt fleets on AWS. I
 
 ## Layout
 - `cmd/tfcensus/main.go` → `internal/cli` (constructor functions, no globals).
-- Foundations: `discovery` (F1), `accounts` (F2), `tfstate` (F3), `plan` (F4).
+- Foundations: `discovery` (F1), `accounts` and `probe` (F2), `tfstate` (F3), `plan` (F4).
 - Features: `inventory` (layers), `typemap`, `match`, `ownership`, `audit`, `codify`, `migrate`, `notify`, `render`, `mcpserver`.
 - Fixtures:
   - `testdata/repos/` (Terragrunt fixtures)
   - `testdata/states/`
-  - `testdata/aws/<service>/<op>/<case>.json`
+  - `testdata/cassettes/aws/` (go-vcr cassettes written from AWS API shapes, replayed with `awstest.Replay` or `TEST_CASSETTE` in scripts)
   - `internal/testutil/fakebin` (fake terragrunt), replaying `testdata/terragrunt/` recordings made by `scripts/record-terragrunt.sh`
 
 ## Reference sources (read-only, for inspiration)

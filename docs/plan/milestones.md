@@ -19,8 +19,8 @@ Same as [relgap M0](https://github.com/sassdavid/relgap/blob/main/docs/plan/mile
 - [x] All discovery.md acceptance criteria. `tfcensus units` on fixtures, in tty and json.
 
 ### M2: Accounts and credentials (F2) → [accounts](specs/accounts-and-credentials.md)
-- [ ] Profile/SSO loading, Org mode, backend role chains, the expired-SSO UX. `tfcensus doctor` with the capability probe (stubbed).
-- [ ] *(Optional, manual, read-only on an existing work account, if employer policy allows)* `tfcensus doctor --profile <nonprod>` matches the facts recorded in the spec.
+- [x] Profile/SSO loading, Org mode, backend role chains, the expired-SSO UX. `tfcensus doctor` with the capability probe (stubbed).
+- [x] *(Optional, manual, read-only on an existing work account, if employer policy allows)* `tfcensus doctor --profile <nonprod>` matches the facts recorded in the spec.
 
 ### M3: State reader and inventory (F3) → [state-reader](specs/state-reader.md)
 - [ ] All state-reader.md criteria. `tfcensus inventory` in json, md and csv. `--save-index`.

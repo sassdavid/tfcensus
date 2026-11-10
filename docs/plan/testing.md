@@ -19,7 +19,8 @@ Research basis: emulator coverage was checked API by API against tfcensus's call
 - No endpoint special-casing in product code. aws-sdk-go-v2 honours `AWS_ENDPOINT_URL` / `AWS_ENDPOINT_URL_<SERVICE>`, and S3 needs `UsePathStyle` (enabled when a custom S3 endpoint is set).
 - Retries are disabled in tests (`retry.AddWithMaxAttempts(…, 1)`), so failures surface immediately.
 - **Stubs sit at the HTTP layer**, not the Finalize middleware. Use `aws.Config.HTTPClient` → an httptest server or a go-vcr recorder. This exercises the real deserializers, paginators and error codes. Finalize stubs skip deserialization and hide bugs.
-- go-vcr matcher: `cassette.NewDefaultMatcher(WithIgnoreAuthorization(), WithIgnoreHeaders("X-Amz-Date","X-Amz-Security-Token","Amz-Sdk-Invocation-Id","Amz-Sdk-Request","User-Agent"))`. **Keep body and `X-Amz-Target` matching**, because Config, Resource Explorer and Cloud Control all POST to `/`. A `BeforeSaveHook` strips credentials and replaces account IDs with `111111111111`.
+- go-vcr matcher: the shared `internal/testutil/vcr` scrubber matches method, URL and body and ignores headers, except the ones in `Scrubber.Match`. `awstest.Scrubber()` adds **`X-Amz-Target`**, because Config, Organizations and Cloud Control all POST to `/`. Its save hook drops `Authorization`, `X-Amz-Security-Token`, `X-Amz-Date`, the SDK headers and credential fields, and replaces account IDs with `111111111111` while recording.
+- The AWS cassettes in `testdata/cassettes/aws/` are written from AWS API reference response shapes, not recorded from an account, and the tests only replay them.
 
 ## Fixtures
 - **Terragrunt fixture repos** in `testdata/repos/` (`tg-live/`, `tg-multi-account/`, `plain-tf/`). Inspired by the local terragrunt-infrastructure-live-stacks-example ([reference-repos.md](reference-repos.md)).

@@ -2,6 +2,7 @@ package discovery_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -9,6 +10,7 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -423,5 +425,107 @@ func BenchmarkDiscover300Units(b *testing.B) {
 		if res := d.Discover(b.Context(), []string{root}); len(res.Units) != 300 {
 			b.Fatalf("got %d units", len(res.Units))
 		}
+	}
+}
+
+func TestFastPathAWSAccountID(t *testing.T) {
+	t.Parallel()
+
+	const unit = `include "root" {
+  path = find_in_parent_folders("root.hcl")
+}
+locals {
+  unused = get_aws_account_id()
+}
+`
+	root := `remote_state {
+  backend = "s3"
+  config  = {
+    bucket = "tfstate-${get_aws_account_id()}"
+    key    = "${path_relative_to_include()}/terraform.tfstate"
+    region = "eu-west-1"
+  }
+}
+`
+	tests := []struct {
+		name       string
+		root       string
+		unit       string
+		env        map[string]string
+		accountID  func(context.Context) (string, error)
+		wantBucket string
+		wantReason string
+		wantCalls  int32
+	}{
+		{
+			name: "from the default credentials, looked up once", root: root, unit: unit,
+			accountID:  func(context.Context) (string, error) { return "111111111111", nil },
+			wantBucket: "tfstate-111111111111", wantCalls: 1,
+		},
+		{
+			name: "no credentials wired in", root: root, unit: unit,
+			wantReason: "get_aws_account_id: function needs terragrunt render",
+		},
+		{
+			name: "lookup fails", root: root, unit: unit,
+			accountID:  func(context.Context) (string, error) { return "", errors.New("no credentials") },
+			wantReason: "get_aws_account_id: no credentials", wantCalls: 1,
+		},
+		{
+			name:       "iam_role makes terragrunt use another account",
+			root:       root + "iam_role = \"arn:aws:iam::222222222222:role/x\"\n",
+			unit:       unit,
+			accountID:  func(context.Context) (string, error) { return "111111111111", nil },
+			wantReason: "get_aws_account_id with an IAM role to assume",
+			wantCalls:  1,
+		},
+		{
+			name: "role from the environment", root: root, unit: unit,
+			env:        map[string]string{"TG_IAM_ASSUME_ROLE": "arn:aws:iam::222222222222:role/x"},
+			accountID:  func(context.Context) (string, error) { return "111111111111", nil },
+			wantReason: "get_aws_account_id with an IAM role to assume", wantCalls: 1,
+		},
+		{
+			name: "unused locals don't call AWS", root: rootWithState, unit: unit,
+			accountID:  func(context.Context) (string, error) { return "111111111111", nil },
+			wantBucket: "state",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			dir := t.TempDir()
+			units := []string{"a", "b"}
+			writeTree(
+				t,
+				dir,
+				map[string]string{"root.hcl": tt.root, "a/terragrunt.hcl": tt.unit, "b/terragrunt.hcl": tt.unit},
+			)
+			var calls atomic.Int32
+			opts := discovery.Options{
+				Render:    discovery.RenderNever,
+				LookupEnv: func(k string) (string, bool) { v, ok := tt.env[k]; return v, ok },
+			}
+			if tt.accountID != nil {
+				opts.AccountID = func(ctx context.Context) (string, error) {
+					calls.Add(1)
+					return tt.accountID(ctx)
+				}
+			}
+			res := discovery.New(unitsRunner(units), slog.New(slog.DiscardHandler), opts).
+				Discover(t.Context(), []string{dir})
+			require.Empty(t, res.Errors)
+			require.Len(t, res.Units, 2)
+			assert.Equal(t, tt.wantCalls, calls.Load())
+			for _, u := range res.Units {
+				if tt.wantReason != "" {
+					assert.Equal(t, discovery.MethodUnresolved, u.Resolution)
+					assert.Contains(t, u.Reason, tt.wantReason)
+					continue
+				}
+				require.Equal(t, discovery.MethodFastPath, u.Resolution, u.Reason)
+				assert.Equal(t, tt.wantBucket, u.Backend.Bucket)
+			}
+		})
 	}
 }

@@ -57,7 +57,10 @@ type Options struct {
 	Concurrency    int // parallel terragrunt render calls
 	RenderTimeout  time.Duration
 	LookupEnv      func(string) (string, bool) // for get_env in the fast path
-	WorkDir        string                      // relative repo paths are resolved against it
+	// AccountID returns the account of the default AWS credentials, for get_aws_account_id in the
+	// fast path. Nil sends units that call it to terragrunt render.
+	AccountID func(context.Context) (string, error)
+	WorkDir   string // relative repo paths are resolved against it
 }
 
 // Discoverer finds units in repositories.
@@ -234,7 +237,11 @@ func (d *Discoverer) terragruntRepo(ctx context.Context, repo, abs string) ([]Un
 // resolve fills in the backend and target of every terragrunt unit, by the fast path, render, or
 // both, as the render mode says.
 func (d *Discoverer) resolve(ctx context.Context, abs string, units []Unit) {
-	ev := newEvaluator(d.opts.LookupEnv)
+	var accountID func() (string, error)
+	if d.opts.AccountID != nil {
+		accountID = func() (string, error) { return d.opts.AccountID(ctx) }
+	}
+	ev := newEvaluator(d.opts.LookupEnv, accountID)
 	rel := relativizer(abs)
 	fastErrs := make([]error, len(units))
 	var toRender []int

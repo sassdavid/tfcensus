@@ -63,14 +63,24 @@
         "org": {
           "properties": {
             "enabled": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "List the accounts of the organization and assume a role in each."
             },
             "management_profile": {
-              "type": "string"
+              "type": "string",
+              "description": "Profile that lists the accounts. Empty means the default AWS credentials."
             },
             "role": {
               "type": "string",
-              "minLength": 1
+              "minLength": 1,
+              "description": "Role assumed in each member account."
+            },
+            "ou_roles": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object",
+              "description": "OU or root ID to the role assumed in the accounts directly under it, instead of role."
             }
           },
           "additionalProperties": false,

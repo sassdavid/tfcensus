@@ -76,6 +76,7 @@ accounts:
   org:
     enabled: false
     management_profile: ""
+    ou_roles: {}
     role: OrganizationAccountAccessRole
   profiles: []
 audit:

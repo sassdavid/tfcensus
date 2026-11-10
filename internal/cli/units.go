@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -36,9 +37,11 @@ A path with a terragrunt.hcl, root.hcl or terragrunt.stack.hcl anywhere below it
 repo: terragrunt find lists its units. Any other path is searched for root modules, which are
 directories whose .tf files have a backend or cloud block.
 
-tfcensus evaluates remote_state itself (the fast path). With --render auto, units the fast path
-can't evaluate, for example because they call run_cmd, go to terragrunt render --json. Units that
-neither method resolves are listed with the reason. Without paths, units uses discovery.roots from
+tfcensus evaluates remote_state itself (the fast path). get_aws_account_id there returns the
+account of the default AWS credentials (AWS_PROFILE, environment credentials or an instance role),
+looked up once with sts:GetCallerIdentity and only when state needs it. With --render auto, units
+the fast path can't evaluate, for example because they call run_cmd or set iam_role, go to
+terragrunt render --json. Units that neither method resolves are listed with the reason. Without paths, units uses discovery.roots from
 the config, or the working directory.`,
 		Example: `  tfcensus units ~/src/infra/acme-live
   tfcensus units --filter './live/prod/**' --format json
@@ -66,6 +69,7 @@ the config, or the working directory.`,
 				return fmt.Errorf("get working directory: %w", err)
 			}
 			runner := execx.NewRunner(d.Logger, execx.WithEnviron(func() []string { return d.Env }))
+			loader := newLoader(d)
 			disc := discovery.New(runner, d.Logger, discovery.Options{
 				Terragrunt:     cfg.Binaries.Terragrunt,
 				Terraform:      cfg.Binaries.Terraform,
@@ -74,6 +78,13 @@ the config, or the working directory.`,
 				Render:         mode,
 				LookupEnv:      d.Env.Lookup,
 				WorkDir:        cwd,
+				AccountID: func(ctx context.Context) (string, error) {
+					acct, accountErr := loader.Default(ctx)
+					if accountErr != nil {
+						return "", accountErr
+					}
+					return acct.ID, nil
+				},
 			})
 			result := disc.Discover(cmd.Context(), unitPaths(args, cfg.Discovery.Roots, d.Env.Get("HOME")))
 			if err = writeUnits(d.Stdout, g.outFormat, d, result); err != nil {
@@ -142,7 +153,7 @@ func writeUnits(w io.Writer, format render.Format, d *app.Deps, res discovery.Re
 }
 
 func unitColumns() []string {
-	return []string{"REPO", "UNIT", "KIND", "BACKEND", "LOCK", "ACCOUNT", "REGION", "RESOLUTION", "WARNINGS"}
+	return []string{"REPO", "UNIT", "KIND", "BACKEND", "LOCK", colAccount, "REGION", "RESOLUTION", "WARNINGS"}
 }
 
 func unitRow(u *discovery.Unit) []string {

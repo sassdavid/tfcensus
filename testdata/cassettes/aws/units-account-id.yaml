@@ -1,0 +1,45 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 43
+        host: ""
+        body: Action=GetCallerIdentity&Version=2011-06-15
+        form:
+            Action:
+                - GetCallerIdentity
+            Version:
+                - "2011-06-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://sts.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 410
+        body: |
+            <GetCallerIdentityResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">
+              <GetCallerIdentityResult>
+                <Arn>arn:aws:iam::111111111111:user/tfcensus-readonly</Arn>
+                <UserId>AIDAEXAMPLEUSERID</UserId>
+                <Account>111111111111</Account>
+              </GetCallerIdentityResult>
+              <ResponseMetadata>
+                <RequestId>00000000-0000-4000-8000-000000000000</RequestId>
+              </ResponseMetadata>
+            </GetCallerIdentityResponse>
+        headers:
+            Content-Type:
+                - text/xml
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 4.958µs
