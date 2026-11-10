@@ -1,0 +1,91 @@
+# Go stack
+
+**Every version below was checked on 2026-11-09:**
+- Go modules: queried `proxy.golang.org/<module>/@latest`, and probed `/vN+1` to catch new major versions.
+- Go toolchain: `go.dev/dl`.
+- GitHub Actions: their GitHub releases.
+
+Re-run the check right before M0 (script: [§ Refresh](#refresh)). After M0, Renovate keeps everything current,
+with a 3-day minimum release age (matching your mise `minimum_release_age` habit).
+Choices are justified in the [ADRs](adr/). Survey basis: go.mod files of gh, terragrunt, opentofu, trivy, syft, aqua,
+goreleaser, chezmoi, k9s, golangci-lint.
+
+## Toolchain (pinned in `mise.toml`)
+
+| Item | Version | Note |
+|---|---|---|
+| Go | **1.27.3** toolchain; `go` directive per [version-policy.md](version-policy.md) | Go supports only the two latest minors (1.27, 1.26) |
+| golangci-lint | **v2.15.0** | + golden config v2.15.0 ([ADR-0008](adr/0008-lint-config.md)) |
+| gofumpt | **v0.12.0** | golines **v0.13.0** + goimports come with the golden config |
+| govulncheck (`golang.org/x/vuln`) | **v1.9.0** | |
+| goreleaser | **v2.20.0** | cosign **v3.1.4**, syft via `anchore/sbom-action` |
+
+## Libraries
+
+| Concern | Module | Latest | Why / alternatives rejected |
+|---|---|---|---|
+| CLI | `github.com/spf13/cobra` (+ `spf13/pflag`) | v1.10.2 (+ v1.1.0) | [ADR-0002](adr/0002-cli-cobra.md) |
+| Config | `github.com/knadh/koanf/v2` + `providers/file` v1.2.1, `providers/env/v2` v2.0.2, `providers/posflag` v1.0.2 | v2.4.1 | [ADR-0003](adr/0003-config-koanf.md) |
+| XDG paths | `github.com/adrg/xdg` | v0.5.3 | stable; used by aqua, syft, k9s |
+| Logging | `log/slog` + `github.com/lmittmann/tint` | stdlib / v1.2.1 | zap rejected ([ADR-0004](adr/0004-logging.md)) |
+| Concurrency | `golang.org/x/sync` (errgroup) | **v0.25.0** | |
+| HTTP retry | `github.com/hashicorp/go-retryablehttp` | v0.7.8 | latest; used by terraform, tofu, trivy |
+| Rate limit | `golang.org/x/time` | v0.16.0 | |
+| Compression | `github.com/klauspost/compress` (zstd cache files) | v1.20.4 | |
+| Styling | `charm.land/lipgloss/v2` (+ `/table`) | **v2.1.0** (released today) | latest at M0; gh/terragrunt/goreleaser are on v2.0.x |
+| Markdown to terminal | `charm.land/glamour/v2` | v2.0.1 | |
+| TTY | `github.com/mattn/go-isatty` | v0.0.24 | |
+| Prompts | stdlib `bufio` → `charm.land/huh/v2` later | — / v2.0.3 | [ADR-0007](adr/0007-interactive-prompts.md) |
+| JSON Schema validate | `github.com/santhosh-tekuri/jsonschema/v6` | v6.0.3 | |
+| JSON Schema generate | `github.com/invopop/jsonschema` | v0.14.0 | config struct → schema |
+| YAML | `go.yaml.in/yaml/v4` | **v4.0.0** (2026-11-04) | YAML org's maintained successor of `gopkg.in/yaml.v3`. If v4.0.0 shows early bugs at M0, fall back to `go.yaml.in/yaml/v3` v3.0.6 |
+| TOML | `github.com/pelletier/go-toml/v2` | v2.4.3 | |
+| MCP | `github.com/modelcontextprotocol/go-sdk` | v1.8.0 | [ADR-0011](adr/0011-mcp-go-sdk.md) |
+
+## Testing
+
+| Concern | Module | Latest |
+|---|---|---|
+| Assertions | `github.com/stretchr/testify` | v1.12.1 |
+| Diffs | `github.com/google/go-cmp` | v0.7.0 |
+| CLI scripts | `github.com/rogpeppe/go-internal` (testscript) | v1.16.0 |
+| Mocks | `go.uber.org/mock` | v0.6.0 |
+| HTTP record/replay | `gopkg.in/dnaeon/go-vcr.v4` | v4.0.7 |
+| In-process S3 fake | `github.com/johannesboyne/gofakes3` | v1.2.0 |
+| In-process AWS emulator | `github.com/sivchari/kumo` | v0.33.1 |
+| Containers in tests | `github.com/testcontainers/testcontainers-go` | v0.45.0, running `motoserver/moto:5.2.5` and Floci 2.4.0 ([testing plan](../plan/testing.md)) |
+
+## AWS, Terraform and rules
+
+| Concern | Module | Latest |
+|---|---|---|
+| AWS core | `github.com/aws/aws-sdk-go-v2` · `/config` · `/credentials` · `github.com/aws/smithy-go` | v1.47.8 · v1.33.16 · v1.20.16 · v1.28.8 |
+| AWS services | `service/sts` v1.51.9 · `s3` v1.114.9 · `organizations` v1.62.7 · `resourceexplorer2` v1.33.11 · `configservice` v1.74.11 · `cloudcontrol` v1.38.11 · `ec2` v1.344.2 · `iam` v1.64.9 · `route53` v1.70.9 · `dynamodb` v1.73.2 · `kms` v1.62.5 · `elasticloadbalancingv2` v1.63.9 | released together 2026-11-06 |
+| Plan/schema structs | `github.com/hashicorp/terraform-json` | v0.29.0 |
+| Exec terraform | `github.com/hashicorp/terraform-exec` | v0.26.0 |
+| HCL read/write | `github.com/hashicorp/hcl/v2` (+ `hclwrite`) | v2.25.0 |
+| cty | `github.com/zclconf/go-cty` | v1.20.0 |
+| Rules | `github.com/google/cel-go` | v0.30.0 |
+| Move auto-detect | `github.com/busser/tfautomv` (`pkg/engine`) | v0.7.0 (latest; low activity, so vendor-or-import is decided at M9) |
+
+**Never import:** `hashicorp/terraform` (BSL 1.1), terragrunt `internal/...`, or OpenTofu `internal/` ([tfcensus ADR-0001](../plan/adr/0001-shell-out-to-terragrunt.md)).
+
+## GitHub Actions (pin by commit SHA; versions as of 2026-11-09)
+
+| Action | Latest |
+|---|---|
+| actions/checkout | v7.0.1 |
+| actions/setup-go | v7.0.0 (or `jdx/mise-action` v5.2.7, which installs the whole mise toolchain; preferred) |
+| golangci/golangci-lint-action | v9.3.0 |
+| goreleaser/goreleaser-action | v7.3.0 |
+| sigstore/cosign-installer | v4.1.3 |
+| actions/attest | v4.2.2 |
+| anchore/sbom-action | v0.24.3 |
+| googleapis/release-please-action | v5.0.0 |
+| github/codeql-action (SARIF upload) | v4 line (bundle v2.27.4) |
+| zizmorcore/zizmor-action | v0.8.1 |
+
+## Refresh
+The checker used for this table is in the session scratchpad. Re-create it in the repo as `scripts/latest-deps.py`
+(it queries `proxy.golang.org/<module>/@latest` and probes `/vN+1`), or simply run `go get -u ./... && go list -m -u all`
+once go.mod exists.
