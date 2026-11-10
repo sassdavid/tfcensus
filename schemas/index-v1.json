@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sassdavid/tfcensus/schemas/index-v1.json",
+  "title": "tfcensus identifier index (inventory --save-index)",
+  "description": "The report envelope (report-v1.json) with every managed, current resource instance and its identifiers. It holds no other attribute values.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "tool", "version", "generated_at", "data", "errors"],
+  "properties": {
+    "schema_version": { "const": "1" },
+    "tool": { "const": "tfcensus" },
+    "version": { "type": "string", "minLength": 1 },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "errors": { "type": "array", "maxItems": 0 },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["units", "entries", "double_managed"],
+      "properties": {
+        "units": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["unit", "workspace", "bucket", "key", "status", "instances"],
+            "properties": {
+              "unit": { "description": "repo/path", "type": "string" },
+              "workspace": { "type": "string" },
+              "bucket": { "type": "string" },
+              "key": { "type": "string" },
+              "status": { "enum": ["ok", "absent", "encrypted", "unsupported", "error"] },
+              "serial": { "type": "integer", "minimum": 0 },
+              "lineage": { "type": "string" },
+              "instances": { "type": "integer", "minimum": 0 }
+            }
+          }
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["unit", "workspace", "address", "type", "provider"],
+            "properties": {
+              "unit": { "type": "string" },
+              "workspace": { "type": "string" },
+              "address": { "type": "string" },
+              "type": { "type": "string" },
+              "provider": { "type": "string" },
+              "id": { "type": "string" },
+              "arn": { "type": "string" },
+              "identity": { "type": "object", "additionalProperties": { "type": "string" } },
+              "account": { "type": "string" },
+              "region": { "type": "string" }
+            }
+          }
+        },
+        "double_managed": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "type", "key", "refs"],
+            "properties": {
+              "kind": { "enum": ["identity", "arn", "id"] },
+              "type": { "type": "string" },
+              "key": { "type": "string" },
+              "refs": {
+                "type": "array",
+                "minItems": 2,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["unit", "workspace", "address"],
+                  "properties": {
+                    "unit": { "type": "string" },
+                    "workspace": { "type": "string" },
+                    "address": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

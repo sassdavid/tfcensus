@@ -16,8 +16,8 @@ description = "Lint, race tests and govulncheck: the single verification command
 depends = ["lint", "test", "vuln"]
 
 [tasks.lint]
-description = "All linters: Go, prose, GitHub workflows and dependency licenses"
-depends = ["lint:go", "lint:prose", "lint:actions", "lint:licenses"]
+description = "All linters: Go, prose, GitHub workflows, dependency licenses and go.mod tidiness"
+depends = ["lint:go", "lint:prose", "lint:actions", "lint:licenses", "lint:tidy"]
 
 [tasks."lint:go"]
 description = "golangci-lint with the golden config (ADR-0008)"
@@ -34,6 +34,10 @@ run = "actionlint"
 [tasks."lint:licenses"]
 description = "Fail on forbidden, restricted or unknown licenses compiled into the release binaries"
 run = "bash scripts/licenses.sh -check"
+
+[tasks."lint:tidy"]
+description = "Fail when go.mod or go.sum differ from what go mod tidy would write"
+run = "go mod tidy -diff"
 
 [tasks.test]
 description = "Unit, component and CLI (testscript) tests with the race detector"

@@ -4,8 +4,9 @@ tfcensus takes a census of Terraform/OpenTofu and Terragrunt fleets on AWS. It l
 resources in their state, finds AWS resources that no unit manages, and audits state backends.
 Drift, whois/codify and cross-unit moves come later. It is read-only by default.
 
-tfcensus is pre-release. Milestone M0 (skeleton and release pipeline) is in place, and it doesn't
-talk to AWS yet. The plan is in [docs/plan](docs/plan/) and the CLI reference in
+tfcensus is pre-release. Milestones M0 to M3 are in place: `units` lists units and their
+backends, `doctor` checks credentials and inventory layers, and `inventory` reads each unit's state
+from S3 and prints identifiers and counts, never attribute values. The plan is in [docs/plan](docs/plan/) and the CLI reference in
 [docs/cli](docs/cli/tfcensus.md).
 
 ## Install

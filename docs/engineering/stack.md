@@ -38,7 +38,7 @@ goreleaser, chezmoi, k9s, golangci-lint.
 | Concurrency | `golang.org/x/sync` (errgroup) | **v0.25.0** | |
 | HTTP retry | `github.com/hashicorp/go-retryablehttp` | v0.7.8 | latest; used by terraform, tofu, trivy |
 | Rate limit | `golang.org/x/time` | v0.16.0 | |
-| Compression | `github.com/klauspost/compress` (zstd cache files) | v1.20.4 | |
+| Compression | `github.com/klauspost/compress` (zstd: `inventory --save-index *.zst`, cache files) | v1.20.4 | gzip from the stdlib for `.gz`; zstd is what whois.md names |
 | Styling | `charm.land/lipgloss/v2` (+ `/table`) | **v2.1.0** (released today) | latest at M0; gh/terragrunt/goreleaser are on v2.0.x |
 | Markdown to terminal | `charm.land/glamour/v2` | v2.0.1 | |
 | TTY | `github.com/mattn/go-isatty` | v0.0.24 | |
@@ -58,7 +58,7 @@ goreleaser, chezmoi, k9s, golangci-lint.
 | CLI scripts | `github.com/rogpeppe/go-internal` (testscript) | v1.16.0 |
 | Mocks | `go.uber.org/mock` | v0.6.0 |
 | HTTP record/replay | `gopkg.in/dnaeon/go-vcr.v4` | v4.0.7 |
-| In-process S3 fake | `github.com/johannesboyne/gofakes3` | v1.2.0 |
+| In-process S3 fake | `github.com/johannesboyne/gofakes3` | v1.2.0 (test-only: state-read tests, the 500-state benchmark and writing the inventory cassette) |
 | In-process AWS emulator | `github.com/sivchari/kumo` | v0.33.1 |
 | Containers in tests | `github.com/testcontainers/testcontainers-go` | v0.45.0, running `motoserver/moto:5.2.5` and Floci 2.4.0 ([testing plan](../plan/testing.md)) |
 

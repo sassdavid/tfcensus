@@ -8,7 +8,7 @@
 | Task | Runs |
 |---|---|
 | `mise run check` | lint + test + vuln. **This is the single verification command in CLAUDE.md** |
-| `mise run lint` | `lint:go` (golangci-lint), `lint:prose` (`.claude/rules/writing.md` checks), `lint:actions` (actionlint) and `lint:licenses` (`scripts/licenses.sh -check`: no forbidden, restricted or unknown licenses on any release platform) |
+| `mise run lint` | `lint:go` (golangci-lint), `lint:prose` (`.claude/rules/writing.md` checks), `lint:actions` (actionlint), `lint:licenses` (`scripts/licenses.sh -check`: no forbidden, restricted or unknown licenses on any release platform) and `lint:tidy` (`go mod tidy -diff`: go.mod and go.sum are tidy) |
 | `mise run test` | `go test -race -count=1 ./...` |
 | `mise run test:golden -- -update` | regenerates golden files (review the diff!). Sets `GOLDEN_UPDATE=1`, which `internal/testutil.Golden` and testscript's `UpdateScripts` honour |
 | `mise run fuzz` | runs every Go fuzz target (`func FuzzXxx`) for 60 s each; `mise run fuzz -- 10s` sets another duration. Passes when a repo has no targets |

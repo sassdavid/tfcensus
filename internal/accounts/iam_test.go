@@ -74,13 +74,21 @@ func policyActions(t *testing.T) []string {
 }
 
 // iamAction names the IAM action of a request: X-Amz-Target for JSON protocols, the form Action
-// for query protocols such as STS, and the path for REST protocols such as Resource Explorer.
+// for query protocols such as STS, the x-id or list-type query for S3 (bucket.s3.region hosts),
+// and the path for REST protocols such as Resource Explorer.
 func iamAction(t *testing.T, r *cassette.Request) string {
 	t.Helper()
 	u, err := url.Parse(r.URL)
 	require.NoError(t, err)
 	service, _, _ := strings.Cut(u.Host, ".")
+	if strings.Contains(u.Host, ".s3.") {
+		service = "s3"
+	}
 	switch target := r.Headers.Get("X-Amz-Target"); {
+	case service == "s3" && u.Query().Get("list-type") == "2":
+		return "s3:ListBucket"
+	case service == "s3":
+		return "s3:" + u.Query().Get("x-id")
 	case target != "":
 		_, op, _ := strings.Cut(target, ".")
 		return service + ":" + op

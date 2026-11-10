@@ -1,0 +1,316 @@
+{
+  "units": [
+    {
+      "unit": "tf-fleet/app",
+      "workspace": "default",
+      "bucket": "acme-tfstate-111111111111",
+      "key": "app/terraform.tfstate",
+      "status": "ok",
+      "serial": 7,
+      "lineage": "2b7c9e40-1d3f-4a5b-8c6d-7e8f9a0b1c2d",
+      "instances": 7
+    },
+    {
+      "unit": "tf-fleet/edge",
+      "workspace": "default",
+      "bucket": "acme-tfstate-111111111111",
+      "key": "edge/terraform.tfstate",
+      "status": "ok",
+      "serial": 19,
+      "lineage": "c4d5e6f7-0819-4a2b-9c3d-4e5f60718293",
+      "instances": 2
+    },
+    {
+      "unit": "tf-fleet/edge",
+      "workspace": "staging",
+      "bucket": "acme-tfstate-111111111111",
+      "key": "env:/staging/edge/terraform.tfstate",
+      "status": "ok",
+      "serial": 3,
+      "lineage": "d5e6f708-192a-4b3c-8d4e-5f6071829304",
+      "instances": 1
+    },
+    {
+      "unit": "tf-fleet/legacy",
+      "workspace": "default",
+      "bucket": "acme-tfstate-111111111111",
+      "key": "legacy/terraform.tfstate",
+      "status": "unsupported",
+      "serial": 88,
+      "lineage": "08192a3b-4c5d-4e6f-9071-829304152637",
+      "instances": 0
+    },
+    {
+      "unit": "tf-fleet/network",
+      "workspace": "default",
+      "bucket": "acme-tfstate-111111111111",
+      "key": "network/terraform.tfstate",
+      "status": "ok",
+      "serial": 42,
+      "lineage": "8d3f2c1a-5b6e-4f70-9a81-0c2d3e4f5a6b",
+      "instances": 7
+    },
+    {
+      "unit": "tf-fleet/planned",
+      "workspace": "default",
+      "bucket": "acme-tfstate-111111111111",
+      "key": "planned/terraform.tfstate",
+      "status": "absent",
+      "instances": 0
+    },
+    {
+      "unit": "tf-fleet/restricted",
+      "workspace": "default",
+      "bucket": "acme-restricted-tfstate",
+      "key": "restricted/terraform.tfstate",
+      "status": "error",
+      "instances": 0
+    },
+    {
+      "unit": "tf-fleet/secure",
+      "workspace": "default",
+      "bucket": "acme-tfstate-111111111111",
+      "key": "secure/terraform.tfstate",
+      "status": "encrypted",
+      "serial": 12,
+      "lineage": "e6f70819-2a3b-4c4d-9e5f-607182930415",
+      "instances": 0
+    },
+    {
+      "unit": "tf-fleet/shared",
+      "workspace": "default",
+      "bucket": "acme-shared-tfstate",
+      "key": "shared/terraform.tfstate",
+      "status": "ok",
+      "serial": 2,
+      "lineage": "f708192a-3b4c-4d5e-8f60-718293041526",
+      "instances": 0
+    }
+  ],
+  "entries": [
+    {
+      "unit": "tf-fleet/app",
+      "workspace": "default",
+      "address": "aws_instance.web",
+      "type": "aws_instance",
+      "provider": "hashicorp/aws",
+      "id": "i-0fedcba9876543210",
+      "arn": "arn:aws:ec2:eu-west-1:111111111111:instance/i-0fedcba9876543210",
+      "identity": {
+        "account_id": "111111111111",
+        "id": "i-0fedcba9876543210",
+        "region": "eu-west-1"
+      },
+      "account": "111111111111",
+      "region": "eu-west-1"
+    },
+    {
+      "unit": "tf-fleet/app",
+      "workspace": "default",
+      "address": "aws_iam_role.app",
+      "type": "aws_iam_role",
+      "provider": "hashicorp/aws",
+      "id": "acme-app",
+      "arn": "arn:aws:iam::111111111111:role/acme-app",
+      "identity": {
+        "account_id": "111111111111",
+        "name": "acme-app"
+      },
+      "account": "111111111111"
+    },
+    {
+      "unit": "tf-fleet/app",
+      "workspace": "default",
+      "address": "aws_s3_bucket.assets",
+      "type": "aws_s3_bucket",
+      "provider": "hashicorp/aws",
+      "id": "acme-assets-dev",
+      "arn": "arn:aws:s3:::acme-assets-dev",
+      "identity": {
+        "account_id": "111111111111",
+        "bucket": "acme-assets-dev",
+        "region": "eu-west-1"
+      },
+      "account": "111111111111",
+      "region": "eu-west-1"
+    },
+    {
+      "unit": "tf-fleet/app",
+      "workspace": "default",
+      "address": "aws_security_group.legacy_web",
+      "type": "aws_security_group",
+      "provider": "hashicorp/aws",
+      "id": "sg-0123456789abcdef0",
+      "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0123456789abcdef0",
+      "identity": {
+        "account_id": "111111111111",
+        "id": "sg-0123456789abcdef0",
+        "region": "eu-west-1"
+      },
+      "account": "111111111111",
+      "region": "eu-west-1"
+    },
+    {
+      "unit": "tf-fleet/app",
+      "workspace": "default",
+      "address": "aws_ssm_parameter.config[\"db_password\"]",
+      "type": "aws_ssm_parameter",
+      "provider": "hashicorp/aws",
+      "id": "/acme/db_password",
+      "arn": "arn:aws:ssm:eu-west-1:111111111111:parameter/acme/db_password",
+      "identity": {
+        "account_id": "111111111111",
+        "name": "/acme/db_password",
+        "region": "eu-west-1"
+      },
+      "account": "111111111111",
+      "region": "eu-west-1"
+    },
+    {
+      "unit": "tf-fleet/app",
+      "workspace": "default",
+      "address": "aws_acm_certificate.cdn",
+      "type": "aws_acm_certificate",
+      "provider": "hashicorp/aws",
+      "id": "arn:aws:acm:us-east-1:111111111111:certificate/0a1b2c3d-4e5f-6789-abcd-ef0123456789",
+      "arn": "arn:aws:acm:us-east-1:111111111111:certificate/0a1b2c3d-4e5f-6789-abcd-ef0123456789",
+      "account": "111111111111",
+      "region": "us-east-1"
+    },
+    {
+      "unit": "tf-fleet/app",
+      "workspace": "default",
+      "address": "random_password.db",
+      "type": "random_password",
+      "provider": "hashicorp/random",
+      "id": "none",
+      "account": "111111111111",
+      "region": "eu-west-1"
+    },
+    {
+      "unit": "tf-fleet/edge",
+      "workspace": "default",
+      "address": "aws_cloudfront_distribution.site",
+      "type": "aws_cloudfront_distribution",
+      "provider": "hashicorp/aws",
+      "id": "E2EXAMPLEDIST1",
+      "arn": "arn:aws:cloudfront::111111111111:distribution/E2EXAMPLEDIST1",
+      "account": "111111111111"
+    },
+    {
+      "unit": "tf-fleet/edge",
+      "workspace": "default",
+      "address": "aws_route53_record.site",
+      "type": "aws_route53_record",
+      "provider": "hashicorp/aws",
+      "id": "Z0123456789EXAMPLE_www.acme.example_A",
+      "account": "111111111111",
+      "region": "eu-west-1"
+    },
+    {
+      "unit": "tf-fleet/edge",
+      "workspace": "staging",
+      "address": "aws_route53_record.site",
+      "type": "aws_route53_record",
+      "provider": "hashicorp/aws",
+      "id": "Z0123456789EXAMPLE_staging.acme.example_A",
+      "account": "111111111111",
+      "region": "eu-west-1"
+    },
+    {
+      "unit": "tf-fleet/network",
+      "workspace": "default",
+      "address": "aws_vpc.main",
+      "type": "aws_vpc",
+      "provider": "hashicorp/aws",
+      "id": "vpc-0a1b2c3d4e5f60718",
+      "arn": "arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0a1b2c3d4e5f60718",
+      "account": "111111111111",
+      "region": "eu-west-1"
+    },
+    {
+      "unit": "tf-fleet/network",
+      "workspace": "default",
+      "address": "aws_subnet.private[0]",
+      "type": "aws_subnet",
+      "provider": "hashicorp/aws",
+      "id": "subnet-0aa1bb2cc3dd4ee50",
+      "arn": "arn:aws:ec2:eu-west-1:111111111111:subnet/subnet-0aa1bb2cc3dd4ee50",
+      "account": "111111111111",
+      "region": "eu-west-1"
+    },
+    {
+      "unit": "tf-fleet/network",
+      "workspace": "default",
+      "address": "aws_subnet.private[1]",
+      "type": "aws_subnet",
+      "provider": "hashicorp/aws",
+      "id": "subnet-0aa1bb2cc3dd4ee51",
+      "arn": "arn:aws:ec2:eu-west-1:111111111111:subnet/subnet-0aa1bb2cc3dd4ee51",
+      "account": "111111111111",
+      "region": "eu-west-1"
+    },
+    {
+      "unit": "tf-fleet/network",
+      "workspace": "default",
+      "address": "aws_security_group.web",
+      "type": "aws_security_group",
+      "provider": "hashicorp/aws",
+      "id": "sg-0123456789abcdef0",
+      "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0123456789abcdef0",
+      "account": "111111111111",
+      "region": "eu-west-1"
+    },
+    {
+      "unit": "tf-fleet/network",
+      "workspace": "default",
+      "address": "aws_db_instance.main",
+      "type": "aws_db_instance",
+      "provider": "hashicorp/aws",
+      "id": "db-ABCDEFGHIJKLMNOPQRSTUVWXY0",
+      "arn": "arn:aws:rds:eu-west-1:111111111111:db:acme-dev",
+      "account": "111111111111",
+      "region": "eu-west-1"
+    },
+    {
+      "unit": "tf-fleet/network",
+      "workspace": "default",
+      "address": "module.flow_logs.aws_cloudwatch_log_group.this",
+      "type": "aws_cloudwatch_log_group",
+      "provider": "hashicorp/aws",
+      "id": "/acme/vpc-flow-logs",
+      "arn": "arn:aws:logs:eu-west-1:111111111111:log-group:/acme/vpc-flow-logs",
+      "account": "111111111111",
+      "region": "eu-west-1"
+    },
+    {
+      "unit": "tf-fleet/network",
+      "workspace": "default",
+      "address": "aws_iam_access_key.ci",
+      "type": "aws_iam_access_key",
+      "provider": "hashicorp/aws",
+      "id": "fixture-ci-access-key-id",
+      "account": "111111111111",
+      "region": "eu-west-1"
+    }
+  ],
+  "double_managed": [
+    {
+      "kind": "arn",
+      "type": "aws_security_group",
+      "key": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0123456789abcdef0",
+      "refs": [
+        {
+          "unit": "tf-fleet/app",
+          "workspace": "default",
+          "address": "aws_security_group.legacy_web"
+        },
+        {
+          "unit": "tf-fleet/network",
+          "workspace": "default",
+          "address": "aws_security_group.web"
+        }
+      ]
+    }
+  ]
+}

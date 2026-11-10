@@ -66,6 +66,8 @@ func checked(f string) bool {
 		".claude/rules/",      // the rules quote the forbidden words
 		"internal/prose/",     // so does the checker
 		"testdata/cassettes/", // recorded responses quote upstream text
+		"testdata/golden/",    // so do golden outputs built from them
+		"testdata/labels/",    // and the labelled release-note entries
 	}
 	excludedFiles := []string{"docs/README.md", ".golangci.yml", "LICENSE"}
 	for _, p := range excludedPrefixes {

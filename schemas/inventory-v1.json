@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sassdavid/tfcensus/schemas/inventory-v1.json",
+  "title": "tfcensus inventory --format json",
+  "description": "The report envelope (report-v1.json) with the inventory payload. relgap reads terraform_version and providers[].source and version per unit as a pin source.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "tool", "version", "generated_at", "data", "errors"],
+  "properties": {
+    "schema_version": { "const": "1" },
+    "tool": { "const": "tfcensus" },
+    "version": { "type": "string", "minLength": 1 },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["message"],
+        "properties": {
+          "target": { "description": "A repo, or repo/path[:workspace] for a state.", "type": "string" },
+          "message": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["units", "double_managed"],
+      "properties": {
+        "units": {
+          "description": "One entry per unit and workspace, sorted by repo, path and workspace (default first).",
+          "type": "array",
+          "items": { "$ref": "#/$defs/unit" }
+        },
+        "double_managed": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/doubleManaged" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "unit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repo", "path", "workspace", "status", "encrypted", "providers", "resources", "instances", "data_sources", "resource_types", "warnings"],
+      "properties": {
+        "repo": { "type": "string" },
+        "path": { "description": "Relative to repo, with forward slashes.", "type": "string" },
+        "workspace": { "type": "string", "minLength": 1 },
+        "bucket": { "type": "string" },
+        "key": { "description": "The object key read, including the workspace prefix.", "type": "string" },
+        "region": { "type": "string" },
+        "status": { "enum": ["ok", "absent", "encrypted", "unsupported", "error", "skipped"] },
+        "engine": { "description": "Present only when the state or the unit shows which tool applied it.", "enum": ["terraform", "opentofu"] },
+        "engine_from": { "type": "string" },
+        "state_version": { "description": "Raw state format version.", "type": "integer" },
+        "terraform_version": { "description": "Version of the terraform or tofu binary that last wrote the state.", "type": "string" },
+        "serial": { "type": "integer", "minimum": 0 },
+        "lineage": { "type": "string" },
+        "encrypted": { "type": "boolean" },
+        "size": { "description": "Object size in bytes.", "type": "integer", "minimum": 0 },
+        "last_modified": { "type": "string", "format": "date-time" },
+        "providers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["source"],
+            "properties": {
+              "source": { "description": "namespace/type for registry.terraform.io and registry.opentofu.org, else host/namespace/type.", "type": "string", "minLength": 1 },
+              "aliases": { "type": "array", "items": { "type": "string" } },
+              "version": { "description": "Raw state has no provider versions; this one comes from version_source.", "type": "string" },
+              "version_source": { "enum": ["lockfile"] }
+            }
+          }
+        },
+        "resources": { "description": "Managed resource blocks.", "type": "integer", "minimum": 0 },
+        "instances": { "description": "Current managed resource instances.", "type": "integer", "minimum": 0 },
+        "data_sources": { "type": "integer", "minimum": 0 },
+        "resource_types": {
+          "description": "Current managed instances per resource type.",
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 1 }
+        },
+        "error": { "type": "string" },
+        "warnings": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "doubleManaged": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "type", "key", "refs"],
+      "properties": {
+        "kind": { "enum": ["identity", "arn", "id"] },
+        "type": { "type": "string" },
+        "key": { "type": "string" },
+        "refs": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["unit", "workspace", "address"],
+            "properties": {
+              "unit": { "type": "string" },
+              "workspace": { "type": "string" },
+              "address": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+# The states of testdata/repos/tf-fleet, as stored in S3: bucket, key, file in this directory.
+# planned has no object (never applied), and acme-restricted-tfstate denies every request.
+acme-tfstate-111111111111 network/terraform.tfstate tf15-network.tfstate
+acme-tfstate-111111111111 app/terraform.tfstate tf112-app.tfstate
+acme-tfstate-111111111111 edge/terraform.tfstate tofu110-edge.tfstate
+acme-tfstate-111111111111 env:/staging/edge/terraform.tfstate tofu110-edge-staging.tfstate
+acme-tfstate-111111111111 secure/terraform.tfstate tofu-encrypted.tfstate
+acme-tfstate-111111111111 legacy/terraform.tfstate tf011-v3.tfstate
+acme-shared-tfstate shared/terraform.tfstate tf111-empty.tfstate

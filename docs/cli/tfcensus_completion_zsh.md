@@ -44,7 +44,7 @@ tfcensus completion zsh [flags]
 ```
       --color string            colorize output: auto, always or never (default "auto")
       --config string           config file to use instead of the discovered .tfcensus.yaml (env TFCENSUS_CONFIG)
-      --format string           output format: tty, plain, md, json or sarif (default tty when stdout is a terminal, else plain)
+      --format string           output format: tty, plain, md, json, csv or sarif (default tty when stdout is a terminal, else plain)
       --log-file string         write logs to this file instead of stderr
       --log-format string       log format: text or json (default "text")
       --no-input[=true|false]   never prompt for input

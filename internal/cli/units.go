@@ -12,8 +12,10 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/sassdavid/tfcensus/internal/accounts"
 	"github.com/sassdavid/tfcensus/internal/app"
 	"github.com/sassdavid/tfcensus/internal/buildinfo"
+	"github.com/sassdavid/tfcensus/internal/config"
 	"github.com/sassdavid/tfcensus/internal/discovery"
 	"github.com/sassdavid/tfcensus/internal/execx"
 	"github.com/sassdavid/tfcensus/internal/render"
@@ -59,55 +61,78 @@ the config, or the working directory.`,
 			if err != nil {
 				return err
 			}
-			cfg := res.Config
-			mode, err := discovery.ParseRenderMode(cfg.Discovery.Render)
+			result, err := discoverUnits(cmd, d, &res.Config, filters, args, newLoader(d))
 			if err != nil {
-				return usageError(err)
+				return err
 			}
-			cwd, err := d.Getwd()
-			if err != nil {
-				return fmt.Errorf("get working directory: %w", err)
-			}
-			runner := execx.NewRunner(d.Logger, execx.WithEnviron(func() []string { return d.Env }))
-			loader := newLoader(d)
-			disc := discovery.New(runner, d.Logger, discovery.Options{
-				Terragrunt:     cfg.Binaries.Terragrunt,
-				Terraform:      cfg.Binaries.Terraform,
-				Filters:        filters,
-				GenerateStacks: cfg.Discovery.GenerateStacks,
-				Render:         mode,
-				LookupEnv:      d.Env.Lookup,
-				WorkDir:        cwd,
-				AccountID: func(ctx context.Context) (string, error) {
-					acct, accountErr := loader.Default(ctx)
-					if accountErr != nil {
-						return "", accountErr
-					}
-					return acct.ID, nil
-				},
-			})
-			result := disc.Discover(cmd.Context(), unitPaths(args, cfg.Discovery.Roots, d.Env.Get("HOME")))
 			if err = writeUnits(d.Stdout, g.outFormat, d, result); err != nil {
 				return err
 			}
-			if len(result.Errors) > 0 {
-				errs := make([]error, len(result.Errors))
-				for i, e := range result.Errors {
-					errs[i] = e
-				}
-				return fmt.Errorf("discover units: %w", errors.Join(errs...))
-			}
-			return nil
+			return discoveryError(result)
 		},
 	}
+	addDiscoveryFlags(cmd, &filters)
+	return cmd
+}
+
+// addDiscoveryFlags adds the flags that control unit discovery.
+func addDiscoveryFlags(cmd *cobra.Command, filters *[]string) {
 	f := cmd.Flags()
-	f.StringArrayVar(&filters, flagFilter, nil,
+	f.StringArrayVar(filters, flagFilter, nil,
 		"terragrunt filter expression, passed to terragrunt find unchanged (repeatable)")
 	f.Bool(flagGenerateStacks, false,
 		"run terragrunt stack generate first, so units in stacks are listed (config discovery.generate_stacks)")
 	f.String(flagRender, "auto",
 		"when to use terragrunt render: auto, always or never (config discovery.render)")
-	return cmd
+}
+
+// discoverUnits finds the units under args, else under discovery.roots, else under the working
+// directory. get_aws_account_id resolves with the default credentials from loader.
+func discoverUnits(
+	cmd *cobra.Command,
+	d *app.Deps,
+	cfg *config.Config,
+	filters, args []string,
+	loader *accounts.Loader,
+) (discovery.Result, error) {
+	mode, err := discovery.ParseRenderMode(cfg.Discovery.Render)
+	if err != nil {
+		return discovery.Result{}, usageError(err)
+	}
+	cwd, err := d.Getwd()
+	if err != nil {
+		return discovery.Result{}, fmt.Errorf("get working directory: %w", err)
+	}
+	runner := execx.NewRunner(d.Logger, execx.WithEnviron(func() []string { return d.Env }))
+	disc := discovery.New(runner, d.Logger, discovery.Options{
+		Terragrunt:     cfg.Binaries.Terragrunt,
+		Terraform:      cfg.Binaries.Terraform,
+		Filters:        filters,
+		GenerateStacks: cfg.Discovery.GenerateStacks,
+		Render:         mode,
+		LookupEnv:      d.Env.Lookup,
+		WorkDir:        cwd,
+		AccountID: func(ctx context.Context) (string, error) {
+			acct, accountErr := loader.Default(ctx)
+			if accountErr != nil {
+				return "", accountErr
+			}
+			return acct.ID, nil
+		},
+	})
+	return disc.Discover(cmd.Context(), unitPaths(args, cfg.Discovery.Roots, d.Env.Get("HOME"))), nil
+}
+
+// discoveryError joins the repositories that failed, or returns nil.
+func discoveryError(res discovery.Result) error {
+	if len(res.Errors) == 0 {
+		return nil
+	}
+	errs := make([]error, len(res.Errors))
+	for i, e := range res.Errors {
+		errs[i] = e
+	}
+	return fmt.Errorf("discover units: %w", errors.Join(errs...))
 }
 
 // unitPaths returns the paths to discover: the arguments, else the configured roots, else ".".
@@ -146,7 +171,7 @@ func writeUnits(w io.Writer, format render.Format, d *app.Deps, res discovery.Re
 		return render.JSON(w, env)
 	case render.FormatMD:
 		return writeUnitsMarkdown(w, units)
-	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatSARIF:
+	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatCSV, render.FormatSARIF:
 		return writeUnitsTable(w, units)
 	}
 	return writeUnitsTable(w, units)
