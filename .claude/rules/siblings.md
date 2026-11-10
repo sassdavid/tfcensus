@@ -30,6 +30,10 @@ Keep the same in both:
   workflows, so there is no tag-triggered release in normal use.
 - goreleaser uploads the archives, checksums, SBOMs and the cosign bundle to that draft and
   publishes it. `actions/attest` adds build provenance for every archive.
+- Every archive carries `third_party_licenses/` from `scripts/licenses.sh`, which goreleaser runs
+  as a before hook. `mise run lint:licenses` fails on forbidden, restricted or unknown licenses.
+  Embedded data from another project keeps its license next to it as `<name>.LICENSE`
+  (engineering ADR-0012).
 - The Homebrew cask goes to `sassdavid/homebrew-tap` and the Scoop manifest to
   `sassdavid/scoop-bucket`.
 - Repository secrets have the same names in both repos: `HOMEBREW_TAP_TOKEN` and

@@ -9,6 +9,8 @@ project_name: tfcensus
 before:
   hooks:
     - go mod tidy -diff
+    # License and notice files of every compiled dependency, for the archives (ADR-0012).
+    - bash scripts/licenses.sh
 
 snapshot:
   version_template: "{{ incpatch .Version }}-next"
@@ -46,6 +48,9 @@ archives:
     files:
       - LICENSE
       - README.md
+      # goreleaser's ** glob needs one directory level, so the index is listed on its own.
+      - third_party_licenses/THIRD_PARTY_NOTICES.md
+      - third_party_licenses/**/*
 
 checksum:
   name_template: checksums.txt
@@ -83,6 +88,10 @@ dockers_v2:
     platforms:
       - linux/amd64
       - linux/arm64
+    # The Dockerfile copies these to /usr/share/doc/tfcensus/ (ADR-0012).
+    extra_files:
+      - LICENSE
+      - third_party_licenses
     labels:
       org.opencontainers.image.title: "{{ .ProjectName }}"
       org.opencontainers.image.description: Census of Terraform/OpenTofu and Terragrunt fleets on AWS

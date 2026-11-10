@@ -103,3 +103,15 @@ jobs:
           test "$archives" -eq 6
           test "$sboms" -eq 6
           (cd dist && sha256sum -c checksums.txt)
+      - name: every archive carries the third-party notices
+        run: |
+          set -euo pipefail
+          for a in dist/*.tar.gz dist/*.zip; do
+            case "$a" in
+              *.zip) files=$(unzip -Z1 "$a") ;;
+              *) files=$(tar -tzf "$a") ;;
+            esac
+            for want in LICENSE third_party_licenses/THIRD_PARTY_NOTICES.md third_party_licenses/go/LICENSE; do
+              grep -qx "$want" <<<"$files" || { echo "$a lacks $want"; exit 1; }
+            done
+          done

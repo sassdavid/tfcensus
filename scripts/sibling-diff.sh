@@ -64,6 +64,7 @@ identical=(
   scripts/fuzz.sh
   scripts/gendocs/doc.go
   scripts/gendocs/main.go
+  scripts/licenses.sh
   scripts/proselint/doc.go
   scripts/proselint/main.go
   scripts/test-golden.sh
