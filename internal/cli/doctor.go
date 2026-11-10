@@ -68,6 +68,7 @@ warning. doctor exits 4 when every source fails.`,
 		},
 	}
 	addAccountFlags(cmd)
+	addRegionFlag(cmd)
 	cmd.Flags().BoolVar(&refresh, "refresh", false, "probe again even when the cached result is fresh")
 	return cmd
 }
@@ -179,7 +180,7 @@ func writeDoctor(d *app.Deps, format render.Format, data doctorData, res *accoun
 		return render.JSON(d.Stdout, env)
 	case render.FormatMD:
 		return writeDoctorMarkdown(d.Stdout, data)
-	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatSARIF:
+	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatCSV, render.FormatSARIF:
 	}
 	return writeDoctorText(d.Stdout, data)
 }

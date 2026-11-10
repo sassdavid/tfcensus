@@ -23,7 +23,7 @@ Same as [relgap M0](https://github.com/sassdavid/relgap/blob/main/docs/plan/mile
 - [x] *(Optional, manual, read-only on an existing work account, if employer policy allows)* `tfcensus doctor --profile <nonprod>` matches the facts recorded in the spec.
 
 ### M3: State reader and inventory (F3) → [state-reader](specs/state-reader.md)
-- [ ] All state-reader.md criteria. `tfcensus inventory` in json, md and csv. `--save-index`.
+- [x] All state-reader.md criteria. `tfcensus inventory` in json, md and csv. `--save-index`.
 
 ### M4: Backend audit → [backend-audit](specs/backend-audit.md)
 - [ ] Bucket, lock and fleet checks with fixtures. Suppressions. SARIF output.

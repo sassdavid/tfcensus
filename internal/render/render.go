@@ -19,12 +19,13 @@ const (
 	FormatPlain Format = "plain"
 	FormatMD    Format = "md"
 	FormatJSON  Format = "json"
+	FormatCSV   Format = "csv"
 	FormatSARIF Format = "sarif"
 )
 
 // AllFormats lists the formats --format accepts.
 func AllFormats() []Format {
-	return []Format{FormatTTY, FormatPlain, FormatMD, FormatJSON, FormatSARIF}
+	return []Format{FormatTTY, FormatPlain, FormatMD, FormatJSON, FormatCSV, FormatSARIF}
 }
 
 // ParseFormat validates a --format value. The empty string means auto.

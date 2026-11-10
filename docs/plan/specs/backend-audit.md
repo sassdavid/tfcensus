@@ -39,7 +39,7 @@ a severity, a remediation hint, and optional suppression in config (`audit.suppr
 | FL-LINEAGE | same `lineage` under two keys (copied state) | high |
 | FL-DOUBLE | same resource identity/ARN in more than one state | high |
 | FL-TFVER | `terraform_version` older than the fleet policy (e.g. < 1.10) | medium |
-| FL-PROV | provider version in state older than the policy, or differs from `.terraform.lock.hcl` | low |
+| FL-PROV | provider version (from `.terraform.lock.hcl`; raw state has none) older than the policy | low |
 | FL-SIZE | state over 20 MB (slow plans) | low |
 | FL-SECRET | sensitive-looking attribute keys stored in plain state (names only, never values) | info |
 

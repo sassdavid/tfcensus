@@ -1,0 +1,262 @@
+[
+  {
+    "repo": "tf-fleet",
+    "path": "app",
+    "workspace": "default",
+    "bucket": "acme-tfstate-111111111111",
+    "key": "app/terraform.tfstate",
+    "region": "eu-west-1",
+    "status": "ok",
+    "state_version": 4,
+    "terraform_version": "1.12.2",
+    "serial": 7,
+    "lineage": "2b7c9e40-1d3f-4a5b-8c6d-7e8f9a0b1c2d",
+    "encrypted": false,
+    "size": 5085,
+    "last_modified": "2026-11-09T08:30:00Z",
+    "providers": [
+      {
+        "source": "hashicorp/aws",
+        "aliases": [
+          "use1"
+        ],
+        "version": "6.20.0",
+        "version_source": "lockfile"
+      },
+      {
+        "source": "hashicorp/random",
+        "version": "3.7.2",
+        "version_source": "lockfile"
+      }
+    ],
+    "resources": 7,
+    "instances": 7,
+    "data_sources": 0,
+    "resource_types": {
+      "aws_acm_certificate": 1,
+      "aws_iam_role": 1,
+      "aws_instance": 1,
+      "aws_s3_bucket": 1,
+      "aws_security_group": 1,
+      "aws_ssm_parameter": 1,
+      "random_password": 1
+    },
+    "warnings": []
+  },
+  {
+    "repo": "tf-fleet",
+    "path": "edge",
+    "workspace": "default",
+    "bucket": "acme-tfstate-111111111111",
+    "key": "edge/terraform.tfstate",
+    "region": "eu-west-1",
+    "status": "ok",
+    "engine": "opentofu",
+    "engine_from": "state provider registry",
+    "state_version": 4,
+    "terraform_version": "1.10.6",
+    "serial": 19,
+    "lineage": "c4d5e6f7-0819-4a2b-9c3d-4e5f60718293",
+    "encrypted": false,
+    "size": 1265,
+    "last_modified": "2026-11-09T08:30:00Z",
+    "providers": [
+      {
+        "source": "hashicorp/aws"
+      }
+    ],
+    "resources": 2,
+    "instances": 2,
+    "data_sources": 0,
+    "resource_types": {
+      "aws_cloudfront_distribution": 1,
+      "aws_route53_record": 1
+    },
+    "warnings": []
+  },
+  {
+    "repo": "tf-fleet",
+    "path": "edge",
+    "workspace": "staging",
+    "bucket": "acme-tfstate-111111111111",
+    "key": "env:/staging/edge/terraform.tfstate",
+    "region": "eu-west-1",
+    "status": "ok",
+    "engine": "opentofu",
+    "engine_from": "state provider registry",
+    "state_version": 4,
+    "terraform_version": "1.10.6",
+    "serial": 3,
+    "lineage": "d5e6f708-192a-4b3c-8d4e-5f6071829304",
+    "encrypted": false,
+    "size": 726,
+    "last_modified": "2026-11-09T08:30:00Z",
+    "providers": [
+      {
+        "source": "hashicorp/aws"
+      }
+    ],
+    "resources": 1,
+    "instances": 1,
+    "data_sources": 0,
+    "resource_types": {
+      "aws_route53_record": 1
+    },
+    "warnings": []
+  },
+  {
+    "repo": "tf-fleet",
+    "path": "hcp",
+    "workspace": "default",
+    "status": "skipped",
+    "encrypted": false,
+    "providers": [],
+    "resources": 0,
+    "instances": 0,
+    "data_sources": 0,
+    "resource_types": {},
+    "warnings": [
+      "backend cloud: tfcensus reads state from s3 only"
+    ]
+  },
+  {
+    "repo": "tf-fleet",
+    "path": "legacy",
+    "workspace": "default",
+    "bucket": "acme-tfstate-111111111111",
+    "key": "legacy/terraform.tfstate",
+    "region": "eu-west-1",
+    "status": "unsupported",
+    "state_version": 3,
+    "terraform_version": "0.11.14",
+    "serial": 88,
+    "lineage": "08192a3b-4c5d-4e6f-9071-829304152637",
+    "encrypted": false,
+    "size": 469,
+    "last_modified": "2026-11-09T08:30:00Z",
+    "providers": [],
+    "resources": 0,
+    "instances": 0,
+    "data_sources": 0,
+    "resource_types": {},
+    "warnings": [
+      "unsupported state format version 3: tfcensus reads version 4 (Terraform 0.12 and later)"
+    ]
+  },
+  {
+    "repo": "tf-fleet",
+    "path": "network",
+    "workspace": "default",
+    "bucket": "acme-tfstate-111111111111",
+    "key": "network/terraform.tfstate",
+    "region": "eu-west-1",
+    "status": "ok",
+    "engine": "terraform",
+    "engine_from": ".terraform-version",
+    "state_version": 4,
+    "terraform_version": "1.5.7",
+    "serial": 42,
+    "lineage": "8d3f2c1a-5b6e-4f70-9a81-0c2d3e4f5a6b",
+    "encrypted": false,
+    "size": 5395,
+    "last_modified": "2026-11-09T08:30:00Z",
+    "providers": [
+      {
+        "source": "hashicorp/aws"
+      }
+    ],
+    "resources": 6,
+    "instances": 7,
+    "data_sources": 1,
+    "resource_types": {
+      "aws_cloudwatch_log_group": 1,
+      "aws_db_instance": 1,
+      "aws_iam_access_key": 1,
+      "aws_security_group": 1,
+      "aws_subnet": 2,
+      "aws_vpc": 1
+    },
+    "warnings": []
+  },
+  {
+    "repo": "tf-fleet",
+    "path": "planned",
+    "workspace": "default",
+    "bucket": "acme-tfstate-111111111111",
+    "key": "planned/terraform.tfstate",
+    "region": "eu-west-1",
+    "status": "absent",
+    "encrypted": false,
+    "providers": [],
+    "resources": 0,
+    "instances": 0,
+    "data_sources": 0,
+    "resource_types": {},
+    "warnings": []
+  },
+  {
+    "repo": "tf-fleet",
+    "path": "restricted",
+    "workspace": "default",
+    "bucket": "acme-restricted-tfstate",
+    "key": "restricted/terraform.tfstate",
+    "region": "us-east-1",
+    "status": "error",
+    "encrypted": false,
+    "providers": [],
+    "resources": 0,
+    "instances": 0,
+    "data_sources": 0,
+    "resource_types": {},
+    "error": "access denied: s3:GetObject on s3://acme-restricted-tfstate/restricted/terraform.tfstate; the backend credentials need s3:GetObject, and kms:Decrypt when the bucket uses SSE-KMS",
+    "warnings": [
+      "workspaces not listed: access denied: s3:ListBucket on s3://acme-restricted-tfstate/env:/; the backend credentials need s3:ListBucket"
+    ]
+  },
+  {
+    "repo": "tf-fleet",
+    "path": "secure",
+    "workspace": "default",
+    "bucket": "acme-tfstate-111111111111",
+    "key": "secure/terraform.tfstate",
+    "region": "eu-west-1",
+    "status": "encrypted",
+    "engine": "opentofu",
+    "engine_from": "state encryption",
+    "serial": 12,
+    "lineage": "e6f70819-2a3b-4c4d-9e5f-607182930415",
+    "encrypted": true,
+    "size": 236,
+    "last_modified": "2026-11-09T08:30:00Z",
+    "providers": [],
+    "resources": 0,
+    "instances": 0,
+    "data_sources": 0,
+    "resource_types": {},
+    "warnings": [
+      "state is encrypted with OpenTofu client-side encryption, so only serial and lineage are readable; tofu show -json in the unit reads it with the unit's key configuration"
+    ]
+  },
+  {
+    "repo": "tf-fleet",
+    "path": "shared",
+    "workspace": "default",
+    "bucket": "acme-shared-tfstate",
+    "key": "shared/terraform.tfstate",
+    "region": "eu-central-1",
+    "status": "ok",
+    "state_version": 4,
+    "terraform_version": "1.11.4",
+    "serial": 2,
+    "lineage": "f708192a-3b4c-4d5e-8f60-718293041526",
+    "encrypted": false,
+    "size": 181,
+    "last_modified": "2026-11-09T08:30:00Z",
+    "providers": [],
+    "resources": 0,
+    "instances": 0,
+    "data_sources": 0,
+    "resource_types": {},
+    "warnings": []
+  }
+]

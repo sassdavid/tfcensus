@@ -27,11 +27,13 @@ Maps each managed resource instance to keys used by matching ([matching.md](matc
 Collisions (the same key from two units) feed **double-managed** detection.
 
 ## Inventory output (`tfcensus inventory`)
-Per unit: state serial, lineage, terraform_version, providers and versions (from state), resource count by type, size, LastModified, encrypted?, errors.
-`--format json` is also an input for relgap (provider and terraform versions across the fleet; see [integration.md](../integration.md)).
+Per unit: state serial, lineage, terraform_version, providers, resource count by type, size, LastModified, encrypted?, errors.
+Raw state records provider addresses but not their versions (checked in terraform's `internal/states/statefile/version4.go`). Provider versions come from the unit's `.terraform.lock.hcl` when the repo has one, marked `version_source: lockfile`, and are absent otherwise.
+`--format json` (schema `schemas/inventory-v1.json`) is also an input for relgap (terraform versions from state and provider versions from lock files across the fleet; see [integration.md](../integration.md)).
+`--save-index <file>` writes the StateIndex (schema `schemas/index-v1.json`): zstd for `.zst`, gzip for `.gz`, plain JSON otherwise.
 
 ## Acceptance criteria
-- [ ] Fixture states: TF 1.5 (no identity), TF 1.12+ (identity), OpenTofu encrypted, workspace prefix, 50 MB synthetic state. Golden index output; the 50 MB state is indexed with under 200 MB RSS (benchmark).
-- [ ] Attribute values never appear in any output except identifiers (test greps rendered output for fixture secrets).
-- [ ] Two fixture units managing the same SG → double-managed in the index.
-- [ ] 500 states over a stubbed S3 at 16 concurrency complete in under 5 s.
+- [x] Fixture states: TF 1.5 (no identity), TF 1.12+ (identity), OpenTofu encrypted, workspace prefix, 50 MB synthetic state. Golden index output; the 50 MB state is indexed with under 200 MB RSS (benchmark).
+- [x] Attribute values never appear in any output except identifiers (test greps rendered output for fixture secrets).
+- [x] Two fixture units managing the same SG → double-managed in the index.
+- [x] 500 states over a stubbed S3 at 16 concurrency complete in under 5 s.

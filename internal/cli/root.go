@@ -89,7 +89,7 @@ stdout carries data, stderr carries logs. Use --format json for scripting.`,
 
 	pf := root.PersistentFlags()
 	pf.StringVar(&g.format, "format", "",
-		"output format: tty, plain, md, json or sarif (default tty when stdout is a terminal, else plain)")
+		"output format: tty, plain, md, json, csv or sarif (default tty when stdout is a terminal, else plain)")
 	pf.StringVar(&g.configFile, "config", "",
 		"config file to use instead of the discovered "+config.ProjectFileName+" (env "+config.EnvConfigFile+")")
 	pf.CountVarP(&g.verbose, "verbose", "v", "more logging: -v info, -vv debug, -vvv trace")
@@ -109,6 +109,7 @@ stdout carries data, stderr carries logs. Use --format json for scripting.`,
 		newConfigCmd(d, g),
 		newUnitsCmd(d, g),
 		newDoctorCmd(d, g),
+		newInventoryCmd(d, g),
 	)
 	return root, g
 }

@@ -20,7 +20,8 @@ Research basis: emulator coverage was checked API by API against tfcensus's call
 - Retries are disabled in tests (`retry.AddWithMaxAttempts(…, 1)`), so failures surface immediately.
 - **Stubs sit at the HTTP layer**, not the Finalize middleware. Use `aws.Config.HTTPClient` → an httptest server or a go-vcr recorder. This exercises the real deserializers, paginators and error codes. Finalize stubs skip deserialization and hide bugs.
 - go-vcr matcher: the shared `internal/testutil/vcr` scrubber matches method, URL and body and ignores headers, except the ones in `Scrubber.Match`. `awstest.Scrubber()` adds **`X-Amz-Target`**, because Config, Organizations and Cloud Control all POST to `/`. Its save hook drops `Authorization`, `X-Amz-Security-Token`, `X-Amz-Date`, the SDK headers and credential fields, and replaces account IDs with `111111111111` while recording.
-- The AWS cassettes in `testdata/cassettes/aws/` are written from AWS API reference response shapes, not recorded from an account, and the tests only replay them.
+- The AWS cassettes in `testdata/cassettes/aws/` are written from AWS API reference response shapes, not recorded from an account, and the tests only replay them. `inventory-fleet.yaml` is recorded from gofakes3 and a fake STS (`awstest.Fake`) through the vcr recorder and `awstest.Scrubber()`, by `TestInventoryCassette` under `mise run test:golden -- -update`.
+- State parsing streams with `encoding/json/jsontext` and keeps only `id`, `arn`, `region` and the identity. `TestLargeState` indexes a 50 MB state generated in the test (never committed) and checks the Go runtime's memory stays under 200 MB.
 
 ## Fixtures
 - **Terragrunt fixture repos** in `testdata/repos/` (`tg-live/`, `tg-multi-account/`, `plain-tf/`). Inspired by the local terragrunt-infrastructure-live-stacks-example ([reference-repos.md](reference-repos.md)).

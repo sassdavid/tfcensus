@@ -1,0 +1,1166 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 43
+        host: ""
+        body: Action=GetCallerIdentity&Version=2011-06-15
+        form:
+            Action:
+                - GetCallerIdentity
+            Version:
+                - "2011-06-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://sts.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |
+            <GetCallerIdentityResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">
+              <GetCallerIdentityResult>
+                <Arn>arn:aws:iam::111111111111:user/tfcensus-readonly</Arn>
+                <UserId>AIDAEXAMPLEUSERID</UserId>
+                <Account>111111111111</Account>
+              </GetCallerIdentityResult>
+              <ResponseMetadata><RequestId>00000000-0000-4000-8000-000000000000</RequestId></ResponseMetadata>
+            </GetCallerIdentityResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 1
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            list-type:
+                - "2"
+            prefix:
+                - env:/
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-111111111111.s3.eu-west-1.amazonaws.com/?list-type=2&prefix=env%3A%2F
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+              <Name>acme-tfstate-111111111111</Name>
+              <IsTruncated>false</IsTruncated>
+              <Prefix>env:/</Prefix>
+              <MaxKeys>1000</MaxKeys>
+              <Contents>
+                <Key>env:/staging/edge/terraform.tfstate</Key>
+                <LastModified>2026-11-09T08:30:00Z</LastModified>
+                <ETag>&#34;da04d3d069f5e741236a096b1f6ac565&#34;</ETag>
+                <Size>726</Size>
+              </Contents>
+              <KeyCount>1</KeyCount>
+            </ListBucketResult>
+        headers:
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Type:
+                - text/xml; charset=utf-8
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwMTAwMDAwMDAwMDAwMDAwMDEwMDAwMDAwMDAwMDAwMDAxMDAwMDAwMDAwMDAwMDAwMQ==
+            X-Amz-Request-Id:
+                - "0000000000000001"
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 2
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            x-id:
+                - GetObject
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Checksum-Mode:
+                - ENABLED
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-111111111111.s3.eu-west-1.amazonaws.com/app/terraform.tfstate?x-id=GetObject
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 5085
+        body: |
+            {
+              "version": 4,
+              "terraform_version": "1.12.2",
+              "serial": 7,
+              "lineage": "2b7c9e40-1d3f-4a5b-8c6d-7e8f9a0b1c2d",
+              "outputs": {},
+              "resources": [
+                {
+                  "mode": "managed",
+                  "type": "aws_instance",
+                  "name": "web",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 2,
+                      "attributes": {
+                        "ami": "ami-0123456789abcdef0",
+                        "arn": "arn:aws:ec2:eu-west-1:111111111111:instance/i-0fedcba9876543210",
+                        "id": "i-0fedcba9876543210",
+                        "instance_type": "t3.small",
+                        "region": "eu-west-1",
+                        "user_data": "FIXTURE-SECRET-user-data"
+                      },
+                      "sensitive_attributes": [],
+                      "identity_schema_version": 0,
+                      "identity": {
+                        "account_id": "111111111111",
+                        "id": "i-0fedcba9876543210",
+                        "region": "eu-west-1"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "mode": "managed",
+                  "type": "aws_iam_role",
+                  "name": "app",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 0,
+                      "attributes": {
+                        "arn": "arn:aws:iam::111111111111:role/acme-app",
+                        "assume_role_policy": "{\"Version\":\"2012-10-17\",\"Statement\":[]}",
+                        "id": "acme-app",
+                        "name": "acme-app"
+                      },
+                      "sensitive_attributes": [],
+                      "identity_schema_version": 0,
+                      "identity": {
+                        "account_id": "111111111111",
+                        "name": "acme-app"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "mode": "managed",
+                  "type": "aws_s3_bucket",
+                  "name": "assets",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 0,
+                      "attributes": {
+                        "arn": "arn:aws:s3:::acme-assets-dev",
+                        "bucket": "acme-assets-dev",
+                        "id": "acme-assets-dev",
+                        "region": "eu-west-1"
+                      },
+                      "sensitive_attributes": [],
+                      "identity_schema_version": 0,
+                      "identity": {
+                        "account_id": "111111111111",
+                        "bucket": "acme-assets-dev",
+                        "region": "eu-west-1"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "mode": "managed",
+                  "type": "aws_security_group",
+                  "name": "legacy_web",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 1,
+                      "attributes": {
+                        "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0123456789abcdef0",
+                        "id": "sg-0123456789abcdef0",
+                        "name": "acme-web",
+                        "region": "eu-west-1"
+                      },
+                      "sensitive_attributes": [],
+                      "identity_schema_version": 0,
+                      "identity": {
+                        "account_id": "111111111111",
+                        "id": "sg-0123456789abcdef0",
+                        "region": "eu-west-1"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "mode": "managed",
+                  "type": "aws_ssm_parameter",
+                  "name": "config",
+                  "each": "map",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "index_key": "db_password",
+                      "schema_version": 0,
+                      "attributes": {
+                        "arn": "arn:aws:ssm:eu-west-1:111111111111:parameter/acme/db_password",
+                        "id": "/acme/db_password",
+                        "region": "eu-west-1",
+                        "type": "SecureString",
+                        "value": "FIXTURE-SECRET-ssm-value"
+                      },
+                      "sensitive_attributes": [[{"type": "get_attr", "value": "value"}]],
+                      "identity_schema_version": 0,
+                      "identity": {
+                        "account_id": "111111111111",
+                        "name": "/acme/db_password",
+                        "region": "eu-west-1"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "mode": "managed",
+                  "type": "aws_acm_certificate",
+                  "name": "cdn",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"].use1",
+                  "instances": [
+                    {
+                      "schema_version": 0,
+                      "attributes": {
+                        "arn": "arn:aws:acm:us-east-1:111111111111:certificate/0a1b2c3d-4e5f-6789-abcd-ef0123456789",
+                        "domain_name": "cdn.acme.example",
+                        "id": "arn:aws:acm:us-east-1:111111111111:certificate/0a1b2c3d-4e5f-6789-abcd-ef0123456789",
+                        "private_key": "FIXTURE-SECRET-db-password",
+                        "region": "us-east-1"
+                      },
+                      "sensitive_attributes": []
+                    }
+                  ]
+                },
+                {
+                  "mode": "managed",
+                  "type": "random_password",
+                  "name": "db",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/random\"]",
+                  "instances": [
+                    {
+                      "schema_version": 3,
+                      "attributes": {
+                        "bcrypt_hash": "FIXTURE-SECRET-random-result",
+                        "id": "none",
+                        "length": 32,
+                        "result": "FIXTURE-SECRET-random-result"
+                      },
+                      "sensitive_attributes": []
+                    }
+                  ]
+                }
+              ],
+              "check_results": []
+            }
+        headers:
+            Accept-Ranges:
+                - bytes
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Length:
+                - "5085"
+            Content-Type:
+                - text/plain; charset=utf-8
+            Etag:
+                - '"7e132988e5e926a1a3d8168279499c8a"'
+            Last-Modified:
+                - Mon, 09 Nov 2026 08:30:00 GMT
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwMjAwMDAwMDAwMDAwMDAwMDIwMDAwMDAwMDAwMDAwMDAyMDAwMDAwMDAwMDAwMDAwMg==
+            X-Amz-Request-Id:
+                - "0000000000000002"
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 3
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            x-id:
+                - GetObject
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Checksum-Mode:
+                - ENABLED
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-111111111111.s3.eu-west-1.amazonaws.com/edge/terraform.tfstate?x-id=GetObject
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 1265
+        body: |
+            {
+              "version": 4,
+              "terraform_version": "1.10.6",
+              "serial": 19,
+              "lineage": "c4d5e6f7-0819-4a2b-9c3d-4e5f60718293",
+              "outputs": {},
+              "resources": [
+                {
+                  "mode": "managed",
+                  "type": "aws_cloudfront_distribution",
+                  "name": "site",
+                  "provider": "provider[\"registry.opentofu.org/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 1,
+                      "attributes": {
+                        "arn": "arn:aws:cloudfront::111111111111:distribution/E2EXAMPLEDIST1",
+                        "id": "E2EXAMPLEDIST1",
+                        "origin": [{"domain_name": "acme-assets-dev.s3.amazonaws.com", "origin_id": "assets"}]
+                      },
+                      "sensitive_attributes": []
+                    }
+                  ]
+                },
+                {
+                  "mode": "managed",
+                  "type": "aws_route53_record",
+                  "name": "site",
+                  "provider": "provider[\"registry.opentofu.org/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 2,
+                      "attributes": {
+                        "fqdn": "www.acme.example",
+                        "id": "Z0123456789EXAMPLE_www.acme.example_A",
+                        "name": "www.acme.example",
+                        "type": "A",
+                        "zone_id": "Z0123456789EXAMPLE"
+                      },
+                      "sensitive_attributes": []
+                    }
+                  ]
+                }
+              ],
+              "check_results": null
+            }
+        headers:
+            Accept-Ranges:
+                - bytes
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Length:
+                - "1265"
+            Content-Type:
+                - text/plain; charset=utf-8
+            Etag:
+                - '"26a8c25fce9cb0de094037dae2a434d6"'
+            Last-Modified:
+                - Mon, 09 Nov 2026 08:30:00 GMT
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwMzAwMDAwMDAwMDAwMDAwMDMwMDAwMDAwMDAwMDAwMDAzMDAwMDAwMDAwMDAwMDAwMw==
+            X-Amz-Request-Id:
+                - "0000000000000003"
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 4
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            x-id:
+                - GetObject
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Checksum-Mode:
+                - ENABLED
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-111111111111.s3.eu-west-1.amazonaws.com/env%3A/staging/edge/terraform.tfstate?x-id=GetObject
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 726
+        body: |
+            {
+              "version": 4,
+              "terraform_version": "1.10.6",
+              "serial": 3,
+              "lineage": "d5e6f708-192a-4b3c-8d4e-5f6071829304",
+              "outputs": {},
+              "resources": [
+                {
+                  "mode": "managed",
+                  "type": "aws_route53_record",
+                  "name": "site",
+                  "provider": "provider[\"registry.opentofu.org/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 2,
+                      "attributes": {
+                        "fqdn": "staging.acme.example",
+                        "id": "Z0123456789EXAMPLE_staging.acme.example_A",
+                        "name": "staging.acme.example",
+                        "type": "A",
+                        "zone_id": "Z0123456789EXAMPLE"
+                      },
+                      "sensitive_attributes": []
+                    }
+                  ]
+                }
+              ],
+              "check_results": null
+            }
+        headers:
+            Accept-Ranges:
+                - bytes
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Length:
+                - "726"
+            Content-Type:
+                - text/plain; charset=utf-8
+            Etag:
+                - '"da04d3d069f5e741236a096b1f6ac565"'
+            Last-Modified:
+                - Mon, 09 Nov 2026 08:30:00 GMT
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwNDAwMDAwMDAwMDAwMDAwMDQwMDAwMDAwMDAwMDAwMDA0MDAwMDAwMDAwMDAwMDAwNA==
+            X-Amz-Request-Id:
+                - "0000000000000004"
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 5
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            x-id:
+                - GetObject
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Checksum-Mode:
+                - ENABLED
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-111111111111.s3.eu-west-1.amazonaws.com/legacy/terraform.tfstate?x-id=GetObject
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 469
+        body: |
+            {
+              "version": 3,
+              "terraform_version": "0.11.14",
+              "serial": 88,
+              "lineage": "08192a3b-4c5d-4e6f-9071-829304152637",
+              "modules": [
+                {
+                  "path": ["root"],
+                  "outputs": {},
+                  "resources": {
+                    "aws_s3_bucket.logs": {
+                      "type": "aws_s3_bucket",
+                      "primary": {
+                        "id": "acme-legacy-logs",
+                        "attributes": {"id": "acme-legacy-logs", "acl": "FIXTURE-SECRET-v3-attribute"}
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+        headers:
+            Accept-Ranges:
+                - bytes
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Length:
+                - "469"
+            Content-Type:
+                - text/plain; charset=utf-8
+            Etag:
+                - '"7367c5391980e627c426b669ac6a6bc0"'
+            Last-Modified:
+                - Mon, 09 Nov 2026 08:30:00 GMT
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwNTAwMDAwMDAwMDAwMDAwMDUwMDAwMDAwMDAwMDAwMDA1MDAwMDAwMDAwMDAwMDAwNQ==
+            X-Amz-Request-Id:
+                - "0000000000000005"
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 6
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            x-id:
+                - GetObject
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Checksum-Mode:
+                - ENABLED
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-111111111111.s3.eu-west-1.amazonaws.com/network/terraform.tfstate?x-id=GetObject
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 5395
+        body: |
+            {
+              "version": 4,
+              "terraform_version": "1.5.7",
+              "serial": 42,
+              "lineage": "8d3f2c1a-5b6e-4f70-9a81-0c2d3e4f5a6b",
+              "outputs": {
+                "db_password": {
+                  "value": "FIXTURE-SECRET-output-value",
+                  "type": "string",
+                  "sensitive": true
+                },
+                "vpc_id": {
+                  "value": "vpc-0a1b2c3d4e5f60718",
+                  "type": "string"
+                }
+              },
+              "resources": [
+                {
+                  "mode": "data",
+                  "type": "aws_availability_zones",
+                  "name": "available",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 0,
+                      "attributes": {
+                        "id": "eu-west-1",
+                        "names": ["eu-west-1a", "eu-west-1b", "eu-west-1c"]
+                      },
+                      "sensitive_attributes": []
+                    }
+                  ]
+                },
+                {
+                  "mode": "managed",
+                  "type": "aws_vpc",
+                  "name": "main",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 1,
+                      "attributes": {
+                        "arn": "arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0a1b2c3d4e5f60718",
+                        "cidr_block": "10.20.0.0/16",
+                        "id": "vpc-0a1b2c3d4e5f60718",
+                        "owner_id": "111111111111",
+                        "tags": {
+                          "Name": "acme-dev"
+                        }
+                      },
+                      "sensitive_attributes": [],
+                      "private": "RklYVFVSRS1TRUNSRVQtcHJpdmF0ZS1ibG9i"
+                    }
+                  ]
+                },
+                {
+                  "mode": "managed",
+                  "type": "aws_subnet",
+                  "name": "private",
+                  "each": "list",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "index_key": 0,
+                      "schema_version": 1,
+                      "attributes": {
+                        "arn": "arn:aws:ec2:eu-west-1:111111111111:subnet/subnet-0aa1bb2cc3dd4ee50",
+                        "availability_zone": "eu-west-1a",
+                        "cidr_block": "10.20.0.0/20",
+                        "id": "subnet-0aa1bb2cc3dd4ee50",
+                        "vpc_id": "vpc-0a1b2c3d4e5f60718"
+                      },
+                      "sensitive_attributes": [],
+                      "dependencies": ["aws_vpc.main"]
+                    },
+                    {
+                      "index_key": 1,
+                      "schema_version": 1,
+                      "attributes": {
+                        "arn": "arn:aws:ec2:eu-west-1:111111111111:subnet/subnet-0aa1bb2cc3dd4ee51",
+                        "availability_zone": "eu-west-1b",
+                        "cidr_block": "10.20.16.0/20",
+                        "id": "subnet-0aa1bb2cc3dd4ee51",
+                        "vpc_id": "vpc-0a1b2c3d4e5f60718"
+                      },
+                      "sensitive_attributes": [],
+                      "dependencies": ["aws_vpc.main"]
+                    }
+                  ]
+                },
+                {
+                  "mode": "managed",
+                  "type": "aws_security_group",
+                  "name": "web",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 1,
+                      "attributes": {
+                        "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0123456789abcdef0",
+                        "description": "web tier",
+                        "id": "sg-0123456789abcdef0",
+                        "ingress": [
+                          {
+                            "cidr_blocks": ["0.0.0.0/0"],
+                            "from_port": 443,
+                            "protocol": "tcp",
+                            "to_port": 443
+                          }
+                        ],
+                        "name": "acme-web",
+                        "vpc_id": "vpc-0a1b2c3d4e5f60718"
+                      },
+                      "sensitive_attributes": []
+                    }
+                  ]
+                },
+                {
+                  "mode": "managed",
+                  "type": "aws_db_instance",
+                  "name": "main",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 2,
+                      "attributes": {
+                        "arn": "arn:aws:rds:eu-west-1:111111111111:db:acme-dev",
+                        "id": "db-ABCDEFGHIJKLMNOPQRSTUVWXY0",
+                        "identifier": "acme-dev",
+                        "password": "FIXTURE-SECRET-db-password",
+                        "username": "acme"
+                      },
+                      "sensitive_attributes": [[{"type": "get_attr", "value": "password"}]]
+                    },
+                    {
+                      "deposed": "a1b2c3d4",
+                      "schema_version": 2,
+                      "attributes": {
+                        "arn": "arn:aws:rds:eu-west-1:111111111111:db:acme-dev-old",
+                        "id": "db-ZYXWVUTSRQPONMLKJIHGFEDCB0",
+                        "password": "FIXTURE-SECRET-db-password"
+                      },
+                      "sensitive_attributes": []
+                    }
+                  ]
+                },
+                {
+                  "module": "module.flow_logs",
+                  "mode": "managed",
+                  "type": "aws_cloudwatch_log_group",
+                  "name": "this",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 0,
+                      "attributes": {
+                        "arn": "arn:aws:logs:eu-west-1:111111111111:log-group:/acme/vpc-flow-logs",
+                        "id": "/acme/vpc-flow-logs",
+                        "retention_in_days": 30
+                      },
+                      "sensitive_attributes": []
+                    }
+                  ]
+                },
+                {
+                  "mode": "managed",
+                  "type": "aws_iam_access_key",
+                  "name": "ci",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 0,
+                      "attributes": {
+                        "id": "fixture-ci-access-key-id",
+                        "secret": "FIXTURE-SECRET-iam-secret",
+                        "ses_smtp_password_v4": "FIXTURE-SECRET-iam-secret",
+                        "user": "acme-ci"
+                      },
+                      "sensitive_attributes": []
+                    }
+                  ]
+                }
+              ],
+              "check_results": null
+            }
+        headers:
+            Accept-Ranges:
+                - bytes
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Length:
+                - "5395"
+            Content-Type:
+                - text/plain; charset=utf-8
+            Etag:
+                - '"1da4391f34478e047a4864522d86bc0c"'
+            Last-Modified:
+                - Mon, 09 Nov 2026 08:30:00 GMT
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwNjAwMDAwMDAwMDAwMDAwMDYwMDAwMDAwMDAwMDAwMDA2MDAwMDAwMDAwMDAwMDAwNg==
+            X-Amz-Request-Id:
+                - "0000000000000006"
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 7
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            x-id:
+                - GetObject
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Checksum-Mode:
+                - ENABLED
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-111111111111.s3.eu-west-1.amazonaws.com/planned/terraform.tfstate?x-id=GetObject
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <Error>
+              <Code>NoSuchKey</Code>
+              <Resource>planned/terraform.tfstate</Resource>
+            </Error>
+        headers:
+            Access-Control-Allow-Origin:
+                - '*'
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwNzAwMDAwMDAwMDAwMDAwMDcwMDAwMDAwMDAwMDAwMDA3MDAwMDAwMDAwMDAwMDAwNw==
+            X-Amz-Request-Id:
+                - "0000000000000007"
+        status: 404 Not Found
+        code: 404
+        duration: 0s
+    - id: 8
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 43
+        host: ""
+        body: Action=GetCallerIdentity&Version=2011-06-15
+        form:
+            Action:
+                - GetCallerIdentity
+            Version:
+                - "2011-06-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://sts.us-east-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |
+            <GetCallerIdentityResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">
+              <GetCallerIdentityResult>
+                <Arn>arn:aws:iam::444455556666:user/tfcensus-readonly</Arn>
+                <UserId>AIDAEXAMPLEUSERID</UserId>
+                <Account>444455556666</Account>
+              </GetCallerIdentityResult>
+              <ResponseMetadata><RequestId>00000000-0000-4000-8000-000000000000</RequestId></ResponseMetadata>
+            </GetCallerIdentityResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 9
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            list-type:
+                - "2"
+            prefix:
+                - env:/
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-restricted-tfstate.s3.us-east-1.amazonaws.com/?list-type=2&prefix=env%3A%2F
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <Error><Code>AccessDenied</Code><Message>Access Denied</Message><RequestId>0000000000000000</RequestId></Error>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 403 Forbidden
+        code: 403
+        duration: 0s
+    - id: 10
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            x-id:
+                - GetObject
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Checksum-Mode:
+                - ENABLED
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-restricted-tfstate.s3.us-east-1.amazonaws.com/restricted/terraform.tfstate?x-id=GetObject
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <Error><Code>AccessDenied</Code><Message>Access Denied</Message><RequestId>0000000000000000</RequestId></Error>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 403 Forbidden
+        code: 403
+        duration: 0s
+    - id: 11
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            x-id:
+                - GetObject
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Checksum-Mode:
+                - ENABLED
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-111111111111.s3.eu-west-1.amazonaws.com/secure/terraform.tfstate?x-id=GetObject
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 236
+        body: |
+            {"serial":12,"lineage":"e6f70819-2a3b-4c4d-9e5f-607182930415","meta":{"key_provider.pbkdf2.main":"RklYVFVSRS1TRUNSRVQta2V5LXByb3ZpZGVyLW1ldGE="},"encrypted_data":"RklYVFVSRS1TRUNSRVQtZW5jcnlwdGVkLXBheWxvYWQ=","encryption_version":"v0"}
+        headers:
+            Accept-Ranges:
+                - bytes
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Length:
+                - "236"
+            Content-Type:
+                - text/plain; charset=utf-8
+            Etag:
+                - '"09600bfba54794434f8b92401980f42d"'
+            Last-Modified:
+                - Mon, 09 Nov 2026 08:30:00 GMT
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwODAwMDAwMDAwMDAwMDAwMDgwMDAwMDAwMDAwMDAwMDA4MDAwMDAwMDAwMDAwMDAwOA==
+            X-Amz-Request-Id:
+                - "0000000000000008"
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 12
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 147
+        host: ""
+        body: Action=AssumeRole&DurationSeconds=900&RoleArn=arn%3Aaws%3Aiam%3A%3A333333333333%3Arole%2Ftfstate-reader&RoleSessionName=tfcensus&Version=2011-06-15
+        form:
+            Action:
+                - AssumeRole
+            DurationSeconds:
+                - "900"
+            RoleArn:
+                - arn:aws:iam::333333333333:role/tfstate-reader
+            RoleSessionName:
+                - tfcensus
+            Version:
+                - "2011-06-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://sts.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 661
+        body: |
+            <AssumeRoleResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">
+              <AssumeRoleResult>
+                <AssumedRoleUser>
+                  <Arn>arn:aws:sts::333333333333:assumed-role/tfstate-reader/tfcensus</Arn>
+                  <AssumedRoleId>AROAEXAMPLEROLEID:tfcensus</AssumedRoleId>
+                </AssumedRoleUser>
+                <Credentials>
+                  <AccessKeyId>ASIAFAKE333333333333</AccessKeyId>
+                  <SecretAccessKey>REDACTED</SecretAccessKey>
+                  <SessionToken>REDACTED</SessionToken>
+                  <Expiration>2099-01-01T00:00:00Z</Expiration>
+                </Credentials>
+              </AssumeRoleResult>
+              <ResponseMetadata><RequestId>00000000-0000-4000-8000-000000000000</RequestId></ResponseMetadata>
+            </AssumeRoleResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 13
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 43
+        host: ""
+        body: Action=GetCallerIdentity&Version=2011-06-15
+        form:
+            Action:
+                - GetCallerIdentity
+            Version:
+                - "2011-06-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://sts.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |
+            <GetCallerIdentityResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">
+              <GetCallerIdentityResult>
+                <Arn>arn:aws:iam::333333333333:user/tfcensus-readonly</Arn>
+                <UserId>AIDAEXAMPLEUSERID</UserId>
+                <Account>333333333333</Account>
+              </GetCallerIdentityResult>
+              <ResponseMetadata><RequestId>00000000-0000-4000-8000-000000000000</RequestId></ResponseMetadata>
+            </GetCallerIdentityResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 14
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            list-type:
+                - "2"
+            prefix:
+                - env:/
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-shared-tfstate.s3.eu-central-1.amazonaws.com/?list-type=2&prefix=env%3A%2F
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+              <Name>acme-shared-tfstate</Name>
+              <IsTruncated>false</IsTruncated>
+              <Prefix>env:/</Prefix>
+              <MaxKeys>1000</MaxKeys>
+            </ListBucketResult>
+        headers:
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Type:
+                - text/xml; charset=utf-8
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwOTAwMDAwMDAwMDAwMDAwMDkwMDAwMDAwMDAwMDAwMDA5MDAwMDAwMDAwMDAwMDAwOQ==
+            X-Amz-Request-Id:
+                - "0000000000000009"
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 15
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            x-id:
+                - GetObject
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Checksum-Mode:
+                - ENABLED
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-shared-tfstate.s3.eu-central-1.amazonaws.com/shared/terraform.tfstate?x-id=GetObject
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 181
+        body: |
+            {
+              "version": 4,
+              "terraform_version": "1.11.4",
+              "serial": 2,
+              "lineage": "f708192a-3b4c-4d5e-8f60-718293041526",
+              "outputs": {},
+              "resources": [],
+              "check_results": null
+            }
+        headers:
+            Accept-Ranges:
+                - bytes
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Length:
+                - "181"
+            Content-Type:
+                - text/plain; charset=utf-8
+            Etag:
+                - '"e2715acdbca6c1ed21fa0c9582672490"'
+            Last-Modified:
+                - Mon, 09 Nov 2026 08:30:00 GMT
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwQTAwMDAwMDAwMDAwMDAwMEEwMDAwMDAwMDAwMDAwMDBBMDAwMDAwMDAwMDAwMDAwQQ==
+            X-Amz-Request-Id:
+                - 000000000000000A
+        status: 200 OK
+        code: 200
+        duration: 0s

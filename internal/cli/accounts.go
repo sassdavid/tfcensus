@@ -21,8 +21,8 @@ const (
 	flagRegion            = "region"
 )
 
-// addAccountFlags adds the flags that select AWS accounts and regions. Their values reach the
-// command through the config (see flagKeys).
+// addAccountFlags adds the flags that select AWS accounts. Their values reach the command through
+// the config (see flagKeys).
 func addAccountFlags(cmd *cobra.Command) {
 	f := cmd.Flags()
 	f.StringArray(flagProfile, nil,
@@ -34,7 +34,11 @@ func addAccountFlags(cmd *cobra.Command) {
 	f.String(flagManagementProfile, "",
 		"profile that lists the organization's accounts, else the default AWS credentials "+
 			"(config accounts.org.management_profile)")
-	f.StringArray(flagRegion, nil, "AWS region (repeatable; config regions)")
+}
+
+// addRegionFlag adds --region, which reaches the command through the config key regions.
+func addRegionFlag(cmd *cobra.Command) {
+	cmd.Flags().StringArray(flagRegion, nil, "AWS region (repeatable; config regions)")
 }
 
 func newLoader(d *app.Deps) *accounts.Loader {
