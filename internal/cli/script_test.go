@@ -5,27 +5,44 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"syscall"
 	"testing"
+	"time"
 
 	"github.com/rogpeppe/go-internal/testscript"
 	"github.com/santhosh-tekuri/jsonschema/v6"
 
+	"github.com/sassdavid/tfcensus/internal/app"
 	"github.com/sassdavid/tfcensus/internal/cli"
 	"github.com/sassdavid/tfcensus/internal/testutil"
+	"github.com/sassdavid/tfcensus/internal/testutil/awstest"
 	"github.com/sassdavid/tfcensus/internal/testutil/fakebin"
+	"github.com/sassdavid/tfcensus/internal/testutil/vcr"
 	"github.com/sassdavid/tfcensus/schemas"
 )
 
-const scriptDir = "../../testdata/script"
+const (
+	scriptDir   = "../../testdata/script"
+	cassetteDir = "../../testdata/cassettes"
+)
+
+// Test-only environment read by the tfcensus command of the test binary.
+const (
+	// envCassette replays every HTTP request from this cassette.
+	envCassette = "TEST_CASSETTE"
+	// envNow fixes the clock (RFC 3339), so JSON envelopes and probe timestamps are stable.
+	envNow = "TEST_NOW"
+)
 
 func TestMain(m *testing.M) {
 	fakebin.Serve() // units_test.go runs a fake terragrunt
 	testscript.Main(m, map[string]func(){
 		"tfcensus": func() {
-			os.Exit(cli.Run(context.Background(), os.Args, os.Stdout, os.Stderr))
+			os.Exit(runTfcensus(os.Args[1:]))
 		},
 		// expect-exit <code> tfcensus [args...] succeeds only when tfcensus exits with <code>.
 		"expect-exit": func() {
@@ -45,12 +62,45 @@ func expectExit(args []string) int {
 		_, _ = fmt.Fprintf(os.Stderr, "expect-exit: bad code %q\n", args[0])
 		return 1
 	}
-	got := cli.Run(context.Background(), args[1:], os.Stdout, os.Stderr)
+	got := runTfcensus(args[2:])
 	if got != want {
 		_, _ = fmt.Fprintf(os.Stderr, "expect-exit: tfcensus exited %d, want %d\n", got, want)
 		return 1
 	}
 	return 0
+}
+
+// runTfcensus runs the CLI the way main does, with the test hooks from the environment. AWS
+// cassettes are written from API reference shapes, not recorded, so they are only replayed.
+func runTfcensus(args []string) int {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	d := &app.Deps{
+		Stdin:  os.Stdin,
+		Stdout: os.Stdout,
+		Stderr: os.Stderr,
+		Env:    app.Env(os.Environ()),
+		Clock:  time.Now,
+		Getwd:  os.Getwd,
+	}
+	if now := os.Getenv(envNow); now != "" {
+		t, err := time.Parse(time.RFC3339, now)
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "%s: %v\n", envNow, err)
+			return 1
+		}
+		d.Clock = func() time.Time { return t }
+	}
+	if path := os.Getenv(envCassette); path != "" {
+		rec, err := vcr.New(path, vcr.Options{Scrubber: awstest.Scrubber()})
+		if err != nil {
+			_, _ = fmt.Fprintln(os.Stderr, err)
+			return 1
+		}
+		d.HTTPTransport = rec
+		defer func() { _ = rec.Stop() }()
+	}
+	return cli.Execute(ctx, d, args)
 }
 
 func scriptParams(t *testing.T, files ...string) testscript.Params {
@@ -65,10 +115,26 @@ func scriptParams(t *testing.T, files ...string) testscript.Params {
 			env.Setenv("XDG_CONFIG_HOME", filepath.Join(env.WorkDir, ".config"))
 			env.Setenv("XDG_CACHE_HOME", filepath.Join(env.WorkDir, ".cache"))
 			env.Setenv("NO_COLOR", "1")
+			// A -race binary sleeps 1s before exiting by default.
+			env.Setenv("GORACE", "atexit_sleep_ms=0")
+			// Nothing may reach AWS: no instance metadata, and no profile from the machine.
+			env.Setenv("AWS_EC2_METADATA_DISABLED", "true")
+			for _, k := range []string{
+				"AWS_PROFILE", "AWS_DEFAULT_PROFILE", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY",
+				"AWS_SESSION_TOKEN", "AWS_CONFIG_FILE", "AWS_SHARED_CREDENTIALS_FILE", "AWS_REGION",
+				"AWS_DEFAULT_REGION",
+			} {
+				env.Setenv(k, "")
+			}
 			// Keep only testscript's own bin directory, so a terragrunt installed on the machine
 			// doesn't change units output. Scripts that need a fake terragrunt prepend its directory.
 			bin, _, _ := strings.Cut(env.Getenv("PATH"), string(os.PathListSeparator))
 			env.Setenv("PATH", bin)
+			cassettes, err := filepath.Abs(cassetteDir)
+			if err != nil {
+				return err
+			}
+			env.Setenv("CASSETTES", cassettes)
 			return nil
 		},
 		Cmds: map[string]func(ts *testscript.TestScript, neg bool, args []string){
@@ -146,4 +212,25 @@ func TestSpec_config_1(t *testing.T) {
 func TestSpec_config_2(t *testing.T) {
 	t.Parallel()
 	testscript.Run(t, scriptParams(t, filepath.Join(scriptDir, "spec_config_2.txtar")))
+}
+
+// TestSpec_accounts_1: an expired SSO token gives one clear message per profile, the run
+// continues, and doctor exits 4 only when every profile fails.
+func TestSpec_accounts_1(t *testing.T) {
+	t.Parallel()
+	testscript.Run(t, scriptParams(t, filepath.Join(scriptDir, "spec_accounts_1.txtar")))
+}
+
+// TestSpec_accounts_2: doctor output from stubbed responses that mirror the real-world check in
+// the accounts spec (golden).
+func TestSpec_accounts_2(t *testing.T) {
+	t.Parallel()
+	testscript.Run(t, scriptParams(t, filepath.Join(scriptDir, "spec_accounts_2.txtar")))
+}
+
+// TestSpec_accounts_3: in org mode, a member account that denies the assume-role is reported and
+// the other accounts are probed.
+func TestSpec_accounts_3(t *testing.T) {
+	t.Parallel()
+	testscript.Run(t, scriptParams(t, filepath.Join(scriptDir, "spec_accounts_3.txtar")))
 }

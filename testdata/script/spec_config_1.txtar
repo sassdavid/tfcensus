@@ -45,6 +45,7 @@ accounts.map.111111111111.name      acme-nonprod                   project file 
 accounts.map.111111111111.profile   acme-nonprod                   project file $WORK/.tfcensus.yaml
 accounts.org.enabled                false                          default
 accounts.org.management_profile     ""                             default
+accounts.org.ou_roles               {}                             default
 accounts.org.role                   OrganizationAccountAccessRole  default
 accounts.profiles                   ["acme-*"]                     user file $WORK/.config/tfcensus/config.yaml
 audit.policy.min_terraform_version  1.10                           default

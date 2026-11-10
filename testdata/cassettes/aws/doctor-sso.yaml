@@ -1,0 +1,398 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 43
+        host: ""
+        body: Action=GetCallerIdentity&Version=2011-06-15
+        form:
+            Action:
+                - GetCallerIdentity
+            Version:
+                - "2011-06-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://sts.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 410
+        body: |
+            <GetCallerIdentityResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">
+              <GetCallerIdentityResult>
+                <Arn>arn:aws:iam::111111111111:user/tfcensus-readonly</Arn>
+                <UserId>AIDAEXAMPLEUSERID</UserId>
+                <Account>111111111111</Account>
+              </GetCallerIdentityResult>
+              <ResponseMetadata>
+                <RequestId>00000000-0000-4000-8000-000000000000</RequestId>
+              </ResponseMetadata>
+            </GetCallerIdentityResponse>
+        headers:
+            Content-Type:
+                - text/xml
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 5.875µs
+    - id: 1
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/json
+        url: https://resource-explorer-2.eu-west-1.amazonaws.com/ListIndexes
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 581
+        body: '{"Indexes":[{"Arn":"arn:aws:resource-explorer-2:eu-central-1:111111111111:index/0c7a9f4e-1b2d-4e5f-8a9b-000000000012","Region":"eu-central-1","Type":"LOCAL"},{"Arn":"arn:aws:resource-explorer-2:eu-north-1:111111111111:index/0c7a9f4e-1b2d-4e5f-8a9b-000000000010","Region":"eu-north-1","Type":"LOCAL"},{"Arn":"arn:aws:resource-explorer-2:eu-west-1:111111111111:index/0c7a9f4e-1b2d-4e5f-8a9b-000000000009","Region":"eu-west-1","Type":"LOCAL"},{"Arn":"arn:aws:resource-explorer-2:us-east-1:111111111111:index/0c7a9f4e-1b2d-4e5f-8a9b-000000000009","Region":"us-east-1","Type":"LOCAL"}]}'
+        headers:
+            Content-Type:
+                - application/json
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 10.459µs
+    - id: 2
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/json
+        url: https://resource-explorer-2.eu-central-1.amazonaws.com/ListSupportedResourceTypes
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 6342
+        body: '{"NextToken":"page-100","ResourceTypes":[{"ResourceType":"service000:resource0","Service":"service000"},{"ResourceType":"service000:resource1","Service":"service000"},{"ResourceType":"service000:resource2","Service":"service000"},{"ResourceType":"service000:resource3","Service":"service000"},{"ResourceType":"service001:resource0","Service":"service001"},{"ResourceType":"service001:resource1","Service":"service001"},{"ResourceType":"service001:resource2","Service":"service001"},{"ResourceType":"service001:resource3","Service":"service001"},{"ResourceType":"service002:resource0","Service":"service002"},{"ResourceType":"service002:resource1","Service":"service002"},{"ResourceType":"service002:resource2","Service":"service002"},{"ResourceType":"service002:resource3","Service":"service002"},{"ResourceType":"service003:resource0","Service":"service003"},{"ResourceType":"service003:resource1","Service":"service003"},{"ResourceType":"service003:resource2","Service":"service003"},{"ResourceType":"service003:resource3","Service":"service003"},{"ResourceType":"service004:resource0","Service":"service004"},{"ResourceType":"service004:resource1","Service":"service004"},{"ResourceType":"service004:resource2","Service":"service004"},{"ResourceType":"service004:resource3","Service":"service004"},{"ResourceType":"service005:resource0","Service":"service005"},{"ResourceType":"service005:resource1","Service":"service005"},{"ResourceType":"service005:resource2","Service":"service005"},{"ResourceType":"service005:resource3","Service":"service005"},{"ResourceType":"service006:resource0","Service":"service006"},{"ResourceType":"service006:resource1","Service":"service006"},{"ResourceType":"service006:resource2","Service":"service006"},{"ResourceType":"service006:resource3","Service":"service006"},{"ResourceType":"service007:resource0","Service":"service007"},{"ResourceType":"service007:resource1","Service":"service007"},{"ResourceType":"service007:resource2","Service":"service007"},{"ResourceType":"service007:resource3","Service":"service007"},{"ResourceType":"service008:resource0","Service":"service008"},{"ResourceType":"service008:resource1","Service":"service008"},{"ResourceType":"service008:resource2","Service":"service008"},{"ResourceType":"service008:resource3","Service":"service008"},{"ResourceType":"service009:resource0","Service":"service009"},{"ResourceType":"service009:resource1","Service":"service009"},{"ResourceType":"service009:resource2","Service":"service009"},{"ResourceType":"service009:resource3","Service":"service009"},{"ResourceType":"service010:resource0","Service":"service010"},{"ResourceType":"service010:resource1","Service":"service010"},{"ResourceType":"service010:resource2","Service":"service010"},{"ResourceType":"service010:resource3","Service":"service010"},{"ResourceType":"service011:resource0","Service":"service011"},{"ResourceType":"service011:resource1","Service":"service011"},{"ResourceType":"service011:resource2","Service":"service011"},{"ResourceType":"service011:resource3","Service":"service011"},{"ResourceType":"service012:resource0","Service":"service012"},{"ResourceType":"service012:resource1","Service":"service012"},{"ResourceType":"service012:resource2","Service":"service012"},{"ResourceType":"service012:resource3","Service":"service012"},{"ResourceType":"service013:resource0","Service":"service013"},{"ResourceType":"service013:resource1","Service":"service013"},{"ResourceType":"service013:resource2","Service":"service013"},{"ResourceType":"service013:resource3","Service":"service013"},{"ResourceType":"service014:resource0","Service":"service014"},{"ResourceType":"service014:resource1","Service":"service014"},{"ResourceType":"service014:resource2","Service":"service014"},{"ResourceType":"service014:resource3","Service":"service014"},{"ResourceType":"service015:resource0","Service":"service015"},{"ResourceType":"service015:resource1","Service":"service015"},{"ResourceType":"service015:resource2","Service":"service015"},{"ResourceType":"service015:resource3","Service":"service015"},{"ResourceType":"service016:resource0","Service":"service016"},{"ResourceType":"service016:resource1","Service":"service016"},{"ResourceType":"service016:resource2","Service":"service016"},{"ResourceType":"service016:resource3","Service":"service016"},{"ResourceType":"service017:resource0","Service":"service017"},{"ResourceType":"service017:resource1","Service":"service017"},{"ResourceType":"service017:resource2","Service":"service017"},{"ResourceType":"service017:resource3","Service":"service017"},{"ResourceType":"service018:resource0","Service":"service018"},{"ResourceType":"service018:resource1","Service":"service018"},{"ResourceType":"service018:resource2","Service":"service018"},{"ResourceType":"service018:resource3","Service":"service018"},{"ResourceType":"service019:resource0","Service":"service019"},{"ResourceType":"service019:resource1","Service":"service019"},{"ResourceType":"service019:resource2","Service":"service019"},{"ResourceType":"service019:resource3","Service":"service019"},{"ResourceType":"service020:resource0","Service":"service020"},{"ResourceType":"service020:resource1","Service":"service020"},{"ResourceType":"service020:resource2","Service":"service020"},{"ResourceType":"service020:resource3","Service":"service020"},{"ResourceType":"service021:resource0","Service":"service021"},{"ResourceType":"service021:resource1","Service":"service021"},{"ResourceType":"service021:resource2","Service":"service021"},{"ResourceType":"service021:resource3","Service":"service021"},{"ResourceType":"service022:resource0","Service":"service022"},{"ResourceType":"service022:resource1","Service":"service022"},{"ResourceType":"service022:resource2","Service":"service022"},{"ResourceType":"service022:resource3","Service":"service022"},{"ResourceType":"service023:resource0","Service":"service023"},{"ResourceType":"service023:resource1","Service":"service023"},{"ResourceType":"service023:resource2","Service":"service023"},{"ResourceType":"service023:resource3","Service":"service023"},{"ResourceType":"service024:resource0","Service":"service024"},{"ResourceType":"service024:resource1","Service":"service024"},{"ResourceType":"service024:resource2","Service":"service024"},{"ResourceType":"service024:resource3","Service":"service024"}]}'
+        headers:
+            Content-Type:
+                - application/json
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 78.333µs
+    - id: 3
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 24
+        host: ""
+        body: '{"NextToken":"page-100"}'
+        headers:
+            Content-Type:
+                - application/json
+        url: https://resource-explorer-2.eu-central-1.amazonaws.com/ListSupportedResourceTypes
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 6342
+        body: '{"NextToken":"page-200","ResourceTypes":[{"ResourceType":"service025:resource0","Service":"service025"},{"ResourceType":"service025:resource1","Service":"service025"},{"ResourceType":"service025:resource2","Service":"service025"},{"ResourceType":"service025:resource3","Service":"service025"},{"ResourceType":"service026:resource0","Service":"service026"},{"ResourceType":"service026:resource1","Service":"service026"},{"ResourceType":"service026:resource2","Service":"service026"},{"ResourceType":"service026:resource3","Service":"service026"},{"ResourceType":"service027:resource0","Service":"service027"},{"ResourceType":"service027:resource1","Service":"service027"},{"ResourceType":"service027:resource2","Service":"service027"},{"ResourceType":"service027:resource3","Service":"service027"},{"ResourceType":"service028:resource0","Service":"service028"},{"ResourceType":"service028:resource1","Service":"service028"},{"ResourceType":"service028:resource2","Service":"service028"},{"ResourceType":"service028:resource3","Service":"service028"},{"ResourceType":"service029:resource0","Service":"service029"},{"ResourceType":"service029:resource1","Service":"service029"},{"ResourceType":"service029:resource2","Service":"service029"},{"ResourceType":"service029:resource3","Service":"service029"},{"ResourceType":"service030:resource0","Service":"service030"},{"ResourceType":"service030:resource1","Service":"service030"},{"ResourceType":"service030:resource2","Service":"service030"},{"ResourceType":"service030:resource3","Service":"service030"},{"ResourceType":"service031:resource0","Service":"service031"},{"ResourceType":"service031:resource1","Service":"service031"},{"ResourceType":"service031:resource2","Service":"service031"},{"ResourceType":"service031:resource3","Service":"service031"},{"ResourceType":"service032:resource0","Service":"service032"},{"ResourceType":"service032:resource1","Service":"service032"},{"ResourceType":"service032:resource2","Service":"service032"},{"ResourceType":"service032:resource3","Service":"service032"},{"ResourceType":"service033:resource0","Service":"service033"},{"ResourceType":"service033:resource1","Service":"service033"},{"ResourceType":"service033:resource2","Service":"service033"},{"ResourceType":"service033:resource3","Service":"service033"},{"ResourceType":"service034:resource0","Service":"service034"},{"ResourceType":"service034:resource1","Service":"service034"},{"ResourceType":"service034:resource2","Service":"service034"},{"ResourceType":"service034:resource3","Service":"service034"},{"ResourceType":"service035:resource0","Service":"service035"},{"ResourceType":"service035:resource1","Service":"service035"},{"ResourceType":"service035:resource2","Service":"service035"},{"ResourceType":"service035:resource3","Service":"service035"},{"ResourceType":"service036:resource0","Service":"service036"},{"ResourceType":"service036:resource1","Service":"service036"},{"ResourceType":"service036:resource2","Service":"service036"},{"ResourceType":"service036:resource3","Service":"service036"},{"ResourceType":"service037:resource0","Service":"service037"},{"ResourceType":"service037:resource1","Service":"service037"},{"ResourceType":"service037:resource2","Service":"service037"},{"ResourceType":"service037:resource3","Service":"service037"},{"ResourceType":"service038:resource0","Service":"service038"},{"ResourceType":"service038:resource1","Service":"service038"},{"ResourceType":"service038:resource2","Service":"service038"},{"ResourceType":"service038:resource3","Service":"service038"},{"ResourceType":"service039:resource0","Service":"service039"},{"ResourceType":"service039:resource1","Service":"service039"},{"ResourceType":"service039:resource2","Service":"service039"},{"ResourceType":"service039:resource3","Service":"service039"},{"ResourceType":"service040:resource0","Service":"service040"},{"ResourceType":"service040:resource1","Service":"service040"},{"ResourceType":"service040:resource2","Service":"service040"},{"ResourceType":"service040:resource3","Service":"service040"},{"ResourceType":"service041:resource0","Service":"service041"},{"ResourceType":"service041:resource1","Service":"service041"},{"ResourceType":"service041:resource2","Service":"service041"},{"ResourceType":"service041:resource3","Service":"service041"},{"ResourceType":"service042:resource0","Service":"service042"},{"ResourceType":"service042:resource1","Service":"service042"},{"ResourceType":"service042:resource2","Service":"service042"},{"ResourceType":"service042:resource3","Service":"service042"},{"ResourceType":"service043:resource0","Service":"service043"},{"ResourceType":"service043:resource1","Service":"service043"},{"ResourceType":"service043:resource2","Service":"service043"},{"ResourceType":"service043:resource3","Service":"service043"},{"ResourceType":"service044:resource0","Service":"service044"},{"ResourceType":"service044:resource1","Service":"service044"},{"ResourceType":"service044:resource2","Service":"service044"},{"ResourceType":"service044:resource3","Service":"service044"},{"ResourceType":"service045:resource0","Service":"service045"},{"ResourceType":"service045:resource1","Service":"service045"},{"ResourceType":"service045:resource2","Service":"service045"},{"ResourceType":"service045:resource3","Service":"service045"},{"ResourceType":"service046:resource0","Service":"service046"},{"ResourceType":"service046:resource1","Service":"service046"},{"ResourceType":"service046:resource2","Service":"service046"},{"ResourceType":"service046:resource3","Service":"service046"},{"ResourceType":"service047:resource0","Service":"service047"},{"ResourceType":"service047:resource1","Service":"service047"},{"ResourceType":"service047:resource2","Service":"service047"},{"ResourceType":"service047:resource3","Service":"service047"},{"ResourceType":"service048:resource0","Service":"service048"},{"ResourceType":"service048:resource1","Service":"service048"},{"ResourceType":"service048:resource2","Service":"service048"},{"ResourceType":"service048:resource3","Service":"service048"},{"ResourceType":"service049:resource0","Service":"service049"},{"ResourceType":"service049:resource1","Service":"service049"},{"ResourceType":"service049:resource2","Service":"service049"},{"ResourceType":"service049:resource3","Service":"service049"}]}'
+        headers:
+            Content-Type:
+                - application/json
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 70.5µs
+    - id: 4
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 24
+        host: ""
+        body: '{"NextToken":"page-200"}'
+        headers:
+            Content-Type:
+                - application/json
+        url: https://resource-explorer-2.eu-central-1.amazonaws.com/ListSupportedResourceTypes
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 6342
+        body: '{"NextToken":"page-300","ResourceTypes":[{"ResourceType":"service050:resource0","Service":"service050"},{"ResourceType":"service050:resource1","Service":"service050"},{"ResourceType":"service050:resource2","Service":"service050"},{"ResourceType":"service050:resource3","Service":"service050"},{"ResourceType":"service051:resource0","Service":"service051"},{"ResourceType":"service051:resource1","Service":"service051"},{"ResourceType":"service051:resource2","Service":"service051"},{"ResourceType":"service051:resource3","Service":"service051"},{"ResourceType":"service052:resource0","Service":"service052"},{"ResourceType":"service052:resource1","Service":"service052"},{"ResourceType":"service052:resource2","Service":"service052"},{"ResourceType":"service052:resource3","Service":"service052"},{"ResourceType":"service053:resource0","Service":"service053"},{"ResourceType":"service053:resource1","Service":"service053"},{"ResourceType":"service053:resource2","Service":"service053"},{"ResourceType":"service053:resource3","Service":"service053"},{"ResourceType":"service054:resource0","Service":"service054"},{"ResourceType":"service054:resource1","Service":"service054"},{"ResourceType":"service054:resource2","Service":"service054"},{"ResourceType":"service054:resource3","Service":"service054"},{"ResourceType":"service055:resource0","Service":"service055"},{"ResourceType":"service055:resource1","Service":"service055"},{"ResourceType":"service055:resource2","Service":"service055"},{"ResourceType":"service055:resource3","Service":"service055"},{"ResourceType":"service056:resource0","Service":"service056"},{"ResourceType":"service056:resource1","Service":"service056"},{"ResourceType":"service056:resource2","Service":"service056"},{"ResourceType":"service056:resource3","Service":"service056"},{"ResourceType":"service057:resource0","Service":"service057"},{"ResourceType":"service057:resource1","Service":"service057"},{"ResourceType":"service057:resource2","Service":"service057"},{"ResourceType":"service057:resource3","Service":"service057"},{"ResourceType":"service058:resource0","Service":"service058"},{"ResourceType":"service058:resource1","Service":"service058"},{"ResourceType":"service058:resource2","Service":"service058"},{"ResourceType":"service058:resource3","Service":"service058"},{"ResourceType":"service059:resource0","Service":"service059"},{"ResourceType":"service059:resource1","Service":"service059"},{"ResourceType":"service059:resource2","Service":"service059"},{"ResourceType":"service059:resource3","Service":"service059"},{"ResourceType":"service060:resource0","Service":"service060"},{"ResourceType":"service060:resource1","Service":"service060"},{"ResourceType":"service060:resource2","Service":"service060"},{"ResourceType":"service060:resource3","Service":"service060"},{"ResourceType":"service061:resource0","Service":"service061"},{"ResourceType":"service061:resource1","Service":"service061"},{"ResourceType":"service061:resource2","Service":"service061"},{"ResourceType":"service061:resource3","Service":"service061"},{"ResourceType":"service062:resource0","Service":"service062"},{"ResourceType":"service062:resource1","Service":"service062"},{"ResourceType":"service062:resource2","Service":"service062"},{"ResourceType":"service062:resource3","Service":"service062"},{"ResourceType":"service063:resource0","Service":"service063"},{"ResourceType":"service063:resource1","Service":"service063"},{"ResourceType":"service063:resource2","Service":"service063"},{"ResourceType":"service063:resource3","Service":"service063"},{"ResourceType":"service064:resource0","Service":"service064"},{"ResourceType":"service064:resource1","Service":"service064"},{"ResourceType":"service064:resource2","Service":"service064"},{"ResourceType":"service064:resource3","Service":"service064"},{"ResourceType":"service065:resource0","Service":"service065"},{"ResourceType":"service065:resource1","Service":"service065"},{"ResourceType":"service065:resource2","Service":"service065"},{"ResourceType":"service065:resource3","Service":"service065"},{"ResourceType":"service066:resource0","Service":"service066"},{"ResourceType":"service066:resource1","Service":"service066"},{"ResourceType":"service066:resource2","Service":"service066"},{"ResourceType":"service066:resource3","Service":"service066"},{"ResourceType":"service067:resource0","Service":"service067"},{"ResourceType":"service067:resource1","Service":"service067"},{"ResourceType":"service067:resource2","Service":"service067"},{"ResourceType":"service067:resource3","Service":"service067"},{"ResourceType":"service068:resource0","Service":"service068"},{"ResourceType":"service068:resource1","Service":"service068"},{"ResourceType":"service068:resource2","Service":"service068"},{"ResourceType":"service068:resource3","Service":"service068"},{"ResourceType":"service069:resource0","Service":"service069"},{"ResourceType":"service069:resource1","Service":"service069"},{"ResourceType":"service069:resource2","Service":"service069"},{"ResourceType":"service069:resource3","Service":"service069"},{"ResourceType":"service070:resource0","Service":"service070"},{"ResourceType":"service070:resource1","Service":"service070"},{"ResourceType":"service070:resource2","Service":"service070"},{"ResourceType":"service070:resource3","Service":"service070"},{"ResourceType":"service071:resource0","Service":"service071"},{"ResourceType":"service071:resource1","Service":"service071"},{"ResourceType":"service071:resource2","Service":"service071"},{"ResourceType":"service071:resource3","Service":"service071"},{"ResourceType":"service072:resource0","Service":"service072"},{"ResourceType":"service072:resource1","Service":"service072"},{"ResourceType":"service072:resource2","Service":"service072"},{"ResourceType":"service072:resource3","Service":"service072"},{"ResourceType":"service073:resource0","Service":"service073"},{"ResourceType":"service073:resource1","Service":"service073"},{"ResourceType":"service073:resource2","Service":"service073"},{"ResourceType":"service073:resource3","Service":"service073"},{"ResourceType":"service074:resource0","Service":"service074"},{"ResourceType":"service074:resource1","Service":"service074"},{"ResourceType":"service074:resource2","Service":"service074"},{"ResourceType":"service074:resource3","Service":"service074"}]}'
+        headers:
+            Content-Type:
+                - application/json
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 74.417µs
+    - id: 5
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 24
+        host: ""
+        body: '{"NextToken":"page-300"}'
+        headers:
+            Content-Type:
+                - application/json
+        url: https://resource-explorer-2.eu-central-1.amazonaws.com/ListSupportedResourceTypes
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 6342
+        body: '{"NextToken":"page-400","ResourceTypes":[{"ResourceType":"service075:resource0","Service":"service075"},{"ResourceType":"service075:resource1","Service":"service075"},{"ResourceType":"service075:resource2","Service":"service075"},{"ResourceType":"service075:resource3","Service":"service075"},{"ResourceType":"service076:resource0","Service":"service076"},{"ResourceType":"service076:resource1","Service":"service076"},{"ResourceType":"service076:resource2","Service":"service076"},{"ResourceType":"service076:resource3","Service":"service076"},{"ResourceType":"service077:resource0","Service":"service077"},{"ResourceType":"service077:resource1","Service":"service077"},{"ResourceType":"service077:resource2","Service":"service077"},{"ResourceType":"service077:resource3","Service":"service077"},{"ResourceType":"service078:resource0","Service":"service078"},{"ResourceType":"service078:resource1","Service":"service078"},{"ResourceType":"service078:resource2","Service":"service078"},{"ResourceType":"service078:resource3","Service":"service078"},{"ResourceType":"service079:resource0","Service":"service079"},{"ResourceType":"service079:resource1","Service":"service079"},{"ResourceType":"service079:resource2","Service":"service079"},{"ResourceType":"service079:resource3","Service":"service079"},{"ResourceType":"service080:resource0","Service":"service080"},{"ResourceType":"service080:resource1","Service":"service080"},{"ResourceType":"service080:resource2","Service":"service080"},{"ResourceType":"service080:resource3","Service":"service080"},{"ResourceType":"service081:resource0","Service":"service081"},{"ResourceType":"service081:resource1","Service":"service081"},{"ResourceType":"service081:resource2","Service":"service081"},{"ResourceType":"service081:resource3","Service":"service081"},{"ResourceType":"service082:resource0","Service":"service082"},{"ResourceType":"service082:resource1","Service":"service082"},{"ResourceType":"service082:resource2","Service":"service082"},{"ResourceType":"service082:resource3","Service":"service082"},{"ResourceType":"service083:resource0","Service":"service083"},{"ResourceType":"service083:resource1","Service":"service083"},{"ResourceType":"service083:resource2","Service":"service083"},{"ResourceType":"service083:resource3","Service":"service083"},{"ResourceType":"service084:resource0","Service":"service084"},{"ResourceType":"service084:resource1","Service":"service084"},{"ResourceType":"service084:resource2","Service":"service084"},{"ResourceType":"service084:resource3","Service":"service084"},{"ResourceType":"service085:resource0","Service":"service085"},{"ResourceType":"service085:resource1","Service":"service085"},{"ResourceType":"service085:resource2","Service":"service085"},{"ResourceType":"service085:resource3","Service":"service085"},{"ResourceType":"service086:resource0","Service":"service086"},{"ResourceType":"service086:resource1","Service":"service086"},{"ResourceType":"service086:resource2","Service":"service086"},{"ResourceType":"service086:resource3","Service":"service086"},{"ResourceType":"service087:resource0","Service":"service087"},{"ResourceType":"service087:resource1","Service":"service087"},{"ResourceType":"service087:resource2","Service":"service087"},{"ResourceType":"service087:resource3","Service":"service087"},{"ResourceType":"service088:resource0","Service":"service088"},{"ResourceType":"service088:resource1","Service":"service088"},{"ResourceType":"service088:resource2","Service":"service088"},{"ResourceType":"service088:resource3","Service":"service088"},{"ResourceType":"service089:resource0","Service":"service089"},{"ResourceType":"service089:resource1","Service":"service089"},{"ResourceType":"service089:resource2","Service":"service089"},{"ResourceType":"service089:resource3","Service":"service089"},{"ResourceType":"service090:resource0","Service":"service090"},{"ResourceType":"service090:resource1","Service":"service090"},{"ResourceType":"service090:resource2","Service":"service090"},{"ResourceType":"service090:resource3","Service":"service090"},{"ResourceType":"service091:resource0","Service":"service091"},{"ResourceType":"service091:resource1","Service":"service091"},{"ResourceType":"service091:resource2","Service":"service091"},{"ResourceType":"service091:resource3","Service":"service091"},{"ResourceType":"service092:resource0","Service":"service092"},{"ResourceType":"service092:resource1","Service":"service092"},{"ResourceType":"service092:resource2","Service":"service092"},{"ResourceType":"service092:resource3","Service":"service092"},{"ResourceType":"service093:resource0","Service":"service093"},{"ResourceType":"service093:resource1","Service":"service093"},{"ResourceType":"service093:resource2","Service":"service093"},{"ResourceType":"service093:resource3","Service":"service093"},{"ResourceType":"service094:resource0","Service":"service094"},{"ResourceType":"service094:resource1","Service":"service094"},{"ResourceType":"service094:resource2","Service":"service094"},{"ResourceType":"service094:resource3","Service":"service094"},{"ResourceType":"service095:resource0","Service":"service095"},{"ResourceType":"service095:resource1","Service":"service095"},{"ResourceType":"service095:resource2","Service":"service095"},{"ResourceType":"service095:resource3","Service":"service095"},{"ResourceType":"service096:resource0","Service":"service096"},{"ResourceType":"service096:resource1","Service":"service096"},{"ResourceType":"service096:resource2","Service":"service096"},{"ResourceType":"service096:resource3","Service":"service096"},{"ResourceType":"service097:resource0","Service":"service097"},{"ResourceType":"service097:resource1","Service":"service097"},{"ResourceType":"service097:resource2","Service":"service097"},{"ResourceType":"service097:resource3","Service":"service097"},{"ResourceType":"service098:resource0","Service":"service098"},{"ResourceType":"service098:resource1","Service":"service098"},{"ResourceType":"service098:resource2","Service":"service098"},{"ResourceType":"service098:resource3","Service":"service098"},{"ResourceType":"service099:resource0","Service":"service099"},{"ResourceType":"service099:resource1","Service":"service099"},{"ResourceType":"service099:resource2","Service":"service099"},{"ResourceType":"service099:resource3","Service":"service099"}]}'
+        headers:
+            Content-Type:
+                - application/json
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 66.292µs
+    - id: 6
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 24
+        host: ""
+        body: '{"NextToken":"page-400"}'
+        headers:
+            Content-Type:
+                - application/json
+        url: https://resource-explorer-2.eu-central-1.amazonaws.com/ListSupportedResourceTypes
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 6342
+        body: '{"NextToken":"page-500","ResourceTypes":[{"ResourceType":"service100:resource0","Service":"service100"},{"ResourceType":"service100:resource1","Service":"service100"},{"ResourceType":"service100:resource2","Service":"service100"},{"ResourceType":"service100:resource3","Service":"service100"},{"ResourceType":"service101:resource0","Service":"service101"},{"ResourceType":"service101:resource1","Service":"service101"},{"ResourceType":"service101:resource2","Service":"service101"},{"ResourceType":"service101:resource3","Service":"service101"},{"ResourceType":"service102:resource0","Service":"service102"},{"ResourceType":"service102:resource1","Service":"service102"},{"ResourceType":"service102:resource2","Service":"service102"},{"ResourceType":"service102:resource3","Service":"service102"},{"ResourceType":"service103:resource0","Service":"service103"},{"ResourceType":"service103:resource1","Service":"service103"},{"ResourceType":"service103:resource2","Service":"service103"},{"ResourceType":"service103:resource3","Service":"service103"},{"ResourceType":"service104:resource0","Service":"service104"},{"ResourceType":"service104:resource1","Service":"service104"},{"ResourceType":"service104:resource2","Service":"service104"},{"ResourceType":"service104:resource3","Service":"service104"},{"ResourceType":"service105:resource0","Service":"service105"},{"ResourceType":"service105:resource1","Service":"service105"},{"ResourceType":"service105:resource2","Service":"service105"},{"ResourceType":"service105:resource3","Service":"service105"},{"ResourceType":"service106:resource0","Service":"service106"},{"ResourceType":"service106:resource1","Service":"service106"},{"ResourceType":"service106:resource2","Service":"service106"},{"ResourceType":"service106:resource3","Service":"service106"},{"ResourceType":"service107:resource0","Service":"service107"},{"ResourceType":"service107:resource1","Service":"service107"},{"ResourceType":"service107:resource2","Service":"service107"},{"ResourceType":"service107:resource3","Service":"service107"},{"ResourceType":"service108:resource0","Service":"service108"},{"ResourceType":"service108:resource1","Service":"service108"},{"ResourceType":"service108:resource2","Service":"service108"},{"ResourceType":"service108:resource3","Service":"service108"},{"ResourceType":"service109:resource0","Service":"service109"},{"ResourceType":"service109:resource1","Service":"service109"},{"ResourceType":"service109:resource2","Service":"service109"},{"ResourceType":"service109:resource3","Service":"service109"},{"ResourceType":"service110:resource0","Service":"service110"},{"ResourceType":"service110:resource1","Service":"service110"},{"ResourceType":"service110:resource2","Service":"service110"},{"ResourceType":"service110:resource3","Service":"service110"},{"ResourceType":"service111:resource0","Service":"service111"},{"ResourceType":"service111:resource1","Service":"service111"},{"ResourceType":"service111:resource2","Service":"service111"},{"ResourceType":"service111:resource3","Service":"service111"},{"ResourceType":"service112:resource0","Service":"service112"},{"ResourceType":"service112:resource1","Service":"service112"},{"ResourceType":"service112:resource2","Service":"service112"},{"ResourceType":"service112:resource3","Service":"service112"},{"ResourceType":"service113:resource0","Service":"service113"},{"ResourceType":"service113:resource1","Service":"service113"},{"ResourceType":"service113:resource2","Service":"service113"},{"ResourceType":"service113:resource3","Service":"service113"},{"ResourceType":"service114:resource0","Service":"service114"},{"ResourceType":"service114:resource1","Service":"service114"},{"ResourceType":"service114:resource2","Service":"service114"},{"ResourceType":"service114:resource3","Service":"service114"},{"ResourceType":"service115:resource0","Service":"service115"},{"ResourceType":"service115:resource1","Service":"service115"},{"ResourceType":"service115:resource2","Service":"service115"},{"ResourceType":"service115:resource3","Service":"service115"},{"ResourceType":"service116:resource0","Service":"service116"},{"ResourceType":"service116:resource1","Service":"service116"},{"ResourceType":"service116:resource2","Service":"service116"},{"ResourceType":"service116:resource3","Service":"service116"},{"ResourceType":"service117:resource0","Service":"service117"},{"ResourceType":"service117:resource1","Service":"service117"},{"ResourceType":"service117:resource2","Service":"service117"},{"ResourceType":"service117:resource3","Service":"service117"},{"ResourceType":"service118:resource0","Service":"service118"},{"ResourceType":"service118:resource1","Service":"service118"},{"ResourceType":"service118:resource2","Service":"service118"},{"ResourceType":"service118:resource3","Service":"service118"},{"ResourceType":"service119:resource0","Service":"service119"},{"ResourceType":"service119:resource1","Service":"service119"},{"ResourceType":"service119:resource2","Service":"service119"},{"ResourceType":"service119:resource3","Service":"service119"},{"ResourceType":"service120:resource0","Service":"service120"},{"ResourceType":"service120:resource1","Service":"service120"},{"ResourceType":"service120:resource2","Service":"service120"},{"ResourceType":"service120:resource3","Service":"service120"},{"ResourceType":"service121:resource0","Service":"service121"},{"ResourceType":"service121:resource1","Service":"service121"},{"ResourceType":"service121:resource2","Service":"service121"},{"ResourceType":"service121:resource3","Service":"service121"},{"ResourceType":"service122:resource0","Service":"service122"},{"ResourceType":"service122:resource1","Service":"service122"},{"ResourceType":"service122:resource2","Service":"service122"},{"ResourceType":"service122:resource3","Service":"service122"},{"ResourceType":"service123:resource0","Service":"service123"},{"ResourceType":"service123:resource1","Service":"service123"},{"ResourceType":"service123:resource2","Service":"service123"},{"ResourceType":"service123:resource3","Service":"service123"},{"ResourceType":"service124:resource0","Service":"service124"},{"ResourceType":"service124:resource1","Service":"service124"},{"ResourceType":"service124:resource2","Service":"service124"},{"ResourceType":"service124:resource3","Service":"service124"}]}'
+        headers:
+            Content-Type:
+                - application/json
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 67.208µs
+    - id: 7
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 24
+        host: ""
+        body: '{"NextToken":"page-500"}'
+        headers:
+            Content-Type:
+                - application/json
+        url: https://resource-explorer-2.eu-central-1.amazonaws.com/ListSupportedResourceTypes
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 6342
+        body: '{"NextToken":"page-600","ResourceTypes":[{"ResourceType":"service125:resource0","Service":"service125"},{"ResourceType":"service125:resource1","Service":"service125"},{"ResourceType":"service125:resource2","Service":"service125"},{"ResourceType":"service125:resource3","Service":"service125"},{"ResourceType":"service126:resource0","Service":"service126"},{"ResourceType":"service126:resource1","Service":"service126"},{"ResourceType":"service126:resource2","Service":"service126"},{"ResourceType":"service126:resource3","Service":"service126"},{"ResourceType":"service127:resource0","Service":"service127"},{"ResourceType":"service127:resource1","Service":"service127"},{"ResourceType":"service127:resource2","Service":"service127"},{"ResourceType":"service127:resource3","Service":"service127"},{"ResourceType":"service128:resource0","Service":"service128"},{"ResourceType":"service128:resource1","Service":"service128"},{"ResourceType":"service128:resource2","Service":"service128"},{"ResourceType":"service128:resource3","Service":"service128"},{"ResourceType":"service129:resource0","Service":"service129"},{"ResourceType":"service129:resource1","Service":"service129"},{"ResourceType":"service129:resource2","Service":"service129"},{"ResourceType":"service129:resource3","Service":"service129"},{"ResourceType":"service130:resource0","Service":"service130"},{"ResourceType":"service130:resource1","Service":"service130"},{"ResourceType":"service130:resource2","Service":"service130"},{"ResourceType":"service130:resource3","Service":"service130"},{"ResourceType":"service131:resource0","Service":"service131"},{"ResourceType":"service131:resource1","Service":"service131"},{"ResourceType":"service131:resource2","Service":"service131"},{"ResourceType":"service131:resource3","Service":"service131"},{"ResourceType":"service132:resource0","Service":"service132"},{"ResourceType":"service132:resource1","Service":"service132"},{"ResourceType":"service132:resource2","Service":"service132"},{"ResourceType":"service132:resource3","Service":"service132"},{"ResourceType":"service133:resource0","Service":"service133"},{"ResourceType":"service133:resource1","Service":"service133"},{"ResourceType":"service133:resource2","Service":"service133"},{"ResourceType":"service133:resource3","Service":"service133"},{"ResourceType":"service134:resource0","Service":"service134"},{"ResourceType":"service134:resource1","Service":"service134"},{"ResourceType":"service134:resource2","Service":"service134"},{"ResourceType":"service134:resource3","Service":"service134"},{"ResourceType":"service135:resource0","Service":"service135"},{"ResourceType":"service135:resource1","Service":"service135"},{"ResourceType":"service135:resource2","Service":"service135"},{"ResourceType":"service135:resource3","Service":"service135"},{"ResourceType":"service136:resource0","Service":"service136"},{"ResourceType":"service136:resource1","Service":"service136"},{"ResourceType":"service136:resource2","Service":"service136"},{"ResourceType":"service136:resource3","Service":"service136"},{"ResourceType":"service137:resource0","Service":"service137"},{"ResourceType":"service137:resource1","Service":"service137"},{"ResourceType":"service137:resource2","Service":"service137"},{"ResourceType":"service137:resource3","Service":"service137"},{"ResourceType":"service138:resource0","Service":"service138"},{"ResourceType":"service138:resource1","Service":"service138"},{"ResourceType":"service138:resource2","Service":"service138"},{"ResourceType":"service138:resource3","Service":"service138"},{"ResourceType":"service139:resource0","Service":"service139"},{"ResourceType":"service139:resource1","Service":"service139"},{"ResourceType":"service139:resource2","Service":"service139"},{"ResourceType":"service139:resource3","Service":"service139"},{"ResourceType":"service140:resource0","Service":"service140"},{"ResourceType":"service140:resource1","Service":"service140"},{"ResourceType":"service140:resource2","Service":"service140"},{"ResourceType":"service140:resource3","Service":"service140"},{"ResourceType":"service141:resource0","Service":"service141"},{"ResourceType":"service141:resource1","Service":"service141"},{"ResourceType":"service141:resource2","Service":"service141"},{"ResourceType":"service141:resource3","Service":"service141"},{"ResourceType":"service142:resource0","Service":"service142"},{"ResourceType":"service142:resource1","Service":"service142"},{"ResourceType":"service142:resource2","Service":"service142"},{"ResourceType":"service142:resource3","Service":"service142"},{"ResourceType":"service143:resource0","Service":"service143"},{"ResourceType":"service143:resource1","Service":"service143"},{"ResourceType":"service143:resource2","Service":"service143"},{"ResourceType":"service143:resource3","Service":"service143"},{"ResourceType":"service144:resource0","Service":"service144"},{"ResourceType":"service144:resource1","Service":"service144"},{"ResourceType":"service144:resource2","Service":"service144"},{"ResourceType":"service144:resource3","Service":"service144"},{"ResourceType":"service145:resource0","Service":"service145"},{"ResourceType":"service145:resource1","Service":"service145"},{"ResourceType":"service145:resource2","Service":"service145"},{"ResourceType":"service145:resource3","Service":"service145"},{"ResourceType":"service146:resource0","Service":"service146"},{"ResourceType":"service146:resource1","Service":"service146"},{"ResourceType":"service146:resource2","Service":"service146"},{"ResourceType":"service146:resource3","Service":"service146"},{"ResourceType":"service147:resource0","Service":"service147"},{"ResourceType":"service147:resource1","Service":"service147"},{"ResourceType":"service147:resource2","Service":"service147"},{"ResourceType":"service147:resource3","Service":"service147"},{"ResourceType":"service148:resource0","Service":"service148"},{"ResourceType":"service148:resource1","Service":"service148"},{"ResourceType":"service148:resource2","Service":"service148"},{"ResourceType":"service148:resource3","Service":"service148"},{"ResourceType":"service149:resource0","Service":"service149"},{"ResourceType":"service149:resource1","Service":"service149"},{"ResourceType":"service149:resource2","Service":"service149"},{"ResourceType":"service149:resource3","Service":"service149"}]}'
+        headers:
+            Content-Type:
+                - application/json
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 69.917µs
+    - id: 8
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 24
+        host: ""
+        body: '{"NextToken":"page-600"}'
+        headers:
+            Content-Type:
+                - application/json
+        url: https://resource-explorer-2.eu-central-1.amazonaws.com/ListSupportedResourceTypes
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 3106
+        body: '{"ResourceTypes":[{"ResourceType":"service150:resource0","Service":"service150"},{"ResourceType":"service150:resource1","Service":"service150"},{"ResourceType":"service150:resource2","Service":"service150"},{"ResourceType":"service150:resource3","Service":"service150"},{"ResourceType":"service151:resource0","Service":"service151"},{"ResourceType":"service151:resource1","Service":"service151"},{"ResourceType":"service151:resource2","Service":"service151"},{"ResourceType":"service151:resource3","Service":"service151"},{"ResourceType":"service152:resource0","Service":"service152"},{"ResourceType":"service152:resource1","Service":"service152"},{"ResourceType":"service152:resource2","Service":"service152"},{"ResourceType":"service152:resource3","Service":"service152"},{"ResourceType":"service153:resource0","Service":"service153"},{"ResourceType":"service153:resource1","Service":"service153"},{"ResourceType":"service153:resource2","Service":"service153"},{"ResourceType":"service153:resource3","Service":"service153"},{"ResourceType":"service154:resource0","Service":"service154"},{"ResourceType":"service154:resource1","Service":"service154"},{"ResourceType":"service154:resource2","Service":"service154"},{"ResourceType":"service154:resource3","Service":"service154"},{"ResourceType":"service155:resource0","Service":"service155"},{"ResourceType":"service155:resource1","Service":"service155"},{"ResourceType":"service155:resource2","Service":"service155"},{"ResourceType":"service155:resource3","Service":"service155"},{"ResourceType":"service156:resource0","Service":"service156"},{"ResourceType":"service156:resource1","Service":"service156"},{"ResourceType":"service156:resource2","Service":"service156"},{"ResourceType":"service156:resource3","Service":"service156"},{"ResourceType":"service157:resource0","Service":"service157"},{"ResourceType":"service157:resource1","Service":"service157"},{"ResourceType":"service157:resource2","Service":"service157"},{"ResourceType":"service157:resource3","Service":"service157"},{"ResourceType":"service158:resource0","Service":"service158"},{"ResourceType":"service158:resource1","Service":"service158"},{"ResourceType":"service158:resource2","Service":"service158"},{"ResourceType":"service158:resource3","Service":"service158"},{"ResourceType":"service159:resource0","Service":"service159"},{"ResourceType":"service159:resource1","Service":"service159"},{"ResourceType":"service159:resource2","Service":"service159"},{"ResourceType":"service159:resource3","Service":"service159"},{"ResourceType":"service160:resource0","Service":"service160"},{"ResourceType":"service160:resource1","Service":"service160"},{"ResourceType":"service160:resource2","Service":"service160"},{"ResourceType":"service160:resource3","Service":"service160"},{"ResourceType":"service161:resource0","Service":"service161"},{"ResourceType":"service161:resource1","Service":"service161"},{"ResourceType":"service161:resource2","Service":"service161"},{"ResourceType":"service161:resource3","Service":"service161"},{"ResourceType":"service162:resource0","Service":"service162"}]}'
+        headers:
+            Content-Type:
+                - application/json
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 37µs
+    - id: 9
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/json
+        url: https://resource-explorer-2.eu-west-1.amazonaws.com/ListViews
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 122
+        body: '{"Views":["arn:aws:resource-explorer-2:eu-west-1:111111111111:view/all-resources-0/5d3c2b1a-0f9e-4d8c-b7a6-000000000000"]}'
+        headers:
+            Content-Type:
+                - application/json
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 6.458µs
+    - id: 10
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        url: https://resource-explorer-2.eu-west-1.amazonaws.com/GetDefaultView
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 122
+        body: '{"ViewArn":"arn:aws:resource-explorer-2:eu-west-1:111111111111:view/all-resources-0/5d3c2b1a-0f9e-4d8c-b7a6-000000000000"}'
+        headers:
+            Content-Type:
+                - application/json
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 19.708µs
+    - id: 11
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - StarlingDoveService.DescribeConfigurationRecorders
+        url: https://config.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 591
+        body: '{"ConfigurationRecorders":[{"arn":"arn:aws:config:eu-west-1:111111111111:configuration-recorder/aws-controltower-BaselineConfigRecorder/abcdefgh12345678","name":"aws-controltower-BaselineConfigRecorder","recordingGroup":{"allSupported":true,"exclusionByResourceTypes":{"resourceTypes":[]},"includeGlobalResourceTypes":true,"recordingStrategy":{"useOnly":"ALL_SUPPORTED_RESOURCE_TYPES"},"resourceTypes":[]},"recordingMode":{"recordingFrequency":"CONTINUOUS","recordingModeOverrides":[]},"recordingScope":"PAID","roleARN":"arn:aws:iam::111111111111:role/aws-controltower-ConfigRecorderRole"}]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 25.875µs
+    - id: 12
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - StarlingDoveService.DescribeConfigurationRecorderStatus
+        url: https://config.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 312
+        body: '{"ConfigurationRecordersStatus":[{"arn":"arn:aws:config:eu-west-1:111111111111:configuration-recorder/aws-controltower-BaselineConfigRecorder/abcdefgh12345678","lastStartTime":1762500000,"lastStatus":"SUCCESS","lastStatusChangeTime":1762700000,"name":"aws-controltower-BaselineConfigRecorder","recording":true}]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 10.459µs
+    - id: 13
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - StarlingDoveService.DescribeConfigurationAggregators
+        url: https://config.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 31
+        body: '{"ConfigurationAggregators":[]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 5.875µs

@@ -1,0 +1,61 @@
+# accounts spec criterion 2: doctor output from stubbed responses mirrors the real-world check in
+# the spec: LOCAL Resource Explorer indexes in four regions and no aggregator, 649 supported types,
+# and the Control Tower recorder (CONTINUOUS, allSupported) in eu-west-1 and eu-central-1 only.
+env TEST_NOW=2026-11-10T12:00:00Z
+env TEST_CASSETTE=$CASSETTES/aws/doctor-nonprod
+exec tfcensus doctor --profile acme-nonprod
+cmp stdout want-doctor.txt
+! stderr .
+
+# Within 24 hours the probe answers from the cache. Only the identity lookup calls AWS.
+exec tfcensus doctor --profile acme-nonprod --format json
+jsonschema report-v1.json stdout
+stdout '"cached": true'
+stdout '"supported_types": 649'
+! stdout '"cached": false'
+exists .cache/tfcensus/probe/111111111111/account.json
+exists .cache/tfcensus/probe/111111111111/us-east-1.json
+
+# --refresh probes again.
+exec tfcensus doctor --profile acme-nonprod --format md --refresh
+cmp stdout want-doctor.md
+
+-- home/.aws/config --
+[profile acme-nonprod]
+region = eu-west-1
+aws_access_key_id = AKIAFAKE
+aws_secret_access_key = fake-secret
+-- want-doctor.txt --
+SOURCE        KIND     ACCOUNT       NAME          STATUS
+acme-nonprod  profile  111111111111  acme-nonprod  ok
+
+ACCOUNT       REGION        RESOURCE EXPLORER    CONFIG                                 AGGREGATORS  LAYERS
+111111111111  eu-central-1  local, default view  recording (continuous, all supported)  none         re, config, cc, native
+111111111111  eu-north-1    local, no view       no recorder                            none         cc, native
+111111111111  eu-west-1     local, default view  recording (continuous, all supported)  none         re, config, cc, native
+111111111111  us-east-1     local, default view  no recorder                            none         re, cc, native
+
+111111111111 (acme-nonprod): Resource Explorer supports 649 resource types.
+111111111111 (acme-nonprod): Resource Explorer has local indexes only, so tfcensus searches each region on its own. An admin can promote one to an aggregator (`aws resource-explorer-2 update-index-type --type AGGREGATOR`).
+111111111111 (acme-nonprod): eu-north-1: the Resource Explorer index has no view, and tfcensus never creates one. An admin can create a default view (`aws resource-explorer-2 create-view`, then `associate-default-view`).
+111111111111 (acme-nonprod): eu-north-1: no AWS Config recorder, so the config layer is off here.
+111111111111 (acme-nonprod): us-east-1: no AWS Config recorder, so the config layer is off here.
+-- want-doctor.md --
+| SOURCE | KIND | ACCOUNT | NAME | STATUS |
+| --- | --- | --- | --- | --- |
+| acme-nonprod | profile | 111111111111 | acme-nonprod | ok |
+
+| ACCOUNT | REGION | RESOURCE EXPLORER | CONFIG | AGGREGATORS | LAYERS |
+| --- | --- | --- | --- | --- | --- |
+| 111111111111 | eu-central-1 | local, default view | recording (continuous, all supported) | none | re, config, cc, native |
+| 111111111111 | eu-north-1 | local, no view | no recorder | none | cc, native |
+| 111111111111 | eu-west-1 | local, default view | recording (continuous, all supported) | none | re, config, cc, native |
+| 111111111111 | us-east-1 | local, default view | no recorder | none | re, cc, native |
+
+## 111111111111 (acme-nonprod)
+
+- Resource Explorer supports 649 resource types.
+- Resource Explorer has local indexes only, so tfcensus searches each region on its own. An admin can promote one to an aggregator (`aws resource-explorer-2 update-index-type --type AGGREGATOR`).
+- eu-north-1: the Resource Explorer index has no view, and tfcensus never creates one. An admin can create a default view (`aws resource-explorer-2 create-view`, then `associate-default-view`).
+- eu-north-1: no AWS Config recorder, so the config layer is off here.
+- us-east-1: no AWS Config recorder, so the config layer is off here.

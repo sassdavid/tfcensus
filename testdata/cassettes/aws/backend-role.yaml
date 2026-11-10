@@ -1,0 +1,190 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 43
+        host: ""
+        body: Action=GetCallerIdentity&Version=2011-06-15
+        form:
+            Action:
+                - GetCallerIdentity
+            Version:
+                - "2011-06-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://sts.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 410
+        body: |
+            <GetCallerIdentityResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">
+              <GetCallerIdentityResult>
+                <Arn>arn:aws:iam::111111111111:user/tfcensus-readonly</Arn>
+                <UserId>AIDAEXAMPLEUSERID</UserId>
+                <Account>111111111111</Account>
+              </GetCallerIdentityResult>
+              <ResponseMetadata>
+                <RequestId>00000000-0000-4000-8000-000000000000</RequestId>
+              </ResponseMetadata>
+            </GetCallerIdentityResponse>
+        headers:
+            Content-Type:
+                - text/xml
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 4.875µs
+    - id: 1
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 171
+        host: ""
+        body: Action=AssumeRole&DurationSeconds=900&ExternalId=acme-tfstate&RoleArn=arn%3Aaws%3Aiam%3A%3A333333333333%3Arole%2Ftfstate-reader&RoleSessionName=tfcensus&Version=2011-06-15
+        form:
+            Action:
+                - AssumeRole
+            DurationSeconds:
+                - "900"
+            ExternalId:
+                - acme-tfstate
+            RoleArn:
+                - arn:aws:iam::333333333333:role/tfstate-reader
+            RoleSessionName:
+                - tfcensus
+            Version:
+                - "2011-06-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://sts.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 669
+        body: |
+            <AssumeRoleResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">
+              <AssumeRoleResult>
+                <AssumedRoleUser>
+                  <AssumedRoleId>AROAEXAMPLEROLEID:tfcensus</AssumedRoleId>
+                  <Arn>arn:aws:sts::333333333333:assumed-role/tfstate-reader/tfcensus</Arn>
+                </AssumedRoleUser>
+                <Credentials>
+                  <AccessKeyId>ASIAFAKE333333333333</AccessKeyId>
+                  <SecretAccessKey>REDACTED</SecretAccessKey>
+                  <SessionToken>REDACTED</SessionToken>
+                  <Expiration>2099-01-01T00:00:00Z</Expiration>
+                </Credentials>
+              </AssumeRoleResult>
+              <ResponseMetadata>
+                <RequestId>00000000-0000-4000-8000-000000000000</RequestId>
+              </ResponseMetadata>
+            </AssumeRoleResponse>
+        headers:
+            Content-Type:
+                - text/xml
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 4.708µs
+    - id: 2
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 43
+        host: ""
+        body: Action=GetCallerIdentity&Version=2011-06-15
+        form:
+            Action:
+                - GetCallerIdentity
+            Version:
+                - "2011-06-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://sts.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 439
+        body: |
+            <GetCallerIdentityResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">
+              <GetCallerIdentityResult>
+                <Arn>arn:aws:sts::333333333333:assumed-role/OrganizationAccountAccessRole/tfcensus</Arn>
+                <UserId>AIDAEXAMPLEUSERID</UserId>
+                <Account>333333333333</Account>
+              </GetCallerIdentityResult>
+              <ResponseMetadata>
+                <RequestId>00000000-0000-4000-8000-000000000000</RequestId>
+              </ResponseMetadata>
+            </GetCallerIdentityResponse>
+        headers:
+            Content-Type:
+                - text/xml
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 3.625µs
+    - id: 3
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 140
+        host: ""
+        body: Action=AssumeRole&DurationSeconds=900&RoleArn=arn%3Aaws%3Aiam%3A%3A333333333333%3Arole%2Fmissing&RoleSessionName=tfcensus&Version=2011-06-15
+        form:
+            Action:
+                - AssumeRole
+            DurationSeconds:
+                - "900"
+            RoleArn:
+                - arn:aws:iam::333333333333:role/missing
+            RoleSessionName:
+                - tfcensus
+            Version:
+                - "2011-06-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://sts.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 395
+        body: |
+            <ErrorResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">
+              <Error>
+                <Type>Sender</Type>
+                <Code>AccessDenied</Code>
+                <Message>User: arn:aws:iam::111111111111:user/tfcensus-readonly is not authorized to perform: sts:AssumeRole on resource: arn:aws:iam::333333333333:role/missing</Message>
+              </Error>
+              <RequestId>00000000-0000-4000-8000-000000000000</RequestId>
+            </ErrorResponse>
+        headers:
+            Content-Type:
+                - text/xml
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: Forbidden
+        code: 403
+        duration: 5.583µs

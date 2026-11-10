@@ -15,6 +15,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/app"
 	"github.com/sassdavid/tfcensus/internal/cli"
 	"github.com/sassdavid/tfcensus/internal/testutil"
+	"github.com/sassdavid/tfcensus/internal/testutil/awstest"
 	"github.com/sassdavid/tfcensus/internal/testutil/fakebin"
 )
 
@@ -189,4 +190,55 @@ func TestUnitsErrors(t *testing.T) {
 	res = runCLI(t, bin, "units", "--render", "sometimes")
 	assert.Equal(t, cli.ExitUsage, res.code)
 	assert.Contains(t, res.stderr, "discovery.render")
+}
+
+// TestUnitsAWSAccountID resolves a bucket named after get_aws_account_id by the fast path, with
+// the account of the default credentials (AWS_PROFILE) looked up through STS.
+func TestUnitsAWSAccountID(t *testing.T) {
+	t.Parallel()
+
+	repo := t.TempDir()
+	files := map[string]string{
+		"root.hcl": `remote_state {
+  backend = "s3"
+  config = {
+    bucket       = "tfstate-${get_aws_account_id()}"
+    key          = "${path_relative_to_include()}/terraform.tfstate"
+    region       = "eu-west-1"
+    use_lockfile = true
+  }
+}
+`,
+		"live/app/terragrunt.hcl": "include \"root\" {\n  path = find_in_parent_folders(\"root.hcl\")\n}\n",
+		"live/db/terragrunt.hcl":  "include \"root\" {\n  path = find_in_parent_folders(\"root.hcl\")\n}\n",
+	}
+	for name, content := range files {
+		p := filepath.Join(repo, filepath.FromSlash(name))
+		require.NoError(t, os.MkdirAll(filepath.Dir(p), 0o750))
+		require.NoError(t, os.WriteFile(p, []byte(content), 0o600))
+	}
+	bin := fakebin.Install(t, "terragrunt", fakebin.Spec{Rules: []fakebin.Rule{{
+		Args:   []string{"find"},
+		Stdout: `[{"type":"unit","path":"live/app"},{"type":"unit","path":"live/db"}]`,
+	}}})
+	home := t.TempDir()
+	awstest.WriteConfig(t, home, []awstest.Profile{{Name: "acme-live", Region: "eu-west-1"}}, "")
+	var stdout, stderr bytes.Buffer
+	d := &app.Deps{
+		Stdin:  strings.NewReader(""),
+		Stdout: &stdout,
+		Stderr: &stderr,
+		Env: app.Env{
+			"PATH=" + filepath.Dir(bin), "HOME=" + home, "XDG_CONFIG_HOME=" + filepath.Join(home, ".config"),
+			"NO_COLOR=1", "AWS_PROFILE=acme-live",
+		},
+		Clock:         func() time.Time { return time.Date(2026, 11, 10, 12, 0, 0, 0, time.UTC) },
+		Getwd:         func() (string, error) { return repo, nil },
+		HTTPTransport: awstest.Replay(t, filepath.Join(cassetteDir, "aws", "units-account-id")),
+	}
+	code := cli.Execute(t.Context(), d, []string{"units", "--render", "never"})
+	require.Equal(t, cli.ExitOK, code, stderr.String())
+	assert.Contains(t, stdout.String(), "s3://tfstate-111111111111/live/app/terraform.tfstate (eu-west-1)")
+	assert.Contains(t, stdout.String(), "s3://tfstate-111111111111/live/db/terraform.tfstate (eu-west-1)")
+	assert.Contains(t, stdout.String(), "2 units: 2 fast-path, 0 render, 0 static, 0 unresolved")
 }

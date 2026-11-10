@@ -1,0 +1,381 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 43
+        host: ""
+        body: Action=GetCallerIdentity&Version=2011-06-15
+        form:
+            Action:
+                - GetCallerIdentity
+            Version:
+                - "2011-06-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://sts.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 410
+        body: |
+            <GetCallerIdentityResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">
+              <GetCallerIdentityResult>
+                <Arn>arn:aws:iam::111111111111:user/tfcensus-readonly</Arn>
+                <UserId>AIDAEXAMPLEUSERID</UserId>
+                <Account>111111111111</Account>
+              </GetCallerIdentityResult>
+              <ResponseMetadata>
+                <RequestId>00000000-0000-4000-8000-000000000000</RequestId>
+              </ResponseMetadata>
+            </GetCallerIdentityResponse>
+        headers:
+            Content-Type:
+                - text/xml
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 3.625µs
+    - id: 1
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/json
+        url: https://resource-explorer-2.eu-west-1.amazonaws.com/ListIndexes
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 298
+        body: '{"Indexes":[{"Arn":"arn:aws:resource-explorer-2:eu-west-1:111111111111:index/0c7a9f4e-1b2d-4e5f-8a9b-000000000009","Region":"eu-west-1","Type":"LOCAL"},{"Arn":"arn:aws:resource-explorer-2:us-east-1:111111111111:index/0c7a9f4e-1b2d-4e5f-8a9b-000000000009","Region":"us-east-1","Type":"AGGREGATOR"}]}'
+        headers:
+            Content-Type:
+                - application/json
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 10.167µs
+    - id: 2
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/json
+        url: https://resource-explorer-2.us-east-1.amazonaws.com/ListSupportedResourceTypes
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 208
+        body: '{"ResourceTypes":[{"ResourceType":"service000:resource0","Service":"service000"},{"ResourceType":"service000:resource1","Service":"service000"},{"ResourceType":"service000:resource2","Service":"service000"}]}'
+        headers:
+            Content-Type:
+                - application/json
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 12.083µs
+    - id: 3
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/json
+        url: https://resource-explorer-2.us-east-1.amazonaws.com/ListViews
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 233
+        body: '{"Views":["arn:aws:resource-explorer-2:us-east-1:111111111111:view/all-resources-0/5d3c2b1a-0f9e-4d8c-b7a6-000000000000","arn:aws:resource-explorer-2:us-east-1:111111111111:view/all-resources-1/5d3c2b1a-0f9e-4d8c-b7a6-000000000001"]}'
+        headers:
+            Content-Type:
+                - application/json
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 26.875µs
+    - id: 4
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/json
+        url: https://resource-explorer-2.eu-west-1.amazonaws.com/ListViews
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 112
+        body: '{"message":"User: arn:aws:iam::111111111111:user/tfcensus-readonly is not authorized to perform this operation"}'
+        headers:
+            Content-Type:
+                - application/json
+            X-Amzn-Errortype:
+                - AccessDeniedException
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: Forbidden
+        code: 403
+        duration: 10.125µs
+    - id: 5
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - StarlingDoveService.DescribeConfigurationRecorders
+        url: https://config.eu-north-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 29
+        body: '{"ConfigurationRecorders":[]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 16.166µs
+    - id: 6
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        url: https://resource-explorer-2.us-east-1.amazonaws.com/GetDefaultView
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 2
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/json
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 12.584µs
+    - id: 7
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - StarlingDoveService.DescribeConfigurationAggregators
+        url: https://config.eu-north-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 31
+        body: '{"ConfigurationAggregators":[]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 26.958µs
+    - id: 8
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - StarlingDoveService.DescribeConfigurationRecorders
+        url: https://config.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 523
+        body: '{"ConfigurationRecorders":[{"arn":"arn:aws:config:eu-west-1:111111111111:configuration-recorder/default/abcdefgh12345678","name":"default","recordingGroup":{"allSupported":false,"exclusionByResourceTypes":{"resourceTypes":[]},"includeGlobalResourceTypes":true,"recordingStrategy":{"useOnly":"ALL_SUPPORTED_RESOURCE_TYPES"},"resourceTypes":[]},"recordingMode":{"recordingFrequency":"DAILY","recordingModeOverrides":[]},"recordingScope":"PAID","roleARN":"arn:aws:iam::111111111111:role/aws-controltower-ConfigRecorderRole"}]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 140µs
+    - id: 9
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - StarlingDoveService.DescribeConfigurationRecorders
+        url: https://config.us-east-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 169
+        body: '{"__type":"AccessDeniedException","message":"User: arn:aws:iam::111111111111:user/tfcensus-readonly is not authorized to perform: config:DescribeConfigurationRecorders"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: Bad Request
+        code: 400
+        duration: 5.417µs
+    - id: 10
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - StarlingDoveService.DescribeConfigurationRecorderStatus
+        url: https://config.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 249
+        body: '{"ConfigurationRecordersStatus":[{"arn":"arn:aws:config:eu-west-1:111111111111:configuration-recorder/default/abcdefgh12345678","lastStartTime":1762500000,"lastStatus":"PENDING","lastStatusChangeTime":1762700000,"name":"default","recording":false}]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 8.583µs
+    - id: 11
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - StarlingDoveService.DescribeConfigurationAggregators
+        url: https://config.us-east-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 171
+        body: '{"__type":"AccessDeniedException","message":"User: arn:aws:iam::111111111111:user/tfcensus-readonly is not authorized to perform: config:DescribeConfigurationAggregators"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: Bad Request
+        code: 400
+        duration: 4.208µs
+    - id: 12
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - StarlingDoveService.DescribeConfigurationAggregators
+        url: https://config.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 362
+        body: '{"ConfigurationAggregators":[{"ConfigurationAggregatorArn":"arn:aws:config:eu-west-1:111111111111:config-aggregator/config-aggregator-abcd1234","ConfigurationAggregatorName":"acme-org","CreationTime":1762500000,"LastUpdatedTime":1762500000,"OrganizationAggregationSource":{"AllAwsRegions":true,"RoleArn":"arn:aws:iam::111111111111:role/aws-config-aggregator"}}]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 7.917µs

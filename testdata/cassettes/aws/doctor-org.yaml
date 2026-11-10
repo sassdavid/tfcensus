@@ -1,0 +1,387 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 43
+        host: ""
+        body: Action=GetCallerIdentity&Version=2011-06-15
+        form:
+            Action:
+                - GetCallerIdentity
+            Version:
+                - "2011-06-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://sts.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 410
+        body: |
+            <GetCallerIdentityResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">
+              <GetCallerIdentityResult>
+                <Arn>arn:aws:iam::111111111111:user/tfcensus-readonly</Arn>
+                <UserId>AIDAEXAMPLEUSERID</UserId>
+                <Account>111111111111</Account>
+              </GetCallerIdentityResult>
+              <ResponseMetadata>
+                <RequestId>00000000-0000-4000-8000-000000000000</RequestId>
+              </ResponseMetadata>
+            </GetCallerIdentityResponse>
+        headers:
+            Content-Type:
+                - text/xml
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 3.875µs
+    - id: 1
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - AWSOrganizationsV20161128.ListAccounts
+        url: https://organizations.us-east-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 984
+        body: '{"Accounts":[{"Arn":"arn:aws:organizations::111111111111:account/o-a1b2c3d4e5/111111111111","Email":"aws+acme-mgmt@acme.test","Id":"111111111111","JoinedMethod":"CREATED","JoinedTimestamp":1600000000,"Name":"acme-mgmt","State":"ACTIVE","Status":"ACTIVE"},{"Arn":"arn:aws:organizations::111111111111:account/o-a1b2c3d4e5/222222222222","Email":"aws+acme-dev@acme.test","Id":"222222222222","JoinedMethod":"CREATED","JoinedTimestamp":1600000000,"Name":"acme-dev","State":"ACTIVE","Status":"ACTIVE"},{"Arn":"arn:aws:organizations::111111111111:account/o-a1b2c3d4e5/333333333333","Email":"aws+acme-prod@acme.test","Id":"333333333333","JoinedMethod":"CREATED","JoinedTimestamp":1600000000,"Name":"acme-prod","State":"ACTIVE","Status":"ACTIVE"},{"Arn":"arn:aws:organizations::111111111111:account/o-a1b2c3d4e5/444444444444","Email":"aws+acme-old@acme.test","Id":"444444444444","JoinedMethod":"CREATED","JoinedTimestamp":1600000000,"Name":"acme-old","State":"SUSPENDED","Status":"SUSPENDED"}]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 21.25µs
+    - id: 2
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 162
+        host: ""
+        body: Action=AssumeRole&DurationSeconds=900&RoleArn=arn%3Aaws%3Aiam%3A%3A222222222222%3Arole%2FOrganizationAccountAccessRole&RoleSessionName=tfcensus&Version=2011-06-15
+        form:
+            Action:
+                - AssumeRole
+            DurationSeconds:
+                - "900"
+            RoleArn:
+                - arn:aws:iam::222222222222:role/OrganizationAccountAccessRole
+            RoleSessionName:
+                - tfcensus
+            Version:
+                - "2011-06-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://sts.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 684
+        body: |
+            <AssumeRoleResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">
+              <AssumeRoleResult>
+                <AssumedRoleUser>
+                  <AssumedRoleId>AROAEXAMPLEROLEID:tfcensus</AssumedRoleId>
+                  <Arn>arn:aws:sts::222222222222:assumed-role/OrganizationAccountAccessRole/tfcensus</Arn>
+                </AssumedRoleUser>
+                <Credentials>
+                  <AccessKeyId>ASIAFAKE222222222222</AccessKeyId>
+                  <SecretAccessKey>REDACTED</SecretAccessKey>
+                  <SessionToken>REDACTED</SessionToken>
+                  <Expiration>2099-01-01T00:00:00Z</Expiration>
+                </Credentials>
+              </AssumeRoleResult>
+              <ResponseMetadata>
+                <RequestId>00000000-0000-4000-8000-000000000000</RequestId>
+              </ResponseMetadata>
+            </AssumeRoleResponse>
+        headers:
+            Content-Type:
+                - text/xml
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 4.625µs
+    - id: 3
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 162
+        host: ""
+        body: Action=AssumeRole&DurationSeconds=900&RoleArn=arn%3Aaws%3Aiam%3A%3A333333333333%3Arole%2FOrganizationAccountAccessRole&RoleSessionName=tfcensus&Version=2011-06-15
+        form:
+            Action:
+                - AssumeRole
+            DurationSeconds:
+                - "900"
+            RoleArn:
+                - arn:aws:iam::333333333333:role/OrganizationAccountAccessRole
+            RoleSessionName:
+                - tfcensus
+            Version:
+                - "2011-06-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://sts.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 417
+        body: |
+            <ErrorResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">
+              <Error>
+                <Type>Sender</Type>
+                <Code>AccessDenied</Code>
+                <Message>User: arn:aws:iam::111111111111:user/tfcensus-readonly is not authorized to perform: sts:AssumeRole on resource: arn:aws:iam::333333333333:role/OrganizationAccountAccessRole</Message>
+              </Error>
+              <RequestId>00000000-0000-4000-8000-000000000000</RequestId>
+            </ErrorResponse>
+        headers:
+            Content-Type:
+                - text/xml
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: Forbidden
+        code: 403
+        duration: 6.791µs
+    - id: 4
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 43
+        host: ""
+        body: Action=GetCallerIdentity&Version=2011-06-15
+        form:
+            Action:
+                - GetCallerIdentity
+            Version:
+                - "2011-06-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://sts.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 439
+        body: |
+            <GetCallerIdentityResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">
+              <GetCallerIdentityResult>
+                <Arn>arn:aws:sts::222222222222:assumed-role/OrganizationAccountAccessRole/tfcensus</Arn>
+                <UserId>AIDAEXAMPLEUSERID</UserId>
+                <Account>222222222222</Account>
+              </GetCallerIdentityResult>
+              <ResponseMetadata>
+                <RequestId>00000000-0000-4000-8000-000000000000</RequestId>
+              </ResponseMetadata>
+            </GetCallerIdentityResponse>
+        headers:
+            Content-Type:
+                - text/xml
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 3.792µs
+    - id: 5
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/json
+        url: https://resource-explorer-2.eu-west-1.amazonaws.com/ListIndexes
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 14
+        body: '{"Indexes":[]}'
+        headers:
+            Content-Type:
+                - application/json
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 5.958µs
+    - id: 6
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/json
+        url: https://resource-explorer-2.eu-west-1.amazonaws.com/ListIndexes
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 14
+        body: '{"Indexes":[]}'
+        headers:
+            Content-Type:
+                - application/json
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 8.625µs
+    - id: 7
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - StarlingDoveService.DescribeConfigurationRecorders
+        url: https://config.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 29
+        body: '{"ConfigurationRecorders":[]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 6.458µs
+    - id: 8
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - StarlingDoveService.DescribeConfigurationRecorders
+        url: https://config.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 29
+        body: '{"ConfigurationRecorders":[]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 5.833µs
+    - id: 9
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - StarlingDoveService.DescribeConfigurationAggregators
+        url: https://config.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 31
+        body: '{"ConfigurationAggregators":[]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 5.333µs
+    - id: 10
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - StarlingDoveService.DescribeConfigurationAggregators
+        url: https://config.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 31
+        body: '{"ConfigurationAggregators":[]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amzn-Requestid:
+                - 00000000-0000-4000-8000-000000000000
+        status: OK
+        code: 200
+        duration: 5.041µs

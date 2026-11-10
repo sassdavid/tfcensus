@@ -1,0 +1,31 @@
+# accounts spec criterion 3: in org mode with three active accounts, the member that denies the
+# assume-role is reported and the others are probed. The suspended account is never tried, and
+# the management account uses its own credentials.
+env TEST_NOW=2026-11-10T12:00:00Z
+env TEST_CASSETTE=$CASSETTES/aws/doctor-org
+exec tfcensus doctor --org --management-profile acme-mgmt --region eu-west-1
+cmp stdout want-org.txt
+stderr -count=1 'skipping account source source=acme-mgmt account=333333333333 error="cannot assume arn:aws:iam::333333333333:role/OrganizationAccountAccessRole from acme-mgmt: access denied"'
+stderr -count=1 '(?m)^.'
+! stdout 444444444444
+
+-- home/.aws/config --
+[profile acme-mgmt]
+region = eu-west-1
+aws_access_key_id = AKIAFAKE
+aws_secret_access_key = fake-secret
+-- want-org.txt --
+SOURCE     KIND  ACCOUNT       NAME       STATUS
+acme-mgmt  org   111111111111  acme-mgmt  ok
+acme-mgmt  org   222222222222  acme-dev   ok
+acme-mgmt  org   333333333333  acme-prod  skipped: cannot assume role
+
+ACCOUNT       REGION     RESOURCE EXPLORER  CONFIG       AGGREGATORS  LAYERS
+111111111111  eu-west-1  no index           no recorder  none         cc, native
+222222222222  eu-west-1  no index           no recorder  none         cc, native
+
+111111111111 (acme-mgmt): Resource Explorer is off. An admin can create an index in each region (`aws resource-explorer-2 create-index`) to turn on the re layer.
+111111111111 (acme-mgmt): eu-west-1: no AWS Config recorder, so the config layer is off here.
+
+222222222222 (acme-dev): Resource Explorer is off. An admin can create an index in each region (`aws resource-explorer-2 create-index`) to turn on the re layer.
+222222222222 (acme-dev): eu-west-1: no AWS Config recorder, so the config layer is off here.

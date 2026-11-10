@@ -33,13 +33,25 @@ const (
 type evaluator struct {
 	files     *fileCache
 	lookupEnv func(string) (string, bool)
+	accountID func() (string, error) // nil when no AWS credentials are wired in
+	account   struct {
+		once sync.Once
+		id   string
+		err  error
+	}
 }
 
-func newEvaluator(lookupEnv func(string) (string, bool)) *evaluator {
+func newEvaluator(lookupEnv func(string) (string, bool), accountID func() (string, error)) *evaluator {
 	if lookupEnv == nil {
 		lookupEnv = func(string) (string, bool) { return "", false }
 	}
-	return &evaluator{files: newFileCache(), lookupEnv: lookupEnv}
+	return &evaluator{files: newFileCache(), lookupEnv: lookupEnv, accountID: accountID}
+}
+
+// callerAccount looks the account up once per run; every unit uses the same default credentials.
+func (ev *evaluator) callerAccount() (string, error) {
+	ev.account.once.Do(func() { ev.account.id, ev.account.err = ev.accountID() })
+	return ev.account.id, ev.account.err
 }
 
 // fileCache parses each file once and remembers which paths exist, because units in one repo
@@ -103,9 +115,17 @@ type scope struct {
 	includes   []include // the unit file's include blocks
 	values     cty.Value
 	depth      int
+	unit       *unitState
+	pending    map[string]*hclsyntax.Attribute // declared locals not evaluated yet
+	evaluating map[string]bool
 	locals     map[string]cty.Value
 	localErrs  map[string]error
 	fns        map[string]function.Function
+}
+
+// unitState is shared by every scope evaluated for one unit.
+type unitState struct {
+	usedAccount bool // get_aws_account_id was called
 }
 
 type include struct {
@@ -117,9 +137,10 @@ type include struct {
 	scope  *scope
 }
 
-func (ev *evaluator) newScope(path, configPath, unitPath string, depth int) *scope {
+func (ev *evaluator) newScope(path, configPath, unitPath string, depth int, unit *unitState) *scope {
 	s := &scope{
-		ev: ev, path: path, configPath: configPath, unitPath: unitPath, depth: depth,
+		ev: ev, path: path, configPath: configPath, unitPath: unitPath, depth: depth, unit: unit,
+		pending: map[string]*hclsyntax.Attribute{}, evaluating: map[string]bool{},
 		locals: map[string]cty.Value{}, localErrs: map[string]error{}, values: cty.NilVal,
 	}
 	s.fns = s.functions()
@@ -158,19 +179,25 @@ func (s *scope) value(expr hcl.Expression) (cty.Value, error) {
 	return v, nil
 }
 
+// refError evaluates the locals tr refers to and returns the error of one that failed.
 func (s *scope) refError(tr hcl.Traversal) error {
 	names := traversalNames(tr)
 	switch {
 	case len(names) >= 2 && names[0] == varLocal:
-		if err := s.localErrs[names[1]]; err != nil {
-			return err
-		}
-	case len(names) >= 4 && names[0] == "include" && names[2] == blockLocals:
+		return s.local(names[1])
+	case len(names) >= 1 && names[0] == varLocal:
+		s.allLocals()
+	case len(names) >= 2 && names[0] == "include":
 		for _, inc := range s.includes {
-			if inc.name == names[1] {
-				if err := inc.scope.localErrs[names[3]]; err != nil {
-					return fmt.Errorf("include.%s.%w", inc.name, err)
-				}
+			if inc.name != names[1] {
+				continue
+			}
+			if len(names) < 4 || names[2] != blockLocals {
+				inc.scope.allLocals()
+				continue
+			}
+			if err := inc.scope.local(names[3]); err != nil {
+				return fmt.Errorf("include.%s.%w", inc.name, err)
 			}
 		}
 	}
@@ -192,46 +219,46 @@ func traversalNames(tr hcl.Traversal) []string {
 	return names
 }
 
-// evalLocals evaluates every local it can. Locals that fail, or depend on one that failed, are
-// kept in localErrs so that only the expressions that use them fail.
-func (s *scope) evalLocals(body *hclsyntax.Body) {
-	pending := map[string]*hclsyntax.Attribute{}
+// declareLocals records the locals of body. Each is evaluated when an expression first uses it,
+// so a local that calls get_aws_account_id or run_cmd costs nothing unless state needs it.
+func (s *scope) declareLocals(body *hclsyntax.Body) {
 	for _, blk := range body.Blocks {
 		if blk.Type == blockLocals {
-			maps.Copy(pending, blk.Body.Attributes)
+			maps.Copy(s.pending, blk.Body.Attributes)
 		}
-	}
-	for progress := true; progress && len(pending) > 0; {
-		progress = false
-		for _, name := range sortedKeys(pending) {
-			attr := pending[name]
-			if dependsOnPending(attr.Expr, pending, name) {
-				continue
-			}
-			if v, err := s.value(attr.Expr); err != nil {
-				s.localErrs[name] = fmt.Errorf("local.%s: %w", name, err)
-			} else {
-				s.locals[name] = v
-			}
-			delete(pending, name)
-			progress = true
-		}
-	}
-	for name := range pending {
-		s.localErrs[name] = fmt.Errorf("local.%s: reference cycle", name)
 	}
 }
 
-func dependsOnPending(expr hcl.Expression, pending map[string]*hclsyntax.Attribute, self string) bool {
-	for _, tr := range expr.Variables() {
-		names := traversalNames(tr)
-		if len(names) >= 2 && names[0] == varLocal && names[1] != self {
-			if _, ok := pending[names[1]]; ok {
-				return true
-			}
-		}
+// local evaluates the named local if it hasn't been, and returns its error. Undeclared names are
+// left to HCL, which reports them.
+func (s *scope) local(name string) error {
+	if err, failed := s.localErrs[name]; failed {
+		return err
 	}
-	return false
+	attr, ok := s.pending[name]
+	if !ok {
+		return nil
+	}
+	if s.evaluating[name] {
+		return fmt.Errorf("local.%s: reference cycle", name)
+	}
+	s.evaluating[name] = true
+	v, err := s.value(attr.Expr)
+	delete(s.evaluating, name)
+	delete(s.pending, name)
+	if err != nil {
+		err = fmt.Errorf("local.%s: %w", name, err)
+		s.localErrs[name] = err
+		return err
+	}
+	s.locals[name] = v
+	return nil
+}
+
+func (s *scope) allLocals() {
+	for _, name := range sortedKeys(s.pending) {
+		_ = s.local(name) // kept in localErrs
+	}
 }
 
 // readConfig is read_terragrunt_config: the target's locals and inputs, evaluated in the target's
@@ -244,8 +271,9 @@ func (s *scope) readConfig(target string) (cty.Value, error) {
 	if err != nil {
 		return cty.NilVal, err
 	}
-	t := s.ev.newScope(target, target, s.unitPath, s.depth+1)
-	t.evalLocals(body)
+	t := s.ev.newScope(target, target, s.unitPath, s.depth+1, s.unit)
+	t.declareLocals(body)
+	t.allLocals()
 	for _, name := range sortedKeys(t.localErrs) {
 		return cty.NilVal, fmt.Errorf("read_terragrunt_config(%s): %w", filepath.Base(target), t.localErrs[name])
 	}
@@ -282,14 +310,14 @@ func (ev *evaluator) evalUnit(unitPath string) (*unitConfig, error) {
 	if err != nil {
 		return nil, err
 	}
-	u := ev.newScope(unitPath, unitPath, unitPath, 0)
+	u := ev.newScope(unitPath, unitPath, unitPath, 0, &unitState{})
 	if err = u.loadValues(); err != nil {
 		return nil, err
 	}
 	if err = u.loadIncludes(body); err != nil {
 		return nil, err
 	}
-	u.evalLocals(body)
+	u.declareLocals(body)
 
 	cfg := &unitConfig{generated: map[string]generated{}, inputs: map[string]any{}}
 	layers := make([]layer, 0, len(u.includes)+1)
@@ -306,7 +334,24 @@ func (ev *evaluator) evalUnit(unitPath string) (*unitConfig, error) {
 	if err = cfg.mergeRemoteState(layers); err != nil {
 		return cfg, err
 	}
+	if u.unit.usedAccount && ev.assumesRole(layers) {
+		return cfg, fmt.Errorf("get_aws_account_id with an IAM role to assume: %w", ErrUnsupportedFunction)
+	}
 	return cfg, nil
+}
+
+// assumesRole reports whether terragrunt would assume a role before calling AWS, in which case
+// get_aws_account_id returns that role's account, not the caller's.
+func (ev *evaluator) assumesRole(layers []layer) bool {
+	for _, name := range []string{"TG_IAM_ASSUME_ROLE", "TERRAGRUNT_IAM_ROLE"} {
+		if v, _ := ev.lookupEnv(name); v != "" {
+			return true
+		}
+	}
+	return slices.ContainsFunc(layers, func(l layer) bool {
+		_, ok := l.body.Attributes["iam_role"]
+		return ok
+	})
 }
 
 func (s *scope) loadValues() error {
@@ -370,10 +415,10 @@ func (s *scope) parseInclude(blk *hclsyntax.Block) (include, error) {
 	if inc.body, err = s.ev.files.body(inc.path); err != nil {
 		return inc, err
 	}
-	inc.scope = s.ev.newScope(inc.path, s.unitPath, s.unitPath, 0)
+	inc.scope = s.ev.newScope(inc.path, s.unitPath, s.unitPath, 0, s.unit)
 	inc.scope.included = inc.path
 	inc.scope.values = s.values
-	inc.scope.evalLocals(inc.body)
+	inc.scope.declareLocals(inc.body)
 	return inc, nil
 }
 

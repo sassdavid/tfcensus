@@ -78,9 +78,10 @@ func (s *scope) functions() map[string]function.Function {
 		"get_path_to_repo_root":       constFunc(s.pathToRepoRoot),
 		"get_platform":                constFunc(func() (string, error) { return runtime.GOOS, nil }),
 		"read_terragrunt_config":      s.readTerragruntConfigFunc(),
+		"get_aws_account_id":          s.awsAccountIDFunc(),
 	}
 	for _, name := range []string{
-		"run_cmd", "sops_decrypt_file", "get_aws_account_id", "get_aws_account_alias",
+		"run_cmd", "sops_decrypt_file", "get_aws_account_alias",
 		"get_aws_caller_identity_arn", "get_aws_caller_identity_user_id", "get_terraform_command",
 		"get_terraform_cli_args", "read_tfvars_file", "mark_as_read", "constraint_check",
 		"get_default_retryable_errors", "get_working_dir",
@@ -88,6 +89,21 @@ func (s *scope) functions() map[string]function.Function {
 		fns[name] = unsupportedFunc(name)
 	}
 	return fns
+}
+
+// awsAccountIDFunc is get_aws_account_id: the account of the default AWS credentials.
+func (s *scope) awsAccountIDFunc() function.Function {
+	if s.ev.accountID == nil {
+		return unsupportedFunc("get_aws_account_id")
+	}
+	return constFunc(func() (string, error) {
+		s.unit.usedAccount = true
+		id, err := s.ev.callerAccount()
+		if err != nil {
+			return "", fmt.Errorf("get_aws_account_id: %w", err)
+		}
+		return id, nil
+	})
 }
 
 func unsupportedFunc(name string) function.Function {

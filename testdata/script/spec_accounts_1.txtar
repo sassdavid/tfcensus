@@ -1,0 +1,67 @@
+# accounts spec criterion 1: an expired SSO token produces one clear message per profile, the run
+# continues, and doctor exits 4 only when every profile fails. The SDK finds the expired tokens in
+# ~/.aws/sso/cache and fails before any request, so the cassette serves acme-nonprod only.
+env TEST_NOW=2026-11-10T12:00:00Z
+env TEST_CASSETTE=$CASSETTES/aws/doctor-sso
+exec tfcensus doctor --profile 'acme-*' --region eu-west-1
+cmp stdout want-partial.txt
+stderr -count=1 'skipping account source source=acme-prod error="SSO token for profile acme-prod is expired or missing. Run `aws sso login --sso-session acme`"'
+stderr -count=1 'skipping account source source=acme-legacy error="SSO token for profile acme-legacy is expired or missing. Run `aws sso login --profile acme-legacy`"'
+stderr -count=2 '(?m)^.'
+
+exec tfcensus doctor --profile 'acme-*' --region eu-west-1 --format json
+stdout '"target": "acme-prod",\s+"message": "SSO token for profile acme-prod is expired or missing. Run `aws sso login --sso-session acme`"'
+
+# When every profile fails, doctor exits 4.
+exec expect-exit 4 tfcensus doctor --profile acme-prod --profile acme-legacy
+stderr -count=1 'source=acme-prod '
+stderr -count=1 'source=acme-legacy '
+stderr 'tfcensus: no account source worked \(2 failed; see the warnings above\)'
+cmp stdout want-failed.txt
+
+# A glob that matches no profile is a usage error.
+exec expect-exit 2 tfcensus doctor --profile 'globex-*'
+stderr 'no such profile: no profile matches "globex-\*"'
+
+-- home/.aws/config --
+[profile acme-nonprod]
+region = eu-west-1
+aws_access_key_id = AKIAFAKE
+aws_secret_access_key = fake-secret
+
+[profile acme-prod]
+region = eu-west-1
+sso_session = acme
+sso_account_id = 222222222222
+sso_role_name = ReadOnly
+
+[profile acme-legacy]
+region = eu-west-1
+sso_start_url = https://acme-legacy.awsapps.com/start
+sso_region = eu-west-1
+sso_account_id = 333333333333
+sso_role_name = ReadOnly
+
+[sso-session acme]
+sso_start_url = https://acme.awsapps.com/start
+sso_region = eu-west-1
+sso_registration_scopes = sso:account:access
+-- home/.aws/sso/cache/293abb6b76d7791c0732cc517d38c4b5c734b87f.json --
+{"accessToken": "expired", "expiresAt": "2026-11-01T00:00:00Z", "region": "eu-west-1", "startUrl": "https://acme.awsapps.com/start"}
+-- home/.aws/sso/cache/1d4ef536e6d16a617cfc56efbc85dc4d2827bc41.json --
+{"accessToken": "expired", "expiresAt": "2026-11-01T00:00:00Z", "region": "eu-west-1", "startUrl": "https://acme-legacy.awsapps.com/start"}
+-- want-partial.txt --
+SOURCE        KIND     ACCOUNT       NAME          STATUS
+acme-legacy   profile  -             -             skipped: SSO login needed
+acme-nonprod  profile  111111111111  acme-nonprod  ok
+acme-prod     profile  -             -             skipped: SSO login needed
+
+ACCOUNT       REGION     RESOURCE EXPLORER    CONFIG                                 AGGREGATORS  LAYERS
+111111111111  eu-west-1  local, default view  recording (continuous, all supported)  none         re, config, cc, native
+
+111111111111 (acme-nonprod): Resource Explorer supports 649 resource types.
+111111111111 (acme-nonprod): Resource Explorer has local indexes only, so tfcensus searches each region on its own. An admin can promote one to an aggregator (`aws resource-explorer-2 update-index-type --type AGGREGATOR`).
+-- want-failed.txt --
+SOURCE       KIND     ACCOUNT  NAME  STATUS
+acme-legacy  profile  -        -     skipped: SSO login needed
+acme-prod    profile  -        -     skipped: SSO login needed

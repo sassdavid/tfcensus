@@ -100,6 +100,13 @@ v0.28.0 to v0.49.0 (the newest releases older than the 3-day minimum age).
 | Concern | Module | Version | Why |
 |---|---|---|---|
 | Windows console colors | `golang.org/x/sys` (`windows`) | v0.49.0 | turns on VT processing so tint's ANSI colors render in conhost; already required by isatty |
+| AWS SSO and sign-in credentials | `github.com/aws/aws-sdk-go-v2/service/sso` · `service/ssooidc` · `service/signin` | v1.39.4 · v1.44.4 · v1.13.0 | required by `config` for `sso-session`, legacy SSO and `aws login` profiles |
+| AWS SDK internals | `aws-sdk-go-v2/feature/ec2/imds` · `internal/configsources` · `internal/endpoints/v2` · `internal/v4a` · `service/internal/accept-encoding` · `service/internal/presigned-url` | v1.20.8 · v1.5.11 · v2.8.11 · v1.5.11 · v1.13.24 · v1.14.11 | required by `config` and the service clients |
+
+At M2 the AWS SDK (core, `config`, `credentials`, smithy-go, `sts`, `organizations`,
+`resourceexplorer2`, `configservice` at the versions in the AWS table) added only the AWS modules above.
+It moved no module that relgap also uses, so relgap's go.mod needed no change (`go list -m all` in both
+repos, compared on 2026-11-10). The AWS modules are Apache-2.0, and `mise run lint:licenses` passes.
 
 ## Refresh
 The checker used for this table is in the session scratchpad. Re-create it in the repo as `scripts/latest-deps.py`
