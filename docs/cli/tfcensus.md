@@ -29,5 +29,6 @@ stdout carries data, stderr carries logs. Use --format json for scripting.
 
 * [tfcensus completion](tfcensus_completion.md)	 - Generate the autocompletion script for the specified shell
 * [tfcensus config](tfcensus_config.md)	 - Inspect and validate configuration
+* [tfcensus units](tfcensus_units.md)	 - List units with their state backend, target account and region
 * [tfcensus version](tfcensus_version.md)	 - Print version and build information
 

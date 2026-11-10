@@ -52,10 +52,17 @@ type Call struct {
 // Main runs the fake when this process was started through an [Install]ed link, and the tests
 // otherwise. Call it from TestMain.
 func Main(m *testing.M) {
+	Serve()
+	os.Exit(m.Run())
+}
+
+// Serve runs the fake and exits when this process was started through an [Install]ed link, and
+// returns otherwise. A TestMain that hands over to testscript.Main calls it first, because
+// testscript.Main replaces [os.Args][0], where the fake finds its spec.
+func Serve() {
 	if spec, ok := loadSpec(os.Args[0]); ok {
 		os.Exit(run(os.Args[0], os.Args[1:], spec, os.Stdout, os.Stderr))
 	}
-	os.Exit(m.Run())
 }
 
 // Install links the test binary into a new temp directory as name and returns the link's path.

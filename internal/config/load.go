@@ -13,6 +13,8 @@ import (
 	"github.com/knadh/koanf/providers/posflag"
 	"github.com/knadh/koanf/v2"
 	"github.com/spf13/pflag"
+
+	"github.com/sassdavid/tfcensus/internal/yamlschema"
 )
 
 // Environment variable names.
@@ -118,7 +120,7 @@ func (r *Result) Source(key string) Source {
 
 type loader struct {
 	opts    Options
-	schema  *schemaDoc
+	schema  *yamlschema.Schema
 	k       *koanf.Koanf
 	sources map[string]Source
 	res     *Result
@@ -267,11 +269,11 @@ func (l *loader) loadFile(kind SourceKind, path string) error {
 // keys that contain "_". Values are converted to the schema type.
 func (l *loader) loadEnv() error {
 	byEnv := map[string]string{}
-	for _, key := range l.schema.envLeaves() {
+	for _, key := range envLeaves(l.schema) {
 		byEnv[EnvVarName(key)] = key
 	}
 	known := map[string]bool{}
-	for _, key := range l.schema.envLeaves() {
+	for _, key := range envLeaves(l.schema) {
 		known[key] = true
 	}
 	names := map[string]string{} // key to env var
@@ -292,7 +294,7 @@ func (l *loader) loadEnv() error {
 				l.res.UnknownEnv = append(l.res.UnknownEnv, name)
 				return "", nil
 			}
-			typ := l.schema.typeAt(strings.Split(key, delim))
+			typ := l.schema.TypeAt(strings.Split(key, delim))
 			if value == "" && typ != typeString && typ != typeArray {
 				return "", nil // VAR= means unset for numbers and booleans
 			}
@@ -387,21 +389,21 @@ func (l *loader) loadFlags() error {
 
 // validateEffective catches bad values from env vars and flags. Files were checked on load.
 func (l *loader) validateEffective() error {
-	inst, err := toJSONValue(l.k.Raw())
+	inst, err := yamlschema.ToJSONValue(l.k.Raw())
 	if err != nil {
 		return fmt.Errorf("%w: %w", ErrInvalid, err)
 	}
-	leaves, err := l.schema.validate(inst)
+	leaves, err := l.schema.Validate(inst)
 	if err != nil {
-		return err
+		return fmt.Errorf("validate config: %w", err)
 	}
 	if len(leaves) == 0 {
 		return nil
 	}
 	problems := make([]Problem, 0, len(leaves))
 	for _, lf := range leaves {
-		key := strings.Join(lf.loc, delim)
-		problems = append(problems, Problem{Origin: l.sourceOf(key).String(), Key: key, Message: lf.message})
+		key := strings.Join(lf.Loc, delim)
+		problems = append(problems, Problem{Origin: l.sourceOf(key).String(), Key: key, Message: lf.Message})
 	}
 	return &ValidationError{Problems: problems}
 }

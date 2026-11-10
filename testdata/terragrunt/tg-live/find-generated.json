@@ -1,0 +1,89 @@
+[
+  {
+    "type": "unit",
+    "path": "live/nonprod/eu-west-1/dev/vpc"
+  },
+  {
+    "type": "unit",
+    "path": "live/nonprod/eu-west-1/staging/vpc"
+  },
+  {
+    "type": "unit",
+    "path": "live/nonprod/us-east-1/global/iam"
+  },
+  {
+    "type": "unit",
+    "path": "live/prod/eu-central-1/prod/edge"
+  },
+  {
+    "type": "stack",
+    "path": "live/prod/eu-central-1/prod/services"
+  },
+  {
+    "type": "unit",
+    "path": "live/prod/eu-central-1/prod/services/.terragrunt-stack/api"
+  },
+  {
+    "type": "unit",
+    "path": "live/prod/eu-central-1/prod/services/.terragrunt-stack/worker"
+  },
+  {
+    "type": "unit",
+    "path": "live/prod/eu-west-1/prod/dns"
+  },
+  {
+    "type": "unit",
+    "path": "live/prod/eu-west-1/prod/legacy",
+    "exclude": {
+      "exclude_dependencies": null,
+      "no_run": null,
+      "actions": [
+        "all"
+      ],
+      "if": true
+    }
+  },
+  {
+    "type": "unit",
+    "path": "live/prod/eu-west-1/prod/secrets"
+  },
+  {
+    "type": "unit",
+    "path": "live/prod/eu-west-1/prod/vpc"
+  },
+  {
+    "type": "unit",
+    "path": "live/nonprod/eu-west-1/dev/app",
+    "dependencies": [
+      "live/nonprod/eu-west-1/dev/vpc"
+    ]
+  },
+  {
+    "type": "unit",
+    "path": "live/nonprod/eu-west-1/dev/db",
+    "dependencies": [
+      "live/nonprod/eu-west-1/dev/vpc"
+    ]
+  },
+  {
+    "type": "unit",
+    "path": "live/nonprod/eu-west-1/staging/app",
+    "dependencies": [
+      "live/nonprod/eu-west-1/staging/vpc"
+    ]
+  },
+  {
+    "type": "unit",
+    "path": "live/prod/eu-west-1/prod/app",
+    "dependencies": [
+      "live/prod/eu-west-1/prod/vpc"
+    ]
+  },
+  {
+    "type": "unit",
+    "path": "live/prod/eu-west-1/prod/db",
+    "dependencies": [
+      "live/prod/eu-west-1/prod/vpc"
+    ]
+  }
+]

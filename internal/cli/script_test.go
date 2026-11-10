@@ -15,12 +15,14 @@ import (
 
 	"github.com/sassdavid/tfcensus/internal/cli"
 	"github.com/sassdavid/tfcensus/internal/testutil"
+	"github.com/sassdavid/tfcensus/internal/testutil/fakebin"
 	"github.com/sassdavid/tfcensus/schemas"
 )
 
 const scriptDir = "../../testdata/script"
 
 func TestMain(m *testing.M) {
+	fakebin.Serve() // units_test.go runs a fake terragrunt
 	testscript.Main(m, map[string]func(){
 		"tfcensus": func() {
 			os.Exit(cli.Run(context.Background(), os.Args, os.Stdout, os.Stderr))
@@ -63,6 +65,10 @@ func scriptParams(t *testing.T, files ...string) testscript.Params {
 			env.Setenv("XDG_CONFIG_HOME", filepath.Join(env.WorkDir, ".config"))
 			env.Setenv("XDG_CACHE_HOME", filepath.Join(env.WorkDir, ".cache"))
 			env.Setenv("NO_COLOR", "1")
+			// Keep only testscript's own bin directory, so a terragrunt installed on the machine
+			// doesn't change units output. Scripts that need a fake terragrunt prepend its directory.
+			bin, _, _ := strings.Cut(env.Getenv("PATH"), string(os.PathListSeparator))
+			env.Setenv("PATH", bin)
 			return nil
 		},
 		Cmds: map[string]func(ts *testscript.TestScript, neg bool, args []string){

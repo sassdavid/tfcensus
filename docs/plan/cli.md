@@ -29,7 +29,7 @@
 | `--types <glob>` | resource type filter (TF or CFN names) |
 | `--layers re,config,cc,native` | force inventory layers (default: auto from capability probe) |
 | `--rules <file>` | extra ownership rules |
-| `--tf-path`, `--tg-path` | binaries (Terragrunt defaults to tofu, so we always pass `--tf-path`) |
+| `--tf-path`, `--tg-path` | binaries (Terragrunt defaults to tofu, so tfcensus always passes the terraform binary: `TG_TF_PATH`, plus `--tf-path` where terragrunt accepts it) |
 
 Output and global flags follow the [engineering standards](../engineering/engineering-standards.md): `--format tty|plain|md|json|csv|sarif`, `-o`, `--fail-on`, `-v`, `--no-input`, `--yes` (move only).
 

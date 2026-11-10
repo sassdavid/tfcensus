@@ -11,6 +11,7 @@
 | `mise run lint` | `lint:go` (golangci-lint), `lint:prose` (`.claude/rules/writing.md` checks) and `lint:actions` (actionlint) |
 | `mise run test` | `go test -race -count=1 ./...` |
 | `mise run test:golden -- -update` | regenerates golden files (review the diff!). Sets `GOLDEN_UPDATE=1`, which `internal/testutil.Golden` and testscript's `UpdateScripts` honour |
+| `mise run fuzz` | runs every Go fuzz target (`func FuzzXxx`) for 60 s each; `mise run fuzz -- 10s` sets another duration. Passes when a repo has no targets |
 | `mise run docs` | regenerates `docs/cli/` via cobra/doc and fails if the checked-in copy differs |
 | `mise run snapshot` | `goreleaser release --snapshot --clean --skip=sign,docker`. Keyless cosign needs CI's OIDC token, and goreleaser OSS can't make `signs:` conditional, so local snapshots skip signing. The multi-platform image needs a buildx builder with a Docker daemon, so snapshots skip it too |
 | `mise run sibling:diff` | compares the files shared with relgap ([.claude/rules/siblings.md](../../.claude/rules/siblings.md)) |
@@ -19,7 +20,7 @@
 
 | Workflow | Trigger | Jobs |
 |---|---|---|
-| `ci.yml` | PR, push main | lint; test matrix (ubuntu, macos, windows) on the Go minor of the `go` directive; docs-up-to-date; schema tests; goreleaser snapshot |
+| `ci.yml` | PR, push main | lint; test matrix (ubuntu, macos, windows) on the Go minor of the `go` directive; fuzz (`mise run fuzz`); docs-up-to-date; schema tests; goreleaser snapshot |
 | `security.yml` | PR, weekly | govulncheck (SARIF), zizmor, dependency review |
 | `live.yml` | nightly, manual | terraform/tofu/terragrunt e2e against moto (testcontainers), **no AWS account needed**. An optional real-AWS OIDC job is added only if a sandbox account ever exists. Added with the first e2e test, not at M0 |
 | `release-please.yml` | push main | opens or updates the release PR (version bump + CHANGELOG.md from Conventional Commits). On merge it creates the tag and a draft release (`draft` + `force-tag-creation`) |

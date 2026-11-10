@@ -40,7 +40,7 @@ A Go CLI that takes a census of Terraform/OpenTofu + Terragrunt fleets on AWS. I
   - `testdata/repos/` (Terragrunt fixtures)
   - `testdata/states/`
   - `testdata/aws/<service>/<op>/<case>.json`
-  - `internal/testutil/faketg` (fake terragrunt)
+  - `internal/testutil/fakebin` (fake terragrunt), replaying `testdata/terragrunt/` recordings made by `scripts/record-terragrunt.sh`
 
 ## Reference sources (read-only, for inspiration)
 - Local clones live in `~/src/github/_reference/<owner>/<repo>` (list and license notes: `docs/plan/reference-repos.md`). Read them to verify formats and behaviour. **Never copy code** from BSL (terraform), AGPL (renovate) or Prosperity (dependabot) repos.
@@ -48,7 +48,7 @@ A Go CLI that takes a census of Terraform/OpenTofu + Terragrunt fleets on AWS. I
 
 ## Conventions that aren't obvious
 - AWS clients come from `accounts` (one `aws.Config` per profile/role, cached). Never call `config.LoadDefaultConfig` elsewhere.
-- Always pass `--tf-path` to terragrunt, because it defaults to tofu.
+- Always tell terragrunt the terraform binary, because it defaults to tofu: `TG_TF_PATH` on every call, plus `--tf-path` for `run` and `render` (`find` rejects the flag).
 - Match order is identity → arn → normalized id. Unmapped types are `undetermined`, never managed.
 - Every finding carries `reason` and `rule`. Every suppression carries `reason` and optionally `expires`.
 - Logs go to stderr, data to stdout through an injected `io.Writer`. The logger comes from `Deps` (sloglint).

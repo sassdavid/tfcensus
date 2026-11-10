@@ -52,6 +52,20 @@ jobs:
         if: runner.os == 'Windows'
         run: go test -count=1 ./...
 
+  fuzz:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+        with:
+          version: 2026.11.5
+      - name: fuzz targets, 60s each
+        run: mise run fuzz
+
   docs:
     runs-on: ubuntu-latest
     permissions:
