@@ -1,0 +1,251 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sassdavid/tfcensus/schemas/config-v1.json",
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "enum": [
+        1
+      ],
+      "description": "Config file format version."
+    },
+    "binaries": {
+      "properties": {
+        "terragrunt": {
+          "type": "string",
+          "minLength": 1,
+          "description": "terragrunt binary, a name on PATH or a path."
+        },
+        "terraform": {
+          "type": "string",
+          "minLength": 1,
+          "description": "terraform or tofu binary, passed to terragrunt as --tf-path."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "discovery": {
+      "properties": {
+        "roots": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Directories to discover units in."
+        },
+        "generate_stacks": {
+          "type": "boolean",
+          "description": "Run terragrunt stack generate before discovery."
+        },
+        "render": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "always",
+            "never"
+          ],
+          "description": "Use terragrunt render: auto, always or never (fast path only)."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "accounts": {
+      "properties": {
+        "profiles": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "AWS profile globs from ~/.aws/config."
+        },
+        "org": {
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "management_profile": {
+              "type": "string"
+            },
+            "role": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "map": {
+          "additionalProperties": {
+            "properties": {
+              "profile": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "type": "object"
+          },
+          "type": "object",
+          "description": "Account ID to profile and display name, for when profile names don't match accounts."
+        },
+        "aggregator": {
+          "properties": {
+            "profile": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "region": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "regions": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "description": "Regions to scan. Empty means the regions found in the units' backends and providers."
+    },
+    "scan": {
+      "properties": {
+        "layers": {
+          "type": "string",
+          "description": "Inventory layers: auto, or a comma-separated list of re, config, cc and native."
+        },
+        "cloudcontrol_types": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "CloudFormation types listed through Cloud Control."
+        },
+        "packs": {
+          "properties": {
+            "aws-defaults": {
+              "type": "boolean"
+            },
+            "aws-service": {
+              "type": "boolean"
+            },
+            "other-iac": {
+              "type": "boolean"
+            },
+            "derived": {
+              "type": "boolean"
+            },
+            "ephemeral": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "never_hide": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "rules": {
+      "items": {
+        "type": "object"
+      },
+      "type": "array",
+      "description": "Ownership rules."
+    },
+    "audit": {
+      "properties": {
+        "policy": {
+          "properties": {
+            "min_terraform_version": {
+              "type": "string",
+              "minLength": 1
+            },
+            "noncurrent_days": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "stale_lock_hours": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "suppress": {
+          "items": {
+            "type": "object"
+          },
+          "type": "array",
+          "description": "Suppressions, each with a reason and an optional expiry."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "drift": {
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "refresh-only",
+            "full"
+          ]
+        },
+        "collapse": {
+          "type": "string",
+          "enum": [
+            "shape",
+            "strict",
+            "none"
+          ]
+        },
+        "noise": {
+          "items": {
+            "type": "object"
+          },
+          "type": "array",
+          "description": "Noise rules."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "notify": {
+      "type": "object",
+      "description": "Notifiers."
+    },
+    "cache": {
+      "properties": {
+        "ttl": {
+          "type": "string",
+          "pattern": "^([0-9]+(\\.[0-9]+)?(ns|us|µs|ms|s|m|h))+$",
+          "description": "How long cached inventory stays fresh, as a Go duration such as 1h."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "title": "tfcensus configuration",
+  "description": "Schema for $XDG_CONFIG_HOME/tfcensus/config.yaml and .tfcensus.yaml. Generated from internal/config by `mise run test:golden -- -update`; do not edit."
+}

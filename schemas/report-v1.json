@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sassdavid/tfcensus/schemas/report-v1.json",
+  "title": "tfcensus JSON output envelope",
+  "description": "Every --format json output is wrapped in this envelope. data is command-specific; its schemas are added per command.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "tool", "version", "generated_at", "data", "errors"],
+  "properties": {
+    "schema_version": {
+      "description": "Version of this envelope schema. Changes independently of the binary version.",
+      "const": "1"
+    },
+    "tool": {
+      "const": "tfcensus"
+    },
+    "version": {
+      "description": "Version of the tfcensus binary that produced the output.",
+      "type": "string",
+      "minLength": 1
+    },
+    "generated_at": {
+      "description": "RFC 3339 timestamp, UTC.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "data": {
+      "description": "Command-specific payload.",
+      "type": "object"
+    },
+    "errors": {
+      "description": "Per-target errors. A non-empty list means the run was partial.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["message"],
+        "properties": {
+          "target": {
+            "description": "What failed, e.g. a tool or repo name.",
+            "type": "string"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

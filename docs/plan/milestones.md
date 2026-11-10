@@ -11,8 +11,8 @@ Release mapping: **v0.1.0 = M0–M6**, v0.2 = M7, v0.3 = M8, v0.4 = M9, v0.5 = M
 
 ### M0: Skeleton and pipeline
 Same as [relgap M0](https://github.com/sassdavid/relgap/blob/main/docs/plan/milestones.md) (the shared template in [docs/engineering](../engineering/README.md)), plus `execx` with a fake-binary test harness, plus `docs/iam/tfcensus-readonly.json`.
-- [ ] `mise run check` is green. Snapshot release builds. CI is green (linux and macos).
-- [ ] `tfcensus version --format json` validates against the envelope schema.
+- [ ] `mise run check` is green. Snapshot release builds. CI is green (linux, macos and windows).
+- [x] `tfcensus version --format json` validates against the envelope schema.
 
 ### M1: Discovery (F1) → [discovery](specs/discovery.md)
 - [ ] **Spike:** check whether `terragrunt render --json` (v1.2.1) includes `remote_state`. Record the answer and the chosen approach in [adr/0001](adr/0001-shell-out-to-terragrunt.md).

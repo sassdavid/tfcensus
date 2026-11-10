@@ -7,9 +7,10 @@ A Go CLI that takes a census of Terraform/OpenTofu + Terragrunt fleets on AWS. I
 - drift, whois/codify and cross-unit moves (later)
 
 ## Verify (run before claiming anything works)
-- `mise run check` runs lint, `go test -race ./...` and govulncheck. It must pass before every commit.
+- `mise run check` runs the linters (golangci-lint, prose, actionlint), `go test -race ./...` and govulncheck. It must pass before every commit.
 - `mise run test:golden -- -update` regenerates goldens. Review the diff.
 - `mise run typemap:gen` regenerates `internal/typemap/data`, and must produce a deterministic diff.
+- `mise run docs` regenerates `docs/cli/`. CI fails if it's stale.
 
 ## Plan
 - Milestones are in `docs/plan/milestones.md`. Do **one milestone per session**, the one named in the prompt.
@@ -17,8 +18,15 @@ A Go CLI that takes a census of Terraform/OpenTofu + Terragrunt fleets on AWS. I
 - Tick a box only with evidence (the command and its result) in the commit body.
 - ADRs live in `docs/plan/adr/` and `docs/engineering/adr/`. Propose a new ADR instead of silently deviating.
 
+## Sibling repo
+- relgap (`~/src/github/relgap`) shares this repo's build, lint, test and release setup. Follow `.claude/rules/siblings.md`: reuse its files instead of writing new ones, keep shared files identical (`mise run sibling:diff`), and make shared changes in both repos.
+
+## Writing and comments
+- All text (docs, comments, CLI help, commits, PRs) follows `.claude/rules/writing.md`. `mise run lint:prose` checks part of it.
+- Go code keeps comments few: package docs in `doc.go`, one-sentence doc comments on exported names, why-comments only. Details in `.claude/rules/go.md`.
+
 ## Safety rules (non-negotiable)
-- **Never call real AWS** unless the prompt names a profile and says read-only is allowed. Default to stubs (`testdata/aws/`).
+- Never call real AWS unless the prompt names a profile and says read-only is allowed. Default to stubs (`testdata/aws/`).
 - Never print state attribute values, only identifiers. The grep test enforces this.
 - Code paths outside `internal/migrate` must not write to S3, DynamoDB or state. Write APIs are only reachable from `move apply|rollback|mark-applied`.
 - No mutating tool is exposed over MCP.

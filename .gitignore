@@ -1,1 +1,9 @@
 .claude/settings.local.json
+.idea/
+
+# goreleaser output
+dist/
+
+# go build output
+/tfcensus
+/tfcensus.exe

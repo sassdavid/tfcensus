@@ -18,3 +18,7 @@ Use **koanf/v2** (v2.4.1). It reads config from a file, from env vars, and from 
 ## Consequences
 - The config struct is the single source of truth. The JSON Schema is generated from it with `invopop/jsonschema` (verify at M0) and checked in. A test fails if they drift apart.
 - Env var mapping: `TFCENSUS_CACHE_TTL` → `cache.ttl` (`__` for nesting when a key itself has `_`). Document this in `docs/config.md`.
+
+## Amendment (2026-11-10)
+The env var mapping is documented in `tfcensus config --help`, which `mise run docs` writes to
+`docs/cli/tfcensus_config.md`, instead of a separate `docs/config.md`. relgap does the same.

@@ -1,0 +1,90 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Identity",
+      "Effect": "Allow",
+      "Action": ["sts:GetCallerIdentity"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "Organizations",
+      "Effect": "Allow",
+      "Action": ["organizations:Describe*", "organizations:List*"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "StateBucketsAndAudit",
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListAllMyBuckets",
+        "s3:ListBucket",
+        "s3:ListBucketVersions",
+        "s3:GetBucket*",
+        "s3:GetEncryptionConfiguration",
+        "s3:GetLifecycleConfiguration",
+        "s3:GetReplicationConfiguration",
+        "s3:GetAccountPublicAccessBlock"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ReadStateObjects",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:GetObjectVersion"],
+      "Resource": "arn:aws:s3:::*/*"
+    },
+    {
+      "Sid": "DecryptStateViaS3Only",
+      "Effect": "Allow",
+      "Action": ["kms:Decrypt"],
+      "Resource": "*",
+      "Condition": {
+        "StringLike": { "kms:ViaService": "s3.*.amazonaws.com" }
+      }
+    },
+    {
+      "Sid": "KeyAudit",
+      "Effect": "Allow",
+      "Action": ["kms:DescribeKey", "kms:GetKeyPolicy", "kms:ListAliases"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "LockTables",
+      "Effect": "Allow",
+      "Action": ["dynamodb:DescribeTable", "dynamodb:DescribeContinuousBackups", "dynamodb:Scan"],
+      "Resource": "arn:aws:dynamodb:*:*:table/*"
+    },
+    {
+      "Sid": "ResourceExplorer",
+      "Effect": "Allow",
+      "Action": ["resource-explorer-2:Get*", "resource-explorer-2:List*", "resource-explorer-2:Search"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "Config",
+      "Effect": "Allow",
+      "Action": ["config:Describe*", "config:Get*", "config:List*", "config:Select*"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "CloudControlRead",
+      "Effect": "Allow",
+      "Action": ["cloudformation:ListResources", "cloudformation:GetResource", "cloudformation:DescribeType"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "NativeEnumerators",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:Describe*",
+        "iam:Get*",
+        "iam:List*",
+        "route53:Get*",
+        "route53:List*",
+        "elasticloadbalancing:Describe*"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
