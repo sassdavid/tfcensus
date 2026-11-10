@@ -1,0 +1,22 @@
+# Plain text when stdout is not a terminal.
+exec tfcensus version
+stdout '^tfcensus +\S+'
+stdout '^commit +\S+'
+stdout '^platform +\w+/\w+$'
+! stderr .
+
+# JSON output is the shared envelope and validates against schemas/report-v1.json.
+exec tfcensus version --format json
+stdout '"schema_version": "1"'
+stdout '"tool": "tfcensus"'
+stdout '"go_version": "go1\.'
+jsonschema report-v1.json stdout
+! stderr .
+
+# Formats the command can't render are usage errors.
+exec expect-exit 2 tfcensus version --format sarif
+stderr 'format "sarif" is not supported by this command'
+exec expect-exit 2 tfcensus version --format yaml
+stderr 'invalid format "yaml"'
+exec expect-exit 2 tfcensus version extra
+stderr 'takes no arguments'

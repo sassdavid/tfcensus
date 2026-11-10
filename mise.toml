@@ -1,0 +1,55 @@
+# Toolchain and tasks. Versions: docs/engineering/stack.md (Renovate keeps both in sync).
+
+[tools]
+go = "1.27.3"
+golangci-lint = "2.15.0"
+gofumpt = "0.12.0"
+"go:golang.org/x/vuln/cmd/govulncheck" = "1.9.0"
+goreleaser = "2.20.0"
+cosign = "3.1.4"
+syft = "1.57.1"
+actionlint = "1.7.12"
+
+[tasks.check]
+description = "Lint, race tests and govulncheck: the single verification command"
+depends = ["lint", "test", "vuln"]
+
+[tasks.lint]
+description = "All linters: Go, prose and GitHub workflows"
+depends = ["lint:go", "lint:prose", "lint:actions"]
+
+[tasks."lint:go"]
+description = "golangci-lint with the golden config (ADR-0008)"
+run = "golangci-lint run"
+
+[tasks."lint:prose"]
+description = "Writing rules from .claude/rules/writing.md"
+run = "go run ./scripts/proselint"
+
+[tasks."lint:actions"]
+description = "actionlint on .github/workflows"
+run = "actionlint"
+
+[tasks.test]
+description = "Unit, component and CLI (testscript) tests with the race detector"
+run = "go test -race -count=1 ./..."
+
+[tasks."test:golden"]
+description = "Compare golden files; pass -update to regenerate them (review the diff)"
+run = "bash scripts/test-golden.sh"
+
+[tasks.vuln]
+description = "Known vulnerabilities in reachable code"
+run = "govulncheck ./..."
+
+[tasks.docs]
+description = "Regenerate docs/cli; fails if the checked-in copy was stale"
+run = "go run ./scripts/gendocs -out docs/cli"
+
+[tasks."sibling:diff"]
+description = "Compare the files shared with the sibling repo (.claude/rules/siblings.md)"
+run = "bash scripts/sibling-diff.sh"
+
+[tasks.snapshot]
+description = "Local goreleaser build: archives, checksums, SBOMs (signing and the image only run on tags in CI)"
+run = "goreleaser release --snapshot --clean --skip=sign,docker"

@@ -19,6 +19,12 @@ Adopt **v2.15.0 verbatim**, then apply this override block. It's marked with `# 
 6. `sloglint context: scope`: keep. Relax only if it gets noisy. Record the reason in this ADR if we do.
 7. `exhaustruct`: off for MVP (upstream default). Reconsider at 1.0.
 
+## Amendment (2026-11-10)
+At M0 the test exclusions from item 5 (`mnd` in tests, `paralleltest` for testscript files) matched
+nothing, and golangci-lint warned about unused exclusion rules. They were left out. Add each one back
+when a test first needs it. `goconst` in tests is already excluded upstream. The upstream "you may want
+to enable" linters stay off, as upstream ships them.
+
 ## Keeping it current
 - The upstream tag goes in the file's header comment: `# source: maratori/golangci-lint-config v2.15.0`.
 - A Renovate `customManagers` regex (`github-tags` datasource) bumps that comment. It is **grouped** with the golangci-lint bump in `mise.toml` and CI, so both move together.

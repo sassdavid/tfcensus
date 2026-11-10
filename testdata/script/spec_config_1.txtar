@@ -1,0 +1,74 @@
+# config spec criterion 1: `config show --sources` prints the key, value and source of every
+# key, across all five layers: defaults < user file < project file < env < flags.
+# Paths in the golden use forward slashes.
+[windows] skip 'golden paths use forward slashes'
+
+mkdir .git
+env TFCENSUS_REGIONS=eu-west-1,eu-central-1
+env TFCENSUS_DISCOVERY__GENERATE_STACKS=true
+exec tfcensus config show --sources --tf-path /opt/bin/tofu
+cmpenv stdout want-sources.txt
+! stderr .
+
+# The same provenance is available as JSON.
+exec tfcensus config show --sources --format json --tf-path /opt/bin/tofu
+jsonschema report-v1.json stdout
+stdout '"binaries.terraform": "flag --tf-path"'
+stdout '"regions": "env TFCENSUS_REGIONS"'
+
+-- .config/tfcensus/config.yaml --
+audit:
+  policy:
+    noncurrent_days: 14
+accounts:
+  profiles: ["acme-*"]
+cache:
+  ttl: 2h
+-- .tfcensus.yaml --
+schema_version: 1
+audit:
+  policy:
+    noncurrent_days: 7
+accounts:
+  map:
+    "111111111111":
+      profile: acme-nonprod
+      name: acme-nonprod
+discovery:
+  render: never
+-- want-sources.txt --
+KEY                                 VALUE                          SOURCE
+accounts.aggregator.name            ""                             default
+accounts.aggregator.profile         ""                             default
+accounts.aggregator.region          ""                             default
+accounts.map.111111111111.name      acme-nonprod                   project file $WORK/.tfcensus.yaml
+accounts.map.111111111111.profile   acme-nonprod                   project file $WORK/.tfcensus.yaml
+accounts.org.enabled                false                          default
+accounts.org.management_profile     ""                             default
+accounts.org.role                   OrganizationAccountAccessRole  default
+accounts.profiles                   ["acme-*"]                     user file $WORK/.config/tfcensus/config.yaml
+audit.policy.min_terraform_version  1.10                           default
+audit.policy.noncurrent_days        7                              project file $WORK/.tfcensus.yaml
+audit.policy.stale_lock_hours       24                             default
+audit.suppress                      []                             default
+binaries.terraform                  /opt/bin/tofu                  flag --tf-path
+binaries.terragrunt                 terragrunt                     default
+cache.ttl                           2h                             user file $WORK/.config/tfcensus/config.yaml
+discovery.generate_stacks           true                           env TFCENSUS_DISCOVERY__GENERATE_STACKS
+discovery.render                    never                          project file $WORK/.tfcensus.yaml
+discovery.roots                     []                             default
+drift.collapse                      shape                          default
+drift.mode                          refresh-only                   default
+drift.noise                         []                             default
+notify                              {}                             default
+regions                             ["eu-west-1","eu-central-1"]   env TFCENSUS_REGIONS
+rules                               []                             default
+scan.cloudcontrol_types             []                             default
+scan.layers                         auto                           default
+scan.never_hide                     []                             default
+scan.packs.aws-defaults             true                           default
+scan.packs.aws-service              true                           default
+scan.packs.derived                  true                           default
+scan.packs.ephemeral                true                           default
+scan.packs.other-iac                true                           default
+schema_version                      1                              project file $WORK/.tfcensus.yaml

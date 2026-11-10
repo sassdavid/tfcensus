@@ -1,0 +1,65 @@
+name: release
+
+# Normally called by release-please.yml after it creates the tag. The tag trigger covers a
+# manually re-pushed tag (tags are still only ever created by release-please).
+on:
+  push:
+    tags: ["v*"]
+  workflow_call:
+    inputs:
+      tag:
+        description: Tag to release, e.g. v0.1.0
+        required: true
+        type: string
+    secrets:
+      HOMEBREW_TAP_TOKEN:
+        description: PAT that can push to sassdavid/homebrew-tap. Without it the cask isn't published.
+        required: false
+      SCOOP_BUCKET_TOKEN:
+        description: PAT that can push to sassdavid/scoop-bucket. Without it the manifest isn't published.
+        required: false
+
+permissions: {}
+
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # upload release assets
+      packages: write # push ghcr.io/sassdavid/tfcensus
+      id-token: write # cosign keyless signing + attestations
+      attestations: write
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.TAG }}
+          fetch-depth: 0
+          persist-credentials: false
+      # No tool cache in the release job (cache poisoning); mise.lock pins checksums.
+      - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+        with:
+          version: 2026.11.5
+          cache: false
+      # dockers_v2 builds linux/amd64 and linux/arm64 in one buildx call.
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+        with:
+          cache-binary: false
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: goreleaser release
+        run: goreleaser release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          SCOOP_BUCKET_TOKEN: ${{ secrets.SCOOP_BUCKET_TOKEN }}
+      # Attest whatever was uploaded, even if a later publisher (tap, bucket) failed.
+      - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        if: always() && hashFiles('dist/checksums.txt') != ''
+        with:
+          subject-checksums: ./dist/checksums.txt

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigests", ":semanticCommits"],
+  "minimumReleaseAge": "3 days",
+  "postUpdateOptions": ["gomodTidy"],
+  "packageRules": [
+    {
+      "description": "The go directive is a support floor, raised by hand (docs/engineering/version-policy.md)",
+      "matchManagers": ["gomod"],
+      "matchDepTypes": ["golang"],
+      "enabled": false
+    },
+    {
+      "description": "golangci-lint and its golden config move together (ADR-0008); re-apply the local overrides",
+      "groupName": "golangci-lint",
+      "matchDepNames": ["golangci-lint", "maratori/golangci-lint-config"]
+    }
+  ],
+  "customManagers": [
+    {
+      "description": "Golden lint config tag in the .golangci.yml header",
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.golangci\\.yml$/"],
+      "matchStrings": ["# source: maratori/golangci-lint-config (?<currentValue>v\\d+\\.\\d+\\.\\d+)"],
+      "depNameTemplate": "maratori/golangci-lint-config",
+      "datasourceTemplate": "github-tags"
+    },
+    {
+      "description": "mise version used by jdx/mise-action in workflows",
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/.+\\.ya?ml$/"],
+      "matchStrings": ["uses: jdx/mise-action@\\S+ # \\S+\\n\\s+with:\\n\\s+version: (?<currentValue>\\d+\\.\\d+\\.\\d+)"],
+      "depNameTemplate": "jdx/mise",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.+)$"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+rules:
+  # actionlint can't parse the $/ self-repository syntax yet (rhysd/actionlint#711), so
+  # workflows keep ./ for local reusable workflows. Re-enable once actionlint supports $/.
+  self-repository:
+    disable: true

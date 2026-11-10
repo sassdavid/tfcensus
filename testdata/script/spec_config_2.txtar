@@ -1,0 +1,109 @@
+# config spec criterion 2: unknown keys and wrong types each produce a precise error
+# (exit 2, origin:line:column, key path, what's wrong). Nothing goes to stdout.
+mkdir .git
+
+# Unknown key in the project file.
+cp unknown.yaml .tfcensus.yaml
+exec expect-exit 2 tfcensus config show
+! stdout .
+[!windows] cmpenv stderr want-unknown.txt
+stderr '\.tfcensus\.yaml:2:3: binaries\.terrafrom: unknown key$'
+
+# Wrong type in the project file.
+cp wrongtype.yaml .tfcensus.yaml
+exec expect-exit 2 tfcensus config validate
+! stdout .
+[!windows] cmpenv stderr want-wrongtype.txt
+stderr '\.tfcensus\.yaml:3:22: audit\.policy\.noncurrent_days: wrong type: got string, want integer$'
+
+# Every problem in a file is reported, in file order, including nested and list items.
+cp many.yaml .tfcensus.yaml
+exec expect-exit 2 tfcensus config validate
+[!windows] cmpenv stderr want-many.txt
+stderr '\.tfcensus\.yaml:13:1: color: unknown key$'
+
+# validate with explicit files checks each one and reports all problems.
+rm .tfcensus.yaml
+exec expect-exit 2 tfcensus config validate unknown.yaml wrongtype.yaml ok.yaml
+cmp stderr want-explicit.txt
+exec tfcensus config validate ok.yaml
+stdout '^valid: ok.yaml$'
+
+# Invalid YAML syntax.
+exec expect-exit 2 tfcensus config validate broken.yaml
+stderr '^  broken.yaml: invalid YAML: .*line 2'
+
+# Errors in the user file name the user file.
+mkdir .config/tfcensus
+cp unknown.yaml .config/tfcensus/config.yaml
+exec expect-exit 2 tfcensus config show
+stderr 'config.yaml:2:3: binaries.terrafrom: unknown key$'
+rm .config/tfcensus/config.yaml
+
+# Wrong types and out-of-range values from env vars name their origin.
+env TFCENSUS_AUDIT_POLICY_NONCURRENT_DAYS=thirty
+exec expect-exit 2 tfcensus config show
+cmp stderr want-env-type.txt
+env TFCENSUS_AUDIT_POLICY_NONCURRENT_DAYS=-1
+exec expect-exit 2 tfcensus config show
+cmp stderr want-env-range.txt
+env TFCENSUS_AUDIT_POLICY_NONCURRENT_DAYS=
+
+# Flag values name the flag.
+exec expect-exit 2 tfcensus config show --tf-path ''
+cmp stderr want-flag-empty.txt
+
+-- ok.yaml --
+binaries:
+  terraform: tofu
+-- unknown.yaml --
+binaries:
+  terrafrom: tofu
+-- wrongtype.yaml --
+audit:
+  policy:
+    noncurrent_days: "thirty"
+-- many.yaml --
+schema_version: 2
+audit:
+  policy:
+    stale_lock_hours: 1.5
+cache:
+  ttl: forever
+drift:
+  mode: sometimes
+accounts:
+  org:
+    enabled: true
+    rol: Admin
+color: true
+-- broken.yaml --
+binaries:
+	terraform: tofu
+-- want-unknown.txt --
+tfcensus: invalid configuration:
+  $WORK/.tfcensus.yaml:2:3: binaries.terrafrom: unknown key
+-- want-wrongtype.txt --
+tfcensus: invalid configuration:
+  $WORK/.tfcensus.yaml:3:22: audit.policy.noncurrent_days: wrong type: got string, want integer
+-- want-many.txt --
+tfcensus: invalid configuration:
+  $WORK/.tfcensus.yaml:1:17: schema_version: value must be 1
+  $WORK/.tfcensus.yaml:4:23: audit.policy.stale_lock_hours: wrong type: got number, want integer
+  $WORK/.tfcensus.yaml:6:8: cache.ttl: 'forever' does not match pattern '^([0-9]+(\\.[0-9]+)?(ns|us|µs|ms|s|m|h))+$'
+  $WORK/.tfcensus.yaml:8:9: drift.mode: value must be one of 'refresh-only', 'full'
+  $WORK/.tfcensus.yaml:12:5: accounts.org.rol: unknown key
+  $WORK/.tfcensus.yaml:13:1: color: unknown key
+-- want-explicit.txt --
+tfcensus: invalid configuration:
+  unknown.yaml:2:3: binaries.terrafrom: unknown key
+  wrongtype.yaml:3:22: audit.policy.noncurrent_days: wrong type: got string, want integer
+-- want-env-type.txt --
+tfcensus: invalid configuration:
+  env TFCENSUS_AUDIT_POLICY_NONCURRENT_DAYS: audit.policy.noncurrent_days: wrong type: "thirty" is not an integer
+-- want-env-range.txt --
+tfcensus: invalid configuration:
+  env TFCENSUS_AUDIT_POLICY_NONCURRENT_DAYS: audit.policy.noncurrent_days: minimum: got -1, want 0
+-- want-flag-empty.txt --
+tfcensus: invalid configuration:
+  flag --tf-path: binaries.terraform: minLength: got 0, want 1

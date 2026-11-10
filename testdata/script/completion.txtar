@@ -1,0 +1,8 @@
+exec tfcensus completion bash
+stdout '__start_tfcensus'
+exec tfcensus completion zsh
+stdout '#compdef tfcensus'
+exec tfcensus completion fish
+stdout 'complete -c tfcensus'
+exec tfcensus completion powershell
+stdout 'Register-ArgumentCompleter'

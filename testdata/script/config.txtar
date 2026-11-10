@@ -1,0 +1,113 @@
+# With no files, config show prints the defaults as YAML.
+exec tfcensus config show
+cmp stdout want-defaults.yaml
+! stderr .
+
+# config path lists the user file and the discovered project file.
+[!windows] exec tfcensus config path
+[!windows] cmpenv stdout want-path-none.txt
+mkdir .git
+cp project.yaml .tfcensus.yaml
+mkdir sub/dir
+cd sub/dir
+[!windows] exec tfcensus config path
+[!windows] cmpenv stdout $WORK/want-path-found.txt
+exec tfcensus config path --format json
+jsonschema report-v1.json stdout
+stdout '"kind": "project"'
+stdout '"found": true'
+
+# The project-file walk stops at the git root.
+cd $WORK
+mkdir repo/.git
+cd repo
+exec tfcensus config show
+stdout 'terraform: terraform'
+! stdout 'terraform: tofu'
+
+# Project file values override defaults; config show reads it from a subdirectory.
+cd $WORK/sub/dir
+exec tfcensus config show
+stdout '^  terraform: tofu$'
+
+# validate reports the files it checked.
+exec tfcensus config validate
+stdout '^valid: .*\.tfcensus\.yaml$'
+exec tfcensus config validate --format json
+jsonschema report-v1.json stdout
+
+# --config replaces discovery and must exist.
+exec tfcensus config show --config $WORK/project.yaml
+stdout '^  terraform: tofu$'
+exec expect-exit 2 tfcensus config show --config $WORK/missing.yaml
+stderr 'config file .*missing.yaml does not exist'
+env TFCENSUS_CONFIG=$WORK/missing.yaml
+exec expect-exit 2 tfcensus config show
+stderr 'missing.yaml does not exist'
+env TFCENSUS_CONFIG=
+
+# Unknown TFCENSUS_ variables are ignored with a warning on stderr.
+env TFCENSUS_NOT_A_KEY=1
+exec tfcensus config show
+stderr 'WRN ignoring unknown environment variable name=TFCENSUS_NOT_A_KEY'
+env TFCENSUS_NOT_A_KEY=
+
+# JSON output is the shared envelope.
+exec tfcensus config show --sources --format json
+jsonschema report-v1.json stdout
+stdout '"binaries.terraform": "project file .*\.tfcensus\.yaml"'
+
+-- project.yaml --
+binaries:
+  terraform: tofu
+-- want-path-none.txt --
+user     not found   $WORK/.config/tfcensus/config.yaml
+project  none found  -
+-- want-path-found.txt --
+user     not found  $WORK/.config/tfcensus/config.yaml
+project  found      $WORK/.tfcensus.yaml
+-- want-defaults.yaml --
+accounts:
+  aggregator:
+    name: ""
+    profile: ""
+    region: ""
+  map: {}
+  org:
+    enabled: false
+    management_profile: ""
+    role: OrganizationAccountAccessRole
+  profiles: []
+audit:
+  policy:
+    min_terraform_version: "1.10"
+    noncurrent_days: 30
+    stale_lock_hours: 24
+  suppress: []
+binaries:
+  terraform: terraform
+  terragrunt: terragrunt
+cache:
+  ttl: 1h
+discovery:
+  generate_stacks: false
+  render: auto
+  roots: []
+drift:
+  collapse: shape
+  mode: refresh-only
+  noise: []
+notify: {}
+regions: []
+rules: []
+scan:
+  cloudcontrol_types: []
+  layers: auto
+  never_hide: []
+  packs:
+    aws-defaults: true
+    aws-service: true
+    derived: true
+    ephemeral: true
+    other-iac: true
+schema_version: 1
