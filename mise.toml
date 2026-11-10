@@ -5,6 +5,7 @@ go = "1.27.3"
 golangci-lint = "2.15.0"
 gofumpt = "0.12.0"
 "go:golang.org/x/vuln/cmd/govulncheck" = "1.9.0"
+"go:github.com/google/go-licenses/v2" = "2.0.1"
 goreleaser = "2.20.0"
 cosign = "3.1.4"
 syft = "1.57.1"
@@ -15,8 +16,8 @@ description = "Lint, race tests and govulncheck: the single verification command
 depends = ["lint", "test", "vuln"]
 
 [tasks.lint]
-description = "All linters: Go, prose and GitHub workflows"
-depends = ["lint:go", "lint:prose", "lint:actions"]
+description = "All linters: Go, prose, GitHub workflows and dependency licenses"
+depends = ["lint:go", "lint:prose", "lint:actions", "lint:licenses"]
 
 [tasks."lint:go"]
 description = "golangci-lint with the golden config (ADR-0008)"
@@ -29,6 +30,10 @@ run = "go run ./scripts/proselint"
 [tasks."lint:actions"]
 description = "actionlint on .github/workflows"
 run = "actionlint"
+
+[tasks."lint:licenses"]
+description = "Fail on forbidden, restricted or unknown licenses compiled into the release binaries"
+run = "bash scripts/licenses.sh -check"
 
 [tasks.test]
 description = "Unit, component and CLI (testscript) tests with the race detector"

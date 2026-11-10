@@ -4,6 +4,9 @@
 # goreleaser output
 dist/
 
+# scripts/licenses.sh output, added to release archives
+third_party_licenses/
+
 # go build output
 /tfcensus
 /tfcensus.exe

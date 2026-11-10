@@ -89,5 +89,6 @@ Precedence: **flags > env (`TFCENSUS_*`) > project file > user file > defaults**
 - Dependencies are minimal and justified in `stack.md`. Renovate keeps them current, with a minimum release age of 3 days.
 - `govulncheck` runs in CI. GitHub Actions are pinned by SHA. `zizmor` audits workflows.
 - Releases are signed (cosign keyless), ship an SBOM (syft) and GitHub build-provenance attestations.
+- Every release archive carries the license notices of the code compiled into it, and CI rejects forbidden, restricted or unknown dependency licenses ([ADR-0012](adr/0012-third-party-notices.md)).
 - No telemetry, ever. Network calls go only to the documented endpoints.
 - Read-only by default. Any write to cloud or state is opt-in, explicit and logged.

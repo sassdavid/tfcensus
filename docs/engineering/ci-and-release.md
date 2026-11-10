@@ -2,13 +2,13 @@
 
 ## Local tasks (mise)
 
-`mise.toml` pins `go`, `golangci-lint`, `goreleaser`, `gofumpt`, `govulncheck`, `cosign` and `syft` (checksums in
-`mise.lock`), and defines these tasks:
+`mise.toml` pins `go`, `golangci-lint`, `goreleaser`, `gofumpt`, `govulncheck`, `go-licenses`, `cosign` and `syft`
+(checksums in `mise.lock`), and defines these tasks:
 
 | Task | Runs |
 |---|---|
 | `mise run check` | lint + test + vuln. **This is the single verification command in CLAUDE.md** |
-| `mise run lint` | `lint:go` (golangci-lint), `lint:prose` (`.claude/rules/writing.md` checks) and `lint:actions` (actionlint) |
+| `mise run lint` | `lint:go` (golangci-lint), `lint:prose` (`.claude/rules/writing.md` checks), `lint:actions` (actionlint) and `lint:licenses` (`scripts/licenses.sh -check`: no forbidden, restricted or unknown licenses on any release platform) |
 | `mise run test` | `go test -race -count=1 ./...` |
 | `mise run test:golden -- -update` | regenerates golden files (review the diff!). Sets `GOLDEN_UPDATE=1`, which `internal/testutil.Golden` and testscript's `UpdateScripts` honour |
 | `mise run fuzz` | runs every Go fuzz target (`func FuzzXxx`) for 60 s each; `mise run fuzz -- 10s` sets another duration. Passes when a repo has no targets |
@@ -20,7 +20,7 @@
 
 | Workflow | Trigger | Jobs |
 |---|---|---|
-| `ci.yml` | PR, push main | lint; test matrix (ubuntu, macos, windows) on the Go minor of the `go` directive; fuzz (`mise run fuzz`); docs-up-to-date; schema tests; goreleaser snapshot |
+| `ci.yml` | PR, push main | lint; test matrix (ubuntu, macos, windows) on the Go minor of the `go` directive; fuzz (`mise run fuzz`); docs-up-to-date; schema tests; goreleaser snapshot (6 archives, checksums, SBOMs, third-party notices in every archive) |
 | `security.yml` | PR, weekly | govulncheck (SARIF), zizmor, dependency review |
 | `live.yml` | nightly, manual | terraform/tofu/terragrunt e2e against moto (testcontainers), **no AWS account needed**. An optional real-AWS OIDC job is added only if a sandbox account ever exists. Added with the first e2e test, not at M0 |
 | `release-please.yml` | push main | opens or updates the release PR (version bump + CHANGELOG.md from Conventional Commits). On merge it creates the tag and a draft release (`draft` + `force-tag-creation`) |
@@ -35,6 +35,7 @@ Rules:
 
 - Targets: `linux/{amd64,arm64}`, `darwin/{amd64,arm64}`, `windows/{amd64,arm64}`, built with `CGO_ENABLED=0`, `-trimpath`, `-ldflags "-s -w -X github.com/sassdavid/tfcensus/internal/buildinfo.version=..."` (`main` only calls `cli.Run`, so the ldflags variables live in `internal/buildinfo`, per ADR-0008 #2).
 - `sboms:` via syft; `signs:` cosign `sign-blob --bundle` on the checksum file.
+- A `before` hook runs `scripts/licenses.sh`, and every archive carries `LICENSE`, `README.md` and `third_party_licenses/`: the license, notice and patent files of each compiled module and of Go, plus `THIRD_PARTY_NOTICES.md`, which links each module's source ([ADR-0012](adr/0012-third-party-notices.md)). The container image has the same files under `/usr/share/doc/tfcensus/`.
 - `release.use_existing_draft` finds release-please's draft by name (`{{ .Tag }}`), uploads the assets, then publishes it. `releases/latest` never points at a release without assets, and this works with immutable releases.
 - `homebrew_casks:` (replaces `brews:`) publishes to the tap `sassdavid/homebrew-tap`. Cask and Scoop uploads are skipped when their token secret is missing, and attestation runs even if a publisher fails.
 - `scoops:` for Windows, to the bucket `sassdavid/scoop-bucket` (same as relgap). `nfpms:` (deb/rpm) is optional and comes later.

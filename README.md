@@ -52,4 +52,6 @@ mise run sibling:diff                # compare the files shared with relgap
 
 ## License
 
-[Apache-2.0](LICENSE)
+[Apache-2.0](LICENSE). Each release archive and the container image (under
+`/usr/share/doc/tfcensus/`) have a `third_party_licenses/` directory with the notices of everything
+compiled into the binary and an index that links each module's source.

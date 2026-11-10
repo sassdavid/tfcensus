@@ -20,6 +20,7 @@ goreleaser, chezmoi, k9s, golangci-lint.
 | golangci-lint | **v2.15.0** | + golden config v2.15.0 ([ADR-0008](adr/0008-lint-config.md)) |
 | gofumpt | **v0.12.0** | golines **v0.13.0** + goimports come with the golden config |
 | govulncheck (`golang.org/x/vuln`) | **v1.9.0** | |
+| go-licenses (`github.com/google/go-licenses/v2`) | **v2.0.1** | collects third-party notices for the archives and fails on forbidden, restricted or unknown licenses ([ADR-0012](adr/0012-third-party-notices.md)); gh pins the same version |
 | goreleaser | **v2.20.0** | cosign **v3.1.4** |
 | syft | **v1.57.1** | SBOMs for goreleaser `sboms:`, locally and in CI (installed by mise, so `anchore/sbom-action` isn't needed) |
 | mise | **v2026.11.5** | pinned as `version:` of `jdx/mise-action` in workflows; `mise.lock` pins tool checksums |
