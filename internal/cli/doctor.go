@@ -23,6 +23,7 @@ import (
 const (
 	probeConcurrency = 4
 	colAccount       = "ACCOUNT"
+	colRegion        = "REGION"
 	cellDenied       = "denied"
 	cellError        = "error"
 )
@@ -215,7 +216,7 @@ func sourceStatus(s doctorSource) string {
 }
 
 func regionColumns() []string {
-	return []string{colAccount, "REGION", "RESOURCE EXPLORER", "CONFIG", "AGGREGATORS", "LAYERS"}
+	return []string{colAccount, colRegion, "RESOURCE EXPLORER", "CONFIG", "AGGREGATORS", "LAYERS"}
 }
 
 func regionRow(r *probe.Report, reg *probe.Region) []string {

@@ -67,7 +67,7 @@ goreleaser, chezmoi, k9s, golangci-lint.
 | Concern | Module | Latest |
 |---|---|---|
 | AWS core | `github.com/aws/aws-sdk-go-v2` · `/config` · `/credentials` · `github.com/aws/smithy-go` | v1.47.8 · v1.33.17 · v1.20.17 · v1.28.9 |
-| AWS services | `service/sts` v1.51.9 · `s3` v1.114.9 · `organizations` v1.62.7 · `resourceexplorer2` v1.33.11 · `configservice` v1.74.11 · `cloudcontrol` v1.38.11 · `ec2` v1.344.2 · `iam` v1.64.9 · `route53` v1.70.9 · `dynamodb` v1.73.2 · `kms` v1.62.5 · `elasticloadbalancingv2` v1.63.9 | released together 2026-11-06 |
+| AWS services | `service/sts` v1.51.9 · `s3` v1.114.9 · `organizations` v1.62.7 · `resourceexplorer2` v1.33.11 · `configservice` v1.74.11 · `cloudcontrol` v1.38.11 · `ec2` v1.344.2 · `iam` v1.64.9 · `route53` v1.70.9 · `dynamodb` v1.73.2 · `kms` v1.62.5 · `elasticloadbalancingv2` v1.63.9 · `cloudtrail` v1.65.11 · `s3control` v1.80.0 | released together 2026-11-06, except `s3control` v1.80.0 (2026-11-09), added at M4 under the 3-day minimum age; v1.79.9 from 2026-11-06 passes the same tests |
 | Plan/schema structs | `github.com/hashicorp/terraform-json` | v0.29.0 |
 | Exec terraform | `github.com/hashicorp/terraform-exec` | v0.26.0 |
 | HCL read/write | `github.com/hashicorp/hcl/v2` (+ `hclwrite`) | v2.25.0 |
@@ -101,7 +101,7 @@ v0.28.0 to v0.49.0 (the newest releases older than the 3-day minimum age).
 |---|---|---|---|
 | Windows console colors | `golang.org/x/sys` (`windows`) | v0.49.0 | turns on VT processing so tint's ANSI colors render in conhost; already required by isatty |
 | AWS SSO and sign-in credentials | `github.com/aws/aws-sdk-go-v2/service/sso` · `service/ssooidc` · `service/signin` | v1.39.4 · v1.44.4 · v1.13.0 | required by `config` for `sso-session`, legacy SSO and `aws login` profiles |
-| AWS SDK internals | `aws-sdk-go-v2/feature/ec2/imds` · `internal/configsources` · `internal/endpoints/v2` · `internal/v4a` · `service/internal/accept-encoding` · `service/internal/presigned-url` | v1.20.8 · v1.5.11 · v2.8.11 · v1.5.11 · v1.13.24 · v1.14.11 | required by `config` and the service clients |
+| AWS SDK internals | `aws-sdk-go-v2/feature/ec2/imds` · `internal/configsources` · `internal/endpoints/v2` · `internal/v4a` · `service/internal/accept-encoding` · `service/internal/endpoint-discovery` · `service/internal/presigned-url` | v1.20.8 · v1.5.11 · v2.8.11 · v1.5.11 · v1.13.24 · v1.13.11 · v1.14.11 | required by `config` and the service clients; `endpoint-discovery` by `dynamodb` |
 
 At M2 the AWS SDK (core, `config`, `credentials`, smithy-go, `sts`, `organizations`,
 `resourceexplorer2`, `configservice` at the versions in the AWS table) added only the AWS modules above.

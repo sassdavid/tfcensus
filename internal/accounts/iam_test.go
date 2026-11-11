@@ -84,9 +84,16 @@ func iamAction(t *testing.T, r *cassette.Request) string {
 	if strings.Contains(u.Host, ".s3.") {
 		service = "s3"
 	}
+	if strings.Contains(u.Host, ".s3-control.") && strings.HasSuffix(u.Path, "/configuration/publicAccessBlock") {
+		return "s3:GetAccountPublicAccessBlock"
+	}
 	switch target := r.Headers.Get("X-Amz-Target"); {
 	case service == "s3" && u.Query().Get("list-type") == "2":
 		return "s3:ListBucket"
+	case service == "s3" && u.Query().Get("x-id") == "ListBuckets":
+		return "s3:ListAllMyBuckets"
+	case service == "s3" && u.Query().Get("x-id") == "":
+		return "s3:" + s3Subresource(t, u.Query())
 	case service == "s3":
 		return "s3:" + u.Query().Get("x-id")
 	case target != "":
@@ -97,6 +104,29 @@ func iamAction(t *testing.T, r *cassette.Request) string {
 	default:
 		return service + ":" + strings.TrimPrefix(u.Path, "/")
 	}
+}
+
+// s3Subresource names the IAM action of a bucket configuration GET such as ?versioning.
+func s3Subresource(t *testing.T, q url.Values) string {
+	t.Helper()
+	actions := map[string]string{
+		"versioning":        "GetBucketVersioning",
+		"encryption":        "GetEncryptionConfiguration",
+		"policy":            "GetBucketPolicy",
+		"publicAccessBlock": "GetBucketPublicAccessBlock",
+		"ownershipControls": "GetBucketOwnershipControls",
+		"replication":       "GetReplicationConfiguration",
+		"lifecycle":         "GetLifecycleConfiguration",
+		"logging":           "GetBucketLogging",
+		"location":          "GetBucketLocation",
+	}
+	for sub, action := range actions {
+		if q.Has(sub) {
+			return action
+		}
+	}
+	t.Fatalf("unknown S3 request with query %v", q)
+	return ""
 }
 
 // actionMatches reports whether an IAM action pattern, which may contain * and ?, matches action.

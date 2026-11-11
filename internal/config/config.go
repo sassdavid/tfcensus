@@ -11,8 +11,8 @@ const SchemaVersion = 1
 // Config defines every configuration key. The JSON tags are the key names, and
 // schemas/config-v1.json is generated from this type.
 //
-// rules, audit.suppress, drift.noise and notify are free-form until the milestone that owns
-// them defines their shape.
+// rules, drift.noise and notify are free-form until the milestone that owns them defines their
+// shape.
 type Config struct {
 	SchemaVersion int       `json:"schema_version" jsonschema:"enum=1" jsonschema_description:"Config file format version."`
 	Binaries      Binaries  `json:"binaries"`
@@ -91,15 +91,28 @@ type Packs struct {
 
 // Audit configures the backend audit.
 type Audit struct {
-	Policy   AuditPolicy `json:"policy"`
-	Suppress []Object    `json:"suppress" jsonschema_description:"Suppressions, each with a reason and an optional expiry."`
+	Policy           AuditPolicy   `json:"policy"`
+	DiscoverPatterns []string      `json:"discover_patterns" jsonschema_description:"Bucket name globs that audit backend --discover audits, matched against every bucket of each account."`
+	Suppress         []Suppression `json:"suppress"          jsonschema_description:"Suppressions. A finding matching every set field of an entry is suppressed until expires."`
 }
 
 // AuditPolicy holds the audit thresholds.
 type AuditPolicy struct {
-	MinTerraformVersion string `json:"min_terraform_version" jsonschema:"minLength=1"`
-	NoncurrentDays      int    `json:"noncurrent_days"       jsonschema:"minimum=0"`
-	StaleLockHours      int    `json:"stale_lock_hours"      jsonschema:"minimum=0"`
+	MinTerraformVersion string            `json:"min_terraform_version" jsonschema:"minLength=1" jsonschema_description:"FL-TFVER flags states written by an older terraform or tofu."`
+	MinProviderVersions map[string]string `json:"min_provider_versions"                          jsonschema_description:"FL-PROV: provider source (hashicorp/aws) to the oldest version allowed in .terraform.lock.hcl."`
+	NoncurrentDays      int               `json:"noncurrent_days"       jsonschema:"minimum=0"   jsonschema_description:"S3-LC: noncurrent state versions must be kept at least this many days."`
+	StaleLockHours      int               `json:"stale_lock_hours"      jsonschema:"minimum=0"   jsonschema_description:"LK-STALE flags locks older than this."`
+	MaxStateMB          float64           `json:"max_state_mb"          jsonschema:"minimum=0"   jsonschema_description:"FL-SIZE flags states larger than this many MiB."`
+}
+
+// Suppression hides audit findings. Empty match fields match everything.
+type Suppression struct {
+	Check   string `json:"check"   jsonschema_description:"Check ID or glob, such as S3-MFA or LK-*."`
+	Bucket  string `json:"bucket"  jsonschema_description:"Bucket name glob."`
+	Unit    string `json:"unit"    jsonschema_description:"Unit glob, repo/path."`
+	Key     string `json:"key"     jsonschema_description:"State key or lock table glob."`
+	Reason  string `json:"reason"  jsonschema_description:"Why the finding is accepted."                                                                                             jsonschema:"required,minLength=1"`
+	Expires string `json:"expires" jsonschema_description:"Last day the suppression applies, as a quoted \"YYYY-MM-DD\" date (UTC). After it the finding comes back with a warning." jsonschema:"pattern=^[0-9]{4}-[0-9]{2}-[0-9]{2}$"`
 }
 
 // Drift configures drift detection.
@@ -117,6 +130,7 @@ type Cache struct {
 const (
 	defaultNoncurrentDays = 30
 	defaultStaleLockHours = 24
+	defaultMaxStateMB     = 20
 )
 
 // Default returns the built-in configuration. Slices and maps are non-nil so that
@@ -148,10 +162,13 @@ func Default() Config {
 		Audit: Audit{
 			Policy: AuditPolicy{
 				MinTerraformVersion: "1.10",
+				MinProviderVersions: map[string]string{},
 				NoncurrentDays:      defaultNoncurrentDays,
 				StaleLockHours:      defaultStaleLockHours,
+				MaxStateMB:          defaultMaxStateMB,
 			},
-			Suppress: []Object{},
+			DiscoverPatterns: []string{"*tfstate*", "*terraform-state*", "*tf-state*"},
+			Suppress:         []Suppression{},
 		},
 		Drift:  Drift{Mode: "refresh-only", Collapse: "shape", Noise: []Object{}},
 		Notify: Object{},

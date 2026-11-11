@@ -12,7 +12,9 @@ Narrow it before use:
 - `DecryptStateViaS3Only`: limit `Resource` to the KMS keys that encrypt state. The `kms:ViaService` condition already
   restricts decryption to requests made through S3.
 - `LockTables`: limit to your lock tables (`arn:aws:dynamodb:*:*:table/terraform-locks*`). `dynamodb:Scan` is used only
-  to look for stale locks.
+  to look for stale locks and orphaned digests. Lock items hold lock metadata, not state.
+- `StateAccessLogging`: `audit backend` reads trail event selectors to see whether CloudTrail logs S3 data events
+  for a state bucket that has no server access logging (S3-LOG).
 
 Org mode (`--org`) also needs `sts:AssumeRole` on the member-account role (default `OrganizationAccountAccessRole`,
 or the roles in `accounts.org.ou_roles`). So does a backend whose `remote_state` names a `role_arn`. Grant it on the

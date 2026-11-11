@@ -29,13 +29,18 @@ type Fake struct {
 	t       testing.TB
 	backend *s3mem.Backend
 	s3      http.Handler
-	now     time.Time
+	clock   gofakes3.TimeSourceAdvancer
 
 	// Keys maps an access key ID to its account for sts:GetCallerIdentity. Keys issued by
 	// AssumeRole carry their account, so they need no entry.
 	Keys map[string]string
 	// Deny lists buckets whose every request gets 403 AccessDenied.
 	Deny []string
+	// Stubs answers the requests gofakes3 doesn't serve; see [Fake.RoundTrip] for the keys.
+	Stubs map[string]Stub
+	// Regions maps a bucket to its region, for ListBuckets and GetBucketLocation. Unlisted
+	// buckets are in us-east-1.
+	Regions map[string]string
 }
 
 // assumedKeyPrefix starts the access key IDs AssumeRole hands out; the account follows it.
@@ -52,7 +57,10 @@ func NewFake(t testing.TB, now time.Time) *Fake {
 		gofakes3.WithHostBucket(true),
 		gofakes3.WithLogger(gofakes3.DiscardLog()),
 	)
-	return &Fake{t: t, backend: backend, s3: faker.Server(), now: now, Keys: map[string]string{}}
+	return &Fake{
+		t: t, backend: backend, s3: faker.Server(), clock: clock, Keys: map[string]string{},
+		Stubs: map[string]Stub{}, Regions: map[string]string{},
+	}
 }
 
 // Put stores body at s3://bucket/key, creating the bucket when needed.
@@ -64,20 +72,54 @@ func (f *Fake) Put(bucket, key string, body []byte) {
 		}
 	}
 	// gofakes3's PUT handler sets Last-Modified; the backend alone doesn't.
-	meta := map[string]string{"Last-Modified": f.now.UTC().Format(http.TimeFormat)}
+	meta := map[string]string{"Last-Modified": f.clock.Now().UTC().Format(http.TimeFormat)}
 	if _, err := f.backend.PutObject(bucket, key, meta, bytes.NewReader(body), int64(len(body)), nil); err != nil {
 		f.t.Fatal(err)
 	}
 }
 
-// RoundTrip serves req in process.
+// PutAt stores body like [Fake.Put], with at as its LastModified time.
+func (f *Fake) PutAt(bucket, key string, body []byte, at time.Time) {
+	f.t.Helper()
+	d := at.Sub(f.clock.Now())
+	f.clock.Advance(d)
+	defer f.clock.Advance(-d)
+	f.Put(bucket, key, body)
+}
+
+// CreateBucket creates an empty bucket.
+func (f *Fake) CreateBucket(bucket string) {
+	f.t.Helper()
+	if err := f.backend.CreateBucket(bucket); err != nil {
+		f.t.Fatal(err)
+	}
+}
+
+// RoundTrip serves req in process: STS from canned responses, S3 objects from gofakes3, and
+// everything else from Stubs, keyed by
+//
+//   - s3:<bucket>?<subresource> for bucket configuration (versioning, encryption, policy,
+//     publicAccessBlock, ownershipControls, replication, lifecycle, logging); a missing stub
+//     answers what AWS answers for a bucket without that configuration,
+//   - s3control:<account>?publicAccessBlock,
+//   - <service>:<operation>:<resource> or <service>:<operation> for the JSON protocols (kms,
+//     dynamodb, cloudtrail), where resource is the KeyId, TableName or TrailName in the request.
 func (f *Fake) RoundTrip(req *http.Request) (*http.Response, error) {
 	rec := httptest.NewRecorder()
+	host := req.URL.Host
 	switch {
-	case strings.HasPrefix(req.URL.Host, "sts."):
+	case strings.HasPrefix(host, "sts."):
 		f.sts(rec, req)
-	case f.denied(req.URL.Host):
+	case strings.Contains(host, ".s3-control."):
+		f.s3control(rec, req)
+	case jsonService(host) != "":
+		f.json(rec, req, jsonService(host))
+	case strings.HasPrefix(host, "s3.") && req.URL.Path == "/":
+		f.listBuckets(rec)
+	case f.denied(host):
 		writeS3Error(rec, http.StatusForbidden, "AccessDenied", "Access Denied")
+	case subresource(req) != "":
+		f.bucketConfig(rec, req)
 	default:
 		// gofakes3 takes the bucket from Host, which client requests leave empty, and rewrites
 		// the URL in place.

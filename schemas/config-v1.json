@@ -185,26 +185,80 @@
           "properties": {
             "min_terraform_version": {
               "type": "string",
-              "minLength": 1
+              "minLength": 1,
+              "description": "FL-TFVER flags states written by an older terraform or tofu."
+            },
+            "min_provider_versions": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object",
+              "description": "FL-PROV: provider source (hashicorp/aws) to the oldest version allowed in .terraform.lock.hcl."
             },
             "noncurrent_days": {
               "type": "integer",
-              "minimum": 0
+              "minimum": 0,
+              "description": "S3-LC: noncurrent state versions must be kept at least this many days."
             },
             "stale_lock_hours": {
               "type": "integer",
-              "minimum": 0
+              "minimum": 0,
+              "description": "LK-STALE flags locks older than this."
+            },
+            "max_state_mb": {
+              "type": "number",
+              "minimum": 0,
+              "description": "FL-SIZE flags states larger than this many MiB."
             }
           },
           "additionalProperties": false,
           "type": "object"
         },
-        "suppress": {
+        "discover_patterns": {
           "items": {
-            "type": "object"
+            "type": "string"
           },
           "type": "array",
-          "description": "Suppressions, each with a reason and an optional expiry."
+          "description": "Bucket name globs that audit backend --discover audits, matched against every bucket of each account."
+        },
+        "suppress": {
+          "items": {
+            "properties": {
+              "check": {
+                "type": "string",
+                "description": "Check ID or glob, such as S3-MFA or LK-*."
+              },
+              "bucket": {
+                "type": "string",
+                "description": "Bucket name glob."
+              },
+              "unit": {
+                "type": "string",
+                "description": "Unit glob, repo/path."
+              },
+              "key": {
+                "type": "string",
+                "description": "State key or lock table glob."
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Why the finding is accepted."
+              },
+              "expires": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "description": "Last day the suppression applies, as a quoted \"YYYY-MM-DD\" date (UTC). After it the finding comes back with a warning."
+              }
+            },
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "reason"
+            ]
+          },
+          "type": "array",
+          "description": "Suppressions. A finding matching every set field of an entry is suppressed until expires."
         }
       },
       "additionalProperties": false,

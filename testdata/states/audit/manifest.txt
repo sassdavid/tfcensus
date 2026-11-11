@@ -1,0 +1,15 @@
+# The states of testdata/repos/tf-audit as stored in S3: bucket, key, file in this directory.
+# planned has no object (never applied). retired and lost are states no unit resolves to.
+# acme-tfstate-good-replica is the replica of acme-audit-good.
+acme-audit-good network/terraform.tfstate network.tfstate
+acme-audit-good app/terraform.tfstate app.tfstate
+acme-audit-good copy/terraform.tfstate copy.tfstate
+acme-audit-good empty/terraform.tfstate empty.tfstate
+acme-audit-bad legacy/terraform.tfstate legacy.tfstate
+acme-audit-bad retired/terraform.tfstate retired.tfstate
+acme-audit-legacy secrets/terraform.tfstate secrets.tfstate
+acme-tfstate-orphans lost/terraform.tfstate retired.tfstate
+acme-tfstate-good-replica network/terraform.tfstate network.tfstate
+acme-tfstate-good-replica app/terraform.tfstate app.tfstate
+acme-tfstate-good-replica copy/terraform.tfstate copy.tfstate
+acme-tfstate-good-replica empty/terraform.tfstate empty.tfstate

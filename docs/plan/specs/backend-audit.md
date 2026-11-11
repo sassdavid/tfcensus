@@ -1,7 +1,8 @@
 # Spec: `tfcensus audit backend`
 
 Backends are discovered from units (F1) and, with `--discover`, from bucket scans. Each check has an ID,
-a severity, a remediation hint, and optional suppression in config (`audit.suppress: [{check, bucket, reason, expires}]`).
+a severity, a remediation hint, and optional suppression in config (`audit.suppress: [{check, bucket, unit, key, reason, expires}]`,
+globs, [ADR-0008](../adr/0008-audit-suppressions-fields.md)).
 
 ## Bucket checks
 
@@ -12,9 +13,9 @@ a severity, a remediation hint, and optional suppression in config (`audit.suppr
 | S3-ENC | default SSE-KMS with a customer-managed key (SSE-S3 → medium) | medium |
 | S3-KMSPOL | KMS key policy doesn't grant `kms:Decrypt` to `*` principals | high |
 | S3-PAB | bucket + account public access block all true | high |
-| S3-TLS | bucket policy denies `aws:SecureTransport=false`. Evaluated properly; Prowler's version has a false pass (#13226) | high |
+| S3-TLS | bucket policy denies `aws:SecureTransport=false` for s3:GetObject and s3:PutObject on state objects, to every principal. Evaluated properly; Prowler's version has a false pass (#13226) | high |
 | S3-OWN | ObjectOwnership BucketOwnerEnforced | medium |
-| S3-REPL | cross-region replication configured (and the replica bucket passes S3-VER/ENC) | medium |
+| S3-REPL | cross-region replication configured (and the replica bucket passes S3-VER/ENC). A bucket that another audited bucket replicates to is a replica and needs none | medium |
 | S3-LC | lifecycle for noncurrent versions exists, keeping more than N days (default 30). Flags missing (unbounded cost) and too-aggressive (under 7 d) | medium |
 | S3-LOG | access logging or CloudTrail data events | low |
 | S3-LEGACY | legacy `RootAccess` statement (terragrunt < 1.2 wrote it) | low |
@@ -44,7 +45,7 @@ a severity, a remediation hint, and optional suppression in config (`audit.suppr
 | FL-SECRET | sensitive-looking attribute keys stored in plain state (names only, never values) | info |
 
 ## Acceptance criteria
-- [ ] Each check has stubbed positive and negative fixtures and a golden finding.
-- [ ] S3-TLS uses real policy evaluation (handles `Bool` vs `BoolIfExists`, NotPrincipal, multiple statements), with tests for the Prowler #13226 shape.
-- [ ] Suppressions with `expires` behave like ownership rules (warning after expiry).
-- [ ] The live validation on the author's fleet reproduces known replication status per state bucket (recorded in `docs/validation/`).
+- [x] Each check has stubbed positive and negative fixtures and a golden finding.
+- [x] S3-TLS uses real policy evaluation (handles `Bool` vs `BoolIfExists`, NotPrincipal, multiple statements), with tests for the Prowler #13226 shape.
+- [x] Suppressions with `expires` behave like ownership rules (warning after expiry).
+- [x] The live validation on the author's fleet reproduces known replication status per state bucket (recorded in [docs/validation/backend-audit.md](../../validation/backend-audit.md)).

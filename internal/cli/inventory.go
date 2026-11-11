@@ -11,12 +11,9 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"sync"
 	"text/tabwriter"
 	"time"
 
-	"github.com/aws/aws-sdk-go-v2/aws/arn"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/spf13/cobra"
 
 	"github.com/sassdavid/tfcensus/internal/accounts"
@@ -118,9 +115,8 @@ func runInventory(cmd *cobra.Command, d *app.Deps, format render.Format, cfg *co
 	if err != nil {
 		return fmt.Errorf("get working directory: %w", err)
 	}
-	clients := newBackendClients(loader, accts, cfg, d.Env.Lookup)
 	reader := tfstate.NewReader(tfstate.Options{
-		Client:      clients.client,
+		Client:      stateClient(newBackends(loader, accts, cfg, d)),
 		WorkDir:     cwd,
 		Concurrency: a.concurrency,
 		TFPath:      cfg.Binaries.Terraform,
@@ -172,71 +168,35 @@ func inventoryError(states []tfstate.UnitState) error {
 	return err
 }
 
-// backendClients hands out one S3 client per credential and region.
-type backendClients struct {
-	loader    *accounts.Loader
-	accts     *accounts.Result
-	mapping   map[string]string
-	pathStyle bool
-
-	mu      sync.Mutex
-	clients map[string]*s3.Client
-}
-
-func newBackendClients(
-	l *accounts.Loader,
-	accts *accounts.Result,
-	cfg *config.Config,
-	lookup func(string) (string, bool),
-) *backendClients {
+// newBackends returns the backend credentials for cfg's accounts.map and the resolved accounts.
+func newBackends(l *accounts.Loader, accts *accounts.Result, cfg *config.Config, d *app.Deps) *accounts.Backends {
 	mapping := map[string]string{}
 	for id, ref := range cfg.Accounts.Map {
 		if ref.Profile != "" {
 			mapping[id] = ref.Profile
 		}
 	}
-	// A custom endpoint (an emulator) can't serve virtual-hosted bucket names.
-	_, custom := lookup("AWS_ENDPOINT_URL")
-	_, customS3 := lookup("AWS_ENDPOINT_URL_S3")
-	return &backendClients{
-		loader: l, accts: accts, mapping: mapping, pathStyle: custom || customS3,
-		clients: map[string]*s3.Client{},
+	return accounts.NewBackends(l, accts, mapping, d.Env.Lookup)
+}
+
+// backendRef names the credentials of u's backend.
+func backendRef(u *discovery.Unit) accounts.BackendRef {
+	be := u.Backend
+	return accounts.BackendRef{
+		Profile: be.Profile, RoleARN: be.RoleARN, Account: u.Target.Account,
+		Region: cmp.Or(be.Region, u.Target.Region),
 	}
 }
 
-func (b *backendClients) client(ctx context.Context, u *discovery.Unit) (tfstate.Client, error) {
-	be := u.Backend
-	var base *accounts.Account
-	var err error
-	if be.Profile != "" {
-		base, err = b.loader.Profile(ctx, be.Profile)
-	} else {
-		owner := u.Target.Account
-		if role, parseErr := arn.Parse(be.RoleARN); parseErr == nil {
-			owner = role.AccountID
+// stateClient returns the S3 client that reads u's state.
+func stateClient(b *accounts.Backends) func(context.Context, *discovery.Unit) (tfstate.Client, error) {
+	return func(ctx context.Context, u *discovery.Unit) (tfstate.Client, error) {
+		acct, region, err := b.Credentials(ctx, backendRef(u))
+		if err != nil {
+			return nil, err
 		}
-		base, err = b.loader.BaseFor(ctx, owner, b.accts, b.mapping)
+		return b.S3(acct, region), nil
 	}
-	if err != nil {
-		return nil, fmt.Errorf("load backend credentials: %w", err)
-	}
-	acct, err := b.loader.Backend(ctx, base, accounts.Role{ARN: be.RoleARN})
-	if err != nil {
-		return nil, fmt.Errorf("load backend credentials: %w", err)
-	}
-	region := cmp.Or(be.Region, u.Target.Region, acct.Config.Region)
-	key := acct.Source + "\x00" + acct.RoleARN + "\x00" + region
-	b.mu.Lock()
-	defer b.mu.Unlock()
-	if c, ok := b.clients[key]; ok {
-		return c, nil
-	}
-	c := s3.NewFromConfig(acct.Config, func(o *s3.Options) {
-		o.Region = region
-		o.UsePathStyle = b.pathStyle
-	})
-	b.clients[key] = c
-	return c, nil
 }
 
 func writeInventory(d *app.Deps, format render.Format, data inventoryData, disc discovery.Result) error {

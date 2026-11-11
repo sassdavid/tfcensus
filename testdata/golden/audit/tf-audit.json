@@ -1,0 +1,616 @@
+{
+  "schema_version": "1",
+  "tool": "tfcensus",
+  "version": "test",
+  "generated_at": "2026-11-10T12:00:00Z",
+  "data": {
+    "checks": [
+      {
+        "id": "S3-VER",
+        "severity": "high",
+        "title": "State bucket versioning is enabled",
+        "remediation": "Enable versioning, so an overwritten or deleted state can be restored."
+      },
+      {
+        "id": "S3-MFA",
+        "severity": "low",
+        "title": "State bucket has MFA delete",
+        "remediation": "Informational: MFA delete needs the root user's MFA device and is rarely practical."
+      },
+      {
+        "id": "S3-ENC",
+        "severity": "medium",
+        "title": "State bucket encrypts with a customer-managed KMS key",
+        "remediation": "Set default encryption to SSE-KMS with a customer-managed key, so key policy controls who can decrypt state."
+      },
+      {
+        "id": "S3-KMSPOL",
+        "severity": "high",
+        "title": "State key policy doesn't let every principal decrypt",
+        "remediation": "Remove kms:Decrypt for Principal \"*\", or restrict it with aws:PrincipalAccount or aws:PrincipalOrgID."
+      },
+      {
+        "id": "S3-PAB",
+        "severity": "high",
+        "title": "Bucket and account public access block are all on",
+        "remediation": "Turn on all four public access block settings on the bucket and the account."
+      },
+      {
+        "id": "S3-TLS",
+        "severity": "high",
+        "title": "State bucket policy denies requests without TLS",
+        "remediation": "Add a Deny for Principal \"*\", Action s3:*, the bucket and bucket/* resources, with Bool aws:SecureTransport false as the only condition."
+      },
+      {
+        "id": "S3-OWN",
+        "severity": "medium",
+        "title": "Object ownership is BucketOwnerEnforced",
+        "remediation": "Set object ownership to BucketOwnerEnforced, which turns ACLs off."
+      },
+      {
+        "id": "S3-REPL",
+        "severity": "medium",
+        "title": "State is replicated to another region",
+        "remediation": "Configure cross-region replication to a versioned, KMS-encrypted bucket."
+      },
+      {
+        "id": "S3-LC",
+        "severity": "medium",
+        "title": "Noncurrent state versions expire after a bounded time",
+        "remediation": "Add a lifecycle rule with NoncurrentVersionExpiration of at least the policy's noncurrent_days."
+      },
+      {
+        "id": "S3-LOG",
+        "severity": "low",
+        "title": "State access is logged",
+        "remediation": "Turn on server access logging or CloudTrail S3 data events for the bucket."
+      },
+      {
+        "id": "S3-LEGACY",
+        "severity": "low",
+        "title": "No legacy RootAccess statement",
+        "remediation": "Remove the RootAccess statement that terragrunt before 1.2 added; the account root has access through IAM."
+      },
+      {
+        "id": "LK-MODE",
+        "severity": "low",
+        "title": "Unit locks with S3 lock files",
+        "remediation": "Set use_lockfile = true: dynamodb_table is deprecated since Terraform 1.11. Keep both during the migration."
+      },
+      {
+        "id": "LK-BOTH",
+        "severity": "info",
+        "title": "Unit uses one lock mechanism",
+        "remediation": "Both lock files and DynamoDB are configured, which is fine while migrating. Remove dynamodb_table afterwards."
+      },
+      {
+        "id": "LK-PITR",
+        "severity": "medium",
+        "title": "Lock table has point-in-time recovery and KMS encryption",
+        "remediation": "Turn on point-in-time recovery and encrypt the table with a KMS key."
+      },
+      {
+        "id": "LK-STALE",
+        "severity": "high",
+        "title": "No stale locks",
+        "remediation": "Check that no run holds the lock, then release it with terraform force-unlock."
+      },
+      {
+        "id": "LK-MD5",
+        "severity": "low",
+        "title": "No orphaned digest items",
+        "remediation": "Delete the -md5 item: its state object no longer exists."
+      },
+      {
+        "id": "FL-ORPHAN",
+        "severity": "medium",
+        "title": "Every state key belongs to a unit",
+        "remediation": "Delete or archive the state, or add the unit that owns it to the scanned repos."
+      },
+      {
+        "id": "FL-ABSENT",
+        "severity": "low",
+        "title": "Every unit's state exists",
+        "remediation": "Apply the unit, or fix its backend key."
+      },
+      {
+        "id": "FL-EMPTY",
+        "severity": "low",
+        "title": "State manages resources",
+        "remediation": "Destroy the unit's code and state, or check that the key is right."
+      },
+      {
+        "id": "FL-LINEAGE",
+        "severity": "high",
+        "title": "Each lineage lives under one key",
+        "remediation": "One of the states is a copy. Keep the one the unit applies to and archive the other."
+      },
+      {
+        "id": "FL-DOUBLE",
+        "severity": "high",
+        "title": "Each resource is managed by one state",
+        "remediation": "Remove the resource from all but one state with terraform state rm, or a removed block."
+      },
+      {
+        "id": "FL-TFVER",
+        "severity": "medium",
+        "title": "State was written by a supported version",
+        "remediation": "Upgrade the unit's terraform or tofu to at least the policy's min_terraform_version."
+      },
+      {
+        "id": "FL-PROV",
+        "severity": "low",
+        "title": "Provider versions meet the policy",
+        "remediation": "Upgrade the provider in .terraform.lock.hcl with terraform init -upgrade."
+      },
+      {
+        "id": "FL-SIZE",
+        "severity": "low",
+        "title": "State is small enough for fast plans",
+        "remediation": "Split the unit."
+      },
+      {
+        "id": "FL-SECRET",
+        "severity": "info",
+        "title": "No secrets stored in plain state",
+        "remediation": "Use write-only arguments or ephemeral resources, or keep the secret in a secrets manager."
+      }
+    ],
+    "buckets": [
+      {
+        "name": "acme-audit-bad",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "source": "unit",
+        "units": 1,
+        "state_keys": 2,
+        "versioning": "Suspended",
+        "encryption": "AES256",
+        "replication": []
+      },
+      {
+        "name": "acme-audit-good",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "source": "unit",
+        "units": 5,
+        "state_keys": 4,
+        "versioning": "Enabled",
+        "encryption": "aws:kms (customer-managed key)",
+        "replication": [
+          {
+            "bucket": "acme-tfstate-good-replica",
+            "region": "eu-central-1",
+            "status": "Enabled"
+          }
+        ]
+      },
+      {
+        "name": "acme-audit-legacy",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "source": "unit",
+        "units": 1,
+        "state_keys": 1,
+        "versioning": "Enabled",
+        "encryption": "aws:kms (customer-managed key)",
+        "replication": [
+          {
+            "bucket": "acme-audit-legacy-replica",
+            "region": "eu-west-1",
+            "status": "Enabled"
+          }
+        ]
+      },
+      {
+        "name": "acme-tfstate-good-replica",
+        "account": "111111111111",
+        "region": "eu-central-1",
+        "source": "discover",
+        "units": 0,
+        "state_keys": 4,
+        "versioning": "Enabled",
+        "encryption": "aws:kms (customer-managed key)",
+        "replication": [],
+        "replica_of": "acme-tfstate-orphans"
+      },
+      {
+        "name": "acme-tfstate-orphans",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "source": "discover",
+        "units": 0,
+        "state_keys": 1,
+        "versioning": "Enabled",
+        "encryption": "aws:kms (customer-managed key)",
+        "replication": [
+          {
+            "bucket": "acme-tfstate-good-replica",
+            "region": "eu-central-1",
+            "status": "Enabled"
+          }
+        ]
+      }
+    ],
+    "lock_tables": [
+      {
+        "name": "acme-audit-locks-bad",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "units": 1,
+        "pitr": false,
+        "encryption": "AWS owned key",
+        "locks": 1
+      },
+      {
+        "name": "acme-audit-locks-good",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "units": 1,
+        "pitr": true,
+        "encryption": "KMS",
+        "locks": 1
+      }
+    ],
+    "findings": [
+      {
+        "rule": "S3-VER",
+        "severity": "high",
+        "target": "s3://acme-audit-bad",
+        "bucket": "acme-audit-bad",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "versioning is suspended: an overwritten or deleted state can't be restored",
+        "remediation": "Enable versioning, so an overwritten or deleted state can be restored."
+      },
+      {
+        "rule": "S3-KMSPOL",
+        "severity": "high",
+        "target": "s3://acme-audit-legacy",
+        "bucket": "acme-audit-legacy",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "key arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-open-4000-8000-000000000003 allows kms:Decrypt to principals in any account (statement AllowDecryptAnywhere)",
+        "remediation": "Remove kms:Decrypt for Principal \"*\", or restrict it with aws:PrincipalAccount or aws:PrincipalOrgID."
+      },
+      {
+        "rule": "S3-PAB",
+        "severity": "high",
+        "target": "s3://acme-audit-bad",
+        "bucket": "acme-audit-bad",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "bucket: BlockPublicAcls, IgnorePublicAcls, BlockPublicPolicy, RestrictPublicBuckets off",
+        "remediation": "Turn on all four public access block settings on the bucket and the account."
+      },
+      {
+        "rule": "S3-TLS",
+        "severity": "high",
+        "target": "s3://acme-audit-bad",
+        "bucket": "acme-audit-bad",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "the bucket has no policy, so plain HTTP requests aren't denied",
+        "remediation": "Add a Deny for Principal \"*\", Action s3:*, the bucket and bucket/* resources, with Bool aws:SecureTransport false as the only condition."
+      },
+      {
+        "rule": "S3-TLS",
+        "severity": "high",
+        "target": "s3://acme-audit-legacy",
+        "bucket": "acme-audit-legacy",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "plain HTTP isn't denied for s3:GetObject by anonymous, another account, the bucket's account, arn:aws:iam::111111111111:root",
+        "remediation": "Add a Deny for Principal \"*\", Action s3:*, the bucket and bucket/* resources, with Bool aws:SecureTransport false as the only condition."
+      },
+      {
+        "rule": "LK-STALE",
+        "severity": "high",
+        "target": "dynamodb://eu-west-1/acme-audit-locks-bad",
+        "table": "acme-audit-locks-bad",
+        "key": "acme-audit-bad/legacy/terraform.tfstate",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "lock held for 3d3h, over 24h",
+        "remediation": "Check that no run holds the lock, then release it with terraform force-unlock."
+      },
+      {
+        "rule": "LK-STALE",
+        "severity": "high",
+        "target": "s3://acme-audit-bad/legacy/terraform.tfstate.tflock",
+        "bucket": "acme-audit-bad",
+        "key": "legacy/terraform.tfstate.tflock",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "lock file is 3d0h old, over 24h",
+        "remediation": "Check that no run holds the lock, then release it with terraform force-unlock."
+      },
+      {
+        "rule": "FL-LINEAGE",
+        "severity": "high",
+        "target": "tf-audit/app",
+        "bucket": "acme-audit-good",
+        "key": "app/terraform.tfstate",
+        "unit": "tf-audit/app",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "lineage 1a2b3c4d-0000-4000-8000-000000000002 is shared by tf-audit/app (s3://acme-audit-good/app/terraform.tfstate) and tf-audit/copy (s3://acme-audit-good/copy/terraform.tfstate)",
+        "remediation": "One of the states is a copy. Keep the one the unit applies to and archive the other."
+      },
+      {
+        "rule": "FL-LINEAGE",
+        "severity": "high",
+        "target": "tf-audit/copy",
+        "bucket": "acme-audit-good",
+        "key": "copy/terraform.tfstate",
+        "unit": "tf-audit/copy",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "lineage 1a2b3c4d-0000-4000-8000-000000000002 is shared by tf-audit/app (s3://acme-audit-good/app/terraform.tfstate) and tf-audit/copy (s3://acme-audit-good/copy/terraform.tfstate)",
+        "remediation": "One of the states is a copy. Keep the one the unit applies to and archive the other."
+      },
+      {
+        "rule": "FL-DOUBLE",
+        "severity": "high",
+        "target": "tf-audit/app",
+        "unit": "tf-audit/app",
+        "reason": "aws_iam_role arn:aws:iam::111111111111:role/acme-audit-app is managed by tf-audit/app (aws_iam_role.app) and tf-audit/copy (aws_iam_role.app) (matched on arn)",
+        "remediation": "Remove the resource from all but one state with terraform state rm, or a removed block."
+      },
+      {
+        "rule": "S3-ENC",
+        "severity": "medium",
+        "target": "s3://acme-audit-bad",
+        "bucket": "acme-audit-bad",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "default encryption is SSE-S3: anyone with s3:GetObject can read state, no key policy applies",
+        "remediation": "Set default encryption to SSE-KMS with a customer-managed key, so key policy controls who can decrypt state."
+      },
+      {
+        "rule": "S3-OWN",
+        "severity": "medium",
+        "target": "s3://acme-audit-bad",
+        "bucket": "acme-audit-bad",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "object ownership is ObjectWriter: ACLs are on",
+        "remediation": "Set object ownership to BucketOwnerEnforced, which turns ACLs off."
+      },
+      {
+        "rule": "S3-REPL",
+        "severity": "medium",
+        "target": "s3://acme-audit-bad",
+        "bucket": "acme-audit-bad",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "no replication: losing the region loses every state",
+        "remediation": "Configure cross-region replication to a versioned, KMS-encrypted bucket."
+      },
+      {
+        "rule": "S3-REPL",
+        "severity": "medium",
+        "target": "s3://acme-audit-legacy",
+        "bucket": "acme-audit-legacy",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "replica acme-audit-legacy-replica is in the same region; replica acme-audit-legacy-replica versioning is suspended; replica acme-audit-legacy-replica: default encryption is SSE-S3: anyone with s3:GetObject can read state, no key policy applies",
+        "remediation": "Configure cross-region replication to a versioned, KMS-encrypted bucket."
+      },
+      {
+        "rule": "S3-LC",
+        "severity": "medium",
+        "target": "s3://acme-audit-bad",
+        "bucket": "acme-audit-bad",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "no lifecycle rule expires noncurrent versions of every state: they are kept forever",
+        "remediation": "Add a lifecycle rule with NoncurrentVersionExpiration of at least the policy's noncurrent_days."
+      },
+      {
+        "rule": "S3-LC",
+        "severity": "medium",
+        "target": "s3://acme-audit-legacy",
+        "bucket": "acme-audit-legacy",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "noncurrent versions expire after 3 days, under 7: a bad apply found late can't be rolled back",
+        "remediation": "Add a lifecycle rule with NoncurrentVersionExpiration of at least the policy's noncurrent_days."
+      },
+      {
+        "rule": "LK-PITR",
+        "severity": "medium",
+        "target": "dynamodb://eu-west-1/acme-audit-locks-bad",
+        "table": "acme-audit-locks-bad",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "encrypted with an AWS owned key, not KMS; point-in-time recovery is off",
+        "remediation": "Turn on point-in-time recovery and encrypt the table with a KMS key."
+      },
+      {
+        "rule": "FL-ORPHAN",
+        "severity": "medium",
+        "target": "s3://acme-audit-bad/retired/terraform.tfstate",
+        "bucket": "acme-audit-bad",
+        "key": "retired/terraform.tfstate",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "no discovered unit resolves to this key",
+        "remediation": "Delete or archive the state, or add the unit that owns it to the scanned repos."
+      },
+      {
+        "rule": "FL-ORPHAN",
+        "severity": "medium",
+        "target": "s3://acme-tfstate-orphans/lost/terraform.tfstate",
+        "bucket": "acme-tfstate-orphans",
+        "key": "lost/terraform.tfstate",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "state in a discovered bucket that no unit uses",
+        "remediation": "Delete or archive the state, or add the unit that owns it to the scanned repos."
+      },
+      {
+        "rule": "FL-TFVER",
+        "severity": "medium",
+        "target": "tf-audit/legacy",
+        "bucket": "acme-audit-bad",
+        "key": "legacy/terraform.tfstate",
+        "unit": "tf-audit/legacy",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "written by 1.5.7, older than the policy's 1.10",
+        "remediation": "Upgrade the unit's terraform or tofu to at least the policy's min_terraform_version."
+      },
+      {
+        "rule": "S3-LOG",
+        "severity": "low",
+        "target": "s3://acme-audit-bad",
+        "bucket": "acme-audit-bad",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "no server access logging and no CloudTrail trail records S3 data events for the bucket",
+        "remediation": "Turn on server access logging or CloudTrail S3 data events for the bucket."
+      },
+      {
+        "rule": "S3-LEGACY",
+        "severity": "low",
+        "target": "s3://acme-audit-legacy",
+        "bucket": "acme-audit-legacy",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "the policy has the RootAccess statement that terragrunt before 1.2 added",
+        "remediation": "Remove the RootAccess statement that terragrunt before 1.2 added; the account root has access through IAM."
+      },
+      {
+        "rule": "LK-MODE",
+        "severity": "low",
+        "target": "tf-audit/legacy",
+        "bucket": "acme-audit-bad",
+        "table": "acme-audit-locks-bad",
+        "key": "legacy/terraform.tfstate",
+        "unit": "tf-audit/legacy",
+        "region": "eu-west-1",
+        "reason": "locks with dynamodb_table acme-audit-locks-bad only",
+        "remediation": "Set use_lockfile = true: dynamodb_table is deprecated since Terraform 1.11. Keep both during the migration."
+      },
+      {
+        "rule": "LK-MD5",
+        "severity": "low",
+        "target": "dynamodb://eu-west-1/acme-audit-locks-bad",
+        "table": "acme-audit-locks-bad",
+        "key": "acme-audit-bad/gone/terraform.tfstate-md5",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "digest for s3://acme-audit-bad/gone/terraform.tfstate, which doesn't exist",
+        "remediation": "Delete the -md5 item: its state object no longer exists."
+      },
+      {
+        "rule": "FL-ABSENT",
+        "severity": "low",
+        "target": "tf-audit/planned",
+        "bucket": "acme-audit-good",
+        "key": "planned/terraform.tfstate",
+        "unit": "tf-audit/planned",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "s3://acme-audit-good/planned/terraform.tfstate doesn't exist: never applied, or a wrong key",
+        "remediation": "Apply the unit, or fix its backend key."
+      },
+      {
+        "rule": "FL-EMPTY",
+        "severity": "low",
+        "target": "tf-audit/empty",
+        "bucket": "acme-audit-good",
+        "key": "empty/terraform.tfstate",
+        "unit": "tf-audit/empty",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "the state manages no resources",
+        "remediation": "Destroy the unit's code and state, or check that the key is right."
+      },
+      {
+        "rule": "FL-PROV",
+        "severity": "low",
+        "target": "tf-audit/legacy",
+        "bucket": "acme-audit-bad",
+        "key": "legacy/terraform.tfstate",
+        "unit": "tf-audit/legacy",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "hashicorp/aws 4.67.0 in .terraform.lock.hcl is older than the policy's 5.0",
+        "remediation": "Upgrade the provider in .terraform.lock.hcl with terraform init -upgrade."
+      },
+      {
+        "rule": "FL-SIZE",
+        "severity": "low",
+        "target": "tf-audit/legacy",
+        "bucket": "acme-audit-bad",
+        "key": "legacy/terraform.tfstate",
+        "unit": "tf-audit/legacy",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "state is 4.8 KiB, over the policy's 0.004 MiB",
+        "remediation": "Split the unit."
+      },
+      {
+        "rule": "LK-BOTH",
+        "severity": "info",
+        "target": "tf-audit/app",
+        "bucket": "acme-audit-good",
+        "table": "acme-audit-locks-good",
+        "key": "app/terraform.tfstate",
+        "unit": "tf-audit/app",
+        "region": "eu-west-1",
+        "reason": "locks with both use_lockfile and dynamodb_table acme-audit-locks-good",
+        "remediation": "Both lock files and DynamoDB are configured, which is fine while migrating. Remove dynamodb_table afterwards."
+      },
+      {
+        "rule": "FL-SECRET",
+        "severity": "info",
+        "target": "tf-audit/secrets",
+        "bucket": "acme-audit-legacy",
+        "key": "secrets/terraform.tfstate",
+        "unit": "tf-audit/secrets",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "sensitive-looking attributes stored in plain state: aws_db_instance.main (password); aws_iam_access_key.ci (secret, ses_smtp_password_v4); random_password.db (bcrypt_hash, result)",
+        "remediation": "Use write-only arguments or ephemeral resources, or keep the secret in a secrets manager."
+      }
+    ],
+    "suppressed": [
+      {
+        "rule": "S3-MFA",
+        "severity": "low",
+        "target": "s3://acme-audit-bad",
+        "bucket": "acme-audit-bad",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "MFA delete is off",
+        "remediation": "Informational: MFA delete needs the root user's MFA device and is rarely practical.",
+        "suppressed": {
+          "reason": "MFA delete needs the root user's device",
+          "expires": "2027-06-30"
+        }
+      },
+      {
+        "rule": "S3-MFA",
+        "severity": "low",
+        "target": "s3://acme-audit-legacy",
+        "bucket": "acme-audit-legacy",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "MFA delete is off",
+        "remediation": "Informational: MFA delete needs the root user's MFA device and is rarely practical.",
+        "suppressed": {
+          "reason": "MFA delete needs the root user's device",
+          "expires": "2027-06-30"
+        }
+      }
+    ],
+    "warnings": [
+      "audit.suppress[1] (check S3-LOG) expired on 2026-10-31 and no longer applies: 1 finding(s) reported again"
+    ],
+    "incomplete": []
+  },
+  "errors": []
+}

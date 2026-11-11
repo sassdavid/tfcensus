@@ -1,0 +1,1048 @@
+{
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "results": [
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "s3://acme-audit-bad"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "versioning is suspended: an overwritten or deleted state can't be restored"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "S3-VER|s3://acme-audit-bad|"
+          },
+          "ruleId": "S3-VER",
+          "ruleIndex": 0
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "s3://acme-audit-legacy"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "key arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-open-4000-8000-000000000003 allows kms:Decrypt to principals in any account (statement AllowDecryptAnywhere)"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "S3-KMSPOL|s3://acme-audit-legacy|"
+          },
+          "ruleId": "S3-KMSPOL",
+          "ruleIndex": 3
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "s3://acme-audit-bad"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "bucket: BlockPublicAcls, IgnorePublicAcls, BlockPublicPolicy, RestrictPublicBuckets off"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "S3-PAB|s3://acme-audit-bad|"
+          },
+          "ruleId": "S3-PAB",
+          "ruleIndex": 4
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "s3://acme-audit-bad"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "the bucket has no policy, so plain HTTP requests aren't denied"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "S3-TLS|s3://acme-audit-bad|"
+          },
+          "ruleId": "S3-TLS",
+          "ruleIndex": 5
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "s3://acme-audit-legacy"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "plain HTTP isn't denied for s3:GetObject by anonymous, another account, the bucket's account, arn:aws:iam::111111111111:root"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "S3-TLS|s3://acme-audit-legacy|"
+          },
+          "ruleId": "S3-TLS",
+          "ruleIndex": 5
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "dynamodb://eu-west-1/acme-audit-locks-bad"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "lock held for 3d3h, over 24h"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "LK-STALE|dynamodb://eu-west-1/acme-audit-locks-bad|acme-audit-bad/legacy/terraform.tfstate"
+          },
+          "ruleId": "LK-STALE",
+          "ruleIndex": 14
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "s3://acme-audit-bad/legacy/terraform.tfstate.tflock"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "lock file is 3d0h old, over 24h"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "LK-STALE|s3://acme-audit-bad/legacy/terraform.tfstate.tflock|legacy/terraform.tfstate.tflock"
+          },
+          "ruleId": "LK-STALE",
+          "ruleIndex": 14
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "tf-audit/app"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "lineage 1a2b3c4d-0000-4000-8000-000000000002 is shared by tf-audit/app (s3://acme-audit-good/app/terraform.tfstate) and tf-audit/copy (s3://acme-audit-good/copy/terraform.tfstate)"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "FL-LINEAGE|tf-audit/app|app/terraform.tfstate"
+          },
+          "ruleId": "FL-LINEAGE",
+          "ruleIndex": 19
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "tf-audit/copy"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "lineage 1a2b3c4d-0000-4000-8000-000000000002 is shared by tf-audit/app (s3://acme-audit-good/app/terraform.tfstate) and tf-audit/copy (s3://acme-audit-good/copy/terraform.tfstate)"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "FL-LINEAGE|tf-audit/copy|copy/terraform.tfstate"
+          },
+          "ruleId": "FL-LINEAGE",
+          "ruleIndex": 19
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "tf-audit/app"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "aws_iam_role arn:aws:iam::111111111111:role/acme-audit-app is managed by tf-audit/app (aws_iam_role.app) and tf-audit/copy (aws_iam_role.app) (matched on arn)"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "FL-DOUBLE|tf-audit/app|"
+          },
+          "ruleId": "FL-DOUBLE",
+          "ruleIndex": 20
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "s3://acme-audit-bad"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "default encryption is SSE-S3: anyone with s3:GetObject can read state, no key policy applies"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "S3-ENC|s3://acme-audit-bad|"
+          },
+          "ruleId": "S3-ENC",
+          "ruleIndex": 2
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "s3://acme-audit-bad"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "object ownership is ObjectWriter: ACLs are on"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "S3-OWN|s3://acme-audit-bad|"
+          },
+          "ruleId": "S3-OWN",
+          "ruleIndex": 6
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "s3://acme-audit-bad"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "no replication: losing the region loses every state"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "S3-REPL|s3://acme-audit-bad|"
+          },
+          "ruleId": "S3-REPL",
+          "ruleIndex": 7
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "s3://acme-audit-legacy"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "replica acme-audit-legacy-replica is in the same region; replica acme-audit-legacy-replica versioning is suspended; replica acme-audit-legacy-replica: default encryption is SSE-S3: anyone with s3:GetObject can read state, no key policy applies"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "S3-REPL|s3://acme-audit-legacy|"
+          },
+          "ruleId": "S3-REPL",
+          "ruleIndex": 7
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "s3://acme-audit-bad"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "no lifecycle rule expires noncurrent versions of every state: they are kept forever"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "S3-LC|s3://acme-audit-bad|"
+          },
+          "ruleId": "S3-LC",
+          "ruleIndex": 8
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "s3://acme-audit-legacy"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "noncurrent versions expire after 3 days, under 7: a bad apply found late can't be rolled back"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "S3-LC|s3://acme-audit-legacy|"
+          },
+          "ruleId": "S3-LC",
+          "ruleIndex": 8
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "dynamodb://eu-west-1/acme-audit-locks-bad"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "encrypted with an AWS owned key, not KMS; point-in-time recovery is off"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "LK-PITR|dynamodb://eu-west-1/acme-audit-locks-bad|"
+          },
+          "ruleId": "LK-PITR",
+          "ruleIndex": 13
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "s3://acme-audit-bad/retired/terraform.tfstate"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "no discovered unit resolves to this key"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "FL-ORPHAN|s3://acme-audit-bad/retired/terraform.tfstate|retired/terraform.tfstate"
+          },
+          "ruleId": "FL-ORPHAN",
+          "ruleIndex": 16
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "s3://acme-tfstate-orphans/lost/terraform.tfstate"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "state in a discovered bucket that no unit uses"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "FL-ORPHAN|s3://acme-tfstate-orphans/lost/terraform.tfstate|lost/terraform.tfstate"
+          },
+          "ruleId": "FL-ORPHAN",
+          "ruleIndex": 16
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "tf-audit/legacy"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "written by 1.5.7, older than the policy's 1.10"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "FL-TFVER|tf-audit/legacy|legacy/terraform.tfstate"
+          },
+          "ruleId": "FL-TFVER",
+          "ruleIndex": 21
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "s3://acme-audit-bad"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "no server access logging and no CloudTrail trail records S3 data events for the bucket"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "S3-LOG|s3://acme-audit-bad|"
+          },
+          "ruleId": "S3-LOG",
+          "ruleIndex": 9
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "s3://acme-audit-legacy"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "the policy has the RootAccess statement that terragrunt before 1.2 added"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "S3-LEGACY|s3://acme-audit-legacy|"
+          },
+          "ruleId": "S3-LEGACY",
+          "ruleIndex": 10
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "tf-audit/legacy"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "locks with dynamodb_table acme-audit-locks-bad only"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "LK-MODE|tf-audit/legacy|legacy/terraform.tfstate"
+          },
+          "ruleId": "LK-MODE",
+          "ruleIndex": 11
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "dynamodb://eu-west-1/acme-audit-locks-bad"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "digest for s3://acme-audit-bad/gone/terraform.tfstate, which doesn't exist"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "LK-MD5|dynamodb://eu-west-1/acme-audit-locks-bad|acme-audit-bad/gone/terraform.tfstate-md5"
+          },
+          "ruleId": "LK-MD5",
+          "ruleIndex": 15
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "tf-audit/planned"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "s3://acme-audit-good/planned/terraform.tfstate doesn't exist: never applied, or a wrong key"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "FL-ABSENT|tf-audit/planned|planned/terraform.tfstate"
+          },
+          "ruleId": "FL-ABSENT",
+          "ruleIndex": 17
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "tf-audit/empty"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "the state manages no resources"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "FL-EMPTY|tf-audit/empty|empty/terraform.tfstate"
+          },
+          "ruleId": "FL-EMPTY",
+          "ruleIndex": 18
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "tf-audit/legacy"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "hashicorp/aws 4.67.0 in .terraform.lock.hcl is older than the policy's 5.0"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "FL-PROV|tf-audit/legacy|legacy/terraform.tfstate"
+          },
+          "ruleId": "FL-PROV",
+          "ruleIndex": 22
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "tf-audit/legacy"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "state is 4.8 KiB, over the policy's 0.004 MiB"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "FL-SIZE|tf-audit/legacy|legacy/terraform.tfstate"
+          },
+          "ruleId": "FL-SIZE",
+          "ruleIndex": 23
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "tf-audit/app"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "locks with both use_lockfile and dynamodb_table acme-audit-locks-good"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "LK-BOTH|tf-audit/app|app/terraform.tfstate"
+          },
+          "ruleId": "LK-BOTH",
+          "ruleIndex": 12
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "tf-audit/secrets"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "sensitive-looking attributes stored in plain state: aws_db_instance.main (password); aws_iam_access_key.ci (secret, ses_smtp_password_v4); random_password.db (bcrypt_hash, result)"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "FL-SECRET|tf-audit/secrets|secrets/terraform.tfstate"
+          },
+          "ruleId": "FL-SECRET",
+          "ruleIndex": 24
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "s3://acme-audit-bad"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "MFA delete is off"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "S3-MFA|s3://acme-audit-bad|"
+          },
+          "ruleId": "S3-MFA",
+          "ruleIndex": 1,
+          "suppressions": [
+            {
+              "justification": "MFA delete needs the root user's device (until 2027-06-30)",
+              "kind": "external",
+              "status": "accepted"
+            }
+          ]
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "s3://acme-audit-legacy"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "MFA delete is off"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "S3-MFA|s3://acme-audit-legacy|"
+          },
+          "ruleId": "S3-MFA",
+          "ruleIndex": 1,
+          "suppressions": [
+            {
+              "justification": "MFA delete needs the root user's device (until 2027-06-30)",
+              "kind": "external",
+              "status": "accepted"
+            }
+          ]
+        }
+      ],
+      "tool": {
+        "driver": {
+          "informationUri": "https://github.com/sassdavid/tfcensus",
+          "name": "tfcensus",
+          "rules": [
+            {
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "Enable versioning, so an overwritten or deleted state can be restored."
+              },
+              "id": "S3-VER",
+              "properties": {
+                "severity": "high"
+              },
+              "shortDescription": {
+                "text": "State bucket versioning is enabled"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "help": {
+                "text": "Informational: MFA delete needs the root user's MFA device and is rarely practical."
+              },
+              "id": "S3-MFA",
+              "properties": {
+                "severity": "low"
+              },
+              "shortDescription": {
+                "text": "State bucket has MFA delete"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "help": {
+                "text": "Set default encryption to SSE-KMS with a customer-managed key, so key policy controls who can decrypt state."
+              },
+              "id": "S3-ENC",
+              "properties": {
+                "severity": "medium"
+              },
+              "shortDescription": {
+                "text": "State bucket encrypts with a customer-managed KMS key"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "Remove kms:Decrypt for Principal \"*\", or restrict it with aws:PrincipalAccount or aws:PrincipalOrgID."
+              },
+              "id": "S3-KMSPOL",
+              "properties": {
+                "severity": "high"
+              },
+              "shortDescription": {
+                "text": "State key policy doesn't let every principal decrypt"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "Turn on all four public access block settings on the bucket and the account."
+              },
+              "id": "S3-PAB",
+              "properties": {
+                "severity": "high"
+              },
+              "shortDescription": {
+                "text": "Bucket and account public access block are all on"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "Add a Deny for Principal \"*\", Action s3:*, the bucket and bucket/* resources, with Bool aws:SecureTransport false as the only condition."
+              },
+              "id": "S3-TLS",
+              "properties": {
+                "severity": "high"
+              },
+              "shortDescription": {
+                "text": "State bucket policy denies requests without TLS"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "help": {
+                "text": "Set object ownership to BucketOwnerEnforced, which turns ACLs off."
+              },
+              "id": "S3-OWN",
+              "properties": {
+                "severity": "medium"
+              },
+              "shortDescription": {
+                "text": "Object ownership is BucketOwnerEnforced"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "help": {
+                "text": "Configure cross-region replication to a versioned, KMS-encrypted bucket."
+              },
+              "id": "S3-REPL",
+              "properties": {
+                "severity": "medium"
+              },
+              "shortDescription": {
+                "text": "State is replicated to another region"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "help": {
+                "text": "Add a lifecycle rule with NoncurrentVersionExpiration of at least the policy's noncurrent_days."
+              },
+              "id": "S3-LC",
+              "properties": {
+                "severity": "medium"
+              },
+              "shortDescription": {
+                "text": "Noncurrent state versions expire after a bounded time"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "help": {
+                "text": "Turn on server access logging or CloudTrail S3 data events for the bucket."
+              },
+              "id": "S3-LOG",
+              "properties": {
+                "severity": "low"
+              },
+              "shortDescription": {
+                "text": "State access is logged"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "help": {
+                "text": "Remove the RootAccess statement that terragrunt before 1.2 added; the account root has access through IAM."
+              },
+              "id": "S3-LEGACY",
+              "properties": {
+                "severity": "low"
+              },
+              "shortDescription": {
+                "text": "No legacy RootAccess statement"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "help": {
+                "text": "Set use_lockfile = true: dynamodb_table is deprecated since Terraform 1.11. Keep both during the migration."
+              },
+              "id": "LK-MODE",
+              "properties": {
+                "severity": "low"
+              },
+              "shortDescription": {
+                "text": "Unit locks with S3 lock files"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "help": {
+                "text": "Both lock files and DynamoDB are configured, which is fine while migrating. Remove dynamodb_table afterwards."
+              },
+              "id": "LK-BOTH",
+              "properties": {
+                "severity": "info"
+              },
+              "shortDescription": {
+                "text": "Unit uses one lock mechanism"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "help": {
+                "text": "Turn on point-in-time recovery and encrypt the table with a KMS key."
+              },
+              "id": "LK-PITR",
+              "properties": {
+                "severity": "medium"
+              },
+              "shortDescription": {
+                "text": "Lock table has point-in-time recovery and KMS encryption"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "Check that no run holds the lock, then release it with terraform force-unlock."
+              },
+              "id": "LK-STALE",
+              "properties": {
+                "severity": "high"
+              },
+              "shortDescription": {
+                "text": "No stale locks"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "help": {
+                "text": "Delete the -md5 item: its state object no longer exists."
+              },
+              "id": "LK-MD5",
+              "properties": {
+                "severity": "low"
+              },
+              "shortDescription": {
+                "text": "No orphaned digest items"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "help": {
+                "text": "Delete or archive the state, or add the unit that owns it to the scanned repos."
+              },
+              "id": "FL-ORPHAN",
+              "properties": {
+                "severity": "medium"
+              },
+              "shortDescription": {
+                "text": "Every state key belongs to a unit"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "help": {
+                "text": "Apply the unit, or fix its backend key."
+              },
+              "id": "FL-ABSENT",
+              "properties": {
+                "severity": "low"
+              },
+              "shortDescription": {
+                "text": "Every unit's state exists"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "help": {
+                "text": "Destroy the unit's code and state, or check that the key is right."
+              },
+              "id": "FL-EMPTY",
+              "properties": {
+                "severity": "low"
+              },
+              "shortDescription": {
+                "text": "State manages resources"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "One of the states is a copy. Keep the one the unit applies to and archive the other."
+              },
+              "id": "FL-LINEAGE",
+              "properties": {
+                "severity": "high"
+              },
+              "shortDescription": {
+                "text": "Each lineage lives under one key"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "Remove the resource from all but one state with terraform state rm, or a removed block."
+              },
+              "id": "FL-DOUBLE",
+              "properties": {
+                "severity": "high"
+              },
+              "shortDescription": {
+                "text": "Each resource is managed by one state"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "help": {
+                "text": "Upgrade the unit's terraform or tofu to at least the policy's min_terraform_version."
+              },
+              "id": "FL-TFVER",
+              "properties": {
+                "severity": "medium"
+              },
+              "shortDescription": {
+                "text": "State was written by a supported version"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "help": {
+                "text": "Upgrade the provider in .terraform.lock.hcl with terraform init -upgrade."
+              },
+              "id": "FL-PROV",
+              "properties": {
+                "severity": "low"
+              },
+              "shortDescription": {
+                "text": "Provider versions meet the policy"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "help": {
+                "text": "Split the unit."
+              },
+              "id": "FL-SIZE",
+              "properties": {
+                "severity": "low"
+              },
+              "shortDescription": {
+                "text": "State is small enough for fast plans"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "help": {
+                "text": "Use write-only arguments or ephemeral resources, or keep the secret in a secrets manager."
+              },
+              "id": "FL-SECRET",
+              "properties": {
+                "severity": "info"
+              },
+              "shortDescription": {
+                "text": "No secrets stored in plain state"
+              }
+            }
+          ],
+          "version": "VERSION"
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}
