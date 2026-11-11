@@ -1,0 +1,431 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 64
+        host: ""
+        body: '{"Filters":{"FilterString":"region:eu-west-1"},"MaxResults":500}'
+        headers:
+            Content-Type:
+                - application/json
+        url: https://resource-explorer-2.eu-west-1.amazonaws.com/ListResources
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Resources":[{"Arn":"arn:aws:ec2:eu-west-1:111111111111:security-group/sg-1","OwningAccountId":"111111111111","Region":"eu-west-1","ResourceType":"ec2:security-group","Service":"ec2","Properties":[{"Name":"tags","Data":[{"Key":"team","Value":"net"}]}]}]}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 1
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            bucket-region:
+                - us-east-1
+            x-id:
+                - ListBuckets
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://s3.us-east-1.amazonaws.com/?bucket-region=us-east-1&x-id=ListBuckets
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ListAllMyBucketsResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>o</ID></Owner><Buckets></Buckets></ListAllMyBucketsResult>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 2
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        url: https://route53.amazonaws.com/2013-04-01/hostedzone
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ListHostedZonesResponse xmlns="https://route53.amazonaws.com/doc/2013-04-01/"><HostedZones><HostedZone><Id>/hostedzone/Z1</Id><Name>example.com.</Name><CallerReference>r</CallerReference><ResourceRecordSetCount>3</ResourceRecordSetCount></HostedZone></HostedZones><IsTruncated>false</IsTruncated><MaxItems>100</MaxItems><Marker></Marker></ListHostedZonesResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 3
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 78
+        host: ""
+        body: '{"Filters":{"FilterString":"region:us-east-1 region:global"},"MaxResults":500}'
+        headers:
+            Content-Type:
+                - application/json
+        url: https://resource-explorer-2.us-east-1.amazonaws.com/ListResources
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Resources":[{"Arn":"arn:aws:iam::111111111111:role/app","OwningAccountId":"111111111111","Region":"global","ResourceType":"iam:role","Service":"iam"},{"Arn":"arn:aws:ec2:us-east-1:111111111111:vpc/vpc-9","OwningAccountId":"111111111111","Region":"us-east-1","ResourceType":"ec2:vpc","Service":"ec2"}]}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 4
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 120
+        host: ""
+        body: Action=GetAccountAuthorizationDetails&Filter.member.1=Role&Filter.member.2=User&Filter.member.3=Group&Version=2010-05-08
+        form:
+            Action:
+                - GetAccountAuthorizationDetails
+            Filter.member.1:
+                - Role
+            Filter.member.2:
+                - User
+            Filter.member.3:
+                - Group
+            Version:
+                - "2010-05-08"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://iam.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <GetAccountAuthorizationDetailsResponse xmlns="https://iam.amazonaws.com/doc/2010-05-08/"><GetAccountAuthorizationDetailsResult><IsTruncated>false</IsTruncated><RoleDetailList><member><RoleName>app</RoleName><Arn>arn:aws:iam::111111111111:role/app</Arn><AttachedManagedPolicies><member><PolicyName>ReadOnlyAccess</PolicyName><PolicyArn>arn:aws:iam::aws:policy/ReadOnlyAccess</PolicyArn></member></AttachedManagedPolicies><RolePolicyList><member><PolicyName>inline</PolicyName><PolicyDocument>FIXTURE-POLICY-DOCUMENT</PolicyDocument></member></RolePolicyList></member></RoleDetailList></GetAccountAuthorizationDetailsResult><ResponseMetadata><RequestId>0</RequestId></ResponseMetadata></GetAccountAuthorizationDetailsResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 5
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            bucket-region:
+                - eu-west-1
+            x-id:
+                - ListBuckets
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://s3.eu-west-1.amazonaws.com/?bucket-region=eu-west-1&x-id=ListBuckets
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ListAllMyBucketsResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>o</ID></Owner><Buckets><Bucket><Name>acme-logs</Name><CreationDate>2026-01-01T00:00:00.000Z</CreationDate><BucketRegion>eu-west-1</BucketRegion></Bucket></Buckets></ListAllMyBucketsResult>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 6
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 857
+        host: ""
+        body: '{"Expression":"SELECT resourceId, resourceName, resourceType, arn, awsRegion, accountId, tags, relationships WHERE resourceType IN (''AWS::DynamoDB::Table'', ''AWS::EC2::EIP'', ''AWS::EC2::InternetGateway'', ''AWS::EC2::NatGateway'', ''AWS::EC2::RouteTable'', ''AWS::EC2::SecurityGroup'', ''AWS::EC2::Subnet'', ''AWS::EC2::VPC'', ''AWS::ECR::Repository'', ''AWS::EKS::Cluster'', ''AWS::ElasticLoadBalancingV2::Listener'', ''AWS::ElasticLoadBalancingV2::LoadBalancer'', ''AWS::ElasticLoadBalancingV2::TargetGroup'', ''AWS::IAM::Group'', ''AWS::IAM::InstanceProfile'', ''AWS::IAM::Policy'', ''AWS::IAM::Role'', ''AWS::IAM::User'', ''AWS::KMS::Alias'', ''AWS::KMS::Key'', ''AWS::Lambda::Function'', ''AWS::RDS::DBCluster'', ''AWS::RDS::DBInstance'', ''AWS::RDS::DBSubnetGroup'', ''AWS::Route53::HostedZone'', ''AWS::S3::Bucket'', ''AWS::SNS::Topic'', ''AWS::SQS::Queue'', ''AWS::SecretsManager::Secret'')","Limit":100}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - StarlingDoveService.SelectResourceConfig
+        url: https://config.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Results":["{\"resourceId\":\"sg-1\",\"resourceName\":\"sg-1\",\"resourceType\":\"AWS::EC2::SecurityGroup\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:security-group/sg-1\",\"awsRegion\":\"eu-west-1\",\"accountId\":\"111111111111\",\"tags\":[{\"key\":\"Name\",\"value\":\"web\"}],\"relationships\":[]}","{\"resourceId\":\"AROAEXAMPLE\",\"resourceName\":\"AROAEXAMPLE\",\"resourceType\":\"AWS::IAM::Role\",\"arn\":\"arn:aws:iam::111111111111:role/app\",\"awsRegion\":\"global\",\"accountId\":\"111111111111\",\"tags\":[],\"relationships\":[]}"]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 7
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 68
+        host: ""
+        body: Action=DescribeSecurityGroupRules&MaxResults=1000&Version=2016-11-15
+        form:
+            Action:
+                - DescribeSecurityGroupRules
+            MaxResults:
+                - "1000"
+            Version:
+                - "2016-11-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://ec2.us-east-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <DescribeSecurityGroupRulesResponse xmlns="http://ec2.amazonaws.com/doc/2016-11-15/"><requestId>0</requestId><securityGroupRuleSet></securityGroupRuleSet></DescribeSecurityGroupRulesResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 8
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 68
+        host: ""
+        body: Action=DescribeSecurityGroupRules&MaxResults=1000&Version=2016-11-15
+        form:
+            Action:
+                - DescribeSecurityGroupRules
+            MaxResults:
+                - "1000"
+            Version:
+                - "2016-11-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://ec2.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <DescribeSecurityGroupRulesResponse xmlns="http://ec2.amazonaws.com/doc/2016-11-15/"><requestId>0</requestId><securityGroupRuleSet><item><securityGroupRuleId>sgr-1</securityGroupRuleId><groupId>sg-1</groupId><groupOwnerId>111111111111</groupOwnerId><isEgress>false</isEgress><ipProtocol>tcp</ipProtocol><fromPort>443</fromPort><toPort>443</toPort><cidrIpv4>10.0.0.0/8</cidrIpv4><securityGroupRuleArn>arn:aws:ec2:eu-west-1:111111111111:security-group-rule/sgr-1</securityGroupRuleArn><tagSet/></item></securityGroupRuleSet></DescribeSecurityGroupRulesResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 9
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        url: https://route53.amazonaws.com/2013-04-01/hostedzone/Z1/rrset
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ListResourceRecordSetsResponse xmlns="https://route53.amazonaws.com/doc/2013-04-01/"><ResourceRecordSets><ResourceRecordSet><Name>example.com.</Name><Type>NS</Type><TTL>300</TTL><ResourceRecords><ResourceRecord><Value>192.0.2.1</Value></ResourceRecord></ResourceRecords></ResourceRecordSet></ResourceRecordSets><IsTruncated>false</IsTruncated><MaxItems>2</MaxItems></ListResourceRecordSetsResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 10
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            policy:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-logs.s3.eu-west-1.amazonaws.com/?policy=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Version":"2012-10-17","Statement":[]}'
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 11
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            versioning:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-logs.s3.eu-west-1.amazonaws.com/?versioning=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <VersioningConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Status>Enabled</Status></VersioningConfiguration>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 12
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            lifecycle:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-logs.s3.eu-west-1.amazonaws.com/?lifecycle=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <Error><Code>NoSuchLifecycleConfiguration</Code><Message>none</Message><RequestId>0000000000000000</RequestId></Error>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 404 Not Found
+        code: 404
+        duration: 0s
+    - id: 13
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            encryption:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-logs.s3.eu-west-1.amazonaws.com/?encryption=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ServerSideEncryptionConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Rule><ApplyServerSideEncryptionByDefault><SSEAlgorithm>AES256</SSEAlgorithm></ApplyServerSideEncryptionByDefault></Rule></ServerSideEncryptionConfiguration>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 14
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            publicAccessBlock:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-logs.s3.eu-west-1.amazonaws.com/?publicAccessBlock=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <PublicAccessBlockConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><BlockPublicAcls>true</BlockPublicAcls><IgnorePublicAcls>true</IgnorePublicAcls><BlockPublicPolicy>true</BlockPublicPolicy><RestrictPublicBuckets>true</RestrictPublicBuckets></PublicAccessBlockConfiguration>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s

@@ -48,14 +48,14 @@ type Object struct {
 // Fetch reads and parses s3://bucket/key without taking a lock. It returns [ErrAbsent] when the
 // key doesn't exist and [ErrAccessDenied] when S3 refuses the read. A parse error comes with the
 // object's metadata.
-func Fetch(ctx context.Context, c Client, bucket, key string) (*Object, error) {
+func Fetch(ctx context.Context, c Client, bucket, key string, opts ParseOptions) (*Object, error) {
 	out, err := c.GetObject(ctx, &s3.GetObjectInput{Bucket: aws.String(bucket), Key: aws.String(key)})
 	if err != nil {
 		return nil, classify(err, actionGet, bucket, key)
 	}
 	defer func() { _ = out.Body.Close() }()
 	obj := &Object{Size: aws.ToInt64(out.ContentLength), LastModified: out.LastModified}
-	obj.State, err = Parse(out.Body)
+	obj.State, err = ParseWith(out.Body, opts)
 	// Drain what the decoder didn't need, so the connection can be reused.
 	_, _ = io.Copy(io.Discard, out.Body)
 	if err != nil {

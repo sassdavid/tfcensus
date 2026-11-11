@@ -58,6 +58,13 @@ type Instance struct {
 	// Sensitive lists attribute names, never values, that look like secrets and hold a value, or
 	// that the provider marked sensitive in sensitive_attributes. Sorted, without duplicates.
 	Sensitive []string
+	// IdentityAttrs holds the values of the type's identity attributes read from its resource
+	// attributes, keyed by identity attribute name, when [ParseOptions.IdentityAttrs] names them.
+	// It stands in for Identity in states written before Terraform 1.12.
+	IdentityAttrs map[string]string
+	// RuleKeys are the [SGRule.Key] hashes of a security group rule's expanded tuples, or of a
+	// security group's inline rules, when [ParseOptions.RuleTuples] is set.
+	RuleKeys []string
 }
 
 // Address returns the instance's resource address, such as module.vpc.aws_subnet.private[0].
@@ -107,7 +114,23 @@ func identifierAttrs() []string { return []string{attrID, attrARN, attrRegion} }
 // a nil error; a state in another format version returns [ErrUnsupportedVersion] and the
 // metadata read so far.
 func Parse(r io.Reader) (*State, error) {
-	p := parser{d: jsontext.NewDecoder(r)}
+	return ParseWith(r, ParseOptions{})
+}
+
+// ParseOptions asks the parser to keep more than the identifier attributes.
+type ParseOptions struct {
+	// IdentityAttrs returns, for a resource type, its identity attributes mapped to the resource
+	// attributes they come from. The parser keeps those string values in
+	// [Instance.IdentityAttrs]. Identity attributes are identifiers, so this keeps no secret.
+	IdentityAttrs func(tfType string) map[string]string
+	// RuleTuples hashes the rules of aws_security_group and aws_security_group_rule into
+	// [Instance.RuleKeys]. The rule values themselves are dropped.
+	RuleTuples bool
+}
+
+// ParseWith reads raw state JSON like [Parse], keeping what o asks for.
+func ParseWith(r io.Reader, o ParseOptions) (*State, error) {
+	p := parser{d: jsontext.NewDecoder(r), opts: o}
 	s, err := p.state()
 	if err != nil {
 		return nil, fmt.Errorf("parse state at byte %d: %w", p.d.InputOffset(), err)
@@ -120,7 +143,8 @@ func Parse(r io.Reader) (*State, error) {
 }
 
 type parser struct {
-	d *jsontext.Decoder
+	d    *jsontext.Decoder
+	opts ParseOptions
 }
 
 func (p *parser) state() (*State, error) {
@@ -270,8 +294,9 @@ func (p *parser) resource() (Resource, error) {
 			raw, err = p.string()
 			r.Provider = ParseProvider(raw)
 		case "instances":
+			// Terraform writes type before instances, so the type is known here.
 			err = p.array(func() error {
-				inst, instErr := p.instance()
+				inst, instErr := p.instance(r.Type)
 				if instErr != nil {
 					return instErr
 				}
@@ -286,8 +311,9 @@ func (p *parser) resource() (Resource, error) {
 	return r, err
 }
 
-func (p *parser) instance() (Instance, error) {
+func (p *parser) instance(tfType string) (Instance, error) {
 	var inst Instance
+	x := p.extras(tfType)
 	err := p.object(func(name string) error {
 		var err error
 		switch name {
@@ -296,7 +322,7 @@ func (p *parser) instance() (Instance, error) {
 		case "deposed":
 			inst.Deposed, err = p.string()
 		case "attributes":
-			err = p.attributes(&inst)
+			err = p.attributes(&inst, x)
 		case "attributes_flat":
 			err = p.flatAttributes(&inst)
 		case "identity":
@@ -310,7 +336,32 @@ func (p *parser) instance() (Instance, error) {
 	})
 	slices.Sort(inst.Sensitive)
 	inst.Sensitive = slices.Compact(inst.Sensitive)
+	if x.rules != nil {
+		inst.RuleKeys = x.rules.keys(inst.ID)
+	}
 	return inst, err
+}
+
+// extras is what [ParseOptions] asks to keep for one resource type.
+type extras struct {
+	identity map[string]string // resource attribute to identity attribute
+	rules    *ruleCollector
+}
+
+func (p *parser) extras(tfType string) extras {
+	var x extras
+	if p.opts.IdentityAttrs != nil {
+		for ident, attr := range p.opts.IdentityAttrs(tfType) {
+			if x.identity == nil {
+				x.identity = map[string]string{}
+			}
+			x.identity[attr] = ident
+		}
+	}
+	if p.opts.RuleTuples && (tfType == typeSecurityGroup || tfType == typeSecurityGroupRule) {
+		x.rules = &ruleCollector{tfType: tfType}
+	}
+	return x
 }
 
 func (p *parser) indexKey() (string, error) {
@@ -332,13 +383,23 @@ func (p *parser) indexKey() (string, error) {
 }
 
 // attributes keeps the identifier attributes and skips every other value unread.
-func (p *parser) attributes(inst *Instance) error {
+func (p *parser) attributes(inst *Instance, x extras) error {
 	if p.d.PeekKind() == 'n' {
 		return p.d.SkipValue() //nolint:wrapcheck // Parse adds the byte offset
 	}
 	return p.object(func(name string) error {
 		if SensitiveName(name) {
 			return p.sensitiveValue(inst, name)
+		}
+		if x.rules != nil && x.rules.wants(name) {
+			raw, err := p.d.ReadValue()
+			if err != nil {
+				return err //nolint:wrapcheck // Parse adds the byte offset
+			}
+			return x.rules.set(name, raw)
+		}
+		if ident, ok := x.identity[name]; ok && p.d.PeekKind() == '"' {
+			return p.identityAttr(inst, name, ident)
 		}
 		if !slices.Contains(identifierAttrs(), name) || p.d.PeekKind() != '"' {
 			return p.d.SkipValue() //nolint:wrapcheck // Parse adds the byte offset
@@ -347,6 +408,19 @@ func (p *parser) attributes(inst *Instance) error {
 		inst.set(name, v)
 		return err
 	})
+}
+
+// identityAttr keeps the string value of resource attribute name as identity attribute ident.
+func (p *parser) identityAttr(inst *Instance, name, ident string) error {
+	v, err := p.string()
+	if v != "" {
+		if inst.IdentityAttrs == nil {
+			inst.IdentityAttrs = map[string]string{}
+		}
+		inst.IdentityAttrs[ident] = v
+	}
+	inst.set(name, v)
+	return err
 }
 
 // sensitiveValue records name when its value is set: not null, not a boolean and not an empty

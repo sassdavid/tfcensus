@@ -1,0 +1,35 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 68
+        host: ""
+        body: Action=DescribeSecurityGroupRules&MaxResults=1000&Version=2016-11-15
+        form:
+            Action:
+                - DescribeSecurityGroupRules
+            MaxResults:
+                - "1000"
+            Version:
+                - "2016-11-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://ec2.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <Response><Errors><Error><Code>UnauthorizedOperation</Code><Message>You are not authorized</Message></Error></Errors><RequestID>00000000-0000-4000-8000-000000000000</RequestID></Response>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 403 Forbidden
+        code: 403
+        duration: 0s

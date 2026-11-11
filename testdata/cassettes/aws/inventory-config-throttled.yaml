@@ -1,0 +1,57 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 857
+        host: ""
+        body: '{"Expression":"SELECT resourceId, resourceName, resourceType, arn, awsRegion, accountId, tags, relationships WHERE resourceType IN (''AWS::DynamoDB::Table'', ''AWS::EC2::EIP'', ''AWS::EC2::InternetGateway'', ''AWS::EC2::NatGateway'', ''AWS::EC2::RouteTable'', ''AWS::EC2::SecurityGroup'', ''AWS::EC2::Subnet'', ''AWS::EC2::VPC'', ''AWS::ECR::Repository'', ''AWS::EKS::Cluster'', ''AWS::ElasticLoadBalancingV2::Listener'', ''AWS::ElasticLoadBalancingV2::LoadBalancer'', ''AWS::ElasticLoadBalancingV2::TargetGroup'', ''AWS::IAM::Group'', ''AWS::IAM::InstanceProfile'', ''AWS::IAM::Policy'', ''AWS::IAM::Role'', ''AWS::IAM::User'', ''AWS::KMS::Alias'', ''AWS::KMS::Key'', ''AWS::Lambda::Function'', ''AWS::RDS::DBCluster'', ''AWS::RDS::DBInstance'', ''AWS::RDS::DBSubnetGroup'', ''AWS::Route53::HostedZone'', ''AWS::S3::Bucket'', ''AWS::SNS::Topic'', ''AWS::SQS::Queue'', ''AWS::SecretsManager::Secret'')","Limit":100}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - StarlingDoveService.SelectResourceConfig
+        url: https://config.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"__type":"ThrottlingException","message":"Rate exceeded"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+        status: 400 Bad Request
+        code: 400
+        duration: 0s
+    - id: 1
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 857
+        host: ""
+        body: '{"Expression":"SELECT resourceId, resourceName, resourceType, arn, awsRegion, accountId, tags, relationships WHERE resourceType IN (''AWS::DynamoDB::Table'', ''AWS::EC2::EIP'', ''AWS::EC2::InternetGateway'', ''AWS::EC2::NatGateway'', ''AWS::EC2::RouteTable'', ''AWS::EC2::SecurityGroup'', ''AWS::EC2::Subnet'', ''AWS::EC2::VPC'', ''AWS::ECR::Repository'', ''AWS::EKS::Cluster'', ''AWS::ElasticLoadBalancingV2::Listener'', ''AWS::ElasticLoadBalancingV2::LoadBalancer'', ''AWS::ElasticLoadBalancingV2::TargetGroup'', ''AWS::IAM::Group'', ''AWS::IAM::InstanceProfile'', ''AWS::IAM::Policy'', ''AWS::IAM::Role'', ''AWS::IAM::User'', ''AWS::KMS::Alias'', ''AWS::KMS::Key'', ''AWS::Lambda::Function'', ''AWS::RDS::DBCluster'', ''AWS::RDS::DBInstance'', ''AWS::RDS::DBSubnetGroup'', ''AWS::Route53::HostedZone'', ''AWS::S3::Bucket'', ''AWS::SNS::Topic'', ''AWS::SQS::Queue'', ''AWS::SecretsManager::Secret'')","Limit":100}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - StarlingDoveService.SelectResourceConfig
+        url: https://config.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Results":["{\"resourceId\":\"vpc-1\",\"resourceName\":\"vpc-1\",\"resourceType\":\"AWS::EC2::VPC\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-1\",\"awsRegion\":\"eu-west-1\",\"accountId\":\"111111111111\",\"tags\":[],\"relationships\":[]}"]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+        status: 200 OK
+        code: 200
+        duration: 0s

@@ -1,0 +1,53 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 78
+        host: ""
+        body: '{"Filters":{"FilterString":"region:us-east-1 region:global"},"MaxResults":500}'
+        headers:
+            Content-Type:
+                - application/json
+        url: https://resource-explorer-2.us-east-1.amazonaws.com/ListResources
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"__type":"ThrottlingException","message":"Rate exceeded"}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 429 Too Many Requests
+        code: 429
+        duration: 0s
+    - id: 1
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 78
+        host: ""
+        body: '{"Filters":{"FilterString":"region:us-east-1 region:global"},"MaxResults":500}'
+        headers:
+            Content-Type:
+                - application/json
+        url: https://resource-explorer-2.us-east-1.amazonaws.com/ListResources
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Resources":[{"Arn":"arn:aws:iam::111111111111:role/app","OwningAccountId":"111111111111","Region":"global","ResourceType":"iam:role","Service":"iam"}]}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 0s

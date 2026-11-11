@@ -31,7 +31,10 @@ Same as [relgap M0](https://github.com/sassdavid/relgap/blob/main/docs/plan/mile
 
 ### M5: Inventory layers and matching → [inventory](specs/inventory.md), [matching](specs/matching.md)
 Scope: config + resource-explorer + native (sg-rules, iam-attachments, route53, s3-subresources) layers; typemap generation task + the first 40 types; the match algorithm.
-- [ ] inventory.md criteria 1–3, matching.md criteria 1–4.
+- [x] inventory.md criteria 1–3, matching.md criteria 1–4.
+- Not in M5: the Config aggregator fast path, the Cloud Control layer and its parent graph
+  (inventory.md criterion 4), the 1 h results cache, and the emulator nightly. scan wires the
+  layers and `--explain-coverage` at M6.
 
 ### M6: Ownership rules and scan report → v0.1.0 ([ownership](specs/ownership-rules.md), [scan](specs/scan.md))
 - [ ] All ownership-rules.md and scan.md criteria (emulator and fixture based).

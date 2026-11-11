@@ -95,6 +95,7 @@ type Options struct {
 	Concurrency int    // 0 means [DefaultConcurrency]
 	TFPath      string // the terraform binary terragrunt runs; a tofu binary marks terragrunt units as OpenTofu
 	Logger      *slog.Logger
+	Parse       ParseOptions // what to keep beyond identifiers, for matching
 }
 
 // Reader reads the state of many units concurrently.
@@ -212,7 +213,7 @@ func (r *Reader) unit(ctx context.Context, u *discovery.Unit) []UnitState {
 }
 
 func (r *Reader) read(ctx context.Context, c Client, us *UnitState, versions map[string]string) {
-	obj, err := Fetch(ctx, c, us.Bucket, us.Key)
+	obj, err := Fetch(ctx, c, us.Bucket, us.Key, r.opts.Parse)
 	if obj != nil {
 		us.Size, us.LastModified = obj.Size, obj.LastModified
 	}

@@ -1,0 +1,279 @@
+# Hand-written typemap entries. Each entry confirms the CloudFormation type of a TF type and says
+# how to match it. Identity attributes come from generated.yaml.
+#
+#   tf          the TF resource type
+#   cfn         the CloudFormation type (or Native::... when CloudFormation has none)
+#   config      the AWS Config type, when Config records it (validated against the SDK enum)
+#   re          Resource Explorer types, when the generated ones are missing or wrong
+#   arn         ARN pattern: {x} is one segment, {x+} the rest, {x:regexp} a regexp
+#   id          templates for the TF id attribute, tried in order; [..] is optional
+#   live        fields rendered from other fields of the live resource
+#   native      the native lister that lists the type
+#   rule_tuple  match security group rules by protocol, ports, source and direction
+#   derived     AWS creates the resource as a child of a parent; when lists field values
+#
+# Fields in templates come from the live resource: its attributes, the ARN pattern's
+# placeholders, then id, arn, account, region and partition.
+
+# VPC
+- tf: aws_vpc
+  cfn: AWS::EC2::VPC
+  config: AWS::EC2::VPC
+  arn: "arn:{partition}:ec2:{region}:{account}:vpc/{id}"
+  id: ["{id}"]
+- tf: aws_subnet
+  cfn: AWS::EC2::Subnet
+  config: AWS::EC2::Subnet
+  arn: "arn:{partition}:ec2:{region}:{account}:subnet/{id}"
+  id: ["{id}"]
+- tf: aws_internet_gateway
+  cfn: AWS::EC2::InternetGateway
+  config: AWS::EC2::InternetGateway
+  arn: "arn:{partition}:ec2:{region}:{account}:internet-gateway/{id}"
+  id: ["{id}"]
+- tf: aws_nat_gateway
+  cfn: AWS::EC2::NatGateway
+  config: AWS::EC2::NatGateway
+  arn: "arn:{partition}:ec2:{region}:{account}:natgateway/{id}"
+  id: ["{id}"]
+- tf: aws_route_table
+  cfn: AWS::EC2::RouteTable
+  config: AWS::EC2::RouteTable
+  arn: "arn:{partition}:ec2:{region}:{account}:route-table/{id}"
+  id: ["{id}"]
+- tf: aws_eip
+  cfn: AWS::EC2::EIP
+  config: AWS::EC2::EIP
+  arn: "arn:{partition}:ec2:{region}:{account}:elastic-ip/{id}"
+  id: ["{id}"]
+
+# Security groups and rules. Rule ARNs don't say ingress or egress, so rule types have no ARN
+# pattern: the ec2-sg-rules lister sets their type.
+- tf: aws_security_group
+  cfn: AWS::EC2::SecurityGroup
+  config: AWS::EC2::SecurityGroup
+  arn: "arn:{partition}:ec2:{region}:{account}:security-group/{id}"
+  id: ["{id}"]
+- tf: aws_vpc_security_group_ingress_rule
+  cfn: AWS::EC2::SecurityGroupIngress
+  native: ec2-sg-rules
+  id: ["{id}"]
+- tf: aws_vpc_security_group_egress_rule
+  cfn: AWS::EC2::SecurityGroupEgress
+  native: ec2-sg-rules
+  id: ["{id}"]
+- tf: aws_security_group_rule
+  cfn: [AWS::EC2::SecurityGroupIngress, AWS::EC2::SecurityGroupEgress]
+  native: ec2-sg-rules
+  rule_tuple: true
+
+# IAM. Global: no region in ARNs or identities.
+- tf: aws_iam_role
+  cfn: AWS::IAM::Role
+  config: AWS::IAM::Role
+  arn: "arn:{partition}:iam::{account}:role/{path:(?:[^:]*/)?}{name}"
+  id: ["{name}"]
+- tf: aws_iam_user
+  cfn: AWS::IAM::User
+  config: AWS::IAM::User
+  arn: "arn:{partition}:iam::{account}:user/{path:(?:[^:]*/)?}{name}"
+  id: ["{name}"]
+- tf: aws_iam_group
+  cfn: AWS::IAM::Group
+  config: AWS::IAM::Group
+  re: iam:group
+  arn: "arn:{partition}:iam::{account}:group/{path:(?:[^:]*/)?}{name}"
+  id: ["{name}"]
+- tf: aws_iam_policy
+  cfn: AWS::IAM::ManagedPolicy
+  config: AWS::IAM::Policy
+  re: iam:policy
+  arn: "arn:{partition}:iam::{account}:policy/{path:(?:[^:]*/)?}{name}"
+  id: ["{arn}"]
+- tf: aws_iam_instance_profile
+  cfn: AWS::IAM::InstanceProfile
+  config: AWS::IAM::InstanceProfile
+  arn: "arn:{partition}:iam::{account}:instance-profile/{path:(?:[^:]*/)?}{name}"
+  id: ["{name}"]
+- tf: aws_iam_role_policy_attachment
+  cfn: Native::IAM::RolePolicyAttachment
+  native: iam-attachments
+  id: ["{role}/{policy_arn}"]
+- tf: aws_iam_user_policy_attachment
+  cfn: Native::IAM::UserPolicyAttachment
+  native: iam-attachments
+  id: ["{user}/{policy_arn}"]
+- tf: aws_iam_group_policy_attachment
+  cfn: Native::IAM::GroupPolicyAttachment
+  native: iam-attachments
+- tf: aws_iam_role_policy
+  cfn: AWS::IAM::RolePolicy
+  native: iam-attachments
+  id: ["{role}:{name}"]
+- tf: aws_iam_user_policy
+  cfn: AWS::IAM::UserPolicy
+  native: iam-attachments
+  id: ["{user}:{name}"]
+- tf: aws_iam_group_policy
+  cfn: AWS::IAM::GroupPolicy
+  native: iam-attachments
+  id: ["{group}:{name}"]
+
+# S3. Bucket ARNs carry no account or region; subresources have no ARN.
+- tf: aws_s3_bucket
+  cfn: AWS::S3::Bucket
+  config: AWS::S3::Bucket
+  arn: "arn:{partition}:s3:::{bucket}"
+  id: ["{bucket}"]
+- tf: aws_s3_bucket_policy
+  cfn: AWS::S3::BucketPolicy
+  native: s3-subresources
+  id: ["{bucket}"]
+- tf: aws_s3_bucket_versioning
+  cfn: Native::S3::BucketVersioning
+  native: s3-subresources
+  id: ["{bucket}"]
+  derived: {parent: AWS::S3::Bucket}
+- tf: aws_s3_bucket_server_side_encryption_configuration
+  cfn: Native::S3::BucketEncryption
+  native: s3-subresources
+  id: ["{bucket}"]
+  derived: {parent: AWS::S3::Bucket}
+- tf: aws_s3_bucket_lifecycle_configuration
+  cfn: Native::S3::BucketLifecycle
+  native: s3-subresources
+  id: ["{bucket}"]
+- tf: aws_s3_bucket_public_access_block
+  cfn: Native::S3::BucketPublicAccessBlock
+  native: s3-subresources
+  id: ["{bucket}"]
+  derived: {parent: AWS::S3::Bucket}
+
+# KMS
+- tf: aws_kms_key
+  cfn: AWS::KMS::Key
+  config: AWS::KMS::Key
+  arn: "arn:{partition}:kms:{region}:{account}:key/{id}"
+  id: ["{id}"]
+- tf: aws_kms_alias
+  cfn: AWS::KMS::Alias
+  config: AWS::KMS::Alias
+  arn: "arn:{partition}:kms:{region}:{account}:{name:alias/.+}"
+  id: ["{name}"]
+
+# RDS. Provider 5 and later set id to the DbiResourceId, which Config reports as resourceId;
+# earlier versions used the identifier.
+- tf: aws_db_instance
+  cfn: AWS::RDS::DBInstance
+  config: AWS::RDS::DBInstance
+  arn: "arn:{partition}:rds:{region}:{account}:db:{identifier}"
+  id: ["{id}", "{identifier}"]
+- tf: aws_rds_cluster
+  cfn: AWS::RDS::DBCluster
+  config: AWS::RDS::DBCluster
+  re: rds:cluster
+  arn: "arn:{partition}:rds:{region}:{account}:cluster:{cluster_identifier}"
+  id: ["{cluster_identifier}"]
+- tf: aws_db_subnet_group
+  cfn: AWS::RDS::DBSubnetGroup
+  config: AWS::RDS::DBSubnetGroup
+  arn: "arn:{partition}:rds:{region}:{account}:subgrp:{name}"
+  id: ["{name}"]
+
+# EKS
+- tf: aws_eks_cluster
+  cfn: AWS::EKS::Cluster
+  config: AWS::EKS::Cluster
+  arn: "arn:{partition}:eks:{region}:{account}:cluster/{name}"
+  id: ["{name}"]
+- tf: aws_eks_node_group
+  cfn: AWS::EKS::Nodegroup
+  arn: "arn:{partition}:eks:{region}:{account}:nodegroup/{cluster_name}/{node_group_name}/{uuid}"
+  id: ["{cluster_name}:{node_group_name}"]
+
+# ELBv2. aws_alb* are aliases of aws_lb*.
+- tf: aws_lb
+  cfn: AWS::ElasticLoadBalancingV2::LoadBalancer
+  config: AWS::ElasticLoadBalancingV2::LoadBalancer
+  arn: "arn:{partition}:elasticloadbalancing:{region}:{account}:loadbalancer/{lb_type:app|net|gateway}/{name}/{lb_id}"
+  id: ["{arn}"]
+- tf: aws_alb
+  cfn: AWS::ElasticLoadBalancingV2::LoadBalancer
+  config: AWS::ElasticLoadBalancingV2::LoadBalancer
+  arn: "arn:{partition}:elasticloadbalancing:{region}:{account}:loadbalancer/{lb_type:app|net|gateway}/{name}/{lb_id}"
+  id: ["{arn}"]
+- tf: aws_lb_listener
+  cfn: AWS::ElasticLoadBalancingV2::Listener
+  config: AWS::ElasticLoadBalancingV2::Listener
+  arn: "arn:{partition}:elasticloadbalancing:{region}:{account}:listener/{lb_type:app|net|gateway}/{lb_name}/{lb_id}/{listener_id}"
+  id: ["{arn}"]
+- tf: aws_alb_listener
+  cfn: AWS::ElasticLoadBalancingV2::Listener
+  config: AWS::ElasticLoadBalancingV2::Listener
+  arn: "arn:{partition}:elasticloadbalancing:{region}:{account}:listener/{lb_type:app|net|gateway}/{lb_name}/{lb_id}/{listener_id}"
+  id: ["{arn}"]
+- tf: aws_lb_target_group
+  cfn: AWS::ElasticLoadBalancingV2::TargetGroup
+  config: AWS::ElasticLoadBalancingV2::TargetGroup
+  arn: "arn:{partition}:elasticloadbalancing:{region}:{account}:targetgroup/{name}/{tg_id}"
+  id: ["{arn}"]
+- tf: aws_alb_target_group
+  cfn: AWS::ElasticLoadBalancingV2::TargetGroup
+  config: AWS::ElasticLoadBalancingV2::TargetGroup
+  arn: "arn:{partition}:elasticloadbalancing:{region}:{account}:targetgroup/{name}/{tg_id}"
+  id: ["{arn}"]
+
+# Route 53. Global. TF builds a record's id from the name as written, which may be relative to
+# the zone, so both forms are tried.
+- tf: aws_route53_zone
+  cfn: AWS::Route53::HostedZone
+  config: AWS::Route53::HostedZone
+  arn: "arn:{partition}:route53:::hostedzone/{zone_id}"
+  id: ["{zone_id}"]
+- tf: aws_route53_record
+  cfn: AWS::Route53::RecordSet
+  native: route53-records
+  id:
+    - "{zone_id}_{name}_{type}[_{set_identifier}]"
+    - "{zone_id}_{short_name}_{type}[_{set_identifier}]"
+  derived:
+    parent: AWS::Route53::HostedZone
+    when: {type: [NS, SOA], apex: ["true"]}
+
+# Serverless, messaging and storage
+- tf: aws_lambda_function
+  cfn: AWS::Lambda::Function
+  config: AWS::Lambda::Function
+  arn: "arn:{partition}:lambda:{region}:{account}:function:{function_name}"
+  id: ["{function_name}"]
+- tf: aws_sqs_queue
+  cfn: AWS::SQS::Queue
+  config: AWS::SQS::Queue
+  arn: "arn:{partition}:sqs:{region}:{account}:{name}"
+  id: ["{url}"]
+  live:
+    url: "https://sqs.{region}.amazonaws.com/{account}/{name}"
+- tf: aws_sns_topic
+  cfn: AWS::SNS::Topic
+  config: AWS::SNS::Topic
+  arn: "arn:{partition}:sns:{region}:{account}:{name}"
+  id: ["{arn}"]
+- tf: aws_ecr_repository
+  cfn: AWS::ECR::Repository
+  config: AWS::ECR::Repository
+  arn: "arn:{partition}:ecr:{region}:{account}:repository/{name+}"
+  id: ["{name}"]
+- tf: aws_secretsmanager_secret
+  cfn: AWS::SecretsManager::Secret
+  config: AWS::SecretsManager::Secret
+  arn: "arn:{partition}:secretsmanager:{region}:{account}:secret:{name}"
+  id: ["{arn}"]
+- tf: aws_cloudwatch_log_group
+  cfn: AWS::Logs::LogGroup
+  arn: "arn:{partition}:logs:{region}:{account}:log-group:{name:[^:]+}"
+  id: ["{name}"]
+- tf: aws_dynamodb_table
+  cfn: AWS::DynamoDB::Table
+  config: AWS::DynamoDB::Table
+  arn: "arn:{partition}:dynamodb:{region}:{account}:table/{name}"
+  id: ["{name}"]
