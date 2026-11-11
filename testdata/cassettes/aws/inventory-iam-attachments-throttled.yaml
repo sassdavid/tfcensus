@@ -1,0 +1,75 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 120
+        host: ""
+        body: Action=GetAccountAuthorizationDetails&Filter.member.1=Role&Filter.member.2=User&Filter.member.3=Group&Version=2010-05-08
+        form:
+            Action:
+                - GetAccountAuthorizationDetails
+            Filter.member.1:
+                - Role
+            Filter.member.2:
+                - User
+            Filter.member.3:
+                - Group
+            Version:
+                - "2010-05-08"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://iam.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ErrorResponse><Error><Type>Sender</Type><Code>Throttling</Code><Message>Rate exceeded</Message></Error><RequestId>00000000-0000-4000-8000-000000000000</RequestId></ErrorResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 400 Bad Request
+        code: 400
+        duration: 0s
+    - id: 1
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 120
+        host: ""
+        body: Action=GetAccountAuthorizationDetails&Filter.member.1=Role&Filter.member.2=User&Filter.member.3=Group&Version=2010-05-08
+        form:
+            Action:
+                - GetAccountAuthorizationDetails
+            Filter.member.1:
+                - Role
+            Filter.member.2:
+                - User
+            Filter.member.3:
+                - Group
+            Version:
+                - "2010-05-08"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://iam.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <GetAccountAuthorizationDetailsResponse xmlns="https://iam.amazonaws.com/doc/2010-05-08/"><GetAccountAuthorizationDetailsResult><IsTruncated>false</IsTruncated><RoleDetailList><member><RoleName>app</RoleName><Arn>arn:aws:iam::111111111111:role/app</Arn><AttachedManagedPolicies><member><PolicyName>ReadOnlyAccess</PolicyName><PolicyArn>arn:aws:iam::aws:policy/ReadOnlyAccess</PolicyArn></member></AttachedManagedPolicies><RolePolicyList><member><PolicyName>inline</PolicyName><PolicyDocument>FIXTURE-POLICY-DOCUMENT</PolicyDocument></member></RolePolicyList></member></RoleDetailList></GetAccountAuthorizationDetailsResult><ResponseMetadata><RequestId>0</RequestId></ResponseMetadata></GetAccountAuthorizationDetailsResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s

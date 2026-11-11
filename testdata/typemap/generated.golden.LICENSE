@@ -1,0 +1,11 @@
+generated.yaml is derived from the following MPL-2.0 sources:
+
+- https://github.com/hashicorp/terraform-provider-aws at 1111111111111111111111111111111111111111
+  Copyright Example A
+- https://github.com/hashicorp/terraform-provider-awscc at 2222222222222222222222222222222222222222
+  Copyright Example B
+
+Mozilla Public License Version 2.0
+==================================
+
+Fixture text.

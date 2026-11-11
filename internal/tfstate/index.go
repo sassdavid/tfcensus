@@ -41,8 +41,12 @@ type Entry struct {
 	ID        string            `json:"id,omitempty"`
 	ARN       string            `json:"arn,omitempty"`
 	Identity  map[string]string `json:"identity,omitempty"`
-	Account   string            `json:"account,omitempty"` // from identity, ARN, or the unit's target
-	Region    string            `json:"region,omitempty"`  // from identity, ARN, region attribute, or the unit's target
+	// IdentityAttrs are identity attribute values read from resource attributes, for states
+	// without an identity block.
+	IdentityAttrs map[string]string `json:"identity_attrs,omitempty"`
+	RuleKeys      []string          `json:"rule_keys,omitempty"` // hashed security group rule tuples
+	Account       string            `json:"account,omitempty"`   // from identity, ARN, or the unit's target
+	Region        string            `json:"region,omitempty"`    // from identity, ARN, region attribute, or the unit's target
 }
 
 // Keys returns the entry's match keys, strongest first.
@@ -141,6 +145,7 @@ func entry(us *UnitState, r *Resource, inst *Instance) Entry {
 	e := Entry{
 		Unit: us.Unit(), Workspace: us.Workspace, Address: r.Address(inst), Type: r.Type,
 		Provider: r.Provider.Source, ID: inst.ID, ARN: inst.ARN, Identity: inst.Identity,
+		IdentityAttrs: inst.IdentityAttrs, RuleKeys: inst.RuleKeys,
 	}
 	var parsed *arn.ARN
 	if a, err := arn.Parse(inst.ARN); err == nil {

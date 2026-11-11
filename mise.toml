@@ -59,6 +59,10 @@ run = "govulncheck ./..."
 description = "Regenerate docs/cli; fails if the checked-in copy was stale"
 run = "go run ./scripts/gendocs -out docs/cli"
 
+[tasks."typemap:gen"]
+description = "Regenerate internal/typemap/data/generated.yaml from the aws and awscc provider checkouts (TFCENSUS_PROVIDER_AWS_DIR, TFCENSUS_PROVIDER_AWSCC_DIR)"
+run = "go run ./scripts/typemapgen"
+
 [tasks."sibling:diff"]
 description = "Compare the files shared with the sibling repo (.claude/rules/siblings.md)"
 run = "bash scripts/sibling-diff.sh"

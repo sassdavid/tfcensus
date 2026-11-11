@@ -31,7 +31,7 @@ func bucketSubresources() map[string]Stub {
 		"encryption": {Body: `<ServerSideEncryptionConfiguration xmlns="` + s3XMLNS + `"><Rule>` +
 			`<ApplyServerSideEncryptionByDefault><SSEAlgorithm>AES256</SSEAlgorithm></ApplyServerSideEncryptionByDefault>` +
 			`<BucketKeyEnabled>false</BucketKeyEnabled></Rule></ServerSideEncryptionConfiguration>`},
-		"policy": missing("NoSuchBucketPolicy", "The bucket policy does not exist"),
+		subPolicy: missing("NoSuchBucketPolicy", "The bucket policy does not exist"),
 		"publicAccessBlock": missing("NoSuchPublicAccessBlockConfiguration",
 			"The public access block configuration was not found"),
 		"ownershipControls": missing("OwnershipControlsNotFoundError", "The bucket ownership controls were not found"),
@@ -44,6 +44,9 @@ func bucketSubresources() map[string]Stub {
 		"location":  {},
 	}
 }
+
+// subPolicy is the query key of a bucket policy request.
+const subPolicy = "policy"
 
 func s3ErrorXML(code, msg string) string {
 	return `<?xml version="1.0" encoding="UTF-8"?>` + "\n" +

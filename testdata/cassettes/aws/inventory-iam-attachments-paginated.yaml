@@ -1,0 +1,77 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 120
+        host: ""
+        body: Action=GetAccountAuthorizationDetails&Filter.member.1=Role&Filter.member.2=User&Filter.member.3=Group&Version=2010-05-08
+        form:
+            Action:
+                - GetAccountAuthorizationDetails
+            Filter.member.1:
+                - Role
+            Filter.member.2:
+                - User
+            Filter.member.3:
+                - Group
+            Version:
+                - "2010-05-08"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://iam.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <GetAccountAuthorizationDetailsResponse xmlns="https://iam.amazonaws.com/doc/2010-05-08/"><GetAccountAuthorizationDetailsResult><IsTruncated>true</IsTruncated><Marker>page-2</Marker><RoleDetailList><member><RoleName>app</RoleName><Arn>arn:aws:iam::111111111111:role/app</Arn><AttachedManagedPolicies><member><PolicyName>ReadOnlyAccess</PolicyName><PolicyArn>arn:aws:iam::aws:policy/ReadOnlyAccess</PolicyArn></member></AttachedManagedPolicies><RolePolicyList><member><PolicyName>inline</PolicyName><PolicyDocument>FIXTURE-POLICY-DOCUMENT</PolicyDocument></member></RolePolicyList></member></RoleDetailList></GetAccountAuthorizationDetailsResult><ResponseMetadata><RequestId>0</RequestId></ResponseMetadata></GetAccountAuthorizationDetailsResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 1
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 134
+        host: ""
+        body: Action=GetAccountAuthorizationDetails&Filter.member.1=Role&Filter.member.2=User&Filter.member.3=Group&Marker=page-2&Version=2010-05-08
+        form:
+            Action:
+                - GetAccountAuthorizationDetails
+            Filter.member.1:
+                - Role
+            Filter.member.2:
+                - User
+            Filter.member.3:
+                - Group
+            Marker:
+                - page-2
+            Version:
+                - "2010-05-08"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://iam.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <GetAccountAuthorizationDetailsResponse xmlns="https://iam.amazonaws.com/doc/2010-05-08/"><GetAccountAuthorizationDetailsResult><IsTruncated>false</IsTruncated><UserDetailList><member><UserName>ci</UserName><Arn>arn:aws:iam::111111111111:user/ci</Arn><AttachedManagedPolicies><member><PolicyName>ReadOnlyAccess</PolicyName><PolicyArn>arn:aws:iam::aws:policy/ReadOnlyAccess</PolicyArn></member></AttachedManagedPolicies></member></UserDetailList><GroupDetailList><member><GroupName>ops</GroupName><Arn>arn:aws:iam::111111111111:group/ops</Arn><GroupPolicyList><member><PolicyName>deploy</PolicyName><PolicyDocument>FIXTURE-POLICY-DOCUMENT</PolicyDocument></member></GroupPolicyList></member></GroupDetailList></GetAccountAuthorizationDetailsResult><ResponseMetadata><RequestId>0</RequestId></ResponseMetadata></GetAccountAuthorizationDetailsResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s

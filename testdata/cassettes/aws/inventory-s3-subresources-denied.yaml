@@ -1,0 +1,36 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            bucket-region:
+                - eu-west-1
+            x-id:
+                - ListBuckets
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://s3.eu-west-1.amazonaws.com/?bucket-region=eu-west-1&x-id=ListBuckets
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <Error><Code>AccessDenied</Code><Message>Access Denied</Message><RequestId>0000000000000000</RequestId></Error>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 403 Forbidden
+        code: 403
+        duration: 0s

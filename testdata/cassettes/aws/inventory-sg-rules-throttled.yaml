@@ -1,0 +1,67 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 68
+        host: ""
+        body: Action=DescribeSecurityGroupRules&MaxResults=1000&Version=2016-11-15
+        form:
+            Action:
+                - DescribeSecurityGroupRules
+            MaxResults:
+                - "1000"
+            Version:
+                - "2016-11-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://ec2.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <Response><Errors><Error><Code>RequestLimitExceeded</Code><Message>Request limit exceeded.</Message></Error></Errors><RequestID>00000000-0000-4000-8000-000000000000</RequestID></Response>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 503 Service Unavailable
+        code: 503
+        duration: 0s
+    - id: 1
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 68
+        host: ""
+        body: Action=DescribeSecurityGroupRules&MaxResults=1000&Version=2016-11-15
+        form:
+            Action:
+                - DescribeSecurityGroupRules
+            MaxResults:
+                - "1000"
+            Version:
+                - "2016-11-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://ec2.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <DescribeSecurityGroupRulesResponse xmlns="http://ec2.amazonaws.com/doc/2016-11-15/"><requestId>0</requestId><securityGroupRuleSet><item><securityGroupRuleId>sgr-1</securityGroupRuleId><groupId>sg-1</groupId><groupOwnerId>111111111111</groupOwnerId><isEgress>false</isEgress><ipProtocol>tcp</ipProtocol><fromPort>443</fromPort><toPort>443</toPort><cidrIpv4>10.0.0.0/8</cidrIpv4><securityGroupRuleArn>arn:aws:ec2:eu-west-1:111111111111:security-group-rule/sgr-1</securityGroupRuleArn><tagSet/></item></securityGroupRuleSet></DescribeSecurityGroupRulesResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s

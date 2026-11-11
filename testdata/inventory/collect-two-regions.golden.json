@@ -1,0 +1,85 @@
+{
+  "resources": [
+    "AWS::IAM::Role arn:aws:iam::111111111111:role/app global ",
+    "AWS::IAM::RolePolicy app:inline global ",
+    "AWS::Route53::RecordSet Z1_example.com_NS global ",
+    "Native::IAM::RolePolicyAttachment app/arn:aws:iam::aws:policy/ReadOnlyAccess global ",
+    "AWS::EC2::SecurityGroup arn:aws:ec2:eu-west-1:111111111111:security-group/sg-1 tags:Name=web eu-west-1",
+    "AWS::EC2::SecurityGroupIngress arn:aws:ec2:eu-west-1:111111111111:security-group-rule/sgr-1 eu-west-1",
+    "AWS::S3::BucketPolicy acme-logs eu-west-1",
+    "Native::S3::BucketEncryption acme-logs eu-west-1",
+    "Native::S3::BucketPublicAccessBlock acme-logs eu-west-1",
+    "Native::S3::BucketVersioning acme-logs eu-west-1",
+    "AWS::EC2::VPC arn:aws:ec2:us-east-1:111111111111:vpc/vpc-9 us-east-1"
+  ],
+  "runs": [
+    {
+      "account": "111111111111",
+      "layer": "native:iam-attachments",
+      "status": "ok",
+      "count": 2
+    },
+    {
+      "account": "111111111111",
+      "layer": "native:route53-records",
+      "status": "ok",
+      "count": 1
+    },
+    {
+      "account": "111111111111",
+      "region": "eu-west-1",
+      "layer": "config",
+      "status": "ok",
+      "count": 2
+    },
+    {
+      "account": "111111111111",
+      "region": "eu-west-1",
+      "layer": "resource-explorer",
+      "status": "ok",
+      "count": 1
+    },
+    {
+      "account": "111111111111",
+      "region": "eu-west-1",
+      "layer": "native:ec2-sg-rules",
+      "status": "ok",
+      "count": 1
+    },
+    {
+      "account": "111111111111",
+      "region": "eu-west-1",
+      "layer": "native:s3-subresources",
+      "status": "ok",
+      "count": 4
+    },
+    {
+      "account": "111111111111",
+      "region": "us-east-1",
+      "layer": "config",
+      "status": "unsupported",
+      "count": 0
+    },
+    {
+      "account": "111111111111",
+      "region": "us-east-1",
+      "layer": "resource-explorer",
+      "status": "ok",
+      "count": 2
+    },
+    {
+      "account": "111111111111",
+      "region": "us-east-1",
+      "layer": "native:ec2-sg-rules",
+      "status": "ok",
+      "count": 0
+    },
+    {
+      "account": "111111111111",
+      "region": "us-east-1",
+      "layer": "native:s3-subresources",
+      "status": "ok",
+      "count": 0
+    }
+  ]
+}

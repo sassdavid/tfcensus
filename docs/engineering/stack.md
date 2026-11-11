@@ -9,6 +9,12 @@
 except three AWS modules that were one patch newer (updated in the table).
 Re-run the check right before M0 (script: [§ Refresh](#refresh)). After M0, Renovate keeps everything current,
 with a 3-day minimum release age (matching your mise `minimum_release_age` habit).
+
+**Updated on 2026-11-11 at M5:** every direct and indirect Go module went to its `@latest` from
+`proxy.golang.org`, queried one module at a time from the `go.mod` list. The owner waived the
+3-day minimum age for this update, so the AWS modules released on 2026-11-10 are in. M5 added
+`service/ec2`, `service/iam`, `service/route53` and `golang.org/x/time` at their latest versions.
+relgap took the same bumps for the modules it shares.
 Choices are justified in the [ADRs](adr/). Survey basis: go.mod files of gh, terragrunt, opentofu, trivy, syft, aqua,
 goreleaser, chezmoi, k9s, golangci-lint.
 
@@ -16,7 +22,7 @@ goreleaser, chezmoi, k9s, golangci-lint.
 
 | Item | Version | Note |
 |---|---|---|
-| Go | **1.27.3** toolchain; `go 1.27.0` directive per [version-policy.md](version-policy.md) | same as relgap |
+| Go | **1.27.4** toolchain; `go 1.27.0` directive per [version-policy.md](version-policy.md) | same as relgap |
 | golangci-lint | **v2.15.0** | + golden config v2.15.0 ([ADR-0008](adr/0008-lint-config.md)) |
 | gofumpt | **v0.12.0** | golines **v0.13.0** + goimports come with the golden config |
 | govulncheck (`golang.org/x/vuln`) | **v1.9.0** | |
@@ -37,7 +43,7 @@ goreleaser, chezmoi, k9s, golangci-lint.
 | Logging | `log/slog` + `github.com/lmittmann/tint` | stdlib / v1.2.1 | zap rejected ([ADR-0004](adr/0004-logging.md)) |
 | Concurrency | `golang.org/x/sync` (errgroup) | **v0.25.0** | |
 | HTTP retry | `github.com/hashicorp/go-retryablehttp` | v0.7.8 | latest; used by terraform, tofu, trivy |
-| Rate limit | `golang.org/x/time` | v0.16.0 | |
+| Rate limit | `golang.org/x/time` | v0.16.0 | `rate.Limiter` per account, region and service for inventory layers |
 | Compression | `github.com/klauspost/compress` (zstd: `inventory --save-index *.zst`, cache files) | v1.20.4 | gzip from the stdlib for `.gz`; zstd is what whois.md names |
 | Styling | `charm.land/lipgloss/v2` (+ `/table`) | **v2.1.0** (released today) | latest at M0; gh/terragrunt/goreleaser are on v2.0.x |
 | Markdown to terminal | `charm.land/glamour/v2` | v2.0.1 | |
@@ -66,8 +72,8 @@ goreleaser, chezmoi, k9s, golangci-lint.
 
 | Concern | Module | Latest |
 |---|---|---|
-| AWS core | `github.com/aws/aws-sdk-go-v2` · `/config` · `/credentials` · `github.com/aws/smithy-go` | v1.47.8 · v1.33.17 · v1.20.17 · v1.28.9 |
-| AWS services | `service/sts` v1.51.9 · `s3` v1.114.9 · `organizations` v1.62.7 · `resourceexplorer2` v1.33.11 · `configservice` v1.74.11 · `cloudcontrol` v1.38.11 · `ec2` v1.344.2 · `iam` v1.64.9 · `route53` v1.70.9 · `dynamodb` v1.73.2 · `kms` v1.62.5 · `elasticloadbalancingv2` v1.63.9 · `cloudtrail` v1.65.11 · `s3control` v1.80.0 | released together 2026-11-06, except `s3control` v1.80.0 (2026-11-09), added at M4 under the 3-day minimum age; v1.79.9 from 2026-11-06 passes the same tests |
+| AWS core | `github.com/aws/aws-sdk-go-v2` · `/config` · `/credentials` · `github.com/aws/smithy-go` | v1.48.0 · v1.33.18 · v1.21.0 · v1.28.9 |
+| AWS services | `service/sts` v1.52.0 · `s3` v1.114.10 · `organizations` v1.62.8 · `resourceexplorer2` v1.33.12 · `configservice` v1.74.12 · `cloudcontrol` v1.38.12 · `ec2` v1.344.3 · `iam` v1.65.0 · `route53` v1.70.10 · `dynamodb` v1.74.0 · `kms` v1.62.6 · `elasticloadbalancingv2` v1.64.0 · `cloudtrail` v1.65.12 · `s3control` v1.80.1 | released together 2026-11-10 (the 3-day minimum age was waived at M5). `ec2`, `iam` and `route53` are new at M5, for the native inventory listers. `cloudcontrol` and `elasticloadbalancingv2` aren't imported yet |
 | Plan/schema structs | `github.com/hashicorp/terraform-json` | v0.29.0 |
 | Exec terraform | `github.com/hashicorp/terraform-exec` | v0.26.0 |
 | HCL read/write | `github.com/hashicorp/hcl/v2` (+ `hclwrite`) | v2.25.0 |
@@ -95,18 +101,34 @@ goreleaser, chezmoi, k9s, golangci-lint.
 
 Indirect modules are whatever MVS selects, except where govulncheck flags a known (even unreachable)
 vulnerability: at M0, `golang.org/x/text` went from v0.14.0 to v0.43.0 and `golang.org/x/sys` from
-v0.28.0 to v0.49.0 (the newest releases older than the 3-day minimum age).
+v0.28.0 to v0.49.0 (the newest releases older than the 3-day minimum age). At M5 every indirect
+module went to its latest: `golang.org/x/text` v0.44.0, `x/mod` v0.43.0, `x/tools` v0.52.0,
+`go.yaml.in/yaml/v3` v3.0.6, `buger/jsonparser` v1.6.1, `agext/levenshtein` v1.2.3,
+`go-viper/mapstructure/v2` v2.5.0, `cpuguy83/go-md2man/v2` v2.0.7, `knadh/koanf/maps` v0.1.3,
+`pb33f/ordered-map/v2` v2.3.2, and `pb33f/go-yaml` v0.1.1 (new, required by ordered-map v2.3.2).
 
 | Concern | Module | Version | Why |
 |---|---|---|---|
-| Windows console colors | `golang.org/x/sys` (`windows`) | v0.49.0 | turns on VT processing so tint's ANSI colors render in conhost; already required by isatty |
-| AWS SSO and sign-in credentials | `github.com/aws/aws-sdk-go-v2/service/sso` · `service/ssooidc` · `service/signin` | v1.39.4 · v1.44.4 · v1.13.0 | required by `config` for `sso-session`, legacy SSO and `aws login` profiles |
-| AWS SDK internals | `aws-sdk-go-v2/feature/ec2/imds` · `internal/configsources` · `internal/endpoints/v2` · `internal/v4a` · `service/internal/accept-encoding` · `service/internal/endpoint-discovery` · `service/internal/presigned-url` | v1.20.8 · v1.5.11 · v2.8.11 · v1.5.11 · v1.13.24 · v1.13.11 · v1.14.11 | required by `config` and the service clients; `endpoint-discovery` by `dynamodb` |
+| Windows console colors | `golang.org/x/sys` (`windows`) | v0.50.0 | turns on VT processing so tint's ANSI colors render in conhost; already required by isatty |
+| AWS SSO and sign-in credentials | `github.com/aws/aws-sdk-go-v2/service/sso` · `service/ssooidc` · `service/signin` | v1.39.5 · v1.44.5 · v1.13.1 | required by `config` for `sso-session`, legacy SSO and `aws login` profiles |
+| AWS SDK internals | `aws-sdk-go-v2/feature/ec2/imds` · `internal/configsources` · `internal/endpoints/v2` · `internal/v4a` · `service/internal/accept-encoding` · `service/internal/endpoint-discovery` · `service/internal/presigned-url` · `service/internal/checksum` · `service/internal/s3shared` · `aws/protocol/eventstream` | v1.20.9 · v1.5.12 · v2.8.12 · v1.5.12 · v1.13.25 · v1.13.12 · v1.14.12 · v1.11.13 · v1.20.12 · v1.7.27 | required by `config` and the service clients; `endpoint-discovery` by `dynamodb`; the last three by `s3` |
 
 At M2 the AWS SDK (core, `config`, `credentials`, smithy-go, `sts`, `organizations`,
 `resourceexplorer2`, `configservice` at the versions in the AWS table) added only the AWS modules above.
 It moved no module that relgap also uses, so relgap's go.mod needed no change (`go list -m all` in both
 repos, compared on 2026-11-10). The AWS modules are Apache-2.0, and `mise run lint:licenses` passes.
+
+## Typemap sources
+
+`mise run typemap:gen` reads two provider checkouts, not Go modules. Neither is imported or
+compiled in. The generated data records each checkout's version and commit in its header, and
+ships with the providers' MPL-2.0 text as `internal/typemap/data/generated.yaml.LICENSE`
+([ADR-0012](adr/0012-third-party-notices.md)).
+
+| Source | Version at M5 | Read from |
+|---|---|---|
+| `hashicorp/terraform-provider-aws` | 6.72.1 (unreleased, commit `ec8b6ef16c52`) | `internal/service/*/service_package_gen.go`, `names/attr_consts_gen.go`, `internal/tags/tagpolicy/tagris-terraform-mapping.hcl` |
+| `hashicorp/terraform-provider-awscc` | 1.109.1 (unreleased, commit `f886b4d9fe18`) | `internal/provider/all_schemas.hcl` |
 
 ## Refresh
 The checker used for this table is in the session scratchpad. Re-create it in the repo as `scripts/latest-deps.py`

@@ -11,28 +11,46 @@
    - `aws_security_group_rule` `sgrule-<hash>` is synthetic, so it's matched by expanding the rule tuple (protocol, ports, cidr/sg, direction) instead.
 
 ## typemap (data, not code)
-`internal/typemap/data/*.yaml`, generated plus curated:
+`internal/typemap/data/`, embedded in the binary:
+
+- `generated.yaml`, written by `mise run typemap:gen` and never edited by hand: every aws provider
+  resource type with its service, whether it is global, its identity kind and attributes (with
+  optional ones and attribute renames such as Route 53's `name` from `fqdn`), its Resource
+  Explorer types, and a CloudFormation candidate. Next to it, `generated.yaml.LICENSE` carries the
+  providers' MPL-2.0 text (engineering ADR-0012).
+- `curated.yaml`, hand-written: the confirmed CloudFormation type, the AWS Config type, the ARN
+  pattern, the TF id templates, the native lister, rule-tuple matching and derived-child rules.
+  Only curated types are ever matched; a generated CloudFormation candidate is a hint for curation.
 
 ```yaml
 - tf: aws_lb
   cfn: AWS::ElasticLoadBalancingV2::LoadBalancer
-  arn: "arn:{partition}:elasticloadbalancing:{region}:{account}:loadbalancer/{type}/{name}/{id}"
-  id: arn                       # TF id equals ARN
+  config: AWS::ElasticLoadBalancingV2::LoadBalancer
+  arn: "arn:{partition}:elasticloadbalancing:{region}:{account}:loadbalancer/{lb_type:app|net|gateway}/{name}/{lb_id}"
+  id: ["{arn}"]                 # TF id equals ARN
 - tf: aws_security_group
   cfn: AWS::EC2::SecurityGroup
-  id: attr:id                   # sg-…
-- tf: aws_vpc_security_group_ingress_rule
-  cfn: AWS::EC2::SecurityGroupIngress
+  config: AWS::EC2::SecurityGroup
+  arn: "arn:{partition}:ec2:{region}:{account}:security-group/{id}"
+  id: ["{id}"]                  # sg-…
+- tf: aws_security_group_rule
+  cfn: [AWS::EC2::SecurityGroupIngress, AWS::EC2::SecurityGroupEgress]
   native: ec2-sg-rules
-  id: attr:security_group_rule_id
+  rule_tuple: true
 ```
 
-Sources for generating it:
-- `terraform providers schema -json` (identity schemas, attribute names), run against pinned provider versions in a `mise run typemap:gen` task.
+Sources for generating it, read from local checkouts (no provider binary, no `terraform` run):
+- terraform-provider-aws: the generated service packages (`internal/service/*/service_package_gen.go`)
+  for type names, global types and identity schemas, `names/attr_consts_gen.go` for attribute
+  names, and the tag policy mapping (`internal/tags/tagpolicy/tagris-terraform-mapping.hcl`) for
+  Resource Explorer types.
 - **awscc's `all_schemas.hcl`** (MPL-2.0) as the CFN type universe.
 - Curated aws→CFN pairs seeded by name similarity + ARN resource-type patterns. About 300 types cover most real estates; the rest are reported as `undetermined: no type mapping`.
 
-The typemap carries `min_provider_version` / `max_provider_version` where ID formats changed.
+Where a TF id format changed between provider versions, the entry lists both templates
+(`aws_db_instance` tries the DbiResourceId of provider 5 and later, then the identifier).
+`min_provider_version` / `max_provider_version` fields come when a format can't be told apart
+that way.
 
 ## Algorithm
 - Build the StateIndex keys for every managed instance, and the live keys for every CloudResource (all candidate TF types).
@@ -44,8 +62,8 @@ The typemap carries `min_provider_version` / `max_provider_version` where ID for
 - Never claim a resource is managed when its type has no mapping. It goes to `undetermined` with the reason, and those counts show in the summary.
 
 ## Acceptance criteria
-- [ ] Table tests for the 40 most common types (VPC/subnet/SG/rules, IAM role/policy/attachment, S3 + subresources, KMS, RDS, EKS, ELBv2 + listeners/target groups, Route53, Lambda, SQS/SNS, ECR, Secrets Manager, CloudWatch logs, DynamoDB).
-- [ ] Identity-based and ARN-based matching give the same result on a fixture with both.
-- [ ] SG rule tuple matching handles inline, legacy `aws_security_group_rule` and the new per-rule resources.
-- [ ] A typemap generation task is reproducible (same input → byte-identical output).
-- [ ] The provider source paths are parameters (`TFCENSUS_PROVIDER_AWS_DIR`, `TFCENSUS_PROVIDER_AWSCC_DIR`) with `_reference` defaults; the generated header records the source commits, and no machine-specific path is committed.
+- [x] Table tests for the 40 most common types (VPC/subnet/SG/rules, IAM role/policy/attachment, S3 + subresources, KMS, RDS, EKS, ELBv2 + listeners/target groups, Route53, Lambda, SQS/SNS, ECR, Secrets Manager, CloudWatch logs, DynamoDB).
+- [x] Identity-based and ARN-based matching give the same result on a fixture with both.
+- [x] SG rule tuple matching handles inline, legacy `aws_security_group_rule` and the new per-rule resources.
+- [x] A typemap generation task is reproducible (same input → byte-identical output).
+- [x] The provider source paths are parameters (`TFCENSUS_PROVIDER_AWS_DIR`, `TFCENSUS_PROVIDER_AWSCC_DIR`) with `_reference` defaults; the generated header records the source commits, and no machine-specific path is committed.

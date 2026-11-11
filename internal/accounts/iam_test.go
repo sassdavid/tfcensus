@@ -95,7 +95,9 @@ func iamAction(t *testing.T, r *cassette.Request) string {
 	case service == "s3" && u.Query().Get("x-id") == "":
 		return "s3:" + s3Subresource(t, u.Query())
 	case service == "s3":
-		return "s3:" + u.Query().Get("x-id")
+		return "s3:" + s3Operation(u.Query().Get("x-id"))
+	case service == "route53":
+		return "route53:" + route53Action(t, u.Path)
 	case target != "":
 		_, op, _ := strings.Cut(target, ".")
 		return service + ":" + op
@@ -104,6 +106,32 @@ func iamAction(t *testing.T, r *cassette.Request) string {
 	default:
 		return service + ":" + strings.TrimPrefix(u.Path, "/")
 	}
+}
+
+// s3Operation names the IAM action of an S3 operation whose name differs from it.
+func s3Operation(op string) string {
+	actions := map[string]string{
+		"GetBucketEncryption":             "GetEncryptionConfiguration",
+		"GetBucketLifecycleConfiguration": "GetLifecycleConfiguration",
+		"GetPublicAccessBlock":            "GetBucketPublicAccessBlock",
+	}
+	if a, ok := actions[op]; ok {
+		return a
+	}
+	return op
+}
+
+// route53Action names the IAM action of a Route 53 REST request by its path.
+func route53Action(t *testing.T, p string) string {
+	t.Helper()
+	switch {
+	case strings.HasSuffix(p, "/rrset"):
+		return "ListResourceRecordSets"
+	case strings.HasSuffix(p, "/hostedzone"):
+		return "ListHostedZones"
+	}
+	t.Fatalf("unknown Route 53 request %s", p)
+	return ""
 }
 
 // s3Subresource names the IAM action of a bucket configuration GET such as ?versioning.
