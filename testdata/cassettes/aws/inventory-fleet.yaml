@@ -6,40 +6,170 @@ interactions:
         proto: ""
         proto_major: 0
         proto_minor: 0
-        content_length: 43
+        content_length: 0
         host: ""
-        body: Action=GetCallerIdentity&Version=2011-06-15
         form:
-            Action:
-                - GetCallerIdentity
-            Version:
-                - "2011-06-15"
+            list-type:
+                - "2"
+            prefix:
+                - env:/
         headers:
-            Content-Type:
-                - application/x-www-form-urlencoded
-        url: https://sts.eu-west-1.amazonaws.com/
-        method: POST
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-restricted-tfstate.s3.us-east-1.amazonaws.com/?list-type=2&prefix=env%3A%2F
+        method: GET
       response:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
         content_length: -1
-        body: |
-            <GetCallerIdentityResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">
-              <GetCallerIdentityResult>
-                <Arn>arn:aws:iam::111111111111:user/tfcensus-readonly</Arn>
-                <UserId>AIDAEXAMPLEUSERID</UserId>
-                <Account>111111111111</Account>
-              </GetCallerIdentityResult>
-              <ResponseMetadata><RequestId>00000000-0000-4000-8000-000000000000</RequestId></ResponseMetadata>
-            </GetCallerIdentityResponse>
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <Error><Code>AccessDenied</Code><Message>Access Denied</Message><RequestId>0000000000000000</RequestId></Error>
         headers:
             Content-Type:
-                - text/xml
+                - application/xml
+        status: 403 Forbidden
+        code: 403
+        duration: 0s
+    - id: 1
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            x-id:
+                - GetObject
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Checksum-Mode:
+                - ENABLED
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-restricted-tfstate.s3.us-east-1.amazonaws.com/restricted/terraform.tfstate?x-id=GetObject
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <Error><Code>AccessDenied</Code><Message>Access Denied</Message><RequestId>0000000000000000</RequestId></Error>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 403 Forbidden
+        code: 403
+        duration: 0s
+    - id: 2
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            list-type:
+                - "2"
+            prefix:
+                - env:/
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-shared-tfstate.s3.eu-central-1.amazonaws.com/?list-type=2&prefix=env%3A%2F
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+              <Name>acme-shared-tfstate</Name>
+              <IsTruncated>false</IsTruncated>
+              <Prefix>env:/</Prefix>
+              <MaxKeys>1000</MaxKeys>
+            </ListBucketResult>
+        headers:
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Type:
+                - text/xml; charset=utf-8
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwOTAwMDAwMDAwMDAwMDAwMDkwMDAwMDAwMDAwMDAwMDA5MDAwMDAwMDAwMDAwMDAwOQ==
+            X-Amz-Request-Id:
+                - "0000000000000009"
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 1
+    - id: 3
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            x-id:
+                - GetObject
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Checksum-Mode:
+                - ENABLED
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-shared-tfstate.s3.eu-central-1.amazonaws.com/shared/terraform.tfstate?x-id=GetObject
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 181
+        body: |
+            {
+              "version": 4,
+              "terraform_version": "1.11.4",
+              "serial": 2,
+              "lineage": "f708192a-3b4c-4d5e-8f60-718293041526",
+              "outputs": {},
+              "resources": [],
+              "check_results": null
+            }
+        headers:
+            Accept-Ranges:
+                - bytes
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Length:
+                - "181"
+            Content-Type:
+                - text/plain; charset=utf-8
+            Etag:
+                - '"e2715acdbca6c1ed21fa0c9582672490"'
+            Last-Modified:
+                - Mon, 09 Nov 2026 08:30:00 GMT
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwQTAwMDAwMDAwMDAwMDAwMEEwMDAwMDAwMDAwMDAwMDBBMDAwMDAwMDAwMDAwMDAwQQ==
+            X-Amz-Request-Id:
+                - 000000000000000A
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 4
       request:
         proto: ""
         proto_major: 0
@@ -92,7 +222,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 2
+    - id: 5
       request:
         proto: ""
         proto_major: 0
@@ -310,7 +440,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 3
+    - id: 6
       request:
         proto: ""
         proto_major: 0
@@ -403,7 +533,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 4
+    - id: 7
       request:
         proto: ""
         proto_major: 0
@@ -479,7 +609,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 5
+    - id: 8
       request:
         proto: ""
         proto_major: 0
@@ -547,7 +677,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 6
+    - id: 9
       request:
         proto: ""
         proto_major: 0
@@ -779,7 +909,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 7
+    - id: 10
       request:
         proto: ""
         proto_major: 0
@@ -820,110 +950,6 @@ interactions:
                 - "0000000000000007"
         status: 404 Not Found
         code: 404
-        duration: 0s
-    - id: 8
-      request:
-        proto: ""
-        proto_major: 0
-        proto_minor: 0
-        content_length: 43
-        host: ""
-        body: Action=GetCallerIdentity&Version=2011-06-15
-        form:
-            Action:
-                - GetCallerIdentity
-            Version:
-                - "2011-06-15"
-        headers:
-            Content-Type:
-                - application/x-www-form-urlencoded
-        url: https://sts.us-east-1.amazonaws.com/
-        method: POST
-      response:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        content_length: -1
-        body: |
-            <GetCallerIdentityResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">
-              <GetCallerIdentityResult>
-                <Arn>arn:aws:iam::444455556666:user/tfcensus-readonly</Arn>
-                <UserId>AIDAEXAMPLEUSERID</UserId>
-                <Account>444455556666</Account>
-              </GetCallerIdentityResult>
-              <ResponseMetadata><RequestId>00000000-0000-4000-8000-000000000000</RequestId></ResponseMetadata>
-            </GetCallerIdentityResponse>
-        headers:
-            Content-Type:
-                - text/xml
-        status: 200 OK
-        code: 200
-        duration: 0s
-    - id: 9
-      request:
-        proto: ""
-        proto_major: 0
-        proto_minor: 0
-        content_length: 0
-        host: ""
-        form:
-            list-type:
-                - "2"
-            prefix:
-                - env:/
-        headers:
-            Accept-Encoding:
-                - identity
-            X-Amz-Content-Sha256:
-                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-        url: https://acme-restricted-tfstate.s3.us-east-1.amazonaws.com/?list-type=2&prefix=env%3A%2F
-        method: GET
-      response:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        content_length: -1
-        body: |-
-            <?xml version="1.0" encoding="UTF-8"?>
-            <Error><Code>AccessDenied</Code><Message>Access Denied</Message><RequestId>0000000000000000</RequestId></Error>
-        headers:
-            Content-Type:
-                - application/xml
-        status: 403 Forbidden
-        code: 403
-        duration: 0s
-    - id: 10
-      request:
-        proto: ""
-        proto_major: 0
-        proto_minor: 0
-        content_length: 0
-        host: ""
-        form:
-            x-id:
-                - GetObject
-        headers:
-            Accept-Encoding:
-                - identity
-            X-Amz-Checksum-Mode:
-                - ENABLED
-            X-Amz-Content-Sha256:
-                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-        url: https://acme-restricted-tfstate.s3.us-east-1.amazonaws.com/restricted/terraform.tfstate?x-id=GetObject
-        method: GET
-      response:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        content_length: -1
-        body: |-
-            <?xml version="1.0" encoding="UTF-8"?>
-            <Error><Code>AccessDenied</Code><Message>Access Denied</Message><RequestId>0000000000000000</RequestId></Error>
-        headers:
-            Content-Type:
-                - application/xml
-        status: 403 Forbidden
-        code: 403
         duration: 0s
     - id: 11
       request:
@@ -1050,9 +1076,9 @@ interactions:
         body: |
             <GetCallerIdentityResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">
               <GetCallerIdentityResult>
-                <Arn>arn:aws:iam::333333333333:user/tfcensus-readonly</Arn>
+                <Arn>arn:aws:iam::111111111111:user/tfcensus-readonly</Arn>
                 <UserId>AIDAEXAMPLEUSERID</UserId>
-                <Account>333333333333</Account>
+                <Account>111111111111</Account>
               </GetCallerIdentityResult>
               <ResponseMetadata><RequestId>00000000-0000-4000-8000-000000000000</RequestId></ResponseMetadata>
             </GetCallerIdentityResponse>
@@ -1067,44 +1093,36 @@ interactions:
         proto: ""
         proto_major: 0
         proto_minor: 0
-        content_length: 0
+        content_length: 43
         host: ""
+        body: Action=GetCallerIdentity&Version=2011-06-15
         form:
-            list-type:
-                - "2"
-            prefix:
-                - env:/
+            Action:
+                - GetCallerIdentity
+            Version:
+                - "2011-06-15"
         headers:
-            Accept-Encoding:
-                - identity
-            X-Amz-Content-Sha256:
-                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-        url: https://acme-shared-tfstate.s3.eu-central-1.amazonaws.com/?list-type=2&prefix=env%3A%2F
-        method: GET
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://sts.eu-west-1.amazonaws.com/
+        method: POST
       response:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
         content_length: -1
-        body: |-
-            <?xml version="1.0" encoding="UTF-8"?>
-            <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
-              <Name>acme-shared-tfstate</Name>
-              <IsTruncated>false</IsTruncated>
-              <Prefix>env:/</Prefix>
-              <MaxKeys>1000</MaxKeys>
-            </ListBucketResult>
+        body: |
+            <GetCallerIdentityResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">
+              <GetCallerIdentityResult>
+                <Arn>arn:aws:iam::333333333333:user/tfcensus-readonly</Arn>
+                <UserId>AIDAEXAMPLEUSERID</UserId>
+                <Account>333333333333</Account>
+              </GetCallerIdentityResult>
+              <ResponseMetadata><RequestId>00000000-0000-4000-8000-000000000000</RequestId></ResponseMetadata>
+            </GetCallerIdentityResponse>
         headers:
-            Access-Control-Allow-Origin:
-                - '*'
             Content-Type:
-                - text/xml; charset=utf-8
-            Server:
-                - AmazonS3
-            X-Amz-Id-2:
-                - MDAwMDAwMDAwMDAwMDAwOTAwMDAwMDAwMDAwMDAwMDkwMDAwMDAwMDAwMDAwMDA5MDAwMDAwMDAwMDAwMDAwOQ==
-            X-Amz-Request-Id:
-                - "0000000000000009"
+                - text/xml
         status: 200 OK
         code: 200
         duration: 0s
@@ -1113,54 +1131,36 @@ interactions:
         proto: ""
         proto_major: 0
         proto_minor: 0
-        content_length: 0
+        content_length: 43
         host: ""
+        body: Action=GetCallerIdentity&Version=2011-06-15
         form:
-            x-id:
-                - GetObject
+            Action:
+                - GetCallerIdentity
+            Version:
+                - "2011-06-15"
         headers:
-            Accept-Encoding:
-                - identity
-            X-Amz-Checksum-Mode:
-                - ENABLED
-            X-Amz-Content-Sha256:
-                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-        url: https://acme-shared-tfstate.s3.eu-central-1.amazonaws.com/shared/terraform.tfstate?x-id=GetObject
-        method: GET
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://sts.us-east-1.amazonaws.com/
+        method: POST
       response:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 181
+        content_length: -1
         body: |
-            {
-              "version": 4,
-              "terraform_version": "1.11.4",
-              "serial": 2,
-              "lineage": "f708192a-3b4c-4d5e-8f60-718293041526",
-              "outputs": {},
-              "resources": [],
-              "check_results": null
-            }
+            <GetCallerIdentityResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">
+              <GetCallerIdentityResult>
+                <Arn>arn:aws:iam::444455556666:user/tfcensus-readonly</Arn>
+                <UserId>AIDAEXAMPLEUSERID</UserId>
+                <Account>444455556666</Account>
+              </GetCallerIdentityResult>
+              <ResponseMetadata><RequestId>00000000-0000-4000-8000-000000000000</RequestId></ResponseMetadata>
+            </GetCallerIdentityResponse>
         headers:
-            Accept-Ranges:
-                - bytes
-            Access-Control-Allow-Origin:
-                - '*'
-            Content-Length:
-                - "181"
             Content-Type:
-                - text/plain; charset=utf-8
-            Etag:
-                - '"e2715acdbca6c1ed21fa0c9582672490"'
-            Last-Modified:
-                - Mon, 09 Nov 2026 08:30:00 GMT
-            Server:
-                - AmazonS3
-            X-Amz-Id-2:
-                - MDAwMDAwMDAwMDAwMDAwQTAwMDAwMDAwMDAwMDAwMEEwMDAwMDAwMDAwMDAwMDBBMDAwMDAwMDAwMDAwMDAwQQ==
-            X-Amz-Request-Id:
-                - 000000000000000A
+                - text/xml
         status: 200 OK
         code: 200
         duration: 0s

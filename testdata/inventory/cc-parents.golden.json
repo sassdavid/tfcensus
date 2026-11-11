@@ -1,0 +1,23 @@
+{
+  "resources": [
+    "AWS::ElasticLoadBalancingV2::Listener arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2 cloudcontrol parent:arn:aws:elasticloadbalancing:eu-west-1:111111111111:loadbalancer/app/web/50dc6c495c0c9188",
+    "AWS::ElasticLoadBalancingV2::ListenerRule arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener-rule/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2/9683b2d02a6cabee cloudcontrol parent:arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2",
+    "AWS::ElasticLoadBalancingV2::LoadBalancer arn:aws:elasticloadbalancing:eu-west-1:111111111111:loadbalancer/app/web/50dc6c495c0c9188 config"
+  ],
+  "runs": [
+    {
+      "account": "111111111111",
+      "region": "eu-west-1",
+      "layer": "config",
+      "status": "ok",
+      "count": 1
+    },
+    {
+      "account": "111111111111",
+      "region": "eu-west-1",
+      "layer": "cloudcontrol",
+      "status": "ok",
+      "count": 2
+    }
+  ]
+}

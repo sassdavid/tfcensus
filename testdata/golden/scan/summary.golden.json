@@ -1,0 +1,79 @@
+{
+  "accounts": [
+    {
+      "account": "111111111111",
+      "counts": {
+        "aws-managed": 1,
+        "derived": 0,
+        "double-managed": 1,
+        "ignored": 0,
+        "managed": 2,
+        "other-iac": 0,
+        "undetermined": 1,
+        "unmanaged": 1
+      },
+      "coverage": 75
+    },
+    {
+      "account": "222222222222",
+      "counts": {
+        "aws-managed": 0,
+        "derived": 1,
+        "double-managed": 0,
+        "ignored": 0,
+        "managed": 0,
+        "other-iac": 0,
+        "undetermined": 0,
+        "unmanaged": 0
+      },
+      "coverage": null
+    }
+  ],
+  "regions": [
+    {
+      "account": "111111111111",
+      "region": "global",
+      "counts": {
+        "aws-managed": 0,
+        "derived": 0,
+        "double-managed": 0,
+        "ignored": 0,
+        "managed": 1,
+        "other-iac": 0,
+        "undetermined": 0,
+        "unmanaged": 1
+      },
+      "coverage": 50
+    },
+    {
+      "account": "111111111111",
+      "region": "eu-west-1",
+      "counts": {
+        "aws-managed": 1,
+        "derived": 0,
+        "double-managed": 1,
+        "ignored": 0,
+        "managed": 1,
+        "other-iac": 0,
+        "undetermined": 1,
+        "unmanaged": 0
+      },
+      "coverage": 100
+    },
+    {
+      "account": "222222222222",
+      "region": "us-east-1",
+      "counts": {
+        "aws-managed": 0,
+        "derived": 1,
+        "double-managed": 0,
+        "ignored": 0,
+        "managed": 0,
+        "other-iac": 0,
+        "undetermined": 0,
+        "unmanaged": 0
+      },
+      "coverage": null
+    }
+  ]
+}

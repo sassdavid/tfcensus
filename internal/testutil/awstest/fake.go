@@ -17,6 +17,8 @@ import (
 
 	"github.com/johannesboyne/gofakes3"
 	"github.com/johannesboyne/gofakes3/backend/s3mem"
+	"go.yaml.in/yaml/v4"
+	"gopkg.in/dnaeon/go-vcr.v4/pkg/cassette"
 
 	"github.com/sassdavid/tfcensus/internal/testutil"
 	"github.com/sassdavid/tfcensus/internal/testutil/vcr"
@@ -235,6 +237,10 @@ func WriteCassette(t testing.TB, path string, upstream http.RoundTripper) http.R
 			t.Errorf("save cassette %s: %v", path, err)
 			return
 		}
+		if err = sortCassette(path); err != nil {
+			t.Errorf("sort cassette %s: %v", path, err)
+			return
+		}
 		file := strings.TrimSuffix(path, ".yaml") + ".yaml"
 		b, readErr := os.ReadFile(file)
 		if readErr != nil {
@@ -247,6 +253,31 @@ func WriteCassette(t testing.TB, path string, upstream http.RoundTripper) http.R
 		}
 	})
 	return rec
+}
+
+// sortCassette orders the interactions by request, so a recording made by concurrent listings
+// is the same on every run. The sort is stable: identical requests, such as a throttled call and
+// its retry, keep their recorded order, which replay depends on.
+func sortCassette(path string) error {
+	c, err := cassette.Load(strings.TrimSuffix(path, ".yaml"))
+	if err != nil {
+		return fmt.Errorf("load cassette: %w", err)
+	}
+	key := func(i *cassette.Interaction) string {
+		r := &i.Request
+		return r.Method + " " + r.URL + " " + r.Headers.Get("X-Amz-Target") + " " + r.Body
+	}
+	slices.SortStableFunc(c.Interactions, func(a, b *cassette.Interaction) int {
+		return strings.Compare(key(a), key(b))
+	})
+	for i, in := range c.Interactions {
+		in.ID = i
+	}
+	c.MarshalFunc = yaml.Marshal // Load leaves it unset; the recorder uses the same encoder
+	if err = c.Save(); err != nil {
+		return fmt.Errorf("save cassette: %w", err)
+	}
+	return nil
 }
 
 // LoadManifest puts the states listed in manifest into f. Each line names a bucket, a key and a

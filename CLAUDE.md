@@ -35,7 +35,7 @@ A Go CLI that takes a census of Terraform/OpenTofu + Terragrunt fleets on AWS. I
 ## Layout
 - `cmd/tfcensus/main.go` → `internal/cli` (constructor functions, no globals).
 - Foundations: `discovery` (F1), `accounts` and `probe` (F2), `tfstate` (F3), `plan` (F4).
-- Features: `inventory` (layers), `typemap`, `match`, `ownership`, `audit`, `codify`, `migrate`, `notify`, `render`, `mcpserver`.
+- Features: `inventory` (layers), `typemap`, `match`, `ownership`, `scan`, `audit`, `codify`, `migrate`, `notify`, `render`, `mcpserver`.
 - Fixtures:
   - `testdata/repos/` (Terragrunt fixtures)
   - `testdata/states/`

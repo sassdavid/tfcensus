@@ -57,7 +57,7 @@ func NativeLayers(env *Env) []Layer {
 
 // Layers returns every layer in precedence order.
 func Layers(env *Env) []Layer {
-	return append([]Layer{NewConfig(env), NewResourceExplorer(env)}, NativeLayers(env)...)
+	return append(append([]Layer{NewConfig(env), NewResourceExplorer(env)}, NativeLayers(env)...), NewCloudControl(env))
 }
 
 type sgRules struct{ env *Env }

@@ -152,6 +152,42 @@ func reResource(arn, reType, region string, tags ...string) string {
 	)
 }
 
+const cfnQueue = "AWS::SQS::Queue"
+
+func ccLayer(types ...string) func(*inventory.Env) inventory.Layer {
+	return func(e *inventory.Env) inventory.Layer {
+		e.CloudControlTypes = types
+		return inventory.NewCloudControl(e)
+	}
+}
+
+func queueURL(name string) string { return "https://sqs.eu-west-1.amazonaws.com/" + acct + "/" + name }
+
+func queueARN(name string) string { return "arn:aws:sqs:eu-west-1:" + acct + ":" + name }
+
+// ccResource is one Cloud Control resource description. A queue's identifier is its URL, so its
+// properties carry the ARN; other identifiers are ARNs.
+func ccResource(id string) string {
+	props := `{}`
+	if strings.HasPrefix(id, "https://sqs.") {
+		name := id[strings.LastIndex(id, "/")+1:]
+		props = fmt.Sprintf(`{"QueueUrl":%q,"Arn":%q,"QueueName":%q}`, id, queueARN(name), name)
+	}
+	return fmt.Sprintf(`{"Identifier":%q,"Properties":%q}`, id, props)
+}
+
+func ccPage(next string, ids ...string) string {
+	resources := make([]string, len(ids))
+	for i, id := range ids {
+		resources[i] = ccResource(id)
+	}
+	tok := ""
+	if next != "" {
+		tok = fmt.Sprintf(`,"NextToken":%q`, next)
+	}
+	return `{"ResourceDescriptions":[` + strings.Join(resources, ",") + `]` + tok + `}`
+}
+
 func rePage(next string, resources ...string) string {
 	tok := ""
 	if next != "" {
@@ -336,6 +372,32 @@ func layerCases() []layerCase {
 	role := "arn:aws:iam::" + acct + ":role/app"
 	denyJSON := fail(http.StatusBadRequest, awstest.JSONError("AccessDeniedException", "not authorized"))
 	return []layerCase{
+		{
+			name: "cloudcontrol", layer: ccLayer(cfnQueue), region: euWest,
+			scenarios: map[string]scenario{
+				"paginated": {
+					stubs: func(r *awstest.Router) {
+						r.On("cloudcontrolapi", "ListResources", "page-2", ok(ccPage("", queueURL("logs"))))
+						r.On("cloudcontrolapi", "ListResources", "", ok(ccPage("page-2", queueURL("jobs"))))
+					},
+					want: []string{cfnQueue + " " + queueARN("jobs"), cfnQueue + " " + queueARN("logs")},
+				},
+				"throttled": {
+					stubs: func(r *awstest.Router) {
+						r.On("cloudcontrolapi", "ListResources", "",
+							fail(http.StatusBadRequest, awstest.JSONError("ThrottlingException", "Rate exceeded")),
+							ok(ccPage("", queueURL("jobs"))))
+					},
+					want: []string{cfnQueue + " " + queueARN("jobs")},
+				},
+				"denied": {
+					stubs: func(r *awstest.Router) {
+						r.On("cloudcontrolapi", "ListResources", "", denyJSON)
+					},
+					denied: true,
+				},
+			},
+		},
 		{
 			name: "config", layer: inventory.NewConfig, region: euWest,
 			scenarios: map[string]scenario{
@@ -588,9 +650,9 @@ func layerCases() []layerCase {
 	}
 }
 
-// TestLayers runs each layer against a paginated listing, a throttled call that succeeds on
+// TestSpec_inventory_1: each layer has stubbed-response tests. It runs each layer against a paginated listing, a throttled call that succeeds on
 // retry, and an AccessDenied.
-func TestLayers(t *testing.T) {
+func TestSpec_inventory_1(t *testing.T) {
 	t.Parallel()
 
 	for _, lc := range layerCases() {

@@ -43,6 +43,10 @@ run = "go mod tidy -diff"
 description = "Unit, component and CLI (testscript) tests with the race detector"
 run = "go test -race -count=1 ./..."
 
+[tasks."test:emulator"]
+description = "Inventory layers against moto and Floci (needs TFCENSUS_MOTO_URL and TFCENSUS_FLOCI_URL; the live workflow runs it nightly)"
+run = "go test -tags emulator -count=1 -run TestSpec_inventory_5 -v ./internal/inventory/"
+
 [tasks.fuzz]
 description = "Run every Go fuzz target for 60s each (mise run fuzz -- 10s sets another duration)"
 run = "bash scripts/fuzz.sh"

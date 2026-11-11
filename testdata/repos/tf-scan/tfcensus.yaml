@@ -1,0 +1,19 @@
+# Config for the scan tests (passed with --config). The clock is 2026-11-10.
+schema_version: 1
+regions: [eu-west-1]
+scan:
+  # Naming cc lists the allowlist even where Resource Explorer covers the type.
+  layers: config,re,native,cc
+  cloudcontrol_types: [AWS::ElasticLoadBalancingV2::ListenerRule]
+  never_hide: [ignored]
+rules:
+  - name: sandbox
+    category: ignored
+    owner: platform
+    match: 'resource.tags.?owner.orValue("") == "sandbox"'
+    reason: Sandbox experiments are cleaned up every week
+  - name: growth-trial
+    category: ignored
+    match: 'resource.tags.?team.orValue("") == "growth"'
+    reason: Growth team trial, review after the quarter
+    expires: "2026-09-30"

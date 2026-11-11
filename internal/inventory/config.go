@@ -6,7 +6,11 @@ import (
 	"fmt"
 	"iter"
 	"log/slog"
+	"maps"
+	"slices"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/configservice"
@@ -21,6 +25,8 @@ type Env struct {
 	Limits      *Limiters
 	Logger      *slog.Logger
 	S3PathStyle bool // custom endpoints (emulators) need path-style bucket addressing
+	// CloudControlTypes are the CloudFormation types the Cloud Control layer lists.
+	CloudControlTypes []string
 }
 
 func (e *Env) logger() *slog.Logger {
@@ -55,7 +61,10 @@ type configRow struct {
 	ARN          string `json:"arn"`
 	AWSRegion    string `json:"awsRegion"`
 	AccountID    string `json:"accountId"`
-	Tags         []struct {
+	Created      string `json:"resourceCreationTime"`
+	// Configuration holds only the flags the ownership rules read; the query selects nothing else.
+	Configuration map[string]any `json:"configuration"`
+	Tags          []struct {
 		Key   string `json:"key"`
 		Value string `json:"value"`
 	} `json:"tags"`
@@ -73,8 +82,29 @@ func configQuery(configTypes []string) string {
 	for i, t := range configTypes {
 		quoted[i] = "'" + t + "'"
 	}
-	return "SELECT resourceId, resourceName, resourceType, arn, awsRegion, accountId, tags, relationships" +
+	return "SELECT resourceId, resourceName, resourceType, arn, awsRegion, accountId, resourceCreationTime, tags," +
+		" relationships, " + strings.Join(configFlagFields(), ", ") +
 		" WHERE resourceType IN (" + strings.Join(quoted, ", ") + ")"
+}
+
+// configFlags maps the configuration properties the ownership rules read to the attribute names
+// they get. All are booleans or enums, never values a user wrote.
+func configFlags() map[string]string {
+	return map[string]string{
+		"isDefault":        "is_default",
+		"defaultForAz":     "default_for_az",
+		"keyManager":       "key_manager",
+		"requesterManaged": "requester_managed",
+		"interfaceType":    "interface_type",
+	}
+}
+
+func configFlagFields() []string {
+	out := make([]string, 0, len(configFlags()))
+	for _, k := range slices.Sorted(maps.Keys(configFlags())) {
+		out = append(out, "configuration."+k)
+	}
+	return out
 }
 
 func (l *configLayer) List(
@@ -120,12 +150,17 @@ func (l *configLayer) yieldRows(rows []string, yield func(CloudResource, error) 
 }
 
 func (l *configLayer) resource(raw string) (CloudResource, error) {
+	return DecodeConfigItem(l.env.Map, []byte(raw))
+}
+
+// DecodeConfigItem reads one SelectResourceConfig result row, as the config layer selects it.
+func DecodeConfigItem(m *typemap.Map, raw []byte) (CloudResource, error) {
 	var row configRow
-	if err := json.Unmarshal([]byte(raw), &row); err != nil {
+	if err := json.Unmarshal(raw, &row); err != nil {
 		return CloudResource{}, fmt.Errorf("decode config result: %w", err)
 	}
 	r := CloudResource{
-		Account: row.AccountID, Region: row.AWSRegion, CFNType: l.env.Map.FromConfig(row.ResourceType),
+		Account: row.AccountID, Region: row.AWSRegion, CFNType: m.FromConfig(row.ResourceType),
 		ARN: typemap.NormalizeARN(row.ARN), ID: row.ResourceID, Name: row.ResourceName,
 		Sources: []string{LayerConfig},
 	}
@@ -138,10 +173,24 @@ func (l *configLayer) resource(raw string) (CloudResource, error) {
 		}
 		r.Tags[t.Key] = t.Value
 	}
-	for _, rel := range row.Relationships {
-		if strings.HasPrefix(rel.RelationshipName, "Is contained in") {
-			r.Parents = append(r.Parents, Ref{CFNType: l.env.Map.FromConfig(rel.ResourceType), ID: rel.ResourceID})
+	if t, err := time.Parse(time.RFC3339, row.Created); err == nil {
+		r.Created = t.UTC().Format(time.RFC3339)
+	}
+	for k, attr := range configFlags() {
+		switch v := row.Configuration[k].(type) {
+		case bool:
+			r.setAttr(attr, strconv.FormatBool(v))
+		case string:
+			r.setAttr(attr, v)
 		}
+	}
+	for _, rel := range row.Relationships {
+		ref := Ref{CFNType: m.FromConfig(rel.ResourceType), ID: rel.ResourceID}
+		if strings.HasPrefix(rel.RelationshipName, "Is contained in") {
+			r.Parents = append(r.Parents, ref)
+		}
+		ref.Relationship = rel.RelationshipName
+		r.Relationships = append(r.Relationships, ref)
 	}
 	return r, nil
 }

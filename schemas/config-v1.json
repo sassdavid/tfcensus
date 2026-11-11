@@ -164,9 +164,16 @@
         },
         "never_hide": {
           "items": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "other-iac",
+              "aws-managed",
+              "derived",
+              "ignored"
+            ]
           },
-          "type": "array"
+          "type": "array",
+          "description": "Categories that user rules can't give to guarded resources (IAM users)."
         }
       },
       "additionalProperties": false,
@@ -174,10 +181,54 @@
     },
     "rules": {
       "items": {
-        "type": "object"
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+            "description": "Rule name, shown in findings as user/\u003cname\u003e."
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "other-iac",
+              "aws-managed",
+              "derived",
+              "ignored"
+            ],
+            "description": "Category of the resources the rule matches."
+          },
+          "owner": {
+            "type": "string",
+            "description": "Who owns the matched resources, such as datadog."
+          },
+          "match": {
+            "type": "string",
+            "minLength": 1,
+            "description": "CEL expression that returns a bool, over resource and unit."
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Why the matched resources aren't unmanaged."
+          },
+          "expires": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+            "description": "Last day the rule applies, as a quoted \"YYYY-MM-DD\" date (UTC). After it the rule stops matching and scan warns."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "category",
+          "match",
+          "reason"
+        ]
       },
       "type": "array",
-      "description": "Ownership rules."
+      "description": "Ownership rules, tried in order after the built-in packs. The first rule that matches an unmanaged resource sets its category."
     },
     "audit": {
       "properties": {

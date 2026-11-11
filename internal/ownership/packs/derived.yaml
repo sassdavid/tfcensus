@@ -1,0 +1,40 @@
+# Resources that AWS creates as children of another resource.
+- name: requester-managed-eni
+  match: >-
+    resource.type == "AWS::EC2::NetworkInterface" &&
+    (resource.attrs.?requester_managed.orValue("") == "true" ||
+    resource.attrs.?interface_type.orValue("") in ["lambda", "nat_gateway", "vpc_endpoint",
+    "network_load_balancer", "gateway_load_balancer", "gateway_load_balancer_endpoint", "load_balancer"] ||
+    "eks:eni:owner" in resource.tags)
+  reason: network interface that a service manages (requester-managed or a service interface type)
+- name: autoscaled-instance
+  match: >-
+    resource.type == "AWS::EC2::Instance" &&
+    ("aws:autoscaling:groupName" in resource.tags || "eks:nodegroup-name" in resource.tags ||
+    resource.tags.exists(k, k.startsWith("karpenter.sh/")))
+  reason: instance launched by an Auto Scaling group, an EKS node group or Karpenter
+- name: node-launch-template
+  match: >-
+    resource.type == "AWS::EC2::LaunchTemplate" &&
+    ("eks:nodegroup-name" in resource.tags || "eks:cluster-name" in resource.tags ||
+    resource.tags.exists(k, k.startsWith("karpenter.sh/") || k.startsWith("karpenter.k8s.aws/")))
+  reason: launch template that EKS or Karpenter created
+- name: ecs-task
+  match: resource.source_type == "ecs:task"
+  reason: task that ECS started
+- name: lambda-edge-replica
+  match: >-
+    resource.type == "AWS::Lambda::Function" && resource.region != "us-east-1" &&
+    resource.name.startsWith("us-east-1.")
+  reason: Lambda@Edge replica of a function in us-east-1
+- name: derived-instance-volume
+  match: >-
+    resource.type == "AWS::EC2::Volume" &&
+    resource.relationships.exists(r, r.type == "AWS::EC2::Instance" &&
+    ("aws:autoscaling:groupName" in r.tags || "eks:nodegroup-name" in r.tags ||
+    r.tags.exists(k, k.startsWith("karpenter.sh/"))))
+  reason: volume attached to an instance that an Auto Scaling group, EKS or Karpenter launched
+- name: backup-snapshot
+  match: '"aws:backup:source-resource" in resource.tags'
+  owner: aws-backup
+  reason: snapshot or recovery point that AWS Backup created

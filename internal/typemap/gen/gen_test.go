@@ -39,7 +39,9 @@ func checkout(t *testing.T, name, commit string, packed bool) string {
 	return dir
 }
 
-func TestGenerate(t *testing.T) {
+// TestSpec_matching_4: the typemap generation is reproducible: the same input gives
+// byte-identical output (golden).
+func TestSpec_matching_4(t *testing.T) {
 	t.Parallel()
 
 	first, err := gen.Generate(checkout(t, "aws", awsCommit, false), checkout(t, "awscc", ccCommit, true))
@@ -71,9 +73,10 @@ func TestGenerateErrors(t *testing.T) {
 
 var commitRE = regexp.MustCompile(`^[0-9a-f]{40}$`)
 
-// TestCommittedData checks the generated data in the repo: it loads with the curated entries,
+// TestSpec_matching_5: the generated header records the source commits and no machine path is
+// committed. It checks the generated data in the repo: it loads with the curated entries,
 // records 40-hex commits, and holds no machine path.
-func TestCommittedData(t *testing.T) {
+func TestSpec_matching_5(t *testing.T) {
 	t.Parallel()
 
 	b, err := os.ReadFile("../data/generated.yaml")

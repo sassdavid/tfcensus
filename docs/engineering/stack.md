@@ -73,12 +73,12 @@ goreleaser, chezmoi, k9s, golangci-lint.
 | Concern | Module | Latest |
 |---|---|---|
 | AWS core | `github.com/aws/aws-sdk-go-v2` · `/config` · `/credentials` · `github.com/aws/smithy-go` | v1.48.0 · v1.33.18 · v1.21.0 · v1.28.9 |
-| AWS services | `service/sts` v1.52.0 · `s3` v1.114.10 · `organizations` v1.62.8 · `resourceexplorer2` v1.33.12 · `configservice` v1.74.12 · `cloudcontrol` v1.38.12 · `ec2` v1.344.3 · `iam` v1.65.0 · `route53` v1.70.10 · `dynamodb` v1.74.0 · `kms` v1.62.6 · `elasticloadbalancingv2` v1.64.0 · `cloudtrail` v1.65.12 · `s3control` v1.80.1 | released together 2026-11-10 (the 3-day minimum age was waived at M5). `ec2`, `iam` and `route53` are new at M5, for the native inventory listers. `cloudcontrol` and `elasticloadbalancingv2` aren't imported yet |
+| AWS services | `service/sts` v1.52.0 · `s3` v1.114.10 · `organizations` v1.62.8 · `resourceexplorer2` v1.33.12 · `configservice` v1.74.12 · `cloudcontrol` v1.38.12 · `ec2` v1.344.3 · `iam` v1.65.0 · `route53` v1.70.10 · `dynamodb` v1.74.0 · `kms` v1.62.6 · `elasticloadbalancingv2` v1.64.0 · `cloudtrail` v1.65.12 · `s3control` v1.80.1 | released together 2026-11-10 (the 3-day minimum age was waived at M5, and again for `cloudcontrol` at M6, so it matches the other service clients). `ec2`, `iam` and `route53` are new at M5, for the native inventory listers. `cloudcontrol` is new at M6, for the Cloud Control layer. `elasticloadbalancingv2` isn't imported yet |
 | Plan/schema structs | `github.com/hashicorp/terraform-json` | v0.29.0 |
 | Exec terraform | `github.com/hashicorp/terraform-exec` | v0.26.0 |
 | HCL read/write | `github.com/hashicorp/hcl/v2` (+ `hclwrite`) | v2.25.0 |
 | cty | `github.com/zclconf/go-cty` | v1.20.0 |
-| Rules | `github.com/google/cel-go` | v0.30.0 |
+| Rules | `cel.dev/cel-go` | v0.33.2 (published 2026-10-30). The project moved from `github.com/google/cel-go` at v0.32.0. Added at M6 for the ownership rules (Apache-2.0) |
 | Move auto-detect | `github.com/busser/tfautomv` (`pkg/engine`) | v0.7.0 (latest; low activity, so vendor-or-import is decided at M9) |
 
 **Never import:** `hashicorp/terraform` (BSL 1.1), terragrunt `internal/...`, or OpenTofu `internal/` ([tfcensus ADR-0001](../plan/adr/0001-shell-out-to-terragrunt.md)).
@@ -111,6 +111,7 @@ module went to its latest: `golang.org/x/text` v0.44.0, `x/mod` v0.43.0, `x/tool
 |---|---|---|---|
 | Windows console colors | `golang.org/x/sys` (`windows`) | v0.50.0 | turns on VT processing so tint's ANSI colors render in conhost; already required by isatty |
 | AWS SSO and sign-in credentials | `github.com/aws/aws-sdk-go-v2/service/sso` · `service/ssooidc` · `service/signin` | v1.39.5 · v1.44.5 · v1.13.1 | required by `config` for `sso-session`, legacy SSO and `aws login` profiles |
+| CEL runtime | `cel.dev/expr` · `github.com/antlr4-go/antlr/v4` · `google.golang.org/protobuf` · `google.golang.org/genproto/googleapis/api` · `googleapis/rpc` · `golang.org/x/exp` | v0.25.1 · v4.13.1 · v1.36.10 · v0.0.0-20240826202546-f6391c0de4c7 · same · v0.0.0-20240823005443-9b4947da3948 | required by cel-go at the versions it names; new at M6, none of them in relgap's go.mod, so relgap needs no change |
 | AWS SDK internals | `aws-sdk-go-v2/feature/ec2/imds` · `internal/configsources` · `internal/endpoints/v2` · `internal/v4a` · `service/internal/accept-encoding` · `service/internal/endpoint-discovery` · `service/internal/presigned-url` · `service/internal/checksum` · `service/internal/s3shared` · `aws/protocol/eventstream` | v1.20.9 · v1.5.12 · v2.8.12 · v1.5.12 · v1.13.25 · v1.13.12 · v1.14.12 · v1.11.13 · v1.20.12 · v1.7.27 | required by `config` and the service clients; `endpoint-discovery` by `dynamodb`; the last three by `s3` |
 
 At M2 the AWS SDK (core, `config`, `credentials`, smithy-go, `sts`, `organizations`,

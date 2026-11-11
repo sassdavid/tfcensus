@@ -1,0 +1,7 @@
+# Extra rules for the scan cache test: hides the ClickOps debug security group.
+rules:
+  - name: debug-sg
+    category: ignored
+    owner: alice
+    match: resource.type == "AWS::EC2::SecurityGroup" && resource.name.startsWith("clickops-debug")
+    reason: Debugging aid, removed after the incident review

@@ -1,0 +1,31 @@
+# Resources that AWS services, IAM Identity Center, Control Tower, StackSets and CDK bootstrap
+# create.
+- name: service-linked-role
+  match: resource.type == "AWS::IAM::Role" && resource.arn.contains(":role/aws-service-role/")
+  reason: service-linked role that an AWS service created
+- name: sso-role
+  match: resource.type == "AWS::IAM::Role" && resource.name.startsWith("AWSReservedSSO_")
+  owner: iam-identity-center
+  reason: permission set role that IAM Identity Center created
+- name: control-tower
+  match: resource.name.startsWith("aws-controltower-") || resource.arn.contains(":role/aws-controltower-")
+  owner: control-tower
+  reason: created by AWS Control Tower
+- name: stacksets-execution-role
+  match: >-
+    resource.type == "AWS::IAM::Role" &&
+    (resource.name.startsWith("stacksets-exec-") || resource.name == "AWSCloudFormationStackSetExecutionRole")
+  owner: cloudformation-stacksets
+  reason: execution role of CloudFormation StackSets
+- name: aws-managed-kms-key
+  match: resource.type == "AWS::KMS::Key" && resource.attrs.?key_manager.orValue("") == "AWS"
+  reason: AWS managed KMS key (KeyManager AWS)
+- name: aws-kms-alias
+  match: resource.type == "AWS::KMS::Alias" && (resource.arn.contains(":alias/aws/") || resource.name.startsWith("alias/aws/"))
+  reason: alias of an AWS managed KMS key
+- name: cdk-bootstrap
+  match: >-
+    resource.name.startsWith("cdk-hnb659fds-") || resource.name.startsWith("cdktoolkit-stagingbucket-") ||
+    resource.arn.contains(":role/cdk-hnb659fds-")
+  owner: cdk
+  reason: CDK bootstrap resource (default qualifier hnb659fds)

@@ -1,0 +1,42 @@
+aws-defaults default VPC                                   pack/aws-defaults/default-vpc aws-managed
+aws-defaults VPC that a unit should manage                 rules/no-match
+aws-defaults default subnet                                pack/aws-defaults/default-subnet aws-managed
+aws-defaults subnet of a custom VPC                        rules/no-match
+aws-defaults default network ACL                           pack/aws-defaults/default-network-acl aws-managed
+aws-defaults default security group                        pack/aws-defaults/default-security-group aws-managed
+aws-defaults security group named web                      rules/no-match
+aws-defaults internet gateway of the default VPC           pack/aws-defaults/default-vpc-children aws-managed
+aws-defaults internet gateway of a custom VPC              rules/no-match
+aws-service  service-linked role                           pack/aws-service/service-linked-role aws-managed
+aws-service  IAM Identity Center role                      pack/aws-service/sso-role aws-managed
+aws-service  Control Tower role                            pack/aws-service/control-tower aws-managed
+aws-service  StackSets execution role                      pack/aws-service/stacksets-execution-role aws-managed
+aws-service  AWS managed KMS key                           pack/aws-service/aws-managed-kms-key aws-managed
+aws-service  customer managed KMS key                      rules/no-match
+aws-service  CDK bootstrap role                            pack/aws-service/cdk-bootstrap aws-managed
+aws-service  application role                              rules/no-match
+other-iac    CloudFormation stack resource                 pack/other-iac/cloudformation other-iac
+other-iac    Pulumi resource                               pack/other-iac/pulumi other-iac
+other-iac    Crossplane managed resource                   pack/other-iac/crossplane other-iac
+other-iac    Kubernetes cloud provider security group      pack/other-iac/kubernetes other-iac
+other-iac    AWS Load Balancer Controller load balancer    pack/other-iac/kubernetes other-iac
+other-iac    queue with a Name tag only                    rules/no-match
+derived      NAT gateway network interface                 pack/derived/requester-managed-eni derived
+derived      Lambda network interface                      pack/derived/requester-managed-eni derived
+derived      network interface someone created             rules/no-match
+derived      Auto Scaling instance                         pack/derived/autoscaled-instance derived
+derived      Karpenter node                                pack/derived/autoscaled-instance derived
+derived      hand-launched instance                        rules/no-match
+derived      EKS node group launch template                pack/derived/node-launch-template derived
+derived      Lambda@Edge replica                           pack/derived/lambda-edge-replica derived
+derived      function in us-east-1 with a dotted name      rules/no-match
+derived      volume of an Auto Scaling instance            pack/derived/derived-instance-volume derived
+derived      volume of a hand-launched instance            rules/no-match
+derived      AWS Backup snapshot                           pack/derived/backup-snapshot derived
+ephemeral    Athena query results bucket                   pack/ephemeral/athena-query-results ignored
+ephemeral    bucket a unit should manage                   rules/no-match
+aws-service  alias of an AWS managed key                   pack/aws-service/aws-kms-alias aws-managed
+aws-service  alias of a customer key                       rules/no-match
+derived      ECS task                                      pack/derived/ecs-task derived
+ephemeral    log group of a managed function               pack/ephemeral/managed-lambda-log-group ignored
+ephemeral    log group of an unmanaged function            rules/no-match

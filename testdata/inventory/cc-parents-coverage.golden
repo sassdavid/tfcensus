@@ -1,0 +1,4 @@
+TYPE                                       111111111111/eu-west-1
+AWS::ElasticLoadBalancingV2::Listener      config+cc
+AWS::ElasticLoadBalancingV2::ListenerRule  cc
+AWS::ElasticLoadBalancingV2::LoadBalancer  config

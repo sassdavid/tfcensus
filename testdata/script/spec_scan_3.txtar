@@ -1,0 +1,40 @@
+# --fail-on unmanaged --types 'AWS::IAM::*' exits 3 only for IAM findings.
+env TEST_NOW=2026-11-10T12:00:00Z
+env AWS_CONFIG_FILE=$WORK/aws/config
+cd $REPOS
+
+# The IAM scan has two unmanaged IAM resources: exit 3.
+env TEST_CASSETTE=$CASSETTES/aws/scan-iam
+exec expect-exit 3 tfcensus scan tf-scan --config tf-scan/tfcensus.yaml --types AWS::IAM::* --fail-on unmanaged --format csv
+stderr '2 finding\(s\) in unmanaged'
+stdout 'role/clickops-admin'
+stdout 'user/sandbox-user'
+! stdout 'AWS::EC2::|AWS::S3::|ElasticLoadBalancing'
+
+# A rule that owns both leaves no unmanaged IAM resource: exit 0, although the account still
+# has unmanaged security groups, buckets and listener rules.
+exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml --types AWS::IAM::* --fail-on unmanaged --rules $WORK/iam-owned.yaml
+stdout '0 unmanaged'
+
+# The same rules without --types: the other unmanaged resources fail the gate.
+env TEST_CASSETTE=$CASSETTES/aws/scan-fleet
+exec expect-exit 3 tfcensus scan tf-scan --config tf-scan/tfcensus.yaml --fail-on unmanaged --rules $WORK/iam-owned.yaml
+stderr '3 finding\(s\) in unmanaged'
+
+# A TF type glob selects the same types.
+env TEST_CASSETTE=$CASSETTES/aws/scan-iam
+exec expect-exit 3 tfcensus scan tf-scan --config tf-scan/tfcensus.yaml --types aws_iam_* --fail-on unmanaged
+stderr '2 finding\(s\) in unmanaged'
+
+-- aws/config --
+[default]
+region = eu-west-1
+aws_access_key_id = AKIAFAKEDEFAULT
+aws_secret_access_key = fake-default-secret
+-- iam-owned.yaml --
+rules:
+  - name: break-glass
+    category: other-iac
+    owner: security
+    match: resource.name in ["clickops-admin", "sandbox-user"]
+    reason: Break-glass identities that the security team's StackSet manages

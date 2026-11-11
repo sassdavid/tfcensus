@@ -1,0 +1,5 @@
+# Guarded resources: a user rule whose category is in never_hide never applies to them. AWS
+# Config doesn't record whether an IAM user has a console password, so every IAM user is guarded.
+- name: iam-user
+  match: resource.type == "AWS::IAM::User"
+  reason: IAM users can hold long-lived credentials

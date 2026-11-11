@@ -405,7 +405,7 @@ func writeTab(w io.Writer, cols []string, rows [][]string) error {
 		_, _ = fmt.Fprintln(tw, strings.Join(r, "\t"))
 	}
 	if err := tw.Flush(); err != nil {
-		return fmt.Errorf("write audit: %w", err)
+		return fmt.Errorf("write table: %w", err)
 	}
 	return nil
 }

@@ -52,19 +52,22 @@ func coverage(targets []Target, tasks []*task, layers []Layer, env *Env, types [
 		rows[ri].Cells = make([][]string, len(cov.Columns))
 	}
 	for _, t := range tasks {
-		if t.run.Status == RunUnsupported {
+		if t.run.Status == RunUnsupported || t.run.Status == RunSkipped {
 			continue
 		}
-		mark := short(t.layer.Name())
-		if t.run.Status == RunDenied || t.run.Status == RunError {
-			mark += "!"
-		}
 		layerTypes := t.layer.Types()
+		if isDependent(t.layer) {
+			layerTypes = t.types
+		}
 		for ri := range rows {
 			col, ok := cellOf(t, &rows[ri], index)
-			if ok && slices.Contains(layerTypes, rows[ri].CFNType) && !slices.Contains(rows[ri].Cells[col], mark) {
-				rows[ri].Cells[col] = append(rows[ri].Cells[col], mark)
+			if !ok || !slices.Contains(layerTypes, rows[ri].CFNType) {
+				continue
 			}
+			rows[ri].Cells[col] = appendMissing(
+				rows[ri].Cells[col],
+				[]string{cellMark(t, rows[ri].CFNType, layers, env)},
+			)
 		}
 	}
 	for ri := range rows {
@@ -73,6 +76,18 @@ func coverage(targets []Target, tasks []*task, layers []Layer, env *Env, types [
 		}
 	}
 	return cov
+}
+
+// cellMark is what a task's listing shows in the cell of type cfn.
+func cellMark(t *task, cfn string, layers []Layer, env *Env) string {
+	mark := short(t.layer.Name())
+	if isDependent(t.layer) && env != nil && env.Map != nil && !ParentCovered(env.Map, cfn, layers) {
+		mark += markNoParent
+	}
+	if t.run.Status == RunDenied || t.run.Status == RunError {
+		mark += "!"
+	}
+	return mark
 }
 
 // columns returns each account's global column (when a row needs it) and its regions, sorted.
@@ -145,6 +160,10 @@ func coverageTypes(layers []Layer, env *Env, types []string) []CoverageRow {
 	return rows
 }
 
+// markNoParent follows "cc" in a cell when no layer lists the parent type that Cloud Control
+// needs to list the type, so the cell is still a blind spot.
+const markNoParent = ":no-parent"
+
 // short returns the layer name shown in a cell.
 func short(layer string) string {
 	switch layer {
@@ -152,13 +171,16 @@ func short(layer string) string {
 		return "re"
 	case LayerConfig:
 		return LayerConfig
+	case LayerCC:
+		return "cc"
 	}
 	return LayersNative
 }
 
-// markRank orders the marks in a cell like the layers: config, re, native.
+// markRank orders the marks in a cell like the layers: config, re, native, cc.
 func markRank(m string) string {
-	return fmt.Sprintf("%d%s", slices.Index([]string{LayerConfig, "re", LayersNative}, strings.TrimSuffix(m, "!")), m)
+	base := strings.TrimSuffix(strings.TrimSuffix(m, "!"), markNoParent)
+	return fmt.Sprintf("%d%s", slices.Index([]string{LayerConfig, "re", LayersNative, "cc"}, base), m)
 }
 
 // WriteCoverage prints the matrix as an aligned table: one row per type, one column per account

@@ -1,0 +1,30 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 352
+        host: ""
+        body: '{"Expression":"SELECT resourceId, resourceName, resourceType, arn, awsRegion, accountId, resourceCreationTime, tags, relationships, configuration.defaultForAz, configuration.interfaceType, configuration.isDefault, configuration.keyManager, configuration.requesterManaged WHERE resourceType IN (''AWS::ElasticLoadBalancingV2::LoadBalancer'')","Limit":100}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - StarlingDoveService.SelectResourceConfig
+        url: https://config.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Results":[]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+        status: 200 OK
+        code: 200
+        duration: 0s

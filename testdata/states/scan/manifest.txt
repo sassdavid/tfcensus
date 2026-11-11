@@ -1,0 +1,5 @@
+# The states of testdata/repos/tf-scan as stored in S3: bucket, key, file in this directory.
+# iam and iam-dup both manage the role acme-shared.
+acme-scan-tfstate network/terraform.tfstate network.tfstate
+acme-scan-tfstate iam/terraform.tfstate iam.tfstate
+acme-scan-tfstate iam-dup/terraform.tfstate iam-dup.tfstate

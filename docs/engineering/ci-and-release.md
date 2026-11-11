@@ -22,7 +22,7 @@
 |---|---|---|
 | `ci.yml` | PR, push main | lint; test matrix (ubuntu, macos, windows) on the Go minor of the `go` directive; fuzz (`mise run fuzz`); docs-up-to-date; schema tests; goreleaser snapshot (6 archives, checksums, SBOMs, third-party notices in every archive) |
 | `security.yml` | PR, weekly | govulncheck (SARIF), zizmor, dependency review |
-| `live.yml` | nightly, manual | terraform/tofu/terragrunt e2e against moto (testcontainers), **no AWS account needed**. An optional real-AWS OIDC job is added only if a sandbox account ever exists. Added with the first e2e test, not at M0 |
+| `live.yml` | nightly, manual | Inventory layers against moto and Floci service containers, pinned by digest (`mise run test:emulator`). **No AWS account needed.** The terraform/tofu/terragrunt e2e against moto joins it with the first e2e test. An optional real-AWS OIDC job is added only if a sandbox account ever exists |
 | `release-please.yml` | push main | opens or updates the release PR (version bump + CHANGELOG.md from Conventional Commits). On merge it creates the tag and a draft release (`draft` + `force-tag-creation`) |
 | `release.yml` | called by `release-please.yml` when a release is created (tags pushed with `GITHUB_TOKEN` don't trigger workflows); also tag `v*` | goreleaser: binaries, checksums, SBOM, cosign keyless signature, attestations, Homebrew cask, Scoop, container image. Secrets: `HOMEBREW_TAP_TOKEN`, `SCOOP_BUCKET_TOKEN` |
 

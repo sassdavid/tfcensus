@@ -32,6 +32,8 @@ stdout carries data, stderr carries logs. Use --format json for scripting.
 * [tfcensus config](tfcensus_config.md)	 - Inspect and validate configuration
 * [tfcensus doctor](tfcensus_doctor.md)	 - Check AWS credentials and which inventory layers each account and region supports
 * [tfcensus inventory](tfcensus_inventory.md)	 - Read each unit's state: versions, providers, resource counts, serial and lineage
+* [tfcensus rules](tfcensus_rules.md)	 - Work with ownership rules
+* [tfcensus scan](tfcensus_scan.md)	 - Find AWS resources that no unit manages
 * [tfcensus units](tfcensus_units.md)	 - List units with their state backend, target account and region
 * [tfcensus version](tfcensus_version.md)	 - Print version and build information
 

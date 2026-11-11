@@ -18,6 +18,7 @@ const (
 	ServiceIAM     = "iam"
 	ServiceRoute53 = "route53"
 	ServiceS3      = "s3"
+	ServiceCC      = "cloudcontrolapi"
 )
 
 // DefaultRates returns the client-side budget per service in requests per second. Each
@@ -33,6 +34,7 @@ func DefaultRates() map[string]rate.Limit {
 		ServiceIAM:     rateIAM,
 		ServiceRoute53: rateRoute53,
 		ServiceS3:      rateS3,
+		ServiceCC:      rateCC,
 	}
 }
 
@@ -44,6 +46,7 @@ const (
 	rateIAM     rate.Limit = 5
 	rateRoute53 rate.Limit = 5
 	rateS3      rate.Limit = 10
+	rateCC      rate.Limit = 2
 )
 
 func globalService(service string) bool { return service == ServiceIAM || service == ServiceRoute53 }

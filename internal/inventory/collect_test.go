@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -79,7 +80,9 @@ func collect(t *testing.T, rt http.RoundTripper, concurrency int) *inventory.Res
 	return res
 }
 
-func TestCollect(t *testing.T) {
+// TestSpec_inventory_3: the coverage matrix golden for a two-region stub where only one region
+// records Config. It also checks the merged collection and the run statuses.
+func TestSpec_inventory_3(t *testing.T) {
 	t.Parallel()
 
 	res := collect(t, transport(t, "inventory-two-regions", fleetStubs), 16)
@@ -121,7 +124,7 @@ func TestCollectDeterministic(t *testing.T) {
 	t.Parallel()
 
 	if testutil.Updating() {
-		t.Skip("TestCollect writes the cassette")
+		t.Skip("TestSpec_inventory_3 writes the cassette")
 	}
 	serial := collect(t, awstest.Replay(t, filepath.Join(cassettes, "inventory-two-regions")), 1)
 	parallel := collect(t, awstest.Replay(t, filepath.Join(cassettes, "inventory-two-regions")), 16)
@@ -132,7 +135,10 @@ func TestCollectDeterministic(t *testing.T) {
 	assert.JSONEq(t, string(a), string(b))
 }
 
-func TestMerge(t *testing.T) {
+// TestSpec_inventory_2: the same security group from config, Resource Explorer and the native
+// rule lister merges into one resource with config's tags and the sources config and
+// resource-explorer, in either input order.
+func TestSpec_inventory_2(t *testing.T) {
 	t.Parallel()
 
 	sg := "arn:aws:ec2:eu-west-1:" + acct + ":security-group/sg-1"
@@ -182,12 +188,14 @@ func TestSelectLayers(t *testing.T) {
 	t.Parallel()
 
 	c := inventory.NewCollector(inventory.Options{Env: env(t)})
-	_, err := c.Collect(t.Context(), inventory.Request{Layers: []string{"cloudcontrol"}})
+	_, err := c.Collect(t.Context(), inventory.Request{Layers: []string{"drift"}})
 	require.ErrorIs(t, err, inventory.ErrUnknownLayer)
 
-	res, err := c.Collect(t.Context(), inventory.Request{Layers: []string{"native", "config"}})
-	require.NoError(t, err)
-	assert.Empty(t, res.Resources)
+	for _, layers := range [][]string{{"native", "config"}, {"re", "cc"}, {"resource-explorer", "cloudcontrol"}} {
+		res, cerr := c.Collect(t.Context(), inventory.Request{Layers: layers})
+		require.NoError(t, cerr, layers)
+		assert.Empty(t, res.Resources)
+	}
 }
 
 func TestLimiters(t *testing.T) {
@@ -225,4 +233,98 @@ func TestCapabilities(t *testing.T) {
 	assert.Equal(t, "cn-north-1", inventory.GlobalRegion("aws-cn"))
 	assert.Equal(t, "us-gov-west-1", inventory.GlobalRegion("aws-us-gov"))
 	assert.Equal(t, "us-east-1", inventory.GlobalRegion("aws"))
+}
+
+const (
+	cfnLB           = "AWS::ElasticLoadBalancingV2::LoadBalancer"
+	cfnListener     = "AWS::ElasticLoadBalancingV2::Listener"
+	cfnListenerRule = "AWS::ElasticLoadBalancingV2::ListenerRule"
+)
+
+func elbARN(resource string) string {
+	return "arn:aws:elasticloadbalancing:eu-west-1:" + acct + ":" + resource
+}
+
+// parentStubs serve one load balancer from Config, its listener from Cloud Control per load
+// balancer, and the listener's rule from Cloud Control per listener.
+func parentStubs(r *awstest.Router) {
+	lb := elbARN("loadbalancer/app/web/50dc6c495c0c9188")
+	listener := elbARN("listener/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2")
+	rule := elbARN("listener-rule/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2/9683b2d02a6cabee")
+	r.On("config", "SelectResourceConfig", "", ok(configPage("", configRow(cfnLB, lb, lb, euWest))))
+	r.On("cloudcontrolapi", "ListResources", `LoadBalancerArn\":\"`+lb, ok(ccPage("", listener)))
+	r.On("cloudcontrolapi", "ListResources", `ListenerArn\":\"`+listener, ok(ccPage("", rule)))
+}
+
+// TestSpec_inventory_4: ELBv2 listeners are listed through Cloud Control with the load balancers
+// the config layer found, and listener rules with the listeners Cloud Control found.
+func TestSpec_inventory_4(t *testing.T) {
+	t.Parallel()
+
+	e := env(t)
+	e.CloudControlTypes = []string{cfnListenerRule, cfnListener}
+	rt := transport(t, "inventory-cc-parents", parentStubs)
+	res, err := inventory.NewCollector(inventory.Options{Env: e, Layers: []inventory.Layer{
+		inventory.NewConfig(e), inventory.NewCloudControl(e),
+	}}).Collect(t.Context(), inventory.Request{
+		Targets: []inventory.Target{{Account: account(rt), Report: oneRegion()}},
+		Layers:  []string{"config", "cc"},
+		Types:   []string{cfnLB, cfnListener, cfnListenerRule},
+	})
+	require.NoError(t, err)
+	var lines []string
+	for i := range res.Resources {
+		r := &res.Resources[i]
+		parts := []string{describe(r), strings.Join(r.Sources, ",")}
+		for _, p := range r.Parents {
+			parts = append(parts, "parent:"+p.ARN)
+		}
+		lines = append(lines, strings.Join(parts, " "))
+	}
+	var cov bytes.Buffer
+	require.NoError(t, inventory.WriteCoverage(&cov, res.Coverage))
+	out, err := json.MarshalIndent(map[string]any{"resources": lines, "runs": res.Runs}, "", "  ")
+	require.NoError(t, err)
+	testutil.Golden(t, filepath.Join(goldenDir, "cc-parents.golden.json"), append(out, '\n'))
+	testutil.Golden(t, filepath.Join(goldenDir, "cc-parents-coverage.golden"), cov.Bytes())
+	require.Len(t, res.Resources, 3)
+	for i, want := range []string{cfnListener, cfnListenerRule} {
+		assert.Equal(t, want, res.Resources[i].CFNType)
+		assert.Equal(t, []string{inventory.LayerCC}, res.Resources[i].Sources)
+		assert.Len(t, res.Resources[i].Parents, 1)
+	}
+}
+
+// TestCloudControlAuto skips the Cloud Control types an earlier layer listed in the same region,
+// and marks a type whose parent no layer lists as a blind spot.
+func TestCloudControlAuto(t *testing.T) {
+	t.Parallel()
+
+	e := env(t)
+	e.CloudControlTypes = []string{cfnLB}
+	rt := transport(t, "inventory-cc-auto", func(r *awstest.Router) {
+		r.On("config", "SelectResourceConfig", "", ok(configPage("")))
+	})
+	res, err := inventory.NewCollector(inventory.Options{Env: e, Layers: []inventory.Layer{
+		inventory.NewConfig(e), inventory.NewCloudControl(e),
+	}}).Collect(t.Context(), inventory.Request{
+		Targets: []inventory.Target{{Account: account(rt), Report: oneRegion()}},
+		Types:   []string{cfnLB},
+	})
+	require.NoError(t, err)
+	require.Len(t, res.Runs, 2)
+	assert.Equal(t, inventory.RunOK, res.Runs[0].Status)
+	assert.Equal(t, inventory.RunSkipped, res.Runs[1].Status)
+
+	e2 := env(t)
+	e2.CloudControlTypes = []string{cfnListenerRule}
+	assert.False(t, inventory.ParentCovered(e2.Map, cfnListenerRule, []inventory.Layer{inventory.NewCloudControl(e2)}))
+	assert.True(t, inventory.ParentCovered(e2.Map, cfnLB, nil), "a type without a parent is covered")
+}
+
+// oneRegion is a probe result for eu-west-1 with a recording Config recorder.
+func oneRegion() *probe.Report {
+	r := twoRegions()
+	r.Regions = r.Regions[1:]
+	return r
 }

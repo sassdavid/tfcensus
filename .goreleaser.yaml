@@ -95,7 +95,8 @@ dockers_v2:
     labels:
       org.opencontainers.image.title: "{{ .ProjectName }}"
       org.opencontainers.image.description: Census of Terraform/OpenTofu and Terragrunt fleets on AWS
-      org.opencontainers.image.source: "{{ .GitURL }}"
+      # A fixed URL: GitURL can end in .git, which keeps ghcr.io from linking the image to the repo.
+      org.opencontainers.image.source: https://github.com/sassdavid/tfcensus
       org.opencontainers.image.version: "{{ .Version }}"
       org.opencontainers.image.revision: "{{ .FullCommit }}"
       org.opencontainers.image.created: "{{ .CommitDate }}"
