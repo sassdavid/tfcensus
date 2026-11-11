@@ -55,6 +55,9 @@ type Instance struct {
 	ARN      string            // the arn attribute
 	Region   string            // the region attribute (aws provider 6 and later)
 	Identity map[string]string // resource identity (Terraform 1.12 and later), scalars only
+	// Sensitive lists attribute names, never values, that look like secrets and hold a value, or
+	// that the provider marked sensitive in sensitive_attributes. Sorted, without duplicates.
+	Sensitive []string
 }
 
 // Address returns the instance's resource address, such as module.vpc.aws_subnet.private[0].
@@ -89,6 +92,12 @@ const (
 	attrID     = "id"
 	attrARN    = "arn"
 	attrRegion = "region"
+)
+
+// Keys of a sensitive_attributes path step; "type" is also a resource's type key.
+const (
+	stepType  = "type"
+	stepValue = "value"
 )
 
 func identifierAttrs() []string { return []string{attrID, attrARN, attrRegion} }
@@ -250,7 +259,7 @@ func (p *parser) resource() (Resource, error) {
 			var m string
 			m, err = p.string()
 			r.Mode = Mode(m)
-		case "type":
+		case stepType:
 			r.Type, err = p.string()
 		case "name":
 			r.Name, err = p.string()
@@ -292,11 +301,15 @@ func (p *parser) instance() (Instance, error) {
 			err = p.flatAttributes(&inst)
 		case "identity":
 			inst.Identity, err = p.identity()
+		case "sensitive_attributes":
+			err = p.sensitivePaths(&inst)
 		default:
 			err = p.d.SkipValue()
 		}
 		return err
 	})
+	slices.Sort(inst.Sensitive)
+	inst.Sensitive = slices.Compact(inst.Sensitive)
 	return inst, err
 }
 
@@ -324,6 +337,9 @@ func (p *parser) attributes(inst *Instance) error {
 		return p.d.SkipValue() //nolint:wrapcheck // Parse adds the byte offset
 	}
 	return p.object(func(name string) error {
+		if SensitiveName(name) {
+			return p.sensitiveValue(inst, name)
+		}
 		if !slices.Contains(identifierAttrs(), name) || p.d.PeekKind() != '"' {
 			return p.d.SkipValue() //nolint:wrapcheck // Parse adds the byte offset
 		}
@@ -331,6 +347,73 @@ func (p *parser) attributes(inst *Instance) error {
 		inst.set(name, v)
 		return err
 	})
+}
+
+// sensitiveValue records name when its value is set: not null, not a boolean and not an empty
+// string. The value itself is read only to test that and is never kept.
+func (p *parser) sensitiveValue(inst *Instance, name string) error {
+	switch p.d.PeekKind() { //nolint:exhaustive // only null, booleans and strings need a look at the value
+	case 'n', 't', 'f': // unset, or a flag such as manage_master_user_password
+		return p.d.SkipValue() //nolint:wrapcheck // Parse adds the byte offset
+	case '"':
+		tok, err := p.d.ReadToken()
+		if err != nil {
+			return err //nolint:wrapcheck // Parse adds the byte offset
+		}
+		if tok.String() != "" {
+			inst.Sensitive = append(inst.Sensitive, name)
+		}
+		return nil
+	default:
+		inst.Sensitive = append(inst.Sensitive, name)
+		return p.d.SkipValue() //nolint:wrapcheck // Parse adds the byte offset
+	}
+}
+
+// sensitivePaths reads sensitive_attributes, a list of paths whose steps are objects such as
+// {"type": "get_attr", "value": "password"}, and keeps the first step's attribute name.
+func (p *parser) sensitivePaths(inst *Instance) error {
+	if p.d.PeekKind() != '[' {
+		return p.d.SkipValue() //nolint:wrapcheck // Parse adds the byte offset
+	}
+	return p.array(func() error {
+		if p.d.PeekKind() != '[' {
+			return p.d.SkipValue() //nolint:wrapcheck // Parse adds the byte offset
+		}
+		first := true
+		return p.array(func() error {
+			if !first || p.d.PeekKind() != '{' {
+				return p.d.SkipValue() //nolint:wrapcheck // Parse adds the byte offset
+			}
+			first = false
+			name, err := p.attrStep()
+			if name != "" {
+				inst.Sensitive = append(inst.Sensitive, name)
+			}
+			return err
+		})
+	})
+}
+
+// attrStep reads one path step and returns its attribute name for a get_attr step, else "".
+func (p *parser) attrStep() (string, error) {
+	var typ, value string
+	err := p.object(func(name string) error {
+		if (name != stepType && name != stepValue) || p.d.PeekKind() != '"' {
+			return p.d.SkipValue() //nolint:wrapcheck // Parse adds the byte offset
+		}
+		v, err := p.string()
+		if name == stepType {
+			typ = v
+		} else {
+			value = v
+		}
+		return err
+	})
+	if typ != "get_attr" {
+		return "", err
+	}
+	return value, err
 }
 
 // flatAttributes reads the flatmap form that states upgraded from format 3 can still carry.

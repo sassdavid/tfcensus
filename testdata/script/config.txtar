@@ -80,7 +80,13 @@ accounts:
     role: OrganizationAccountAccessRole
   profiles: []
 audit:
+  discover_patterns:
+    - '*tfstate*'
+    - '*terraform-state*'
+    - '*tf-state*'
   policy:
+    max_state_mb: 20
+    min_provider_versions: {}
     min_terraform_version: "1.10"
     noncurrent_days: 30
     stale_lock_hours: 24

@@ -26,8 +26,8 @@ Same as [relgap M0](https://github.com/sassdavid/relgap/blob/main/docs/plan/mile
 - [x] All state-reader.md criteria. `tfcensus inventory` in json, md and csv. `--save-index`.
 
 ### M4: Backend audit → [backend-audit](specs/backend-audit.md)
-- [ ] Bucket, lock and fleet checks with fixtures. Suppressions. SARIF output.
-- [ ] *(Optional, manual)* Live validation recorded in `docs/validation/` (read-only, profiles named in the prompt).
+- [x] Bucket, lock and fleet checks with fixtures. Suppressions. SARIF output.
+- [x] *(Optional, manual)* Live validation recorded in `docs/validation/` (read-only, profiles named in the prompt).
 
 ### M5: Inventory layers and matching → [inventory](specs/inventory.md), [matching](specs/matching.md)
 Scope: config + resource-explorer + native (sg-rules, iam-attachments, route53, s3-subresources) layers; typemap generation task + the first 40 types; the match algorithm.

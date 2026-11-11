@@ -29,6 +29,7 @@ func flagKeys() map[string]string {
 		flagOrgRole:           "accounts.org.role",
 		flagManagementProfile: "accounts.org.management_profile",
 		flagRegion:            "regions",
+		flagDiscoverPattern:   "audit.discover_patterns",
 	}
 }
 
@@ -110,6 +111,7 @@ stdout carries data, stderr carries logs. Use --format json for scripting.`,
 		newUnitsCmd(d, g),
 		newDoctorCmd(d, g),
 		newInventoryCmd(d, g),
+		newAuditCmd(d, g),
 	)
 	return root, g
 }

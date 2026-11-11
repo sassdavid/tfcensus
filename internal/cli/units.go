@@ -178,7 +178,7 @@ func writeUnits(w io.Writer, format render.Format, d *app.Deps, res discovery.Re
 }
 
 func unitColumns() []string {
-	return []string{"REPO", "UNIT", "KIND", "BACKEND", "LOCK", colAccount, "REGION", "RESOLUTION", "WARNINGS"}
+	return []string{"REPO", "UNIT", "KIND", "BACKEND", "LOCK", colAccount, colRegion, "RESOLUTION", "WARNINGS"}
 }
 
 func unitRow(u *discovery.Unit) []string {

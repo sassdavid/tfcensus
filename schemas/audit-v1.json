@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sassdavid/tfcensus/schemas/audit-v1.json",
+  "title": "tfcensus audit backend --format json",
+  "description": "The report envelope (report-v1.json) with the backend audit payload. Findings carry identifiers only: bucket names, keys, unit paths, resource addresses and attribute names, never attribute values.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "tool", "version", "generated_at", "data", "errors"],
+  "properties": {
+    "schema_version": { "const": "1" },
+    "tool": { "const": "tfcensus" },
+    "version": { "type": "string", "minLength": 1 },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "errors": {
+      "description": "Repos that failed discovery, states that couldn't be read, and checks that couldn't run.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["message"],
+        "properties": {
+          "target": { "type": "string" },
+          "message": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["checks", "buckets", "lock_tables", "findings", "suppressed", "warnings", "incomplete"],
+      "properties": {
+        "checks": {
+          "description": "Every check, in spec order.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "severity", "title", "remediation"],
+            "properties": {
+              "id": { "$ref": "#/$defs/checkID" },
+              "severity": { "$ref": "#/$defs/severity" },
+              "title": { "type": "string", "minLength": 1 },
+              "remediation": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "buckets": {
+          "description": "Audited buckets, sorted by source (unit first) and name.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/bucket" }
+        },
+        "lock_tables": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/lockTable" }
+        },
+        "findings": {
+          "description": "Unsuppressed findings, most severe first, then in check order and by target.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/finding" }
+        },
+        "suppressed": {
+          "description": "Findings hidden by an audit.suppress entry, each with that entry's reason.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/finding" }
+        },
+        "warnings": {
+          "description": "Expired suppressions.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "incomplete": {
+          "description": "Checks that couldn't run, such as on access denied.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["target", "message"],
+            "properties": {
+              "target": { "type": "string" },
+              "check": { "$ref": "#/$defs/checkID" },
+              "message": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "checkID": {
+      "enum": [
+        "S3-VER", "S3-MFA", "S3-ENC", "S3-KMSPOL", "S3-PAB", "S3-TLS", "S3-OWN", "S3-REPL", "S3-LC", "S3-LOG", "S3-LEGACY",
+        "LK-MODE", "LK-BOTH", "LK-PITR", "LK-STALE", "LK-MD5",
+        "FL-ORPHAN", "FL-ABSENT", "FL-EMPTY", "FL-LINEAGE", "FL-DOUBLE", "FL-TFVER", "FL-PROV", "FL-SIZE", "FL-SECRET"
+      ]
+    },
+    "severity": { "enum": ["info", "low", "medium", "high"] },
+    "bucket": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "source", "units", "state_keys", "replication"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "account": { "type": "string", "pattern": "^[0-9]{12}$" },
+        "region": { "type": "string" },
+        "source": { "description": "unit: a unit's backend names the bucket; discover: found by --discover.", "enum": ["unit", "discover"] },
+        "units": { "type": "integer", "minimum": 0 },
+        "state_keys": { "description": "Objects whose key ends in .tfstate.", "type": "integer", "minimum": 0 },
+        "versioning": { "enum": ["Enabled", "Suspended", "Off"] },
+        "encryption": { "description": "Default encryption, such as AES256 or aws:kms (customer-managed key).", "type": "string" },
+        "replica_of": { "description": "An audited bucket whose replication writes to this one. A replica needs no replication of its own, and its state keys count as the source's.", "type": "string" },
+        "replication": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["bucket", "status"],
+            "properties": {
+              "bucket": { "type": "string" },
+              "region": { "type": "string" },
+              "status": { "enum": ["Enabled", "Disabled"] }
+            }
+          }
+        }
+      }
+    },
+    "lockTable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "units", "locks"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "account": { "type": "string", "pattern": "^[0-9]{12}$" },
+        "region": { "type": "string" },
+        "units": { "type": "integer", "minimum": 0 },
+        "pitr": { "type": "boolean" },
+        "encryption": { "enum": ["KMS", "AWS owned key"] },
+        "locks": { "description": "Lock items, digest items excluded.", "type": "integer", "minimum": 0 }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule", "severity", "target", "reason", "remediation"],
+      "properties": {
+        "rule": { "$ref": "#/$defs/checkID" },
+        "severity": { "$ref": "#/$defs/severity" },
+        "target": { "description": "s3://bucket[/key], dynamodb://region/table, or repo/path[:workspace].", "type": "string", "minLength": 1 },
+        "bucket": { "type": "string" },
+        "table": { "type": "string" },
+        "key": { "description": "State key, lock ID or lock object key.", "type": "string" },
+        "unit": { "description": "repo/path", "type": "string" },
+        "account": { "type": "string", "pattern": "^[0-9]{12}$" },
+        "region": { "type": "string" },
+        "reason": { "type": "string", "minLength": 1 },
+        "remediation": { "type": "string", "minLength": 1 },
+        "suppressed": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["reason"],
+          "properties": {
+            "reason": { "type": "string", "minLength": 1 },
+            "expires": { "type": "string", "format": "date" }
+          }
+        }
+      }
+    }
+  }
+}

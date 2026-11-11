@@ -1,0 +1,3091 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 43
+        host: ""
+        body: Action=GetCallerIdentity&Version=2011-06-15
+        form:
+            Action:
+                - GetCallerIdentity
+            Version:
+                - "2011-06-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://sts.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |
+            <GetCallerIdentityResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">
+              <GetCallerIdentityResult>
+                <Arn>arn:aws:iam::111111111111:user/tfcensus-readonly</Arn>
+                <UserId>AIDAEXAMPLEUSERID</UserId>
+                <Account>111111111111</Account>
+              </GetCallerIdentityResult>
+              <ResponseMetadata><RequestId>00000000-0000-4000-8000-000000000000</RequestId></ResponseMetadata>
+            </GetCallerIdentityResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 1
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            list-type:
+                - "2"
+            prefix:
+                - env:/
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-good.s3.eu-west-1.amazonaws.com/?list-type=2&prefix=env%3A%2F
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+              <Name>acme-audit-good</Name>
+              <IsTruncated>false</IsTruncated>
+              <Prefix>env:/</Prefix>
+              <MaxKeys>1000</MaxKeys>
+            </ListBucketResult>
+        headers:
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Type:
+                - text/xml; charset=utf-8
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwMTAwMDAwMDAwMDAwMDAwMDEwMDAwMDAwMDAwMDAwMDAxMDAwMDAwMDAwMDAwMDAwMQ==
+            X-Amz-Request-Id:
+                - "0000000000000001"
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 2
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            x-id:
+                - GetObject
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Checksum-Mode:
+                - ENABLED
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-good.s3.eu-west-1.amazonaws.com/app/terraform.tfstate?x-id=GetObject
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 1198
+        body: |
+            {
+              "version": 4,
+              "terraform_version": "1.12.2",
+              "serial": 9,
+              "lineage": "1a2b3c4d-0000-4000-8000-000000000002",
+              "outputs": {},
+              "resources": [
+                {
+                  "mode": "managed",
+                  "type": "aws_iam_role",
+                  "name": "app",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 0,
+                      "attributes": {
+                        "arn": "arn:aws:iam::111111111111:role/acme-audit-app",
+                        "assume_role_policy": "{\"Version\":\"2012-10-17\",\"Statement\":[]}",
+                        "id": "acme-audit-app",
+                        "name": "acme-audit-app"
+                      },
+                      "sensitive_attributes": []
+                    }
+                  ]
+                },
+                {
+                  "mode": "managed",
+                  "type": "aws_s3_bucket",
+                  "name": "logs",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 0,
+                      "attributes": {
+                        "arn": "arn:aws:s3:::acme-app-logs",
+                        "bucket": "acme-app-logs",
+                        "id": "acme-app-logs",
+                        "region": "eu-west-1"
+                      },
+                      "sensitive_attributes": []
+                    }
+                  ]
+                }
+              ],
+              "check_results": null
+            }
+        headers:
+            Accept-Ranges:
+                - bytes
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Length:
+                - "1198"
+            Content-Type:
+                - text/plain; charset=utf-8
+            Etag:
+                - '"b4f85e205cc8507af6ac083754d50f69"'
+            Last-Modified:
+                - Tue, 10 Nov 2026 11:00:00 GMT
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwMjAwMDAwMDAwMDAwMDAwMDIwMDAwMDAwMDAwMDAwMDAyMDAwMDAwMDAwMDAwMDAwMg==
+            X-Amz-Request-Id:
+                - "0000000000000002"
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 3
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            x-id:
+                - GetObject
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Checksum-Mode:
+                - ENABLED
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-good.s3.eu-west-1.amazonaws.com/copy/terraform.tfstate?x-id=GetObject
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 723
+        body: |
+            {
+              "version": 4,
+              "terraform_version": "1.12.2",
+              "serial": 3,
+              "lineage": "1a2b3c4d-0000-4000-8000-000000000002",
+              "outputs": {},
+              "resources": [
+                {
+                  "mode": "managed",
+                  "type": "aws_iam_role",
+                  "name": "app",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 0,
+                      "attributes": {
+                        "arn": "arn:aws:iam::111111111111:role/acme-audit-app",
+                        "assume_role_policy": "{\"Version\":\"2012-10-17\",\"Statement\":[]}",
+                        "id": "acme-audit-app",
+                        "name": "acme-audit-app"
+                      },
+                      "sensitive_attributes": []
+                    }
+                  ]
+                }
+              ],
+              "check_results": null
+            }
+        headers:
+            Accept-Ranges:
+                - bytes
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Length:
+                - "723"
+            Content-Type:
+                - text/plain; charset=utf-8
+            Etag:
+                - '"9c1f0c9e65480c08e54dd2b058446bce"'
+            Last-Modified:
+                - Tue, 10 Nov 2026 11:00:00 GMT
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwMzAwMDAwMDAwMDAwMDAwMDMwMDAwMDAwMDAwMDAwMDAzMDAwMDAwMDAwMDAwMDAwMw==
+            X-Amz-Request-Id:
+                - "0000000000000003"
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 4
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            x-id:
+                - GetObject
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Checksum-Mode:
+                - ENABLED
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-good.s3.eu-west-1.amazonaws.com/empty/terraform.tfstate?x-id=GetObject
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 181
+        body: |
+            {
+              "version": 4,
+              "terraform_version": "1.11.4",
+              "serial": 2,
+              "lineage": "1a2b3c4d-0000-4000-8000-000000000003",
+              "outputs": {},
+              "resources": [],
+              "check_results": null
+            }
+        headers:
+            Accept-Ranges:
+                - bytes
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Length:
+                - "181"
+            Content-Type:
+                - text/plain; charset=utf-8
+            Etag:
+                - '"a9fef907bc45bc5ca80ef194588c7aac"'
+            Last-Modified:
+                - Tue, 10 Nov 2026 11:00:00 GMT
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwNDAwMDAwMDAwMDAwMDAwMDQwMDAwMDAwMDAwMDAwMDA0MDAwMDAwMDAwMDAwMDAwNA==
+            X-Amz-Request-Id:
+                - "0000000000000004"
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 5
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            list-type:
+                - "2"
+            prefix:
+                - env:/
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-bad.s3.eu-west-1.amazonaws.com/?list-type=2&prefix=env%3A%2F
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+              <Name>acme-audit-bad</Name>
+              <IsTruncated>false</IsTruncated>
+              <Prefix>env:/</Prefix>
+              <MaxKeys>1000</MaxKeys>
+            </ListBucketResult>
+        headers:
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Type:
+                - text/xml; charset=utf-8
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwNTAwMDAwMDAwMDAwMDAwMDUwMDAwMDAwMDAwMDAwMDA1MDAwMDAwMDAwMDAwMDAwNQ==
+            X-Amz-Request-Id:
+                - "0000000000000005"
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 6
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            x-id:
+                - GetObject
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Checksum-Mode:
+                - ENABLED
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-bad.s3.eu-west-1.amazonaws.com/legacy/terraform.tfstate?x-id=GetObject
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 4966
+        body: |
+            {
+              "version": 4,
+              "terraform_version": "1.5.7",
+              "serial": 41,
+              "lineage": "1a2b3c4d-0000-4000-8000-000000000004",
+              "outputs": {},
+              "resources": [
+                {
+                  "mode": "managed",
+                  "type": "aws_instance",
+                  "name": "bastion",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 0,
+                      "attributes": {
+                        "ami": "ami-0123456789abcdef0",
+                        "arn": "arn:aws:ec2:eu-west-1:111111111111:instance/i-0aaaabbbbccccdddd",
+                        "id": "i-0aaaabbbbccccdddd",
+                        "instance_type": "t3.micro",
+                        "user_data": "FIXTURE-SECRET-padding-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                      },
+                      "sensitive_attributes": []
+                    }
+                  ]
+                }
+              ],
+              "check_results": null
+            }
+        headers:
+            Accept-Ranges:
+                - bytes
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Length:
+                - "4966"
+            Content-Type:
+                - text/plain; charset=utf-8
+            Etag:
+                - '"c2c6c9109d30be484d7891a4dc3d4663"'
+            Last-Modified:
+                - Tue, 10 Nov 2026 11:00:00 GMT
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwNjAwMDAwMDAwMDAwMDAwMDYwMDAwMDAwMDAwMDAwMDA2MDAwMDAwMDAwMDAwMDAwNg==
+            X-Amz-Request-Id:
+                - "0000000000000006"
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 7
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            x-id:
+                - GetObject
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Checksum-Mode:
+                - ENABLED
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-good.s3.eu-west-1.amazonaws.com/network/terraform.tfstate?x-id=GetObject
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 662
+        body: |
+            {
+              "version": 4,
+              "terraform_version": "1.12.2",
+              "serial": 4,
+              "lineage": "1a2b3c4d-0000-4000-8000-000000000001",
+              "outputs": {},
+              "resources": [
+                {
+                  "mode": "managed",
+                  "type": "aws_vpc",
+                  "name": "main",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 0,
+                      "attributes": {
+                        "arn": "arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0a1b2c3d4e5f60718",
+                        "cidr_block": "10.40.0.0/16",
+                        "id": "vpc-0a1b2c3d4e5f60718"
+                      },
+                      "sensitive_attributes": []
+                    }
+                  ]
+                }
+              ],
+              "check_results": null
+            }
+        headers:
+            Accept-Ranges:
+                - bytes
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Length:
+                - "662"
+            Content-Type:
+                - text/plain; charset=utf-8
+            Etag:
+                - '"35621a6047590e69d85eb91785186ea6"'
+            Last-Modified:
+                - Tue, 10 Nov 2026 11:00:00 GMT
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwNzAwMDAwMDAwMDAwMDAwMDcwMDAwMDAwMDAwMDAwMDA3MDAwMDAwMDAwMDAwMDAwNw==
+            X-Amz-Request-Id:
+                - "0000000000000007"
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 8
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            x-id:
+                - GetObject
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Checksum-Mode:
+                - ENABLED
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-good.s3.eu-west-1.amazonaws.com/planned/terraform.tfstate?x-id=GetObject
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <Error>
+              <Code>NoSuchKey</Code>
+              <Resource>planned/terraform.tfstate</Resource>
+            </Error>
+        headers:
+            Access-Control-Allow-Origin:
+                - '*'
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwODAwMDAwMDAwMDAwMDAwMDgwMDAwMDAwMDAwMDAwMDA4MDAwMDAwMDAwMDAwMDAwOA==
+            X-Amz-Request-Id:
+                - "0000000000000008"
+        status: 404 Not Found
+        code: 404
+        duration: 0s
+    - id: 9
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            list-type:
+                - "2"
+            prefix:
+                - env:/
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-legacy.s3.eu-west-1.amazonaws.com/?list-type=2&prefix=env%3A%2F
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+              <Name>acme-audit-legacy</Name>
+              <IsTruncated>false</IsTruncated>
+              <Prefix>env:/</Prefix>
+              <MaxKeys>1000</MaxKeys>
+            </ListBucketResult>
+        headers:
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Type:
+                - text/xml; charset=utf-8
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwOTAwMDAwMDAwMDAwMDAwMDkwMDAwMDAwMDAwMDAwMDA5MDAwMDAwMDAwMDAwMDAwOQ==
+            X-Amz-Request-Id:
+                - "0000000000000009"
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 10
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            x-id:
+                - GetObject
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Checksum-Mode:
+                - ENABLED
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-legacy.s3.eu-west-1.amazonaws.com/secrets/terraform.tfstate?x-id=GetObject
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 2284
+        body: |
+            {
+              "version": 4,
+              "terraform_version": "1.12.2",
+              "serial": 6,
+              "lineage": "1a2b3c4d-0000-4000-8000-000000000005",
+              "outputs": {},
+              "resources": [
+                {
+                  "mode": "managed",
+                  "type": "aws_db_instance",
+                  "name": "main",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 0,
+                      "attributes": {
+                        "arn": "arn:aws:rds:eu-west-1:111111111111:db:acme-main",
+                        "id": "db-ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+                        "identifier": "acme-main",
+                        "password": "FIXTURE-SECRET-db-password",
+                        "username": "acme",
+                        "master_user_secret_kms_key_id": null,
+                        "kms_key_id": "arn:aws:kms:eu-west-1:111111111111:key/db-key"
+                      },
+                      "sensitive_attributes": [
+                        [
+                          {
+                            "type": "get_attr",
+                            "value": "password"
+                          }
+                        ]
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "mode": "managed",
+                  "type": "random_password",
+                  "name": "db",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/random\"]",
+                  "instances": [
+                    {
+                      "schema_version": 0,
+                      "attributes": {
+                        "id": "none",
+                        "length": 32,
+                        "result": "FIXTURE-SECRET-random-result",
+                        "special": true
+                      },
+                      "sensitive_attributes": [
+                        [
+                          {
+                            "type": "get_attr",
+                            "value": "result"
+                          }
+                        ],
+                        [
+                          {
+                            "type": "get_attr",
+                            "value": "bcrypt_hash"
+                          }
+                        ]
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "mode": "managed",
+                  "type": "aws_iam_access_key",
+                  "name": "ci",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 0,
+                      "attributes": {
+                        "id": "AKIAFIXTUREKEYID0001",
+                        "secret": "FIXTURE-SECRET-access-key",
+                        "ses_smtp_password_v4": "FIXTURE-SECRET-smtp",
+                        "user": "ci",
+                        "password_length": null
+                      },
+                      "sensitive_attributes": []
+                    }
+                  ]
+                }
+              ],
+              "check_results": null
+            }
+        headers:
+            Accept-Ranges:
+                - bytes
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Length:
+                - "2284"
+            Content-Type:
+                - text/plain; charset=utf-8
+            Etag:
+                - '"22284d40299f64f0ee214bd5d975bf03"'
+            Last-Modified:
+                - Tue, 10 Nov 2026 11:00:00 GMT
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwQTAwMDAwMDAwMDAwMDAwMEEwMDAwMDAwMDAwMDAwMDBBMDAwMDAwMDAwMDAwMDAwQQ==
+            X-Amz-Request-Id:
+                - 000000000000000A
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 11
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            x-id:
+                - ListBuckets
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://s3.eu-west-1.amazonaws.com/?x-id=ListBuckets
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ListAllMyBucketsResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>fake-owner</ID></Owner><Buckets><Bucket><Name>acme-audit-bad</Name><CreationDate>2024-01-01T00:00:00.000Z</CreationDate><BucketRegion>eu-west-1</BucketRegion></Bucket><Bucket><Name>acme-audit-good</Name><CreationDate>2024-01-01T00:00:00.000Z</CreationDate><BucketRegion>eu-west-1</BucketRegion></Bucket><Bucket><Name>acme-audit-legacy</Name><CreationDate>2024-01-01T00:00:00.000Z</CreationDate><BucketRegion>eu-west-1</BucketRegion></Bucket><Bucket><Name>acme-tfstate-good-replica</Name><CreationDate>2024-01-01T00:00:00.000Z</CreationDate><BucketRegion>eu-central-1</BucketRegion></Bucket><Bucket><Name>acme-tfstate-orphans</Name><CreationDate>2024-01-01T00:00:00.000Z</CreationDate><BucketRegion>eu-west-1</BucketRegion></Bucket><Bucket><Name>unrelated-logs</Name><CreationDate>2024-01-01T00:00:00.000Z</CreationDate><BucketRegion>eu-west-1</BucketRegion></Bucket></Buckets></ListAllMyBucketsResult>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 12
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            list-type:
+                - "2"
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-bad.s3.eu-west-1.amazonaws.com/?list-type=2
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+              <Name>acme-audit-bad</Name>
+              <IsTruncated>false</IsTruncated>
+              <Prefix></Prefix>
+              <MaxKeys>1000</MaxKeys>
+              <Contents>
+                <Key>legacy/terraform.tfstate</Key>
+                <LastModified>2026-11-10T11:00:00Z</LastModified>
+                <ETag>&#34;c2c6c9109d30be484d7891a4dc3d4663&#34;</ETag>
+                <Size>4966</Size>
+              </Contents>
+              <Contents>
+                <Key>legacy/terraform.tfstate.tflock</Key>
+                <LastModified>2026-11-07T12:00:00Z</LastModified>
+                <ETag>&#34;899b09877beb0c287432830513f2e98c&#34;</ETag>
+                <Size>14</Size>
+              </Contents>
+              <Contents>
+                <Key>retired/terraform.tfstate</Key>
+                <LastModified>2026-11-10T11:00:00Z</LastModified>
+                <ETag>&#34;44806bd522218c120d031648844df3e7&#34;</ETag>
+                <Size>181</Size>
+              </Contents>
+              <KeyCount>3</KeyCount>
+            </ListBucketResult>
+        headers:
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Type:
+                - text/xml; charset=utf-8
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwQjAwMDAwMDAwMDAwMDAwMEIwMDAwMDAwMDAwMDAwMDBCMDAwMDAwMDAwMDAwMDAwQg==
+            X-Amz-Request-Id:
+                - 000000000000000B
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 13
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            versioning:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-bad.s3.eu-west-1.amazonaws.com/?versioning=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <VersioningConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Status>Suspended</Status><MfaDelete>Disabled</MfaDelete></VersioningConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 14
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            encryption:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-bad.s3.eu-west-1.amazonaws.com/?encryption=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ServerSideEncryptionConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Rule><ApplyServerSideEncryptionByDefault><SSEAlgorithm>AES256</SSEAlgorithm></ApplyServerSideEncryptionByDefault><BucketKeyEnabled>false</BucketKeyEnabled></Rule></ServerSideEncryptionConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 15
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            publicAccessBlock:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-bad.s3.eu-west-1.amazonaws.com/?publicAccessBlock=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <Error><Code>NoSuchPublicAccessBlockConfiguration</Code><Message>The public access block configuration was not found</Message><RequestId>0000000000000000</RequestId></Error>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 404 Not Found
+        code: 404
+        duration: 0s
+    - id: 16
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        headers:
+            X-Amz-Account-Id:
+                - "111111111111"
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://111111111111.s3-control.eu-west-1.amazonaws.com/v20180820/configuration/publicAccessBlock
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <PublicAccessBlockConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><BlockPublicAcls>true</BlockPublicAcls><IgnorePublicAcls>true</IgnorePublicAcls><BlockPublicPolicy>true</BlockPublicPolicy><RestrictPublicBuckets>true</RestrictPublicBuckets></PublicAccessBlockConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 17
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            policy:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-bad.s3.eu-west-1.amazonaws.com/?policy=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <Error><Code>NoSuchBucketPolicy</Code><Message>The bucket policy does not exist</Message><RequestId>0000000000000000</RequestId></Error>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 404 Not Found
+        code: 404
+        duration: 0s
+    - id: 18
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            ownershipControls:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-bad.s3.eu-west-1.amazonaws.com/?ownershipControls=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <OwnershipControls xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Rule><ObjectOwnership>ObjectWriter</ObjectOwnership></Rule></OwnershipControls>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 19
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            replication:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-bad.s3.eu-west-1.amazonaws.com/?replication=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <Error><Code>ReplicationConfigurationNotFoundError</Code><Message>The replication configuration was not found</Message><RequestId>0000000000000000</RequestId></Error>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 404 Not Found
+        code: 404
+        duration: 0s
+    - id: 20
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            lifecycle:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-bad.s3.eu-west-1.amazonaws.com/?lifecycle=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <Error><Code>NoSuchLifecycleConfiguration</Code><Message>The lifecycle configuration does not exist</Message><RequestId>0000000000000000</RequestId></Error>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 404 Not Found
+        code: 404
+        duration: 0s
+    - id: 21
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            logging:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-bad.s3.eu-west-1.amazonaws.com/?logging=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <BucketLoggingStatus xmlns="http://s3.amazonaws.com/doc/2006-03-01/"/>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 22
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 28
+        host: ""
+        body: '{"includeShadowTrails":true}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - CloudTrail_20131101.DescribeTrails
+        url: https://cloudtrail.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"trailList":[{"HomeRegion":"eu-west-1","IsMultiRegionTrail":true,"IsOrganizationTrail":true,"Name":"org-trail","TrailARN":"arn:aws:cloudtrail:eu-west-1:111111111111:trail/org-trail"}]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 23
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 73
+        host: ""
+        body: '{"TrailName":"arn:aws:cloudtrail:eu-west-1:111111111111:trail/org-trail"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - CloudTrail_20131101.GetEventSelectors
+        url: https://cloudtrail.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"AdvancedEventSelectors":[{"FieldSelectors":[{"Equals":["Data"],"Field":"eventCategory"},{"Equals":["AWS::S3::Object"],"Field":"resources.type"},{"Field":"resources.ARN","StartsWith":["arn:aws:s3:::acme-audit-legacy/"]}],"Name":"state"}],"TrailARN":"arn:aws:cloudtrail:eu-west-1:111111111111:trail/org-trail"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 24
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            list-type:
+                - "2"
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-good.s3.eu-west-1.amazonaws.com/?list-type=2
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+              <Name>acme-audit-good</Name>
+              <IsTruncated>false</IsTruncated>
+              <Prefix></Prefix>
+              <MaxKeys>1000</MaxKeys>
+              <Contents>
+                <Key>app/terraform.tfstate</Key>
+                <LastModified>2026-11-10T11:00:00Z</LastModified>
+                <ETag>&#34;b4f85e205cc8507af6ac083754d50f69&#34;</ETag>
+                <Size>1198</Size>
+              </Contents>
+              <Contents>
+                <Key>app/terraform.tfstate.tflock</Key>
+                <LastModified>2026-11-10T11:00:00Z</LastModified>
+                <ETag>&#34;649deb310f15d00e1fd9ee3f603dd02a&#34;</ETag>
+                <Size>14</Size>
+              </Contents>
+              <Contents>
+                <Key>copy/terraform.tfstate</Key>
+                <LastModified>2026-11-10T11:00:00Z</LastModified>
+                <ETag>&#34;9c1f0c9e65480c08e54dd2b058446bce&#34;</ETag>
+                <Size>723</Size>
+              </Contents>
+              <Contents>
+                <Key>empty/terraform.tfstate</Key>
+                <LastModified>2026-11-10T11:00:00Z</LastModified>
+                <ETag>&#34;a9fef907bc45bc5ca80ef194588c7aac&#34;</ETag>
+                <Size>181</Size>
+              </Contents>
+              <Contents>
+                <Key>network/terraform.tfstate</Key>
+                <LastModified>2026-11-10T11:00:00Z</LastModified>
+                <ETag>&#34;35621a6047590e69d85eb91785186ea6&#34;</ETag>
+                <Size>662</Size>
+              </Contents>
+              <KeyCount>5</KeyCount>
+            </ListBucketResult>
+        headers:
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Type:
+                - text/xml; charset=utf-8
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwQzAwMDAwMDAwMDAwMDAwMEMwMDAwMDAwMDAwMDAwMDBDMDAwMDAwMDAwMDAwMDAwQw==
+            X-Amz-Request-Id:
+                - 000000000000000C
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 25
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            versioning:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-good.s3.eu-west-1.amazonaws.com/?versioning=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <VersioningConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Status>Enabled</Status><MfaDelete>Enabled</MfaDelete></VersioningConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 26
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            encryption:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-good.s3.eu-west-1.amazonaws.com/?encryption=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <ServerSideEncryptionConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Rule><ApplyServerSideEncryptionByDefault><SSEAlgorithm>aws:kms</SSEAlgorithm><KMSMasterKeyID>arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-good-4000-8000-000000000001</KMSMasterKeyID></ApplyServerSideEncryptionByDefault><BucketKeyEnabled>true</BucketKeyEnabled></Rule></ServerSideEncryptionConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 27
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 87
+        host: ""
+        body: '{"KeyId":"arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-good-4000-8000-000000000001"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - TrentService.DescribeKey
+        url: https://kms.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"KeyMetadata":{"AWSAccountId":"111111111111","Arn":"arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-good-4000-8000-000000000001","Enabled":true,"KeyId":"0b1c2d3e-good-4000-8000-000000000001","KeyManager":"CUSTOMER","KeyState":"Enabled","KeyUsage":"ENCRYPT_DECRYPT"}}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 28
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 110
+        host: ""
+        body: '{"KeyId":"arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-good-4000-8000-000000000001","PolicyName":"default"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - TrentService.GetKeyPolicy
+        url: https://kms.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Policy":"{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"Admin\",\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"arn:aws:iam::111111111111:root\"},\"Action\":\"kms:*\",\"Resource\":\"*\"}]}","PolicyName":"default"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 29
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            publicAccessBlock:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-good.s3.eu-west-1.amazonaws.com/?publicAccessBlock=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <PublicAccessBlockConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><BlockPublicAcls>true</BlockPublicAcls><IgnorePublicAcls>true</IgnorePublicAcls><BlockPublicPolicy>true</BlockPublicPolicy><RestrictPublicBuckets>true</RestrictPublicBuckets></PublicAccessBlockConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 30
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            policy:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-good.s3.eu-west-1.amazonaws.com/?policy=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Version":"2012-10-17","Statement":[{"Sid":"EnforcedTLS","Effect":"Deny","Principal":{"*":["*"]},"Action":"s3:*","Resource":["arn:aws:s3:::acme-audit-good","arn:aws:s3:::acme-audit-good/*"],"Condition":{"Bool":{"aws:SecureTransport":"false"}}}]}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 31
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            ownershipControls:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-good.s3.eu-west-1.amazonaws.com/?ownershipControls=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <OwnershipControls xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Rule><ObjectOwnership>BucketOwnerEnforced</ObjectOwnership></Rule></OwnershipControls>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 32
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            replication:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-good.s3.eu-west-1.amazonaws.com/?replication=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <ReplicationConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Role>arn:aws:iam::111111111111:role/s3-replication</Role><Rule><ID>state</ID><Priority>1</Priority><Status>Enabled</Status><Filter><Prefix></Prefix></Filter><DeleteMarkerReplication><Status>Disabled</Status></DeleteMarkerReplication><Destination><Bucket>arn:aws:s3:::acme-tfstate-good-replica</Bucket></Destination></Rule></ReplicationConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 33
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            location:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-good-replica.s3.eu-west-1.amazonaws.com/?location=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <LocationConstraint xmlns="http://s3.amazonaws.com/doc/2006-03-01/">eu-central-1</LocationConstraint>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 34
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            versioning:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-good-replica.s3.eu-central-1.amazonaws.com/?versioning=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <VersioningConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Status>Enabled</Status><MfaDelete>Enabled</MfaDelete></VersioningConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 35
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            encryption:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-good-replica.s3.eu-central-1.amazonaws.com/?encryption=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <ServerSideEncryptionConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Rule><ApplyServerSideEncryptionByDefault><SSEAlgorithm>aws:kms</SSEAlgorithm><KMSMasterKeyID>arn:aws:kms:eu-central-1:111111111111:key/0b1c2d3e-repl-4000-8000-000000000002</KMSMasterKeyID></ApplyServerSideEncryptionByDefault><BucketKeyEnabled>true</BucketKeyEnabled></Rule></ServerSideEncryptionConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 36
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 90
+        host: ""
+        body: '{"KeyId":"arn:aws:kms:eu-central-1:111111111111:key/0b1c2d3e-repl-4000-8000-000000000002"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - TrentService.DescribeKey
+        url: https://kms.eu-central-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"KeyMetadata":{"AWSAccountId":"111111111111","Arn":"arn:aws:kms:eu-central-1:111111111111:key/0b1c2d3e-repl-4000-8000-000000000002","Enabled":true,"KeyId":"0b1c2d3e-repl-4000-8000-000000000002","KeyManager":"CUSTOMER","KeyState":"Enabled","KeyUsage":"ENCRYPT_DECRYPT"}}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 37
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            lifecycle:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-good.s3.eu-west-1.amazonaws.com/?lifecycle=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <LifecycleConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Rule><ID>noncurrent</ID><Filter><Prefix></Prefix></Filter><Status>Enabled</Status><NoncurrentVersionExpiration><NoncurrentDays>90</NoncurrentDays></NoncurrentVersionExpiration></Rule></LifecycleConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 38
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            logging:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-good.s3.eu-west-1.amazonaws.com/?logging=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <BucketLoggingStatus xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><LoggingEnabled><TargetBucket>acme-access-logs</TargetBucket><TargetPrefix>acme-audit-good/</TargetPrefix></LoggingEnabled></BucketLoggingStatus>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 39
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            list-type:
+                - "2"
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-legacy.s3.eu-west-1.amazonaws.com/?list-type=2
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+              <Name>acme-audit-legacy</Name>
+              <IsTruncated>false</IsTruncated>
+              <Prefix></Prefix>
+              <MaxKeys>1000</MaxKeys>
+              <Contents>
+                <Key>secrets/terraform.tfstate</Key>
+                <LastModified>2026-11-10T11:00:00Z</LastModified>
+                <ETag>&#34;22284d40299f64f0ee214bd5d975bf03&#34;</ETag>
+                <Size>2284</Size>
+              </Contents>
+              <KeyCount>1</KeyCount>
+            </ListBucketResult>
+        headers:
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Type:
+                - text/xml; charset=utf-8
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwRDAwMDAwMDAwMDAwMDAwMEQwMDAwMDAwMDAwMDAwMDBEMDAwMDAwMDAwMDAwMDAwRA==
+            X-Amz-Request-Id:
+                - 000000000000000D
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 40
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            versioning:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-legacy.s3.eu-west-1.amazonaws.com/?versioning=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <VersioningConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Status>Enabled</Status><MfaDelete>Disabled</MfaDelete></VersioningConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 41
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            encryption:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-legacy.s3.eu-west-1.amazonaws.com/?encryption=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <ServerSideEncryptionConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Rule><ApplyServerSideEncryptionByDefault><SSEAlgorithm>aws:kms</SSEAlgorithm><KMSMasterKeyID>arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-open-4000-8000-000000000003</KMSMasterKeyID></ApplyServerSideEncryptionByDefault><BucketKeyEnabled>true</BucketKeyEnabled></Rule></ServerSideEncryptionConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 42
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 87
+        host: ""
+        body: '{"KeyId":"arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-open-4000-8000-000000000003"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - TrentService.DescribeKey
+        url: https://kms.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"KeyMetadata":{"AWSAccountId":"111111111111","Arn":"arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-open-4000-8000-000000000003","Enabled":true,"KeyId":"0b1c2d3e-open-4000-8000-000000000003","KeyManager":"CUSTOMER","KeyState":"Enabled","KeyUsage":"ENCRYPT_DECRYPT"}}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 43
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 110
+        host: ""
+        body: '{"KeyId":"arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-open-4000-8000-000000000003","PolicyName":"default"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - TrentService.GetKeyPolicy
+        url: https://kms.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Policy":"{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"Admin\",\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"arn:aws:iam::111111111111:root\"},\"Action\":\"kms:*\",\"Resource\":\"*\"},{\"Sid\":\"AllowDecryptAnywhere\",\"Effect\":\"Allow\",\"Principal\":\"*\",\"Action\":[\"kms:Decrypt\",\"kms:DescribeKey\"],\"Resource\":\"*\"}]}","PolicyName":"default"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 44
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            publicAccessBlock:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-legacy.s3.eu-west-1.amazonaws.com/?publicAccessBlock=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <PublicAccessBlockConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><BlockPublicAcls>true</BlockPublicAcls><IgnorePublicAcls>true</IgnorePublicAcls><BlockPublicPolicy>true</BlockPublicPolicy><RestrictPublicBuckets>true</RestrictPublicBuckets></PublicAccessBlockConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 45
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            policy:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-legacy.s3.eu-west-1.amazonaws.com/?policy=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Version":"2012-10-17","Statement":[{"Sid":"RootAccess","Effect":"Allow","Principal":{"AWS":"arn:aws:iam::111111111111:root"},"Action":"s3:*","Resource":["arn:aws:s3:::acme-audit-legacy","arn:aws:s3:::acme-audit-legacy/*"]},{"Sid":"DenyInsecureWrites","Effect":"Deny","Principal":"*","Action":"s3:PutObject","Resource":"arn:aws:s3:::acme-audit-legacy/*","Condition":{"Bool":{"aws:SecureTransport":"false"}}}]}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 46
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            ownershipControls:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-legacy.s3.eu-west-1.amazonaws.com/?ownershipControls=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <OwnershipControls xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Rule><ObjectOwnership>BucketOwnerEnforced</ObjectOwnership></Rule></OwnershipControls>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 47
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            replication:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-legacy.s3.eu-west-1.amazonaws.com/?replication=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <ReplicationConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Role>arn:aws:iam::111111111111:role/s3-replication</Role><Rule><ID>state</ID><Priority>1</Priority><Status>Enabled</Status><Filter><Prefix></Prefix></Filter><DeleteMarkerReplication><Status>Disabled</Status></DeleteMarkerReplication><Destination><Bucket>arn:aws:s3:::acme-audit-legacy-replica</Bucket></Destination></Rule></ReplicationConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 48
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            location:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-legacy-replica.s3.eu-west-1.amazonaws.com/?location=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <LocationConstraint xmlns="http://s3.amazonaws.com/doc/2006-03-01/">eu-west-1</LocationConstraint>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 49
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            versioning:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-legacy-replica.s3.eu-west-1.amazonaws.com/?versioning=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <VersioningConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Status>Suspended</Status><MfaDelete>Disabled</MfaDelete></VersioningConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 50
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            encryption:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-legacy-replica.s3.eu-west-1.amazonaws.com/?encryption=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ServerSideEncryptionConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Rule><ApplyServerSideEncryptionByDefault><SSEAlgorithm>AES256</SSEAlgorithm></ApplyServerSideEncryptionByDefault><BucketKeyEnabled>false</BucketKeyEnabled></Rule></ServerSideEncryptionConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 51
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            lifecycle:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-legacy.s3.eu-west-1.amazonaws.com/?lifecycle=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <LifecycleConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Rule><ID>noncurrent</ID><Filter><Prefix></Prefix></Filter><Status>Enabled</Status><NoncurrentVersionExpiration><NoncurrentDays>3</NoncurrentDays></NoncurrentVersionExpiration></Rule></LifecycleConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 52
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            logging:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-legacy.s3.eu-west-1.amazonaws.com/?logging=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <BucketLoggingStatus xmlns="http://s3.amazonaws.com/doc/2006-03-01/"/>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 53
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            list-type:
+                - "2"
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-good-replica.s3.eu-central-1.amazonaws.com/?list-type=2
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+              <Name>acme-tfstate-good-replica</Name>
+              <IsTruncated>false</IsTruncated>
+              <Prefix></Prefix>
+              <MaxKeys>1000</MaxKeys>
+              <Contents>
+                <Key>app/terraform.tfstate</Key>
+                <LastModified>2026-11-10T11:00:00Z</LastModified>
+                <ETag>&#34;b4f85e205cc8507af6ac083754d50f69&#34;</ETag>
+                <Size>1198</Size>
+              </Contents>
+              <Contents>
+                <Key>copy/terraform.tfstate</Key>
+                <LastModified>2026-11-10T11:00:00Z</LastModified>
+                <ETag>&#34;9c1f0c9e65480c08e54dd2b058446bce&#34;</ETag>
+                <Size>723</Size>
+              </Contents>
+              <Contents>
+                <Key>empty/terraform.tfstate</Key>
+                <LastModified>2026-11-10T11:00:00Z</LastModified>
+                <ETag>&#34;a9fef907bc45bc5ca80ef194588c7aac&#34;</ETag>
+                <Size>181</Size>
+              </Contents>
+              <Contents>
+                <Key>network/terraform.tfstate</Key>
+                <LastModified>2026-11-10T11:00:00Z</LastModified>
+                <ETag>&#34;35621a6047590e69d85eb91785186ea6&#34;</ETag>
+                <Size>662</Size>
+              </Contents>
+              <KeyCount>4</KeyCount>
+            </ListBucketResult>
+        headers:
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Type:
+                - text/xml; charset=utf-8
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwRTAwMDAwMDAwMDAwMDAwMEUwMDAwMDAwMDAwMDAwMDBFMDAwMDAwMDAwMDAwMDAwRQ==
+            X-Amz-Request-Id:
+                - 000000000000000E
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 54
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            versioning:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-good-replica.s3.eu-central-1.amazonaws.com/?versioning=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <VersioningConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Status>Enabled</Status><MfaDelete>Enabled</MfaDelete></VersioningConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 55
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            encryption:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-good-replica.s3.eu-central-1.amazonaws.com/?encryption=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <ServerSideEncryptionConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Rule><ApplyServerSideEncryptionByDefault><SSEAlgorithm>aws:kms</SSEAlgorithm><KMSMasterKeyID>arn:aws:kms:eu-central-1:111111111111:key/0b1c2d3e-repl-4000-8000-000000000002</KMSMasterKeyID></ApplyServerSideEncryptionByDefault><BucketKeyEnabled>true</BucketKeyEnabled></Rule></ServerSideEncryptionConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 56
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 90
+        host: ""
+        body: '{"KeyId":"arn:aws:kms:eu-central-1:111111111111:key/0b1c2d3e-repl-4000-8000-000000000002"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - TrentService.DescribeKey
+        url: https://kms.eu-central-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"KeyMetadata":{"AWSAccountId":"111111111111","Arn":"arn:aws:kms:eu-central-1:111111111111:key/0b1c2d3e-repl-4000-8000-000000000002","Enabled":true,"KeyId":"0b1c2d3e-repl-4000-8000-000000000002","KeyManager":"CUSTOMER","KeyState":"Enabled","KeyUsage":"ENCRYPT_DECRYPT"}}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 57
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 113
+        host: ""
+        body: '{"KeyId":"arn:aws:kms:eu-central-1:111111111111:key/0b1c2d3e-repl-4000-8000-000000000002","PolicyName":"default"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - TrentService.GetKeyPolicy
+        url: https://kms.eu-central-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Policy":"{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"Admin\",\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"arn:aws:iam::111111111111:root\"},\"Action\":\"kms:*\",\"Resource\":\"*\"}]}","PolicyName":"default"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 58
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            publicAccessBlock:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-good-replica.s3.eu-central-1.amazonaws.com/?publicAccessBlock=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <PublicAccessBlockConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><BlockPublicAcls>true</BlockPublicAcls><IgnorePublicAcls>true</IgnorePublicAcls><BlockPublicPolicy>true</BlockPublicPolicy><RestrictPublicBuckets>true</RestrictPublicBuckets></PublicAccessBlockConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 59
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            policy:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-good-replica.s3.eu-central-1.amazonaws.com/?policy=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Version":"2012-10-17","Statement":[{"Sid":"EnforcedTLS","Effect":"Deny","Principal":{"*":["*"]},"Action":"s3:*","Resource":["arn:aws:s3:::acme-tfstate-good-replica","arn:aws:s3:::acme-tfstate-good-replica/*"],"Condition":{"Bool":{"aws:SecureTransport":"false"}}}]}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 60
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            ownershipControls:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-good-replica.s3.eu-central-1.amazonaws.com/?ownershipControls=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <OwnershipControls xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Rule><ObjectOwnership>BucketOwnerEnforced</ObjectOwnership></Rule></OwnershipControls>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 61
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            replication:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-good-replica.s3.eu-central-1.amazonaws.com/?replication=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <Error><Code>ReplicationConfigurationNotFoundError</Code><Message>The replication configuration was not found</Message><RequestId>0000000000000000</RequestId></Error>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 404 Not Found
+        code: 404
+        duration: 0s
+    - id: 62
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            lifecycle:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-good-replica.s3.eu-central-1.amazonaws.com/?lifecycle=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <LifecycleConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Rule><ID>noncurrent</ID><Filter><Prefix></Prefix></Filter><Status>Enabled</Status><NoncurrentVersionExpiration><NoncurrentDays>90</NoncurrentDays></NoncurrentVersionExpiration></Rule></LifecycleConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 63
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            logging:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-good-replica.s3.eu-central-1.amazonaws.com/?logging=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <BucketLoggingStatus xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><LoggingEnabled><TargetBucket>acme-access-logs</TargetBucket><TargetPrefix>acme-tfstate-good-replica/</TargetPrefix></LoggingEnabled></BucketLoggingStatus>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 64
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            list-type:
+                - "2"
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-orphans.s3.eu-west-1.amazonaws.com/?list-type=2
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+              <Name>acme-tfstate-orphans</Name>
+              <IsTruncated>false</IsTruncated>
+              <Prefix></Prefix>
+              <MaxKeys>1000</MaxKeys>
+              <Contents>
+                <Key>lost/terraform.tfstate</Key>
+                <LastModified>2026-11-10T11:00:00Z</LastModified>
+                <ETag>&#34;44806bd522218c120d031648844df3e7&#34;</ETag>
+                <Size>181</Size>
+              </Contents>
+              <KeyCount>1</KeyCount>
+            </ListBucketResult>
+        headers:
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Type:
+                - text/xml; charset=utf-8
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwRjAwMDAwMDAwMDAwMDAwMEYwMDAwMDAwMDAwMDAwMDBGMDAwMDAwMDAwMDAwMDAwRg==
+            X-Amz-Request-Id:
+                - 000000000000000F
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 65
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            versioning:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-orphans.s3.eu-west-1.amazonaws.com/?versioning=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <VersioningConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Status>Enabled</Status><MfaDelete>Enabled</MfaDelete></VersioningConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 66
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            encryption:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-orphans.s3.eu-west-1.amazonaws.com/?encryption=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <ServerSideEncryptionConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Rule><ApplyServerSideEncryptionByDefault><SSEAlgorithm>aws:kms</SSEAlgorithm><KMSMasterKeyID>arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-good-4000-8000-000000000001</KMSMasterKeyID></ApplyServerSideEncryptionByDefault><BucketKeyEnabled>true</BucketKeyEnabled></Rule></ServerSideEncryptionConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 67
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 87
+        host: ""
+        body: '{"KeyId":"arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-good-4000-8000-000000000001"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - TrentService.DescribeKey
+        url: https://kms.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"KeyMetadata":{"AWSAccountId":"111111111111","Arn":"arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-good-4000-8000-000000000001","Enabled":true,"KeyId":"0b1c2d3e-good-4000-8000-000000000001","KeyManager":"CUSTOMER","KeyState":"Enabled","KeyUsage":"ENCRYPT_DECRYPT"}}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 68
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 110
+        host: ""
+        body: '{"KeyId":"arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-good-4000-8000-000000000001","PolicyName":"default"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - TrentService.GetKeyPolicy
+        url: https://kms.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Policy":"{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"Admin\",\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"arn:aws:iam::111111111111:root\"},\"Action\":\"kms:*\",\"Resource\":\"*\"}]}","PolicyName":"default"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 69
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            publicAccessBlock:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-orphans.s3.eu-west-1.amazonaws.com/?publicAccessBlock=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <PublicAccessBlockConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><BlockPublicAcls>true</BlockPublicAcls><IgnorePublicAcls>true</IgnorePublicAcls><BlockPublicPolicy>true</BlockPublicPolicy><RestrictPublicBuckets>true</RestrictPublicBuckets></PublicAccessBlockConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 70
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            policy:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-orphans.s3.eu-west-1.amazonaws.com/?policy=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Version":"2012-10-17","Statement":[{"Sid":"EnforcedTLS","Effect":"Deny","Principal":{"*":["*"]},"Action":"s3:*","Resource":["arn:aws:s3:::acme-tfstate-orphans","arn:aws:s3:::acme-tfstate-orphans/*"],"Condition":{"Bool":{"aws:SecureTransport":"false"}}}]}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 71
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            ownershipControls:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-orphans.s3.eu-west-1.amazonaws.com/?ownershipControls=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <OwnershipControls xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Rule><ObjectOwnership>BucketOwnerEnforced</ObjectOwnership></Rule></OwnershipControls>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 72
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            replication:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-orphans.s3.eu-west-1.amazonaws.com/?replication=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <ReplicationConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Role>arn:aws:iam::111111111111:role/s3-replication</Role><Rule><ID>state</ID><Priority>1</Priority><Status>Enabled</Status><Filter><Prefix></Prefix></Filter><DeleteMarkerReplication><Status>Disabled</Status></DeleteMarkerReplication><Destination><Bucket>arn:aws:s3:::acme-tfstate-good-replica</Bucket></Destination></Rule></ReplicationConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 73
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            location:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-good-replica.s3.eu-west-1.amazonaws.com/?location=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <LocationConstraint xmlns="http://s3.amazonaws.com/doc/2006-03-01/">eu-central-1</LocationConstraint>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 74
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            versioning:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-good-replica.s3.eu-central-1.amazonaws.com/?versioning=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <VersioningConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Status>Enabled</Status><MfaDelete>Enabled</MfaDelete></VersioningConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 75
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            encryption:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-good-replica.s3.eu-central-1.amazonaws.com/?encryption=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <ServerSideEncryptionConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Rule><ApplyServerSideEncryptionByDefault><SSEAlgorithm>aws:kms</SSEAlgorithm><KMSMasterKeyID>arn:aws:kms:eu-central-1:111111111111:key/0b1c2d3e-repl-4000-8000-000000000002</KMSMasterKeyID></ApplyServerSideEncryptionByDefault><BucketKeyEnabled>true</BucketKeyEnabled></Rule></ServerSideEncryptionConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 76
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 90
+        host: ""
+        body: '{"KeyId":"arn:aws:kms:eu-central-1:111111111111:key/0b1c2d3e-repl-4000-8000-000000000002"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - TrentService.DescribeKey
+        url: https://kms.eu-central-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"KeyMetadata":{"AWSAccountId":"111111111111","Arn":"arn:aws:kms:eu-central-1:111111111111:key/0b1c2d3e-repl-4000-8000-000000000002","Enabled":true,"KeyId":"0b1c2d3e-repl-4000-8000-000000000002","KeyManager":"CUSTOMER","KeyState":"Enabled","KeyUsage":"ENCRYPT_DECRYPT"}}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 77
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            lifecycle:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-orphans.s3.eu-west-1.amazonaws.com/?lifecycle=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <LifecycleConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Rule><ID>noncurrent</ID><Filter><Prefix></Prefix></Filter><Status>Enabled</Status><NoncurrentVersionExpiration><NoncurrentDays>90</NoncurrentDays></NoncurrentVersionExpiration></Rule></LifecycleConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 78
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            logging:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-orphans.s3.eu-west-1.amazonaws.com/?logging=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <BucketLoggingStatus xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><LoggingEnabled><TargetBucket>acme-access-logs</TargetBucket><TargetPrefix>acme-tfstate-orphans/</TargetPrefix></LoggingEnabled></BucketLoggingStatus>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 79
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 36
+        host: ""
+        body: '{"TableName":"acme-audit-locks-bad"}'
+        headers:
+            Accept-Encoding:
+                - identity
+            Content-Type:
+                - application/x-amz-json-1.0
+            X-Amz-Target:
+                - DynamoDB_20120810.DescribeTable
+        url: https://dynamodb.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Table":{"TableName":"acme-audit-locks-bad","TableStatus":"ACTIVE"}}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 80
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 36
+        host: ""
+        body: '{"TableName":"acme-audit-locks-bad"}'
+        headers:
+            Accept-Encoding:
+                - identity
+            Content-Type:
+                - application/x-amz-json-1.0
+            X-Amz-Target:
+                - DynamoDB_20120810.DescribeContinuousBackups
+        url: https://dynamodb.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"ContinuousBackupsDescription":{"ContinuousBackupsStatus":"ENABLED","PointInTimeRecoveryDescription":{"PointInTimeRecoveryStatus":"DISABLED"}}}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 81
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 36
+        host: ""
+        body: '{"TableName":"acme-audit-locks-bad"}'
+        headers:
+            Accept-Encoding:
+                - identity
+            Content-Type:
+                - application/x-amz-json-1.0
+            X-Amz-Target:
+                - DynamoDB_20120810.Scan
+        url: https://dynamodb.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Count":3,"Items":[{"Info":{"S":"{\"ID\":\"00000000-0000-4000-8000-000000000000\",\"Operation\":\"OperationTypeApply\",\"Who\":\"ci@runner\",\"Version\":\"1.12.2\",\"Created\":\"2026-11-07T09:00:00Z\",\"Path\":\"acme-audit-bad/legacy/terraform.tfstate\"}"},"LockID":{"S":"acme-audit-bad/legacy/terraform.tfstate"}},{"Digest":{"S":"0123456789abcdef"},"LockID":{"S":"acme-audit-bad/legacy/terraform.tfstate-md5"}},{"Digest":{"S":"0123456789abcdef"},"LockID":{"S":"acme-audit-bad/gone/terraform.tfstate-md5"}}],"ScannedCount":3}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 82
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 37
+        host: ""
+        body: '{"TableName":"acme-audit-locks-good"}'
+        headers:
+            Accept-Encoding:
+                - identity
+            Content-Type:
+                - application/x-amz-json-1.0
+            X-Amz-Target:
+                - DynamoDB_20120810.DescribeTable
+        url: https://dynamodb.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Table":{"SSEDescription":{"KMSMasterKeyArn":"arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-good-4000-8000-000000000001","SSEType":"KMS","Status":"ENABLED"},"TableName":"acme-audit-locks-good","TableStatus":"ACTIVE"}}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 83
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 37
+        host: ""
+        body: '{"TableName":"acme-audit-locks-good"}'
+        headers:
+            Accept-Encoding:
+                - identity
+            Content-Type:
+                - application/x-amz-json-1.0
+            X-Amz-Target:
+                - DynamoDB_20120810.DescribeContinuousBackups
+        url: https://dynamodb.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"ContinuousBackupsDescription":{"ContinuousBackupsStatus":"ENABLED","PointInTimeRecoveryDescription":{"PointInTimeRecoveryStatus":"ENABLED"}}}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 84
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 37
+        host: ""
+        body: '{"TableName":"acme-audit-locks-good"}'
+        headers:
+            Accept-Encoding:
+                - identity
+            Content-Type:
+                - application/x-amz-json-1.0
+            X-Amz-Target:
+                - DynamoDB_20120810.Scan
+        url: https://dynamodb.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Count":2,"Items":[{"Info":{"S":"{\"ID\":\"00000000-0000-4000-8000-000000000000\",\"Operation\":\"OperationTypeApply\",\"Who\":\"ci@runner\",\"Version\":\"1.12.2\",\"Created\":\"2026-11-10T11:00:00Z\",\"Path\":\"acme-audit-good/app/terraform.tfstate\"}"},"LockID":{"S":"acme-audit-good/app/terraform.tfstate"}},{"Digest":{"S":"0123456789abcdef"},"LockID":{"S":"acme-audit-good/app/terraform.tfstate-md5"}}],"ScannedCount":2}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+        status: 200 OK
+        code: 200
+        duration: 0s

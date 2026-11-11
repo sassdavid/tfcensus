@@ -1,0 +1,19 @@
+# Config for the audit tests (passed with --config). The clock is 2026-11-10.
+schema_version: 1
+audit:
+  policy:
+    min_terraform_version: "1.10"
+    min_provider_versions: { hashicorp/aws: "5.0" }
+    noncurrent_days: 30
+    stale_lock_hours: 24
+    max_state_mb: 0.004
+  discover_patterns: ["acme-tfstate-*"]
+  suppress:
+    - check: S3-MFA
+      bucket: acme-audit-*
+      reason: MFA delete needs the root user's device
+      expires: "2027-06-30"
+    - check: S3-LOG
+      bucket: acme-audit-bad
+      reason: Access logging is being set up
+      expires: "2026-10-31"

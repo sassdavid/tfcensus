@@ -50,6 +50,12 @@
       "Resource": "*"
     },
     {
+      "Sid": "StateAccessLogging",
+      "Effect": "Allow",
+      "Action": ["cloudtrail:DescribeTrails", "cloudtrail:GetEventSelectors"],
+      "Resource": "*"
+    },
+    {
       "Sid": "LockTables",
       "Effect": "Allow",
       "Action": ["dynamodb:DescribeTable", "dynamodb:DescribeContinuousBackups", "dynamodb:Scan"],
