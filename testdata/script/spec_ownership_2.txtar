@@ -1,0 +1,84 @@
+# An expired rule stops matching and produces a warning. TEST_NOW injects the clock.
+env HOME=$WORK/home
+
+# On the last day the rule applies.
+env TEST_NOW=2026-09-30T23:00:00Z
+exec tfcensus rules test rules.yaml --resource bucket.json
+cmp stdout before.txt
+! stderr 'expired'
+
+# The day after, it no longer matches and rules test warns.
+env TEST_NOW=2026-10-01T00:00:00Z
+exec tfcensus rules test rules.yaml --resource bucket.json
+cmp stdout after.txt
+stderr 'ownership rule expired.*rule=growth-trial'
+
+-- rules.yaml --
+rules:
+  - name: growth-trial
+    category: ignored
+    match: 'resource.tags.?team.orValue("") == "growth"'
+    reason: Growth team trial, review after the quarter
+    expires: "2026-09-30"
+-- bucket.json --
+{"account": "111111111111", "region": "eu-west-1", "type": "AWS::S3::Bucket", "tf_types": ["aws_s3_bucket"],
+ "arn": "arn:aws:s3:::acme-growth-experiments", "name": "acme-growth-experiments", "tags": {"team": "growth"},
+ "layer": "config", "sources": ["config"]}
+-- before.txt --
+resource 1: AWS::S3::Bucket arn:aws:s3:::acme-growth-experiments
+  pack/aws-defaults/default-vpc              no match
+  pack/aws-defaults/default-subnet           no match
+  pack/aws-defaults/default-network-acl      no match
+  pack/aws-defaults/default-security-group   no match
+  pack/aws-defaults/default-vpc-children     no match
+  pack/aws-service/service-linked-role       no match
+  pack/aws-service/sso-role                  no match
+  pack/aws-service/control-tower             no match
+  pack/aws-service/stacksets-execution-role  no match
+  pack/aws-service/aws-managed-kms-key       no match
+  pack/aws-service/aws-kms-alias             no match
+  pack/aws-service/cdk-bootstrap             no match
+  pack/other-iac/cloudformation              no match
+  pack/other-iac/pulumi                      no match
+  pack/other-iac/crossplane                  no match
+  pack/other-iac/kubernetes                  no match
+  pack/derived/requester-managed-eni         no match
+  pack/derived/autoscaled-instance           no match
+  pack/derived/node-launch-template          no match
+  pack/derived/ecs-task                      no match
+  pack/derived/lambda-edge-replica           no match
+  pack/derived/derived-instance-volume       no match
+  pack/derived/backup-snapshot               no match
+  pack/ephemeral/managed-lambda-log-group    no match
+  pack/ephemeral/athena-query-results        no match
+  user/growth-trial                          match
+  result: ignored: Growth team trial, review after the quarter (user/growth-trial)
+-- after.txt --
+resource 1: AWS::S3::Bucket arn:aws:s3:::acme-growth-experiments
+  pack/aws-defaults/default-vpc              no match
+  pack/aws-defaults/default-subnet           no match
+  pack/aws-defaults/default-network-acl      no match
+  pack/aws-defaults/default-security-group   no match
+  pack/aws-defaults/default-vpc-children     no match
+  pack/aws-service/service-linked-role       no match
+  pack/aws-service/sso-role                  no match
+  pack/aws-service/control-tower             no match
+  pack/aws-service/stacksets-execution-role  no match
+  pack/aws-service/aws-managed-kms-key       no match
+  pack/aws-service/aws-kms-alias             no match
+  pack/aws-service/cdk-bootstrap             no match
+  pack/other-iac/cloudformation              no match
+  pack/other-iac/pulumi                      no match
+  pack/other-iac/crossplane                  no match
+  pack/other-iac/kubernetes                  no match
+  pack/derived/requester-managed-eni         no match
+  pack/derived/autoscaled-instance           no match
+  pack/derived/node-launch-template          no match
+  pack/derived/ecs-task                      no match
+  pack/derived/lambda-edge-replica           no match
+  pack/derived/derived-instance-volume       no match
+  pack/derived/backup-snapshot               no match
+  pack/ephemeral/managed-lambda-log-group    no match
+  pack/ephemeral/athena-query-results        no match
+  user/growth-trial                          expired: last day 2026-09-30
+  result: no rule matches (rules/no-match)

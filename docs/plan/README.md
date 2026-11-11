@@ -40,7 +40,10 @@ Reading order:
    [0004 identity/arn/id matching](adr/0004-identity-arn-id-matching.md) ·
    [0005 CEL rules](adr/0005-cel-ownership-rules.md) ·
    [0006 tfmigrate-compatible move](adr/0006-tfmigrate-compatible-move.md) ·
-   [0007 read-only by default](adr/0007-read-only-by-default.md)
+   [0007 read-only by default](adr/0007-read-only-by-default.md) ·
+   [0008 audit suppression fields](adr/0008-audit-suppressions-fields.md) ·
+   [0009 scan snapshot cache](adr/0009-scan-snapshot-cache.md) ·
+   [0010 rules on undetermined, guards](adr/0010-rules-on-undetermined-and-guards.md)
 8. [reference-repos.md](reference-repos.md): local reference clones and their licenses
 
 ## Engineering (`docs/engineering/`)

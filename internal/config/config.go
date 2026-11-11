@@ -11,8 +11,7 @@ const SchemaVersion = 1
 // Config defines every configuration key. The JSON tags are the key names, and
 // schemas/config-v1.json is generated from this type.
 //
-// rules, drift.noise and notify are free-form until the milestone that owns them defines their
-// shape.
+// drift.noise and notify are free-form until the milestone that owns them defines their shape.
 type Config struct {
 	SchemaVersion int       `json:"schema_version" jsonschema:"enum=1" jsonschema_description:"Config file format version."`
 	Binaries      Binaries  `json:"binaries"`
@@ -20,7 +19,7 @@ type Config struct {
 	Accounts      Accounts  `json:"accounts"`
 	Regions       []string  `json:"regions"                            jsonschema_description:"Regions to scan. Empty means the regions found in the units' backends and providers."`
 	Scan          Scan      `json:"scan"`
-	Rules         []Object  `json:"rules"                              jsonschema_description:"Ownership rules."`
+	Rules         []Rule    `json:"rules"                              jsonschema_description:"Ownership rules, tried in order after the built-in packs. The first rule that matches an unmanaged resource sets its category."`
 	Audit         Audit     `json:"audit"`
 	Drift         Drift     `json:"drift"`
 	Notify        Object    `json:"notify"                             jsonschema_description:"Notifiers."`
@@ -77,7 +76,17 @@ type Scan struct {
 	Layers            string   `json:"layers"             jsonschema_description:"Inventory layers: auto, or a comma-separated list of re, config, cc and native."`
 	CloudControlTypes []string `json:"cloudcontrol_types" jsonschema_description:"CloudFormation types listed through Cloud Control."`
 	Packs             Packs    `json:"packs"`
-	NeverHide         []string `json:"never_hide"`
+	NeverHide         []string `json:"never_hide"         jsonschema_description:"Categories that user rules can't give to guarded resources (IAM users)."         jsonschema:"enum=other-iac,enum=aws-managed,enum=derived,enum=ignored"`
+}
+
+// Rule is an ownership rule: a CEL expression over resource and unit.
+type Rule struct {
+	Name     string `json:"name"     jsonschema:"required,minLength=1,pattern=^[A-Za-z0-9][A-Za-z0-9._-]*$"          jsonschema_description:"Rule name, shown in findings as user/<name>."`
+	Category string `json:"category" jsonschema:"required,enum=other-iac,enum=aws-managed,enum=derived,enum=ignored" jsonschema_description:"Category of the resources the rule matches."`
+	Owner    string `json:"owner"                                                                                    jsonschema_description:"Who owns the matched resources, such as datadog."`
+	Match    string `json:"match"    jsonschema:"required,minLength=1"                                               jsonschema_description:"CEL expression that returns a bool, over resource and unit."`
+	Reason   string `json:"reason"   jsonschema:"required,minLength=1"                                               jsonschema_description:"Why the matched resources aren't unmanaged."`
+	Expires  string `json:"expires"  jsonschema:"pattern=^[0-9]{4}-[0-9]{2}-[0-9]{2}$"                               jsonschema_description:"Last day the rule applies, as a quoted \"YYYY-MM-DD\" date (UTC). After it the rule stops matching and scan warns."`
 }
 
 // Packs turns the built-in ownership rule packs on or off.
@@ -158,7 +167,7 @@ func Default() Config {
 			},
 			NeverHide: []string{},
 		},
-		Rules: []Object{},
+		Rules: []Rule{},
 		Audit: Audit{
 			Policy: AuditPolicy{
 				MinTerraformVersion: "1.10",

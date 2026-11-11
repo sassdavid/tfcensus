@@ -84,6 +84,9 @@ func iamAction(t *testing.T, r *cassette.Request) string {
 	if strings.Contains(u.Host, ".s3.") {
 		service = "s3"
 	}
+	if service == "cloudcontrolapi" {
+		service = "cloudformation" // Cloud Control's IAM actions use the CloudFormation prefix
+	}
 	if strings.Contains(u.Host, ".s3-control.") && strings.HasSuffix(u.Path, "/configuration/publicAccessBlock") {
 		return "s3:GetAccountPublicAccessBlock"
 	}

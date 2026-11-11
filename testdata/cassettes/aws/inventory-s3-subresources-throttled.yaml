@@ -9,30 +9,26 @@ interactions:
         content_length: 0
         host: ""
         form:
-            bucket-region:
-                - eu-west-1
-            x-id:
-                - ListBuckets
+            encryption:
+                - ""
         headers:
             Accept-Encoding:
                 - identity
             X-Amz-Content-Sha256:
                 - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-        url: https://s3.eu-west-1.amazonaws.com/?bucket-region=eu-west-1&x-id=ListBuckets
+        url: https://acme-logs.s3.eu-west-1.amazonaws.com/?encryption=
         method: GET
       response:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
         content_length: -1
-        body: |-
-            <?xml version="1.0" encoding="UTF-8"?>
-            <Error><Code>SlowDown</Code><Message>Please reduce your request rate.</Message><RequestId>0000000000000000</RequestId></Error>
+        body: <ServerSideEncryptionConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Rule><ApplyServerSideEncryptionByDefault><SSEAlgorithm>AES256</SSEAlgorithm></ApplyServerSideEncryptionByDefault></Rule></ServerSideEncryptionConfiguration>
         headers:
             Content-Type:
                 - text/xml
-        status: 503 Service Unavailable
-        code: 503
+        status: 200 OK
+        code: 200
         duration: 0s
     - id: 1
       request:
@@ -42,28 +38,28 @@ interactions:
         content_length: 0
         host: ""
         form:
-            bucket-region:
-                - eu-west-1
-            x-id:
-                - ListBuckets
+            lifecycle:
+                - ""
         headers:
             Accept-Encoding:
                 - identity
             X-Amz-Content-Sha256:
                 - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-        url: https://s3.eu-west-1.amazonaws.com/?bucket-region=eu-west-1&x-id=ListBuckets
+        url: https://acme-logs.s3.eu-west-1.amazonaws.com/?lifecycle=
         method: GET
       response:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
         content_length: -1
-        body: <ListAllMyBucketsResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>o</ID></Owner><Buckets><Bucket><Name>acme-logs</Name><CreationDate>2026-01-01T00:00:00.000Z</CreationDate><BucketRegion>eu-west-1</BucketRegion></Bucket></Buckets></ListAllMyBucketsResult>
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <Error><Code>NoSuchLifecycleConfiguration</Code><Message>none</Message><RequestId>0000000000000000</RequestId></Error>
         headers:
             Content-Type:
                 - text/xml
-        status: 200 OK
-        code: 200
+        status: 404 Not Found
+        code: 404
         duration: 0s
     - id: 2
       request:
@@ -102,6 +98,35 @@ interactions:
         content_length: 0
         host: ""
         form:
+            publicAccessBlock:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-logs.s3.eu-west-1.amazonaws.com/?publicAccessBlock=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <PublicAccessBlockConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><BlockPublicAcls>true</BlockPublicAcls><IgnorePublicAcls>true</IgnorePublicAcls><BlockPublicPolicy>true</BlockPublicPolicy><RestrictPublicBuckets>true</RestrictPublicBuckets></PublicAccessBlockConfiguration>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 4
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
             versioning:
                 - ""
         headers:
@@ -123,37 +148,6 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 4
-      request:
-        proto: ""
-        proto_major: 0
-        proto_minor: 0
-        content_length: 0
-        host: ""
-        form:
-            lifecycle:
-                - ""
-        headers:
-            Accept-Encoding:
-                - identity
-            X-Amz-Content-Sha256:
-                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-        url: https://acme-logs.s3.eu-west-1.amazonaws.com/?lifecycle=
-        method: GET
-      response:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        content_length: -1
-        body: |-
-            <?xml version="1.0" encoding="UTF-8"?>
-            <Error><Code>NoSuchLifecycleConfiguration</Code><Message>none</Message><RequestId>0000000000000000</RequestId></Error>
-        headers:
-            Content-Type:
-                - text/xml
-        status: 404 Not Found
-        code: 404
-        duration: 0s
     - id: 5
       request:
         proto: ""
@@ -162,26 +156,30 @@ interactions:
         content_length: 0
         host: ""
         form:
-            encryption:
-                - ""
+            bucket-region:
+                - eu-west-1
+            x-id:
+                - ListBuckets
         headers:
             Accept-Encoding:
                 - identity
             X-Amz-Content-Sha256:
                 - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-        url: https://acme-logs.s3.eu-west-1.amazonaws.com/?encryption=
+        url: https://s3.eu-west-1.amazonaws.com/?bucket-region=eu-west-1&x-id=ListBuckets
         method: GET
       response:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
         content_length: -1
-        body: <ServerSideEncryptionConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Rule><ApplyServerSideEncryptionByDefault><SSEAlgorithm>AES256</SSEAlgorithm></ApplyServerSideEncryptionByDefault></Rule></ServerSideEncryptionConfiguration>
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <Error><Code>SlowDown</Code><Message>Please reduce your request rate.</Message><RequestId>0000000000000000</RequestId></Error>
         headers:
             Content-Type:
                 - text/xml
-        status: 200 OK
-        code: 200
+        status: 503 Service Unavailable
+        code: 503
         duration: 0s
     - id: 6
       request:
@@ -191,21 +189,23 @@ interactions:
         content_length: 0
         host: ""
         form:
-            publicAccessBlock:
-                - ""
+            bucket-region:
+                - eu-west-1
+            x-id:
+                - ListBuckets
         headers:
             Accept-Encoding:
                 - identity
             X-Amz-Content-Sha256:
                 - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-        url: https://acme-logs.s3.eu-west-1.amazonaws.com/?publicAccessBlock=
+        url: https://s3.eu-west-1.amazonaws.com/?bucket-region=eu-west-1&x-id=ListBuckets
         method: GET
       response:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
         content_length: -1
-        body: <PublicAccessBlockConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><BlockPublicAcls>true</BlockPublicAcls><IgnorePublicAcls>true</IgnorePublicAcls><BlockPublicPolicy>true</BlockPublicPolicy><RestrictPublicBuckets>true</RestrictPublicBuckets></PublicAccessBlockConfiguration>
+        body: <ListAllMyBucketsResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>o</ID></Owner><Buckets><Bucket><Name>acme-logs</Name><CreationDate>2026-01-01T00:00:00.000Z</CreationDate><BucketRegion>eu-west-1</BucketRegion></Bucket></Buckets></ListAllMyBucketsResult>
         headers:
             Content-Type:
                 - text/xml

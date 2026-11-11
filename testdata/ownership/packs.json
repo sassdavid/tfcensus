@@ -1,0 +1,964 @@
+{
+  "comment": "Pack fixtures for TestSpec_ownership_1. item is an AWS Config SelectResourceConfig row as the config layer selects it; resource is an inventory record, for types Config doesn't record. want is the rule that must decide, or empty when no rule may match.",
+  "cases": [
+    {
+      "pack": "aws-defaults",
+      "name": "default VPC",
+      "want": "pack/aws-defaults/default-vpc",
+      "item": {
+        "resourceId": "vpc-0def0000000000001",
+        "resourceName": "",
+        "resourceType": "AWS::EC2::VPC",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0def0000000000001",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": [],
+        "configuration": {
+          "isDefault": true
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "VPC that a unit should manage",
+      "want": "",
+      "item": {
+        "resourceId": "vpc-0a1b2c3d4e5f60718",
+        "resourceName": "",
+        "resourceType": "AWS::EC2::VPC",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0a1b2c3d4e5f60718",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": [],
+        "configuration": {
+          "isDefault": false
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "default subnet",
+      "want": "pack/aws-defaults/default-subnet",
+      "item": {
+        "resourceId": "subnet-0def000000000001",
+        "resourceName": "",
+        "resourceType": "AWS::EC2::Subnet",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:subnet/subnet-0def000000000001",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": [
+          {
+            "resourceType": "AWS::EC2::VPC",
+            "resourceId": "vpc-0def0000000000001",
+            "relationshipName": "Is contained in Vpc"
+          }
+        ],
+        "configuration": {
+          "defaultForAz": true,
+          "mapPublicIpOnLaunch": true
+        }
+      },
+      "related": [
+        {
+          "resourceId": "vpc-0def0000000000001",
+          "resourceName": "",
+          "resourceType": "AWS::EC2::VPC",
+          "arn": "arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0def0000000000001",
+          "awsRegion": "eu-west-1",
+          "accountId": "111111111111",
+          "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+          "tags": [],
+          "relationships": [],
+          "configuration": {
+            "isDefault": true
+          }
+        }
+      ]
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "subnet of a custom VPC",
+      "want": "",
+      "item": {
+        "resourceId": "subnet-0a1b000000000002",
+        "resourceName": "",
+        "resourceType": "AWS::EC2::Subnet",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:subnet/subnet-0a1b000000000002",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": [],
+        "configuration": {
+          "defaultForAz": false
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "default network ACL",
+      "want": "pack/aws-defaults/default-network-acl",
+      "item": {
+        "resourceId": "acl-0def000000000001",
+        "resourceName": "",
+        "resourceType": "AWS::EC2::NetworkAcl",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:network-acl/acl-0def000000000001",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": [],
+        "configuration": {
+          "isDefault": true
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "default security group",
+      "want": "pack/aws-defaults/default-security-group",
+      "item": {
+        "resourceId": "sg-0def000000000001",
+        "resourceName": "default",
+        "resourceType": "AWS::EC2::SecurityGroup",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0def000000000001",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": [
+          {
+            "resourceType": "AWS::EC2::VPC",
+            "resourceId": "vpc-0a1b2c3d4e5f60718",
+            "relationshipName": "Is contained in Vpc"
+          }
+        ]
+      },
+      "related": [
+        {
+          "resourceId": "vpc-0a1b2c3d4e5f60718",
+          "resourceName": "",
+          "resourceType": "AWS::EC2::VPC",
+          "arn": "arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0a1b2c3d4e5f60718",
+          "awsRegion": "eu-west-1",
+          "accountId": "111111111111",
+          "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+          "tags": [],
+          "relationships": [],
+          "configuration": {
+            "isDefault": false
+          }
+        }
+      ]
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "security group named web",
+      "want": "",
+      "item": {
+        "resourceId": "sg-0aa11bb22cc33dd44",
+        "resourceName": "web",
+        "resourceType": "AWS::EC2::SecurityGroup",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0aa11bb22cc33dd44",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": []
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "internet gateway of the default VPC",
+      "want": "pack/aws-defaults/default-vpc-children",
+      "item": {
+        "resourceId": "igw-0def000000000001",
+        "resourceName": "",
+        "resourceType": "AWS::EC2::InternetGateway",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:internet-gateway/igw-0def000000000001",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": [
+          {
+            "resourceType": "AWS::EC2::VPC",
+            "resourceId": "vpc-0def0000000000001",
+            "relationshipName": "Is attached to Vpc"
+          }
+        ]
+      },
+      "related": [
+        {
+          "resourceId": "vpc-0def0000000000001",
+          "resourceName": "",
+          "resourceType": "AWS::EC2::VPC",
+          "arn": "arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0def0000000000001",
+          "awsRegion": "eu-west-1",
+          "accountId": "111111111111",
+          "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+          "tags": [],
+          "relationships": [],
+          "configuration": {
+            "isDefault": true
+          }
+        }
+      ]
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "internet gateway of a custom VPC",
+      "want": "",
+      "item": {
+        "resourceId": "igw-0a1b000000000002",
+        "resourceName": "",
+        "resourceType": "AWS::EC2::InternetGateway",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:internet-gateway/igw-0a1b000000000002",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": [
+          {
+            "resourceType": "AWS::EC2::VPC",
+            "resourceId": "vpc-0a1b2c3d4e5f60718",
+            "relationshipName": "Is attached to Vpc"
+          }
+        ]
+      },
+      "related": [
+        {
+          "resourceId": "vpc-0a1b2c3d4e5f60718",
+          "resourceName": "",
+          "resourceType": "AWS::EC2::VPC",
+          "arn": "arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0a1b2c3d4e5f60718",
+          "awsRegion": "eu-west-1",
+          "accountId": "111111111111",
+          "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+          "tags": [],
+          "relationships": [],
+          "configuration": {
+            "isDefault": false
+          }
+        }
+      ]
+    },
+    {
+      "pack": "aws-service",
+      "name": "service-linked role",
+      "want": "pack/aws-service/service-linked-role",
+      "item": {
+        "resourceId": "AROASLR0000000000001",
+        "resourceName": "AWSServiceRoleForElasticLoadBalancing",
+        "resourceType": "AWS::IAM::Role",
+        "arn": "arn:aws:iam::111111111111:role/aws-service-role/elasticloadbalancing.amazonaws.com/AWSServiceRoleForElasticLoadBalancing",
+        "awsRegion": "global",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": []
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "IAM Identity Center role",
+      "want": "pack/aws-service/sso-role",
+      "item": {
+        "resourceId": "AROASSO0000000000002",
+        "resourceName": "AWSReservedSSO_AdministratorAccess_0123456789abcdef",
+        "resourceType": "AWS::IAM::Role",
+        "arn": "arn:aws:iam::111111111111:role/aws-reserved/sso.amazonaws.com/eu-west-1/AWSReservedSSO_AdministratorAccess_0123456789abcdef",
+        "awsRegion": "global",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": []
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "Control Tower role",
+      "want": "pack/aws-service/control-tower",
+      "item": {
+        "resourceId": "AROACT00000000000003",
+        "resourceName": "aws-controltower-AdministratorExecutionRole",
+        "resourceType": "AWS::IAM::Role",
+        "arn": "arn:aws:iam::111111111111:role/aws-controltower-AdministratorExecutionRole",
+        "awsRegion": "global",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": []
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "StackSets execution role",
+      "want": "pack/aws-service/stacksets-execution-role",
+      "item": {
+        "resourceId": "AROASSE0000000000004",
+        "resourceName": "stacksets-exec-0123456789abcdef0123456789abcdef",
+        "resourceType": "AWS::IAM::Role",
+        "arn": "arn:aws:iam::111111111111:role/stacksets-exec-0123456789abcdef0123456789abcdef",
+        "awsRegion": "global",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": []
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "AWS managed KMS key",
+      "want": "pack/aws-service/aws-managed-kms-key",
+      "item": {
+        "resourceId": "0b1c2d3e-aws0-4000-8000-000000000001",
+        "resourceName": "",
+        "resourceType": "AWS::KMS::Key",
+        "arn": "arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-aws0-4000-8000-000000000001",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": [],
+        "configuration": {
+          "keyManager": "AWS",
+          "keyState": "Enabled"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "customer managed KMS key",
+      "want": "",
+      "item": {
+        "resourceId": "0b1c2d3e-cust-4000-8000-000000000002",
+        "resourceName": "",
+        "resourceType": "AWS::KMS::Key",
+        "arn": "arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-cust-4000-8000-000000000002",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": [],
+        "configuration": {
+          "keyManager": "CUSTOMER"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "CDK bootstrap role",
+      "want": "pack/aws-service/cdk-bootstrap",
+      "item": {
+        "resourceId": "AROACDK0000000000005",
+        "resourceName": "cdk-hnb659fds-deploy-role-111111111111-eu-west-1",
+        "resourceType": "AWS::IAM::Role",
+        "arn": "arn:aws:iam::111111111111:role/cdk-hnb659fds-deploy-role-111111111111-eu-west-1",
+        "awsRegion": "global",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": []
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "application role",
+      "want": "",
+      "item": {
+        "resourceId": "AROAAPP0000000000006",
+        "resourceName": "acme-app",
+        "resourceType": "AWS::IAM::Role",
+        "arn": "arn:aws:iam::111111111111:role/acme-app",
+        "awsRegion": "global",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": []
+      },
+      "related": []
+    },
+    {
+      "pack": "other-iac",
+      "name": "CloudFormation stack resource",
+      "want": "pack/other-iac/cloudformation",
+      "item": {
+        "resourceId": "https://sqs.eu-west-1.amazonaws.com/111111111111/billing-events",
+        "resourceName": "billing-events",
+        "resourceType": "AWS::SQS::Queue",
+        "arn": "arn:aws:sqs:eu-west-1:111111111111:billing-events",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [
+          {
+            "key": "aws:cloudformation:stack-name",
+            "value": "billing"
+          },
+          {
+            "key": "aws:cloudformation:logical-id",
+            "value": "Events"
+          },
+          {
+            "key": "aws:cloudformation:stack-id",
+            "value": "arn:aws:cloudformation:eu-west-1:111111111111:stack/billing/0a1b2c3d"
+          }
+        ],
+        "relationships": []
+      },
+      "related": []
+    },
+    {
+      "pack": "other-iac",
+      "name": "Pulumi resource",
+      "want": "pack/other-iac/pulumi",
+      "item": {
+        "resourceId": "arn:aws:sns:eu-west-1:111111111111:alerts",
+        "resourceName": "alerts",
+        "resourceType": "AWS::SNS::Topic",
+        "arn": "arn:aws:sns:eu-west-1:111111111111:alerts",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [
+          {
+            "key": "pulumi:project",
+            "value": "monitoring"
+          },
+          {
+            "key": "pulumi:stack",
+            "value": "prod"
+          }
+        ],
+        "relationships": []
+      },
+      "related": []
+    },
+    {
+      "pack": "other-iac",
+      "name": "Crossplane managed resource",
+      "want": "pack/other-iac/crossplane",
+      "item": {
+        "resourceId": "acme-xp-assets",
+        "resourceName": "acme-xp-assets",
+        "resourceType": "AWS::S3::Bucket",
+        "arn": "arn:aws:s3:::acme-xp-assets",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [
+          {
+            "key": "crossplane-kind",
+            "value": "bucket.s3.aws.upbound.io"
+          },
+          {
+            "key": "crossplane-name",
+            "value": "assets"
+          }
+        ],
+        "relationships": []
+      },
+      "related": []
+    },
+    {
+      "pack": "other-iac",
+      "name": "Kubernetes cloud provider security group",
+      "want": "pack/other-iac/kubernetes",
+      "item": {
+        "resourceId": "sg-0c85000000000001",
+        "resourceName": "k8s-elb-a1b2c3",
+        "resourceType": "AWS::EC2::SecurityGroup",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0c85000000000001",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [
+          {
+            "key": "kubernetes.io/cluster/prod",
+            "value": "owned"
+          }
+        ],
+        "relationships": []
+      },
+      "related": []
+    },
+    {
+      "pack": "other-iac",
+      "name": "AWS Load Balancer Controller load balancer",
+      "want": "pack/other-iac/kubernetes",
+      "item": {
+        "resourceId": "arn:aws:elasticloadbalancing:eu-west-1:111111111111:loadbalancer/app/k8s-web-0a1b2c3d/50dc6c495c0c9189",
+        "resourceName": "k8s-web-0a1b2c3d",
+        "resourceType": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+        "arn": "arn:aws:elasticloadbalancing:eu-west-1:111111111111:loadbalancer/app/k8s-web-0a1b2c3d/50dc6c495c0c9189",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [
+          {
+            "key": "elbv2.k8s.aws/cluster",
+            "value": "prod"
+          },
+          {
+            "key": "ingress.k8s.aws/stack",
+            "value": "web"
+          }
+        ],
+        "relationships": []
+      },
+      "related": []
+    },
+    {
+      "pack": "other-iac",
+      "name": "queue with a Name tag only",
+      "want": "",
+      "item": {
+        "resourceId": "https://sqs.eu-west-1.amazonaws.com/111111111111/jobs",
+        "resourceName": "jobs",
+        "resourceType": "AWS::SQS::Queue",
+        "arn": "arn:aws:sqs:eu-west-1:111111111111:jobs",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [
+          {
+            "key": "Name",
+            "value": "jobs"
+          }
+        ],
+        "relationships": []
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "NAT gateway network interface",
+      "want": "pack/derived/requester-managed-eni",
+      "item": {
+        "resourceId": "eni-0aa1000000000001",
+        "resourceName": "",
+        "resourceType": "AWS::EC2::NetworkInterface",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0aa1000000000001",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": [],
+        "configuration": {
+          "requesterManaged": true,
+          "interfaceType": "nat_gateway"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "Lambda network interface",
+      "want": "pack/derived/requester-managed-eni",
+      "item": {
+        "resourceId": "eni-0aa2000000000002",
+        "resourceName": "",
+        "resourceType": "AWS::EC2::NetworkInterface",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0aa2000000000002",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": [],
+        "configuration": {
+          "requesterManaged": false,
+          "interfaceType": "lambda"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "network interface someone created",
+      "want": "",
+      "item": {
+        "resourceId": "eni-0aa3000000000003",
+        "resourceName": "",
+        "resourceType": "AWS::EC2::NetworkInterface",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0aa3000000000003",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": [],
+        "configuration": {
+          "requesterManaged": false,
+          "interfaceType": "interface"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "Auto Scaling instance",
+      "want": "pack/derived/autoscaled-instance",
+      "item": {
+        "resourceId": "i-0a590000000000001",
+        "resourceName": "",
+        "resourceType": "AWS::EC2::Instance",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:instance/i-0a590000000000001",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [
+          {
+            "key": "aws:autoscaling:groupName",
+            "value": "web-asg"
+          }
+        ],
+        "relationships": []
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "Karpenter node",
+      "want": "pack/derived/autoscaled-instance",
+      "item": {
+        "resourceId": "i-0ca7000000000002",
+        "resourceName": "",
+        "resourceType": "AWS::EC2::Instance",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:instance/i-0ca7000000000002",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [
+          {
+            "key": "karpenter.sh/nodepool",
+            "value": "default"
+          },
+          {
+            "key": "karpenter.k8s.aws/ec2nodeclass",
+            "value": "default"
+          }
+        ],
+        "relationships": []
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "hand-launched instance",
+      "want": "",
+      "item": {
+        "resourceId": "i-0b1a000000000000a",
+        "resourceName": "",
+        "resourceType": "AWS::EC2::Instance",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:instance/i-0b1a000000000000a",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [
+          {
+            "key": "Name",
+            "value": "bastion"
+          }
+        ],
+        "relationships": []
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "EKS node group launch template",
+      "want": "pack/derived/node-launch-template",
+      "item": {
+        "resourceId": "lt-0ee5000000000001",
+        "resourceName": "eks-0a1b2c3d-4e5f",
+        "resourceType": "AWS::EC2::LaunchTemplate",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:launch-template/lt-0ee5000000000001",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [
+          {
+            "key": "eks:cluster-name",
+            "value": "prod"
+          },
+          {
+            "key": "eks:nodegroup-name",
+            "value": "general"
+          }
+        ],
+        "relationships": []
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "Lambda@Edge replica",
+      "want": "pack/derived/lambda-edge-replica",
+      "item": {
+        "resourceId": "us-east-1.edge-auth",
+        "resourceName": "us-east-1.edge-auth",
+        "resourceType": "AWS::Lambda::Function",
+        "arn": "arn:aws:lambda:eu-west-1:111111111111:function:us-east-1.edge-auth",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": []
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "function in us-east-1 with a dotted name",
+      "want": "",
+      "item": {
+        "resourceId": "us-east-1.edge-auth",
+        "resourceName": "us-east-1.edge-auth",
+        "resourceType": "AWS::Lambda::Function",
+        "arn": "arn:aws:lambda:us-east-1:111111111111:function:us-east-1.edge-auth",
+        "awsRegion": "us-east-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": []
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "volume of an Auto Scaling instance",
+      "want": "pack/derived/derived-instance-volume",
+      "item": {
+        "resourceId": "vol-0a59000000000001",
+        "resourceName": "",
+        "resourceType": "AWS::EC2::Volume",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:volume/vol-0a59000000000001",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": [
+          {
+            "resourceType": "AWS::EC2::Instance",
+            "resourceId": "i-0a590000000000001",
+            "relationshipName": "Is attached to Instance"
+          }
+        ]
+      },
+      "related": [
+        {
+          "resourceId": "i-0a590000000000001",
+          "resourceName": "",
+          "resourceType": "AWS::EC2::Instance",
+          "arn": "arn:aws:ec2:eu-west-1:111111111111:instance/i-0a590000000000001",
+          "awsRegion": "eu-west-1",
+          "accountId": "111111111111",
+          "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+          "tags": [
+            {
+              "key": "aws:autoscaling:groupName",
+              "value": "web-asg"
+            }
+          ],
+          "relationships": []
+        }
+      ]
+    },
+    {
+      "pack": "derived",
+      "name": "volume of a hand-launched instance",
+      "want": "",
+      "item": {
+        "resourceId": "vol-0b1a000000000002",
+        "resourceName": "",
+        "resourceType": "AWS::EC2::Volume",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:volume/vol-0b1a000000000002",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": [
+          {
+            "resourceType": "AWS::EC2::Instance",
+            "resourceId": "i-0b1a000000000000a",
+            "relationshipName": "Is attached to Instance"
+          }
+        ]
+      },
+      "related": [
+        {
+          "resourceId": "i-0b1a000000000000a",
+          "resourceName": "",
+          "resourceType": "AWS::EC2::Instance",
+          "arn": "arn:aws:ec2:eu-west-1:111111111111:instance/i-0b1a000000000000a",
+          "awsRegion": "eu-west-1",
+          "accountId": "111111111111",
+          "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+          "tags": [
+            {
+              "key": "Name",
+              "value": "bastion"
+            }
+          ],
+          "relationships": []
+        }
+      ]
+    },
+    {
+      "pack": "derived",
+      "name": "AWS Backup snapshot",
+      "want": "pack/derived/backup-snapshot",
+      "item": {
+        "resourceId": "awsbackup:job-0a1b2c3d-4e5f",
+        "resourceName": "",
+        "resourceType": "AWS::RDS::DBSnapshot",
+        "arn": "arn:aws:rds:eu-west-1:111111111111:snapshot:awsbackup:job-0a1b2c3d-4e5f",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [
+          {
+            "key": "aws:backup:source-resource",
+            "value": "arn:aws:rds:eu-west-1:111111111111:db:orders"
+          }
+        ],
+        "relationships": []
+      },
+      "related": []
+    },
+    {
+      "pack": "ephemeral",
+      "name": "Athena query results bucket",
+      "want": "pack/ephemeral/athena-query-results",
+      "item": {
+        "resourceId": "aws-athena-query-results-111111111111-eu-west-1",
+        "resourceName": "aws-athena-query-results-111111111111-eu-west-1",
+        "resourceType": "AWS::S3::Bucket",
+        "arn": "arn:aws:s3:::aws-athena-query-results-111111111111-eu-west-1",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": []
+      },
+      "related": []
+    },
+    {
+      "pack": "ephemeral",
+      "name": "bucket a unit should manage",
+      "want": "",
+      "item": {
+        "resourceId": "acme-reports",
+        "resourceName": "acme-reports",
+        "resourceType": "AWS::S3::Bucket",
+        "arn": "arn:aws:s3:::acme-reports",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": []
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "alias of an AWS managed key",
+      "want": "pack/aws-service/aws-kms-alias",
+      "resource": {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "sources": [
+          "resource-explorer"
+        ],
+        "cfn_type": "AWS::KMS::Alias",
+        "arn": "arn:aws:kms:eu-west-1:111111111111:alias/aws/s3"
+      }
+    },
+    {
+      "pack": "aws-service",
+      "name": "alias of a customer key",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "sources": [
+          "resource-explorer"
+        ],
+        "cfn_type": "AWS::KMS::Alias",
+        "arn": "arn:aws:kms:eu-west-1:111111111111:alias/acme-data"
+      }
+    },
+    {
+      "pack": "derived",
+      "name": "ECS task",
+      "want": "pack/derived/ecs-task",
+      "resource": {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "sources": [
+          "resource-explorer"
+        ],
+        "source_type": "ecs:task",
+        "arn": "arn:aws:ecs:eu-west-1:111111111111:task/prod/0a1b2c3d4e5f40718293a4b5c6d7e8f9"
+      }
+    },
+    {
+      "pack": "ephemeral",
+      "name": "log group of a managed function",
+      "want": "pack/ephemeral/managed-lambda-log-group",
+      "in_state": [
+        [
+          "aws_lambda_function",
+          "acme-api"
+        ]
+      ],
+      "resource": {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "sources": [
+          "resource-explorer"
+        ],
+        "cfn_type": "AWS::Logs::LogGroup",
+        "arn": "arn:aws:logs:eu-west-1:111111111111:log-group:/aws/lambda/acme-api"
+      }
+    },
+    {
+      "pack": "ephemeral",
+      "name": "log group of an unmanaged function",
+      "want": "",
+      "in_state": [
+        [
+          "aws_lambda_function",
+          "acme-api"
+        ]
+      ],
+      "resource": {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "sources": [
+          "resource-explorer"
+        ],
+        "cfn_type": "AWS::Logs::LogGroup",
+        "arn": "arn:aws:logs:eu-west-1:111111111111:log-group:/aws/lambda/clickops-fn"
+      }
+    }
+  ]
+}

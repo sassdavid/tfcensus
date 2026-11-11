@@ -11,6 +11,8 @@
 #   native      the native lister that lists the type
 #   rule_tuple  match security group rules by protocol, ports, source and direction
 #   derived     AWS creates the resource as a child of a parent; when lists field values
+#   cc_parent   Cloud Control lists the type only per parent: the parent's type and the
+#               resource model property that takes the parent's ARN
 #
 # Fields in templates come from the live resource: its attributes, the ARN pattern's
 # placeholders, then id, arn, account, region and partition.
@@ -45,6 +47,38 @@
   cfn: AWS::EC2::EIP
   config: AWS::EC2::EIP
   arn: "arn:{partition}:ec2:{region}:{account}:elastic-ip/{id}"
+  id: ["{id}"]
+- tf: aws_network_acl
+  cfn: AWS::EC2::NetworkAcl
+  config: AWS::EC2::NetworkAcl
+  arn: "arn:{partition}:ec2:{region}:{account}:network-acl/{id}"
+  id: ["{id}"]
+- tf: aws_vpc_dhcp_options
+  cfn: AWS::EC2::DHCPOptions
+  config: AWS::EC2::DHCPOptions
+  arn: "arn:{partition}:ec2:{region}:{account}:dhcp-options/{id}"
+  id: ["{id}"]
+- tf: aws_network_interface
+  cfn: AWS::EC2::NetworkInterface
+  config: AWS::EC2::NetworkInterface
+  arn: "arn:{partition}:ec2:{region}:{account}:network-interface/{id}"
+  id: ["{id}"]
+
+# Compute
+- tf: aws_instance
+  cfn: AWS::EC2::Instance
+  config: AWS::EC2::Instance
+  arn: "arn:{partition}:ec2:{region}:{account}:instance/{id}"
+  id: ["{id}"]
+- tf: aws_launch_template
+  cfn: AWS::EC2::LaunchTemplate
+  config: AWS::EC2::LaunchTemplate
+  arn: "arn:{partition}:ec2:{region}:{account}:launch-template/{id}"
+  id: ["{id}"]
+- tf: aws_ebs_volume
+  cfn: AWS::EC2::Volume
+  config: AWS::EC2::Volume
+  arn: "arn:{partition}:ec2:{region}:{account}:volume/{id}"
   id: ["{id}"]
 
 # Security groups and rules. Rule ARNs don't say ingress or egress, so rule types have no ARN
@@ -207,11 +241,18 @@
   config: AWS::ElasticLoadBalancingV2::Listener
   arn: "arn:{partition}:elasticloadbalancing:{region}:{account}:listener/{lb_type:app|net|gateway}/{lb_name}/{lb_id}/{listener_id}"
   id: ["{arn}"]
+  cc_parent: {type: AWS::ElasticLoadBalancingV2::LoadBalancer, property: LoadBalancerArn}
 - tf: aws_alb_listener
   cfn: AWS::ElasticLoadBalancingV2::Listener
   config: AWS::ElasticLoadBalancingV2::Listener
   arn: "arn:{partition}:elasticloadbalancing:{region}:{account}:listener/{lb_type:app|net|gateway}/{lb_name}/{lb_id}/{listener_id}"
   id: ["{arn}"]
+  cc_parent: {type: AWS::ElasticLoadBalancingV2::LoadBalancer, property: LoadBalancerArn}
+- tf: aws_lb_listener_rule
+  cfn: AWS::ElasticLoadBalancingV2::ListenerRule
+  arn: "arn:{partition}:elasticloadbalancing:{region}:{account}:listener-rule/{lb_type:app|net|gateway}/{lb_name}/{lb_id}/{listener_id}/{rule_id}"
+  id: ["{arn}"]
+  cc_parent: {type: AWS::ElasticLoadBalancingV2::Listener, property: ListenerArn}
 - tf: aws_lb_target_group
   cfn: AWS::ElasticLoadBalancingV2::TargetGroup
   config: AWS::ElasticLoadBalancingV2::TargetGroup

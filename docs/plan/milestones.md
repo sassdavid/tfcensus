@@ -37,9 +37,11 @@ Scope: config + resource-explorer + native (sg-rules, iam-attachments, route53, 
   layers and `--explain-coverage` at M6.
 
 ### M6: Ownership rules and scan report → v0.1.0 ([ownership](specs/ownership-rules.md), [scan](specs/scan.md))
-- [ ] All ownership-rules.md and scan.md criteria (emulator and fixture based).
+- [x] All ownership-rules.md and scan.md criteria (emulator and fixture based). The manual
+  false-positive measure (ownership criterion 5) is the optional item below.
 - [ ] *(Optional, manual, strongly recommended before announcing v0.1)* A false-positive review on one real non-prod account, under 5% (recorded, aggregated only).
-- [ ] Cloud Control layer for allowlisted types with the parent graph (inventory criterion 4).
+- [x] Cloud Control layer for allowlisted types with the parent graph (inventory criterion 4).
+  The emulator nightly (inventory criterion 5) runs in `live.yml` and is ticked after its first pass.
 - [ ] v0.1.0 tagged and released. Homebrew cask, `mise use github:sassdavid/tfcensus`, and the container image all work.
 
 ### M7: Drift (F4) → v0.2.0 ([drift](specs/drift.md))

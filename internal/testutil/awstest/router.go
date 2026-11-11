@@ -129,11 +129,13 @@ func contentType(service string) string {
 		return "application/x-amz-json-1.1"
 	case "resource-explorer-2":
 		return "application/json"
+	case "cloudcontrolapi":
+		return "application/x-amz-json-1.0"
 	}
 	return "text/xml"
 }
 
-// JSONError is the body of a JSON protocol error (Config, Resource Explorer).
+// JSONError is the body of a JSON protocol error (Config, Resource Explorer, Cloud Control).
 func JSONError(code, msg string) string {
 	return fmt.Sprintf(`{"__type":%q,"message":%q}`, code, msg)
 }

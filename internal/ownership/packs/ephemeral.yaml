@@ -1,0 +1,10 @@
+# Short-lived or by-product resources that nobody manages on purpose.
+- name: managed-lambda-log-group
+  match: >-
+    resource.type == "AWS::Logs::LogGroup" && resource.name.startsWith("/aws/lambda/") &&
+    in_state("aws_lambda_function", resource.name.substring(12))
+  reason: log group that Lambda created for a function a unit manages
+- name: athena-query-results
+  match: resource.type == "AWS::S3::Bucket" && resource.name.startsWith("aws-athena-query-results-")
+  owner: athena
+  reason: bucket that the Athena console created for query results

@@ -1,0 +1,30 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 47
+        host: ""
+        body: '{"MaxResults":100,"TypeName":"AWS::SQS::Queue"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+            X-Amz-Target:
+                - CloudApiService.ListResources
+        url: https://cloudcontrolapi.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"__type":"AccessDeniedException","message":"not authorized"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+        status: 400 Bad Request
+        code: 400
+        duration: 0s

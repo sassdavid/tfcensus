@@ -66,6 +66,14 @@ type Curated struct {
 	Native    string            `yaml:"native,omitempty"`
 	RuleTuple bool              `yaml:"rule_tuple,omitempty"` // match security group rules by their tuple
 	Derived   *Derived          `yaml:"derived,omitempty"`
+	CCParent  *CCParent         `yaml:"cc_parent,omitempty"`
+}
+
+// CCParent says how Cloud Control lists a type that needs a parent: one ListResources call per
+// parent, with the parent's ARN in Property of the resource model.
+type CCParent struct {
+	Type     string `yaml:"type"`     // the parent's CloudFormation type
+	Property string `yaml:"property"` // the resource model property, such as LoadBalancerArn
 }
 
 // Derived marks a type whose resources AWS creates as children of a parent resource.
@@ -95,16 +103,17 @@ func (s *Strings) UnmarshalYAML(n *yaml.Node) error {
 type Type struct {
 	GenResource
 
-	Curated bool
-	CFN     []string
-	Config  string
-	RE      []string
-	ARN     *Pattern
-	ID      []Template
-	Live    map[string]Template
-	Native  string
-	Tuple   bool
-	Derived *Derived
+	Curated  bool
+	CFN      []string
+	Config   string
+	RE       []string
+	ARN      *Pattern
+	ID       []Template
+	Live     map[string]Template
+	Native   string
+	Tuple    bool
+	Derived  *Derived
+	CCParent *CCParent
 }
 
 // Map is the loaded typemap.
@@ -196,8 +205,11 @@ func (m *Map) addCurated(c *Curated) error {
 	if len(c.ID) == 0 && !c.RuleTuple && c.ARN == "" && t.Identity == "" {
 		return fmt.Errorf("%w: %s has no identity, arn, id or rule tuple to match on", ErrInvalid, c.TF)
 	}
-	t.Curated, t.CFN, t.Config, t.ID, t.Native, t.Tuple, t.Derived =
-		true, c.CFN, c.Config, c.ID, c.Native, c.RuleTuple, c.Derived
+	if c.CCParent != nil && (c.CCParent.Property == "" || !m.cfn[c.CCParent.Type]) {
+		return fmt.Errorf("%w: %s: cc_parent needs a CloudFormation type and a property", ErrInvalid, c.TF)
+	}
+	t.Curated, t.CFN, t.Config, t.ID, t.Native, t.Tuple, t.Derived, t.CCParent =
+		true, c.CFN, c.Config, c.ID, c.Native, c.RuleTuple, c.Derived, c.CCParent
 	if len(c.RE) > 0 {
 		t.RE = c.RE
 	}
@@ -289,6 +301,16 @@ func (m *Map) Mapped(cfn string) bool { return len(m.byCFN[cfn]) > 0 }
 
 // IsCFN reports whether cfn is a CloudFormation type or a tfcensus native type.
 func (m *Map) IsCFN(cfn string) bool { return m.cfn[cfn] || strings.HasPrefix(cfn, NativePrefix) }
+
+// CCParent returns how Cloud Control lists a CloudFormation type that needs a parent, or nil.
+func (m *Map) CCParent(cfn string) *CCParent {
+	for _, t := range m.byCFN[cfn] {
+		if t.CCParent != nil {
+			return t.CCParent
+		}
+	}
+	return nil
+}
 
 // FromConfig returns the CloudFormation type for an AWS Config type. Most are the same.
 func (m *Map) FromConfig(configType string) string {

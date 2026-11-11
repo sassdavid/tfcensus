@@ -21,11 +21,19 @@ const (
 	LayerIAMAttachments = "native:iam-attachments"
 	LayerRoute53Records = "native:route53-records"
 	LayerS3Subresources = "native:s3-subresources"
+	LayerCC             = "cloudcontrol"
 )
 
 // LayerOrder returns every layer name in precedence order.
 func LayerOrder() []string {
-	return []string{LayerConfig, LayerRE, LayerSGRules, LayerIAMAttachments, LayerRoute53Records, LayerS3Subresources}
+	return []string{
+		LayerConfig, LayerRE, LayerSGRules, LayerIAMAttachments, LayerRoute53Records, LayerS3Subresources, LayerCC,
+	}
+}
+
+// layerAliases are the short names --layers accepts.
+func layerAliases() map[string]string {
+	return map[string]string{"re": LayerRE, "cc": LayerCC}
 }
 
 func layerRank(name string) int {
@@ -49,14 +57,25 @@ type CloudResource struct {
 	Tags       map[string]string `json:"tags,omitempty"`
 	Attrs      map[string]string `json:"attrs,omitempty"` // identifiers a native lister read, such as role and policy_arn
 	Parents    []Ref             `json:"parents,omitempty"`
-	Sources    []string          `json:"sources"` // the layers that reported it, in precedence order
+	// Relationships are every resource the layer relates it to, its parents included.
+	Relationships []Ref    `json:"relationships,omitempty"`
+	Created       string   `json:"created,omitempty"` // RFC 3339, when the layer knows it
+	Sources       []string `json:"sources"`           // the layers that reported it, in precedence order
+}
+
+func (r *CloudResource) setAttr(k, v string) {
+	if r.Attrs == nil {
+		r.Attrs = map[string]string{}
+	}
+	r.Attrs[k] = v
 }
 
 // Ref points at another resource by ARN, or by type and ID when it has no ARN.
 type Ref struct {
-	CFNType string `json:"cfn_type"`
-	ID      string `json:"id,omitempty"`
-	ARN     string `json:"arn,omitempty"`
+	CFNType      string `json:"cfn_type"`
+	ID           string `json:"id,omitempty"`
+	ARN          string `json:"arn,omitempty"`
+	Relationship string `json:"relationship,omitempty"` // as the layer names it, such as "Is attached to Instance"
 }
 
 // Capabilities says which inventory sources work in one account and region.

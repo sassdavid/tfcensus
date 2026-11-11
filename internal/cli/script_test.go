@@ -135,6 +135,11 @@ func scriptParams(t *testing.T, files ...string) testscript.Params {
 				return err
 			}
 			env.Setenv("CASSETTES", cassettes)
+			repos, err := filepath.Abs(reposDir)
+			if err != nil {
+				return err
+			}
+			env.Setenv("REPOS", repos)
 			return nil
 		},
 		Cmds: map[string]func(ts *testscript.TestScript, neg bool, args []string){
@@ -233,4 +238,36 @@ func TestSpec_accounts_2(t *testing.T) {
 func TestSpec_accounts_3(t *testing.T) {
 	t.Parallel()
 	testscript.Run(t, scriptParams(t, filepath.Join(scriptDir, "spec_accounts_3.txtar")))
+}
+
+// TestSpec_scan_1: an end-to-end scan with stubbed AWS and fixture states covers every category
+// in every format (goldens).
+func TestSpec_scan_1(t *testing.T) {
+	t.Parallel()
+	testscript.Run(t, scriptParams(t, filepath.Join(scriptDir, "spec_scan_1.txtar")))
+}
+
+// TestSpec_scan_3: --fail-on unmanaged --types 'AWS::IAM::*' exits 3 only for IAM findings.
+func TestSpec_scan_3(t *testing.T) {
+	t.Parallel()
+	testscript.Run(t, scriptParams(t, filepath.Join(scriptDir, "spec_scan_3.txtar")))
+}
+
+// TestSpec_ownership_2: an expired rule stops matching and produces a warning (injected clock).
+func TestSpec_ownership_2(t *testing.T) {
+	t.Parallel()
+	testscript.Run(t, scriptParams(t, filepath.Join(scriptDir, "spec_ownership_2.txtar")))
+}
+
+// TestSpec_ownership_3: the scan --explain trace (golden).
+func TestSpec_ownership_3(t *testing.T) {
+	t.Parallel()
+	testscript.Run(t, scriptParams(t, filepath.Join(scriptDir, "spec_ownership_3.txtar")))
+}
+
+// TestSpec_ownership_4: the rules schema is in schemas/config-v1.json, and CEL compile errors
+// report the rule name and column.
+func TestSpec_ownership_4(t *testing.T) {
+	t.Parallel()
+	testscript.Run(t, scriptParams(t, filepath.Join(scriptDir, "spec_ownership_4.txtar")))
 }

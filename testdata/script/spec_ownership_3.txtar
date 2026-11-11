@@ -1,0 +1,110 @@
+# scan --explain prints how one resource was categorized: its match, every rule's outcome and the
+# category (golden).
+env TEST_CASSETTE=$CASSETTES/aws/scan-fleet
+env TEST_NOW=2026-11-10T12:00:00Z
+env AWS_CONFIG_FILE=$WORK/aws/config
+cd $REPOS
+
+# No state and no rule: unmanaged. The sandbox rule can't hide an IAM user (never_hide).
+exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml --explain arn:aws:iam::111111111111:user/sandbox-user
+cmp stdout $WORK/golden/iam-user.txt
+
+# A pack rule matches first; the rules after it are skipped.
+exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml --explain vpc-0def00000000000a1
+cmp stdout $WORK/golden/default-vpc.txt
+
+# Matching decides; no rule runs.
+exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml --explain arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0a1b2c3d4e5f60718
+cmp stdout $WORK/golden/managed-vpc.txt
+
+# The JSON form carries the resource as rules see it, for rules test --resource.
+exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml --explain i-0aa00000000000e5 --format json
+stdout '"rule": "user/sandbox"'
+stdout '"category": "ignored"'
+
+! exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml --explain arn:aws:s3:::no-such-bucket
+stderr 'no live resource has the ARN or ID'
+
+-- aws/config --
+[default]
+region = eu-west-1
+aws_access_key_id = AKIAFAKEDEFAULT
+aws_secret_access_key = fake-default-secret
+-- golden/iam-user.txt --
+resource                                     arn:aws:iam::111111111111:user/sandbox-user
+type                                         AWS::IAM::User (aws_iam_user)
+where                                        111111111111 global
+sources                                      config
+match                                        unmatched: no state manages it (match/not-in-state)
+rules                                        first match wins
+  pack/aws-defaults/default-vpc              no match
+  pack/aws-defaults/default-subnet           no match
+  pack/aws-defaults/default-network-acl      no match
+  pack/aws-defaults/default-security-group   no match
+  pack/aws-defaults/default-vpc-children     no match
+  pack/aws-service/service-linked-role       no match
+  pack/aws-service/sso-role                  no match
+  pack/aws-service/control-tower             no match
+  pack/aws-service/stacksets-execution-role  no match
+  pack/aws-service/aws-managed-kms-key       no match
+  pack/aws-service/aws-kms-alias             no match
+  pack/aws-service/cdk-bootstrap             no match
+  pack/other-iac/cloudformation              no match
+  pack/other-iac/pulumi                      no match
+  pack/other-iac/crossplane                  no match
+  pack/other-iac/kubernetes                  no match
+  pack/derived/requester-managed-eni         no match
+  pack/derived/autoscaled-instance           no match
+  pack/derived/node-launch-template          no match
+  pack/derived/ecs-task                      no match
+  pack/derived/lambda-edge-replica           no match
+  pack/derived/derived-instance-volume       no match
+  pack/derived/backup-snapshot               no match
+  pack/ephemeral/managed-lambda-log-group    no match
+  pack/ephemeral/athena-query-results        no match
+  user/sandbox                               never hide: ignored is in never_hide and IAM users can hold long-lived credentials
+  user/growth-trial                          expired: last day 2026-09-30
+category                                     unmanaged: no state manages it and no rule matches (rules/no-match)
+-- golden/default-vpc.txt --
+resource                                     arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0def00000000000a1
+type                                         AWS::EC2::VPC (aws_vpc)
+where                                        111111111111 eu-west-1
+sources                                      config
+match                                        unmatched: no state manages it (match/not-in-state)
+rules                                        first match wins
+  pack/aws-defaults/default-vpc              match
+  pack/aws-defaults/default-subnet           skipped
+  pack/aws-defaults/default-network-acl      skipped
+  pack/aws-defaults/default-security-group   skipped
+  pack/aws-defaults/default-vpc-children     skipped
+  pack/aws-service/service-linked-role       skipped
+  pack/aws-service/sso-role                  skipped
+  pack/aws-service/control-tower             skipped
+  pack/aws-service/stacksets-execution-role  skipped
+  pack/aws-service/aws-managed-kms-key       skipped
+  pack/aws-service/aws-kms-alias             skipped
+  pack/aws-service/cdk-bootstrap             skipped
+  pack/other-iac/cloudformation              skipped
+  pack/other-iac/pulumi                      skipped
+  pack/other-iac/crossplane                  skipped
+  pack/other-iac/kubernetes                  skipped
+  pack/derived/requester-managed-eni         skipped
+  pack/derived/autoscaled-instance           skipped
+  pack/derived/node-launch-template          skipped
+  pack/derived/ecs-task                      skipped
+  pack/derived/lambda-edge-replica           skipped
+  pack/derived/derived-instance-volume       skipped
+  pack/derived/backup-snapshot               skipped
+  pack/ephemeral/managed-lambda-log-group    skipped
+  pack/ephemeral/athena-query-results        skipped
+  user/sandbox                               skipped
+  user/growth-trial                          skipped
+category                                     aws-managed, owner aws: default VPC that AWS creates in every region (pack/aws-defaults/default-vpc)
+-- golden/managed-vpc.txt --
+resource  arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0a1b2c3d4e5f60718
+type      AWS::EC2::VPC (aws_vpc)
+where     111111111111 eu-west-1
+sources   config
+match     managed: matched tf-scan/network aws_vpc.main by identity (match/identity)
+rules     not evaluated: matching decided
+category  managed: matched tf-scan/network aws_vpc.main by identity (match/identity)

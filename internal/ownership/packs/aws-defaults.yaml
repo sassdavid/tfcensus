@@ -1,0 +1,18 @@
+# Resources AWS creates in every account and region: the default VPC and what it comes with.
+- name: default-vpc
+  match: resource.type == "AWS::EC2::VPC" && resource.attrs.?is_default.orValue("") == "true"
+  reason: default VPC that AWS creates in every region
+- name: default-subnet
+  match: resource.type == "AWS::EC2::Subnet" && resource.attrs.?default_for_az.orValue("") == "true"
+  reason: default subnet of the default VPC
+- name: default-network-acl
+  match: resource.type == "AWS::EC2::NetworkAcl" && resource.attrs.?is_default.orValue("") == "true"
+  reason: default network ACL that AWS creates with every VPC
+- name: default-security-group
+  match: resource.type == "AWS::EC2::SecurityGroup" && resource.name == "default"
+  reason: default security group that AWS creates with every VPC
+- name: default-vpc-children
+  match: >-
+    resource.type in ["AWS::EC2::InternetGateway", "AWS::EC2::RouteTable", "AWS::EC2::DHCPOptions"] &&
+    resource.relationships.exists(r, r.type == "AWS::EC2::VPC" && r.attrs.?is_default.orValue("") == "true")
+  reason: internet gateway, route table or DHCP options of the default VPC

@@ -118,6 +118,14 @@ func typeCases() []typeCase {
 		ec2("aws_security_group", "AWS::EC2::SecurityGroup", "security-group", "sg-1"),
 		ec2("aws_internet_gateway", "AWS::EC2::InternetGateway", "internet-gateway", "igw-1"),
 		ec2("aws_route_table", "AWS::EC2::RouteTable", "route-table", "rtb-1"),
+		ec2("aws_network_acl", "AWS::EC2::NetworkAcl", "network-acl", "acl-1"),
+		ec2("aws_network_interface", "AWS::EC2::NetworkInterface", "network-interface", "eni-1"),
+		ec2("aws_instance", "AWS::EC2::Instance", "instance", "i-1"),
+		ec2("aws_launch_template", "AWS::EC2::LaunchTemplate", "launch-template", "lt-1"),
+		ec2("aws_ebs_volume", "AWS::EC2::Volume", "volume", "vol-1"),
+		{tf: "aws_vpc_dhcp_options", live: live("AWS::EC2::DHCPOptions", func(r *inventory.CloudResource) {
+			r.ARN, r.ID = arnOf("ec2", "dhcp-options/dopt-1"), "dopt-1"
+		}), state: tfstate.Instance{ID: "dopt-1", ARN: arnOf("ec2", "dhcp-options/dopt-1")}},
 		ec2("aws_eip", "AWS::EC2::EIP", "elastic-ip", "eipalloc-1"),
 		{tf: "aws_nat_gateway", live: live("AWS::EC2::NatGateway", func(r *inventory.CloudResource) {
 			r.ARN, r.ID = arnOf("ec2", "natgateway/nat-1"), "nat-1"
@@ -229,6 +237,8 @@ func typeCases() []typeCase {
 		lb("aws_alb", "AWS::ElasticLoadBalancingV2::LoadBalancer", lbARN),
 		lb("aws_lb_listener", "AWS::ElasticLoadBalancingV2::Listener", listenerARN),
 		lb("aws_alb_listener", "AWS::ElasticLoadBalancingV2::Listener", listenerARN),
+		lb("aws_lb_listener_rule", "AWS::ElasticLoadBalancingV2::ListenerRule",
+			arnOf("elasticloadbalancing", "listener-rule/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2/9683b2d02a6cabee")),
 		lb("aws_lb_target_group", "AWS::ElasticLoadBalancingV2::TargetGroup", tgARN),
 		lb("aws_alb_target_group", "AWS::ElasticLoadBalancingV2::TargetGroup", tgARN),
 		{tf: "aws_route53_zone", live: live("AWS::Route53::HostedZone", func(r *inventory.CloudResource) {
@@ -272,10 +282,10 @@ func typeCases() []typeCase {
 	}
 }
 
-// TestTypes matches every curated type in four forms of its state: with identity, with identity
+// TestSpec_matching_1: table tests for the curated types. It matches every curated type in four forms of its state: with identity, with identity
 // read from attributes (states before Terraform 1.12), by ARN, and by ID. Each form must find
 // the same address, which also shows identity and ARN matching agree.
-func TestTypes(t *testing.T) {
+func TestSpec_matching_1(t *testing.T) {
 	t.Parallel()
 
 	m := loadMap(t)
@@ -325,6 +335,38 @@ func TestTypes(t *testing.T) {
 		}
 	}
 	assert.GreaterOrEqual(t, len(covered), 40)
+}
+
+// TestSpec_matching_2: identity-based and ARN-based matching give the same result. For every
+// curated type whose state has both, a state with only the identity, one with only the ARN, and
+// one with both must match the live resource to the same address and category.
+func TestSpec_matching_2(t *testing.T) {
+	t.Parallel()
+
+	m := loadMap(t)
+	checked := 0
+	for _, tc := range typeCases() {
+		if tc.state.Identity == nil || tc.state.ARN == "" {
+			continue
+		}
+		checked++
+		forms := map[string]tfstate.Instance{
+			"identity only": {ID: tc.state.ID, Identity: tc.state.Identity, Region: tc.state.Region},
+			"arn only":      {ID: tc.state.ID, ARN: tc.state.ARN, Region: tc.state.Region},
+			"both":          tc.state,
+		}
+		var results []match.Result
+		for name, inst := range forms {
+			ix := tfstate.BuildIndex([]tfstate.UnitState{unitState("app", tc.tf, inst)})
+			got := match.New(m, ix).Match([]inventory.CloudResource{tc.live})[0]
+			require.Equal(t, match.CategoryManaged, got.Category, "%s %s: %s", tc.tf, name, got.Reason)
+			results = append(results, got)
+		}
+		for _, r := range results[1:] {
+			assert.Equal(t, results[0].ManagedBy, r.ManagedBy, tc.tf)
+		}
+	}
+	assert.GreaterOrEqual(t, checked, 30, "types with both an identity and an ARN")
 }
 
 // attrsKey is the key an identity read from attributes matches by: the identity, unless the
@@ -465,10 +507,11 @@ func TestDerived(t *testing.T) {
 	assert.Equal(t, match.RuleParent, got[0].Rule)
 }
 
-// TestSecurityGroupRules matches rules declared three ways: the per-rule resources (by id), the
+// TestSpec_matching_3: security group rules match whether declared inline, as legacy
+// aws_security_group_rule or as the per-rule resources. It matches rules declared three ways: the per-rule resources (by id), the
 // legacy aws_security_group_rule (by tuple, one TF resource per several AWS rules) and inline
 // blocks of aws_security_group (by tuple, only when no rule resource has the tuple).
-func TestSecurityGroupRules(t *testing.T) {
+func TestSpec_matching_3(t *testing.T) {
 	t.Parallel()
 
 	m := loadMap(t)

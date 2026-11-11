@@ -1,0 +1,19 @@
+# Resources that another IaC tool or a Kubernetes controller manages, found by the tags it sets.
+- name: cloudformation
+  match: '"aws:cloudformation:stack-name" in resource.tags || "aws:cloudformation:stack-id" in resource.tags'
+  owner: cloudformation
+  reason: tagged by a CloudFormation stack (CloudFormation, CDK, StackSets, Control Tower)
+- name: pulumi
+  match: resource.tags.exists(k, k.startsWith("pulumi:"))
+  owner: pulumi
+  reason: tagged by Pulumi
+- name: crossplane
+  match: resource.tags.exists(k, k.startsWith("crossplane.io/") || k.startsWith("crossplane-"))
+  owner: crossplane
+  reason: tagged by Crossplane (crossplane-kind, crossplane-name)
+- name: kubernetes
+  match: >-
+    resource.tags.exists(k, k.startsWith("kubernetes.io/cluster/") || k.startsWith("elbv2.k8s.aws/") ||
+    k.startsWith("ingress.k8s.aws/"))
+  owner: kubernetes
+  reason: tagged by a Kubernetes controller (cloud provider, AWS Load Balancer Controller)

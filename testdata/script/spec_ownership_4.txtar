@@ -1,0 +1,63 @@
+# The rules schema is part of schemas/config-v1.json, and a CEL compile error names the rule and
+# the column. Both exit 2 before any AWS call.
+mkdir .git
+
+# The schema checks the shape of each rule.
+exec expect-exit 2 tfcensus config validate bad-shape.yaml
+! stdout .
+cmp stderr want-shape.txt
+
+# A rule with the right shape still has to compile.
+exec expect-exit 2 tfcensus rules test bad-cel.yaml
+! stdout .
+stderr '^tfcensus: rule "typo": column 9: undefined field ''nmae''$'
+stderr '^rule "syntax": column 22: Syntax error'
+stderr '^rule "not-bool": match returns string, want bool$'
+
+# scan compiles the rules before it discovers units or calls AWS.
+exec expect-exit 2 tfcensus scan --rules bad-cel.yaml
+stderr 'rule "typo": column 9'
+! stderr 'discover'
+
+# The same rules in a valid file compile.
+exec tfcensus rules test good.yaml
+stdout '^26 rules compiled \(good.yaml\)$'
+
+-- bad-shape.yaml --
+schema_version: 1
+rules:
+  - name: no-reason
+    category: managed
+    match: 'true'
+  - name: bad date
+    category: ignored
+    match: 'true'
+    reason: r
+    expires: 2026-13
+-- want-shape.txt --
+tfcensus: invalid configuration:
+  bad-shape.yaml:3:5: rules.0: missing property 'reason'
+  bad-shape.yaml:4:15: rules.0.category: value must be one of 'other-iac', 'aws-managed', 'derived', 'ignored'
+  bad-shape.yaml:6:11: rules.1.name: 'bad date' does not match pattern '^[A-Za-z0-9][A-Za-z0-9._-]*$'
+  bad-shape.yaml:10:14: rules.1.expires: '2026-13' does not match pattern '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'
+-- bad-cel.yaml --
+rules:
+  - name: typo
+    category: ignored
+    match: resource.nmae == "x"
+    reason: r
+  - name: syntax
+    category: ignored
+    match: resource.name == ("x"
+    reason: r
+  - name: not-bool
+    category: ignored
+    match: resource.name
+    reason: r
+-- good.yaml --
+rules:
+  - name: datadog-integration
+    category: other-iac
+    owner: datadog
+    match: resource.type == "AWS::IAM::Role" && resource.name.startsWith("DatadogIntegrationRole")
+    reason: Created by the Datadog CloudFormation quick-start

@@ -1,0 +1,1386 @@
+# scan over a stubbed AWS account and the tf-scan fixture states: every category, every format.
+env TEST_CASSETTE=$CASSETTES/aws/scan-fleet
+env TEST_NOW=2026-11-10T12:00:00Z
+env AWS_CONFIG_FILE=$WORK/aws/config
+cd $REPOS
+
+exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml --format tty
+cmp stdout $WORK/golden/scan.txt
+
+exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml --format md --refresh
+cmp stdout $WORK/golden/scan.md
+
+exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml --format csv --refresh
+cmp stdout $WORK/golden/scan.csv
+
+exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml --format sarif --refresh
+cmp stdout $WORK/golden/scan.sarif
+
+exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml --format json --refresh
+jsonschema scan-v1.json stdout
+jsonschema report-v1.json stdout
+cmp stdout $WORK/golden/scan.json
+
+-- aws/config --
+[default]
+region = eu-west-1
+aws_access_key_id = AKIAFAKEDEFAULT
+aws_secret_access_key = fake-default-secret
+-- golden/scan.txt --
+ACCOUNT       REGION     MANAGED  DOUBLE-MANAGED  UNMANAGED  OTHER-IAC  AWS-MANAGED  DERIVED  IGNORED  UNDETERMINED  COVERAGE
+111111111111  global     1        1               2          0          1            0        0        0             50.0%
+111111111111  eu-west-1  5        0               3          1          4            1        2        1             62.5%
+111111111111  total      6        1               5          1          5            1        2        1             58.3%
+
+Unmanaged (5)
+AWS::EC2::SecurityGroup (1)
+  clickops-debug  arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0c11c0b5000000003  owner=alice  40d
+AWS::ElasticLoadBalancingV2::ListenerRule (1)
+  -  arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener-rule/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2/9683b2d02a6cabee  -  -
+AWS::IAM::Role (1)
+  clickops-admin  arn:aws:iam::111111111111:role/clickops-admin  created-by=bob  89d
+AWS::IAM::User (1)
+  sandbox-user  arn:aws:iam::111111111111:user/sandbox-user  owner=sandbox  -
+AWS::S3::Bucket (1)
+  acme-growth-experiments  arn:aws:s3:::acme-growth-experiments  -  -
+
+Double-managed (1)
+  AWS::IAM::Role arn:aws:iam::111111111111:role/acme-shared: tf-scan/iam (aws_iam_role.shared) and tf-scan/iam-dup (aws_iam_role.shared)
+
+Undetermined (1)
+  no type mapping for AWS::EC2::KeyPair: 1
+
+warning: rule "growth-trial" is past its expires date and no longer matches
+
+22 resources: 6 managed, 1 double-managed, 5 unmanaged, 1 other-iac, 5 aws-managed, 1 derived, 2 ignored, 1 undetermined; coverage 58.3%
+-- golden/scan.md --
+| ACCOUNT | REGION | MANAGED | DOUBLE-MANAGED | UNMANAGED | OTHER-IAC | AWS-MANAGED | DERIVED | IGNORED | UNDETERMINED | COVERAGE |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 111111111111 | global | 1 | 1 | 2 | 0 | 1 | 0 | 0 | 0 | 50.0% |
+| 111111111111 | eu-west-1 | 5 | 0 | 3 | 1 | 4 | 1 | 2 | 1 | 62.5% |
+| 111111111111 | total | 6 | 1 | 5 | 1 | 5 | 1 | 2 | 1 | 58.3% |
+
+<details><summary>Account 111111111111: 5 unmanaged, 1 double-managed</summary>
+
+| CATEGORY | TYPE | NAME | ID | TAGS | AGE | DETAIL |
+| --- | --- | --- | --- | --- | --- | --- |
+| double-managed | AWS::IAM::Role | acme-shared | arn:aws:iam::111111111111:role/acme-shared | - | - | tf-scan/iam (aws_iam_role.shared) and tf-scan/iam-dup (aws_iam_role.shared) |
+| unmanaged | AWS::IAM::Role | clickops-admin | arn:aws:iam::111111111111:role/clickops-admin | created-by=bob | 89d | no state manages it and no rule matches |
+| unmanaged | AWS::IAM::User | sandbox-user | arn:aws:iam::111111111111:user/sandbox-user | owner=sandbox | - | no state manages it and no rule matches |
+| unmanaged | AWS::EC2::SecurityGroup | clickops-debug | arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0c11c0b5000000003 | owner=alice | 40d | no state manages it and no rule matches |
+| unmanaged | AWS::ElasticLoadBalancingV2::ListenerRule | - | arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener-rule/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2/9683b2d02a6cabee | - | - | no state manages it and no rule matches |
+| unmanaged | AWS::S3::Bucket | acme-growth-experiments | arn:aws:s3:::acme-growth-experiments | - | - | no state manages it and no rule matches |
+
+</details>
+
+Undetermined:
+
+- no type mapping for AWS::EC2::KeyPair: 1
+
+- warning: rule "growth-trial" is past its expires date and no longer matches
+
+22 resources: 6 managed, 1 double-managed, 5 unmanaged, 1 other-iac, 5 aws-managed, 1 derived, 2 ignored, 1 undetermined; coverage 58.3%
+-- golden/scan.csv --
+account,region,category,cfn_type,source_type,tf_types,arn,id,name,owner,rule,reason,managed_by,created,sources,tags
+111111111111,global,managed,AWS::IAM::Role,,aws_iam_role,arn:aws:iam::111111111111:role/acme-app,AROAACMEAPP00000001,acme-app,,match/identity,matched tf-scan/iam aws_iam_role.app by identity,tf-scan/iam:default:aws_iam_role.app,,config,
+111111111111,global,double-managed,AWS::IAM::Role,,aws_iam_role,arn:aws:iam::111111111111:role/acme-shared,AROAACMESHARED00002,acme-shared,,match/double-managed,managed by aws_iam_role.shared and aws_iam_role.shared in different states,tf-scan/iam:default:aws_iam_role.shared;tf-scan/iam-dup:default:aws_iam_role.shared,,config,
+111111111111,global,unmanaged,AWS::IAM::Role,,aws_iam_role,arn:aws:iam::111111111111:role/clickops-admin,AROACLICKOPS0000004,clickops-admin,,rules/no-match,no state manages it and no rule matches,,2026-08-12T15:30:00Z,config,created-by=bob
+111111111111,global,unmanaged,AWS::IAM::User,,aws_iam_user,arn:aws:iam::111111111111:user/sandbox-user,AIDASANDBOX00000005,sandbox-user,,rules/no-match,no state manages it and no rule matches,,,config,owner=sandbox
+111111111111,global,aws-managed,AWS::IAM::Role,,aws_iam_role,arn:aws:iam::111111111111:role/aws-service-role/support.amazonaws.com/AWSServiceRoleForSupport,AROASUPPORT00000003,AWSServiceRoleForSupport,aws,pack/aws-service/service-linked-role,service-linked role that an AWS service created,,,config,
+111111111111,eu-west-1,managed,AWS::EC2::SecurityGroup,,aws_security_group,arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0aa11bb22cc33dd44,sg-0aa11bb22cc33dd44,web,,match/identity,matched tf-scan/network aws_security_group.web by identity,tf-scan/network:default:aws_security_group.web,,config,
+111111111111,eu-west-1,managed,AWS::EC2::VPC,,aws_vpc,arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0a1b2c3d4e5f60718,vpc-0a1b2c3d4e5f60718,,,match/identity,matched tf-scan/network aws_vpc.main by identity,tf-scan/network:default:aws_vpc.main,,config,
+111111111111,eu-west-1,managed,AWS::ElasticLoadBalancingV2::Listener,,aws_alb_listener;aws_lb_listener,arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2,arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2,,,match/identity,matched tf-scan/network aws_lb_listener.https by identity,tf-scan/network:default:aws_lb_listener.https,,config,
+111111111111,eu-west-1,managed,AWS::ElasticLoadBalancingV2::LoadBalancer,,aws_alb;aws_lb,arn:aws:elasticloadbalancing:eu-west-1:111111111111:loadbalancer/app/web/50dc6c495c0c9188,arn:aws:elasticloadbalancing:eu-west-1:111111111111:loadbalancer/app/web/50dc6c495c0c9188,web,,match/identity,matched tf-scan/network aws_lb.web by identity,tf-scan/network:default:aws_lb.web,,config,
+111111111111,eu-west-1,managed,AWS::Lambda::Function,,aws_lambda_function,arn:aws:lambda:eu-west-1:111111111111:function:acme-api,acme-api,acme-api,,match/identity,matched tf-scan/network aws_lambda_function.api by identity,tf-scan/network:default:aws_lambda_function.api,,config,
+111111111111,eu-west-1,unmanaged,AWS::EC2::SecurityGroup,,aws_security_group,arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0c11c0b5000000003,sg-0c11c0b5000000003,clickops-debug,,rules/no-match,no state manages it and no rule matches,,2026-10-01T09:00:00Z,config,owner=alice
+111111111111,eu-west-1,unmanaged,AWS::ElasticLoadBalancingV2::ListenerRule,,aws_lb_listener_rule,arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener-rule/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2/9683b2d02a6cabee,arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener-rule/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2/9683b2d02a6cabee,,,rules/no-match,no state manages it and no rule matches,,,cloudcontrol,
+111111111111,eu-west-1,unmanaged,AWS::S3::Bucket,,aws_s3_bucket,arn:aws:s3:::acme-growth-experiments,acme-growth-experiments,acme-growth-experiments,,rules/no-match,no state manages it and no rule matches,,,config,team=growth
+111111111111,eu-west-1,other-iac,AWS::SQS::Queue,,aws_sqs_queue,arn:aws:sqs:eu-west-1:111111111111:billing-events,https://sqs.eu-west-1.amazonaws.com/111111111111/billing-events,billing-events,cloudformation,pack/other-iac/cloudformation,"tagged by a CloudFormation stack (CloudFormation, CDK, StackSets, Control Tower)",,,config,aws:cloudformation:stack-name=billing
+111111111111,eu-west-1,aws-managed,AWS::EC2::InternetGateway,,aws_internet_gateway,arn:aws:ec2:eu-west-1:111111111111:internet-gateway/igw-0def00000000000c3,igw-0def00000000000c3,,aws,pack/aws-defaults/default-vpc-children,"internet gateway, route table or DHCP options of the default VPC",,,config,
+111111111111,eu-west-1,aws-managed,AWS::EC2::SecurityGroup,,aws_security_group,arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0def00000000000b2,sg-0def00000000000b2,default,aws,pack/aws-defaults/default-security-group,default security group that AWS creates with every VPC,,,config,
+111111111111,eu-west-1,aws-managed,AWS::EC2::VPC,,aws_vpc,arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0def00000000000a1,vpc-0def00000000000a1,,aws,pack/aws-defaults/default-vpc,default VPC that AWS creates in every region,,,config,
+111111111111,eu-west-1,aws-managed,AWS::KMS::Key,,aws_kms_key,arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-aws0-4000-8000-000000000001,0b1c2d3e-aws0-4000-8000-000000000001,,aws,pack/aws-service/aws-managed-kms-key,AWS managed KMS key (KeyManager AWS),,,config,
+111111111111,eu-west-1,derived,AWS::EC2::NetworkInterface,,aws_network_interface,arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0aa00000000000d4,eni-0aa00000000000d4,,aws,pack/derived/requester-managed-eni,network interface that a service manages (requester-managed or a service interface type),,,config,
+111111111111,eu-west-1,ignored,AWS::EC2::Instance,,aws_instance,arn:aws:ec2:eu-west-1:111111111111:instance/i-0aa00000000000e5,i-0aa00000000000e5,,platform,user/sandbox,Sandbox experiments are cleaned up every week,,,config,Name=try-arm;owner=sandbox
+111111111111,eu-west-1,ignored,AWS::Logs::LogGroup,,aws_cloudwatch_log_group,arn:aws:logs:eu-west-1:111111111111:log-group:/aws/lambda/acme-api,,/aws/lambda/acme-api,,pack/ephemeral/managed-lambda-log-group,log group that Lambda created for a function a unit manages,,,resource-explorer,
+111111111111,eu-west-1,undetermined,AWS::EC2::KeyPair,,,arn:aws:ec2:eu-west-1:111111111111:key-pair/key-0aa00000000000f6,,,,match/no-type-mapping,no type mapping for AWS::EC2::KeyPair,,,resource-explorer,
+-- golden/scan.sarif --
+{
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "tfcensus",
+          "version": "dev",
+          "informationUri": "https://github.com/sassdavid/tfcensus",
+          "rules": [
+            {
+              "id": "unmanaged",
+              "shortDescription": {
+                "text": "AWS resource that no unit manages"
+              },
+              "help": {
+                "text": "Import it into a unit (tfcensus codify), or add an ownership rule with a reason."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "double-managed",
+              "shortDescription": {
+                "text": "AWS resource that more than one state manages"
+              },
+              "help": {
+                "text": "Remove it from every state but one (terraform state rm, or a removed block)."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "double-managed",
+          "ruleIndex": 1,
+          "level": "error",
+          "message": {
+            "text": "AWS::IAM::Role arn:aws:iam::111111111111:role/acme-shared is managed by tf-scan/iam (aws_iam_role.shared) and tf-scan/iam-dup (aws_iam_role.shared)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "tf-scan/iam"
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "double-managed|arn:aws:iam::111111111111:role/acme-shared"
+          }
+        },
+        {
+          "ruleId": "unmanaged",
+          "ruleIndex": 0,
+          "level": "warning",
+          "message": {
+            "text": "AWS::IAM::Role arn:aws:iam::111111111111:role/clickops-admin: no state manages it and no rule matches"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "aws://111111111111/global/AWS::IAM::Role/AROACLICKOPS0000004"
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "unmanaged|arn:aws:iam::111111111111:role/clickops-admin"
+          }
+        },
+        {
+          "ruleId": "unmanaged",
+          "ruleIndex": 0,
+          "level": "warning",
+          "message": {
+            "text": "AWS::IAM::User arn:aws:iam::111111111111:user/sandbox-user: no state manages it and no rule matches"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "aws://111111111111/global/AWS::IAM::User/AIDASANDBOX00000005"
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "unmanaged|arn:aws:iam::111111111111:user/sandbox-user"
+          }
+        },
+        {
+          "ruleId": "unmanaged",
+          "ruleIndex": 0,
+          "level": "warning",
+          "message": {
+            "text": "AWS::EC2::SecurityGroup arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0c11c0b5000000003: no state manages it and no rule matches"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "aws://111111111111/eu-west-1/AWS::EC2::SecurityGroup/sg-0c11c0b5000000003"
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "unmanaged|arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0c11c0b5000000003"
+          }
+        },
+        {
+          "ruleId": "unmanaged",
+          "ruleIndex": 0,
+          "level": "warning",
+          "message": {
+            "text": "AWS::ElasticLoadBalancingV2::ListenerRule arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener-rule/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2/9683b2d02a6cabee: no state manages it and no rule matches"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "aws://111111111111/eu-west-1/AWS::ElasticLoadBalancingV2::ListenerRule/arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener-rule/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2/9683b2d02a6cabee"
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "unmanaged|arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener-rule/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2/9683b2d02a6cabee"
+          }
+        },
+        {
+          "ruleId": "unmanaged",
+          "ruleIndex": 0,
+          "level": "warning",
+          "message": {
+            "text": "AWS::S3::Bucket arn:aws:s3:::acme-growth-experiments: no state manages it and no rule matches"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "aws://111111111111/eu-west-1/AWS::S3::Bucket/acme-growth-experiments"
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "unmanaged|arn:aws:s3:::acme-growth-experiments"
+          }
+        }
+      ]
+    }
+  ]
+}
+-- golden/scan.json --
+{
+  "schema_version": "1",
+  "tool": "tfcensus",
+  "version": "dev",
+  "generated_at": "2026-11-10T12:00:00Z",
+  "data": {
+    "regions": [
+      {
+        "account": "111111111111",
+        "region": "global",
+        "counts": {
+          "aws-managed": 1,
+          "derived": 0,
+          "double-managed": 1,
+          "ignored": 0,
+          "managed": 1,
+          "other-iac": 0,
+          "undetermined": 0,
+          "unmanaged": 2
+        },
+        "coverage": 50
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "counts": {
+          "aws-managed": 4,
+          "derived": 1,
+          "double-managed": 0,
+          "ignored": 2,
+          "managed": 5,
+          "other-iac": 1,
+          "undetermined": 1,
+          "unmanaged": 3
+        },
+        "coverage": 62.5
+      }
+    ],
+    "accounts": [
+      {
+        "account": "111111111111",
+        "counts": {
+          "aws-managed": 5,
+          "derived": 1,
+          "double-managed": 1,
+          "ignored": 2,
+          "managed": 6,
+          "other-iac": 1,
+          "undetermined": 1,
+          "unmanaged": 5
+        },
+        "coverage": 58.333333333333336
+      }
+    ],
+    "findings": [
+      {
+        "account": "111111111111",
+        "category": "managed",
+        "cfn_type": "AWS::IAM::Role",
+        "tf_types": [
+          "aws_iam_role"
+        ],
+        "arn": "arn:aws:iam::111111111111:role/acme-app",
+        "id": "AROAACMEAPP00000001",
+        "name": "acme-app",
+        "sources": [
+          "config"
+        ],
+        "reason": "matched tf-scan/iam aws_iam_role.app by identity",
+        "rule": "match/identity",
+        "managed_by": [
+          {
+            "unit": "tf-scan/iam",
+            "workspace": "default",
+            "address": "aws_iam_role.app"
+          }
+        ]
+      },
+      {
+        "account": "111111111111",
+        "category": "double-managed",
+        "cfn_type": "AWS::IAM::Role",
+        "tf_types": [
+          "aws_iam_role"
+        ],
+        "arn": "arn:aws:iam::111111111111:role/acme-shared",
+        "id": "AROAACMESHARED00002",
+        "name": "acme-shared",
+        "sources": [
+          "config"
+        ],
+        "reason": "managed by aws_iam_role.shared and aws_iam_role.shared in different states",
+        "rule": "match/double-managed",
+        "managed_by": [
+          {
+            "unit": "tf-scan/iam",
+            "workspace": "default",
+            "address": "aws_iam_role.shared"
+          },
+          {
+            "unit": "tf-scan/iam-dup",
+            "workspace": "default",
+            "address": "aws_iam_role.shared"
+          }
+        ]
+      },
+      {
+        "account": "111111111111",
+        "category": "unmanaged",
+        "cfn_type": "AWS::IAM::Role",
+        "tf_types": [
+          "aws_iam_role"
+        ],
+        "arn": "arn:aws:iam::111111111111:role/clickops-admin",
+        "id": "AROACLICKOPS0000004",
+        "name": "clickops-admin",
+        "tags": {
+          "created-by": "bob"
+        },
+        "created": "2026-08-12T15:30:00Z",
+        "sources": [
+          "config"
+        ],
+        "reason": "no state manages it and no rule matches",
+        "rule": "rules/no-match"
+      },
+      {
+        "account": "111111111111",
+        "category": "unmanaged",
+        "cfn_type": "AWS::IAM::User",
+        "tf_types": [
+          "aws_iam_user"
+        ],
+        "arn": "arn:aws:iam::111111111111:user/sandbox-user",
+        "id": "AIDASANDBOX00000005",
+        "name": "sandbox-user",
+        "tags": {
+          "owner": "sandbox"
+        },
+        "sources": [
+          "config"
+        ],
+        "reason": "no state manages it and no rule matches",
+        "rule": "rules/no-match"
+      },
+      {
+        "account": "111111111111",
+        "category": "aws-managed",
+        "cfn_type": "AWS::IAM::Role",
+        "tf_types": [
+          "aws_iam_role"
+        ],
+        "arn": "arn:aws:iam::111111111111:role/aws-service-role/support.amazonaws.com/AWSServiceRoleForSupport",
+        "id": "AROASUPPORT00000003",
+        "name": "AWSServiceRoleForSupport",
+        "sources": [
+          "config"
+        ],
+        "owner": "aws",
+        "reason": "service-linked role that an AWS service created",
+        "rule": "pack/aws-service/service-linked-role"
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "category": "managed",
+        "cfn_type": "AWS::EC2::SecurityGroup",
+        "tf_types": [
+          "aws_security_group"
+        ],
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0aa11bb22cc33dd44",
+        "id": "sg-0aa11bb22cc33dd44",
+        "name": "web",
+        "sources": [
+          "config"
+        ],
+        "reason": "matched tf-scan/network aws_security_group.web by identity",
+        "rule": "match/identity",
+        "managed_by": [
+          {
+            "unit": "tf-scan/network",
+            "workspace": "default",
+            "address": "aws_security_group.web"
+          }
+        ]
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "category": "managed",
+        "cfn_type": "AWS::EC2::VPC",
+        "tf_types": [
+          "aws_vpc"
+        ],
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0a1b2c3d4e5f60718",
+        "id": "vpc-0a1b2c3d4e5f60718",
+        "sources": [
+          "config"
+        ],
+        "reason": "matched tf-scan/network aws_vpc.main by identity",
+        "rule": "match/identity",
+        "managed_by": [
+          {
+            "unit": "tf-scan/network",
+            "workspace": "default",
+            "address": "aws_vpc.main"
+          }
+        ]
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "category": "managed",
+        "cfn_type": "AWS::ElasticLoadBalancingV2::Listener",
+        "tf_types": [
+          "aws_alb_listener",
+          "aws_lb_listener"
+        ],
+        "arn": "arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2",
+        "id": "arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2",
+        "sources": [
+          "config"
+        ],
+        "reason": "matched tf-scan/network aws_lb_listener.https by identity",
+        "rule": "match/identity",
+        "managed_by": [
+          {
+            "unit": "tf-scan/network",
+            "workspace": "default",
+            "address": "aws_lb_listener.https"
+          }
+        ]
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "category": "managed",
+        "cfn_type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+        "tf_types": [
+          "aws_alb",
+          "aws_lb"
+        ],
+        "arn": "arn:aws:elasticloadbalancing:eu-west-1:111111111111:loadbalancer/app/web/50dc6c495c0c9188",
+        "id": "arn:aws:elasticloadbalancing:eu-west-1:111111111111:loadbalancer/app/web/50dc6c495c0c9188",
+        "name": "web",
+        "sources": [
+          "config"
+        ],
+        "reason": "matched tf-scan/network aws_lb.web by identity",
+        "rule": "match/identity",
+        "managed_by": [
+          {
+            "unit": "tf-scan/network",
+            "workspace": "default",
+            "address": "aws_lb.web"
+          }
+        ]
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "category": "managed",
+        "cfn_type": "AWS::Lambda::Function",
+        "tf_types": [
+          "aws_lambda_function"
+        ],
+        "arn": "arn:aws:lambda:eu-west-1:111111111111:function:acme-api",
+        "id": "acme-api",
+        "name": "acme-api",
+        "sources": [
+          "config"
+        ],
+        "reason": "matched tf-scan/network aws_lambda_function.api by identity",
+        "rule": "match/identity",
+        "managed_by": [
+          {
+            "unit": "tf-scan/network",
+            "workspace": "default",
+            "address": "aws_lambda_function.api"
+          }
+        ]
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "category": "unmanaged",
+        "cfn_type": "AWS::EC2::SecurityGroup",
+        "tf_types": [
+          "aws_security_group"
+        ],
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0c11c0b5000000003",
+        "id": "sg-0c11c0b5000000003",
+        "name": "clickops-debug",
+        "tags": {
+          "owner": "alice"
+        },
+        "created": "2026-10-01T09:00:00Z",
+        "sources": [
+          "config"
+        ],
+        "reason": "no state manages it and no rule matches",
+        "rule": "rules/no-match"
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "category": "unmanaged",
+        "cfn_type": "AWS::ElasticLoadBalancingV2::ListenerRule",
+        "tf_types": [
+          "aws_lb_listener_rule"
+        ],
+        "arn": "arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener-rule/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2/9683b2d02a6cabee",
+        "id": "arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener-rule/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2/9683b2d02a6cabee",
+        "sources": [
+          "cloudcontrol"
+        ],
+        "reason": "no state manages it and no rule matches",
+        "rule": "rules/no-match"
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "category": "unmanaged",
+        "cfn_type": "AWS::S3::Bucket",
+        "tf_types": [
+          "aws_s3_bucket"
+        ],
+        "arn": "arn:aws:s3:::acme-growth-experiments",
+        "id": "acme-growth-experiments",
+        "name": "acme-growth-experiments",
+        "tags": {
+          "team": "growth"
+        },
+        "sources": [
+          "config"
+        ],
+        "reason": "no state manages it and no rule matches",
+        "rule": "rules/no-match"
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "category": "other-iac",
+        "cfn_type": "AWS::SQS::Queue",
+        "tf_types": [
+          "aws_sqs_queue"
+        ],
+        "arn": "arn:aws:sqs:eu-west-1:111111111111:billing-events",
+        "id": "https://sqs.eu-west-1.amazonaws.com/111111111111/billing-events",
+        "name": "billing-events",
+        "tags": {
+          "aws:cloudformation:stack-name": "billing"
+        },
+        "sources": [
+          "config"
+        ],
+        "owner": "cloudformation",
+        "reason": "tagged by a CloudFormation stack (CloudFormation, CDK, StackSets, Control Tower)",
+        "rule": "pack/other-iac/cloudformation"
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "category": "aws-managed",
+        "cfn_type": "AWS::EC2::InternetGateway",
+        "tf_types": [
+          "aws_internet_gateway"
+        ],
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:internet-gateway/igw-0def00000000000c3",
+        "id": "igw-0def00000000000c3",
+        "sources": [
+          "config"
+        ],
+        "owner": "aws",
+        "reason": "internet gateway, route table or DHCP options of the default VPC",
+        "rule": "pack/aws-defaults/default-vpc-children"
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "category": "aws-managed",
+        "cfn_type": "AWS::EC2::SecurityGroup",
+        "tf_types": [
+          "aws_security_group"
+        ],
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0def00000000000b2",
+        "id": "sg-0def00000000000b2",
+        "name": "default",
+        "sources": [
+          "config"
+        ],
+        "owner": "aws",
+        "reason": "default security group that AWS creates with every VPC",
+        "rule": "pack/aws-defaults/default-security-group"
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "category": "aws-managed",
+        "cfn_type": "AWS::EC2::VPC",
+        "tf_types": [
+          "aws_vpc"
+        ],
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0def00000000000a1",
+        "id": "vpc-0def00000000000a1",
+        "sources": [
+          "config"
+        ],
+        "owner": "aws",
+        "reason": "default VPC that AWS creates in every region",
+        "rule": "pack/aws-defaults/default-vpc"
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "category": "aws-managed",
+        "cfn_type": "AWS::KMS::Key",
+        "tf_types": [
+          "aws_kms_key"
+        ],
+        "arn": "arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-aws0-4000-8000-000000000001",
+        "id": "0b1c2d3e-aws0-4000-8000-000000000001",
+        "sources": [
+          "config"
+        ],
+        "owner": "aws",
+        "reason": "AWS managed KMS key (KeyManager AWS)",
+        "rule": "pack/aws-service/aws-managed-kms-key"
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "category": "derived",
+        "cfn_type": "AWS::EC2::NetworkInterface",
+        "tf_types": [
+          "aws_network_interface"
+        ],
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0aa00000000000d4",
+        "id": "eni-0aa00000000000d4",
+        "sources": [
+          "config"
+        ],
+        "owner": "aws",
+        "reason": "network interface that a service manages (requester-managed or a service interface type)",
+        "rule": "pack/derived/requester-managed-eni"
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "category": "ignored",
+        "cfn_type": "AWS::EC2::Instance",
+        "tf_types": [
+          "aws_instance"
+        ],
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:instance/i-0aa00000000000e5",
+        "id": "i-0aa00000000000e5",
+        "tags": {
+          "Name": "try-arm",
+          "owner": "sandbox"
+        },
+        "sources": [
+          "config"
+        ],
+        "owner": "platform",
+        "reason": "Sandbox experiments are cleaned up every week",
+        "rule": "user/sandbox"
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "category": "ignored",
+        "cfn_type": "AWS::Logs::LogGroup",
+        "tf_types": [
+          "aws_cloudwatch_log_group"
+        ],
+        "arn": "arn:aws:logs:eu-west-1:111111111111:log-group:/aws/lambda/acme-api",
+        "name": "/aws/lambda/acme-api",
+        "sources": [
+          "resource-explorer"
+        ],
+        "reason": "log group that Lambda created for a function a unit manages",
+        "rule": "pack/ephemeral/managed-lambda-log-group"
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "category": "undetermined",
+        "cfn_type": "AWS::EC2::KeyPair",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:key-pair/key-0aa00000000000f6",
+        "sources": [
+          "resource-explorer"
+        ],
+        "reason": "no type mapping for AWS::EC2::KeyPair",
+        "rule": "match/no-type-mapping"
+      }
+    ],
+    "runs": [
+      {
+        "account": "111111111111",
+        "layer": "native:iam-attachments",
+        "status": "ok",
+        "count": 0
+      },
+      {
+        "account": "111111111111",
+        "layer": "native:route53-records",
+        "status": "ok",
+        "count": 0
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "layer": "config",
+        "status": "ok",
+        "count": 19
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "layer": "resource-explorer",
+        "status": "ok",
+        "count": 2
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "layer": "native:ec2-sg-rules",
+        "status": "ok",
+        "count": 0
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "layer": "native:s3-subresources",
+        "status": "ok",
+        "count": 0
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "layer": "cloudcontrol",
+        "status": "ok",
+        "count": 1
+      }
+    ],
+    "coverage": {
+      "columns": [
+        {
+          "account": "111111111111",
+          "region": "global"
+        },
+        {
+          "account": "111111111111",
+          "region": "eu-west-1"
+        }
+      ],
+      "rows": [
+        {
+          "cfn_type": "AWS::DynamoDB::Table",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EC2::DHCPOptions",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EC2::EIP",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EC2::Instance",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EC2::InternetGateway",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EC2::LaunchTemplate",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EC2::NatGateway",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EC2::NetworkAcl",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EC2::NetworkInterface",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EC2::RouteTable",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EC2::SecurityGroup",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EC2::SecurityGroupEgress",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "native"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EC2::SecurityGroupIngress",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "native"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EC2::Subnet",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EC2::VPC",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EC2::Volume",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::ECR::Repository",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EKS::Cluster",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EKS::Nodegroup",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::ElasticLoadBalancingV2::Listener",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::ElasticLoadBalancingV2::ListenerRule",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "re",
+              "cc"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::IAM::Group",
+          "global": true,
+          "cells": [
+            [
+              "config"
+            ],
+            null
+          ]
+        },
+        {
+          "cfn_type": "AWS::IAM::GroupPolicy",
+          "global": true,
+          "cells": [
+            [
+              "native"
+            ],
+            null
+          ]
+        },
+        {
+          "cfn_type": "AWS::IAM::InstanceProfile",
+          "global": true,
+          "cells": [
+            [
+              "config"
+            ],
+            null
+          ]
+        },
+        {
+          "cfn_type": "AWS::IAM::ManagedPolicy",
+          "global": true,
+          "cells": [
+            [
+              "config"
+            ],
+            null
+          ]
+        },
+        {
+          "cfn_type": "AWS::IAM::Role",
+          "global": true,
+          "cells": [
+            [
+              "config"
+            ],
+            null
+          ]
+        },
+        {
+          "cfn_type": "AWS::IAM::RolePolicy",
+          "global": true,
+          "cells": [
+            [
+              "native"
+            ],
+            null
+          ]
+        },
+        {
+          "cfn_type": "AWS::IAM::User",
+          "global": true,
+          "cells": [
+            [
+              "config"
+            ],
+            null
+          ]
+        },
+        {
+          "cfn_type": "AWS::IAM::UserPolicy",
+          "global": true,
+          "cells": [
+            [
+              "native"
+            ],
+            null
+          ]
+        },
+        {
+          "cfn_type": "AWS::KMS::Alias",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::KMS::Key",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::Lambda::Function",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::Logs::LogGroup",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::RDS::DBCluster",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::RDS::DBInstance",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::RDS::DBSubnetGroup",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::Route53::HostedZone",
+          "global": true,
+          "cells": [
+            [
+              "config"
+            ],
+            null
+          ]
+        },
+        {
+          "cfn_type": "AWS::Route53::RecordSet",
+          "global": true,
+          "cells": [
+            [
+              "native"
+            ],
+            null
+          ]
+        },
+        {
+          "cfn_type": "AWS::S3::Bucket",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::S3::BucketPolicy",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "native"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::SNS::Topic",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::SQS::Queue",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::SecretsManager::Secret",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "Native::IAM::GroupPolicyAttachment",
+          "global": true,
+          "cells": [
+            [
+              "native"
+            ],
+            null
+          ]
+        },
+        {
+          "cfn_type": "Native::IAM::RolePolicyAttachment",
+          "global": true,
+          "cells": [
+            [
+              "native"
+            ],
+            null
+          ]
+        },
+        {
+          "cfn_type": "Native::IAM::UserPolicyAttachment",
+          "global": true,
+          "cells": [
+            [
+              "native"
+            ],
+            null
+          ]
+        },
+        {
+          "cfn_type": "Native::S3::BucketEncryption",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "native"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "Native::S3::BucketLifecycle",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "native"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "Native::S3::BucketPublicAccessBlock",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "native"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "Native::S3::BucketVersioning",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "native"
+            ]
+          ]
+        }
+      ]
+    },
+    "warnings": [
+      "rule \"growth-trial\" is past its expires date and no longer matches"
+    ],
+    "cached": false
+  },
+  "errors": []
+}
