@@ -9,7 +9,7 @@ cmp unit/main.tf main.tf.orig
 
 # A second run refuses before writing; --force writes the same bytes again.
 exec expect-exit 2 tfcensus codify --from $CODIFY/scan.json --into unit --target terraform@1.14.0
-stderr 'file exists: unit/imports_tfcensus_20261112.tf \(pass --force to overwrite\)'
+stderr 'file exists in unit: imports_tfcensus_20261112.tf \(pass --force to overwrite\)'
 exec tfcensus codify --from $CODIFY/scan.json --into unit --target terraform@1.14.0 --force --format json
 jsonschema codify-v1.json stdout
 jsonschema report-v1.json stdout
@@ -46,9 +46,9 @@ terraform {
 -- tofu/.keep --
 -- sel/.keep --
 -- golden/codify.txt --
-Wrote 5 import block(s) (5 by identity, 0 by id) for terraform 1.14.0 (--target).
-  unit/imports_tfcensus_20261112.tf
-  unit/query_tfcensus_20261112.tfquery.hcl
+Wrote 5 import block(s) (5 by identity, 0 by id) for terraform 1.14.0 (--target) into unit:
+  imports_tfcensus_20261112.tf
+  query_tfcensus_20261112.tfquery.hcl
 
 note: --query: aws_lb_listener_rule needs list config listener_arn: no list block
 

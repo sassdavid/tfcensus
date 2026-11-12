@@ -216,10 +216,10 @@ func writeCodifyText(w io.Writer, rep *codifyReport) error {
 				byIdentity++
 			}
 		}
-		fmt.Fprintf(&b, "Wrote %d import block(s) (%d by identity, %d by id) for %s (%s).\n",
-			len(rep.Imports), byIdentity, len(rep.Imports)-byIdentity, rep.Target, rep.Target.Source)
+		fmt.Fprintf(&b, "Wrote %d import block(s) (%d by identity, %d by id) for %s (%s) into %s:\n",
+			len(rep.Imports), byIdentity, len(rep.Imports)-byIdentity, rep.Target, rep.Target.Source, rep.Into)
 		for _, f := range rep.Files {
-			fmt.Fprintf(&b, "  %s\n", filepath.Join(rep.Into, f))
+			fmt.Fprintf(&b, "  %s\n", f)
 		}
 	}
 	if len(rep.Skipped) > 0 {

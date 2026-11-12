@@ -29,7 +29,7 @@ func Write(dir string, files []File, force bool) error {
 		if !force {
 			_, statErr := os.Lstat(filepath.Join(dir, f.Name))
 			if statErr == nil {
-				return fmt.Errorf("%w: %s (pass --force to overwrite)", ErrExists, filepath.Join(dir, f.Name))
+				return fmt.Errorf("%w in %s: %s (pass --force to overwrite)", ErrExists, dir, f.Name)
 			}
 			if !errors.Is(statErr, fs.ErrNotExist) {
 				return fmt.Errorf("check %s: %w", f.Name, statErr)
