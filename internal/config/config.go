@@ -11,7 +11,7 @@ const SchemaVersion = 1
 // Config defines every configuration key. The JSON tags are the key names, and
 // schemas/config-v1.json is generated from this type.
 //
-// drift.noise and notify are free-form until the milestone that owns them defines their shape.
+// notify is free-form until the milestone that owns it defines its shape.
 type Config struct {
 	SchemaVersion int       `json:"schema_version" jsonschema:"enum=1" jsonschema_description:"Config file format version."`
 	Binaries      Binaries  `json:"binaries"`
@@ -126,9 +126,23 @@ type Suppression struct {
 
 // Drift configures drift detection.
 type Drift struct {
-	Mode     string   `json:"mode"     jsonschema:"enum=refresh-only,enum=full"`
-	Collapse string   `json:"collapse" jsonschema:"enum=shape,enum=strict,enum=none"`
-	Noise    []Object `json:"noise"                                                  jsonschema_description:"Noise rules."`
+	Mode      string      `json:"mode"       jsonschema:"enum=refresh-only,enum=full"                      jsonschema_description:"refresh-only reports drift; full also tells drift the plan reverts from drift it keeps."`
+	Collapse  string      `json:"collapse"   jsonschema:"enum=shape,enum=strict,enum=none"                 jsonschema_description:"How identical changes in several units become one group."`
+	NeverHide []string    `json:"never_hide" jsonschema:"enum=create,enum=update,enum=delete,enum=replace" jsonschema_description:"Drift actions that no noise rule can hide."`
+	Noise     []NoiseRule `json:"noise"                                                                    jsonschema_description:"Noise rules, tried in order. A rule hides the matching attribute changes, or the whole change when it has no attribute."`
+}
+
+// NoiseRule hides drift that matches every set selector. An entry is either a preset or a rule.
+type NoiseRule struct {
+	Preset    string `json:"preset"    jsonschema:"enum=aws-tags-all,enum=computed-hashes"           jsonschema_description:"A built-in rule. A preset entry takes no other key."`
+	Name      string `json:"name"      jsonschema:"pattern=^[A-Za-z0-9][A-Za-z0-9._-]*$"             jsonschema_description:"Rule name, shown on hidden drift as user/<name>."`
+	Unit      string `json:"unit"                                                                    jsonschema_description:"Unit path glob; * matches any characters, / included."`
+	Type      string `json:"type"                                                                    jsonschema_description:"Resource type glob, such as aws_s3_*."`
+	Address   string `json:"address"                                                                 jsonschema_description:"Resource address glob, such as module.tags.*."`
+	Attribute string `json:"attribute"                                                               jsonschema_description:"Attribute path such as tags_all or ingress[*].cidr_blocks. It also matches everything below it."`
+	Action    string `json:"action"    jsonschema:"enum=create,enum=update,enum=delete,enum=replace" jsonschema_description:"Drift action."`
+	Reason    string `json:"reason"                                                                  jsonschema_description:"Why the drift is noise. Required for rules."`
+	Expires   string `json:"expires"   jsonschema:"pattern=^[0-9]{4}-[0-9]{2}-[0-9]{2}$"             jsonschema_description:"Last day the rule applies, as a quoted \"YYYY-MM-DD\" date (UTC). After it the rule stops hiding drift and drift warns."`
 }
 
 // Cache configures the results cache.
@@ -179,7 +193,9 @@ func Default() Config {
 			DiscoverPatterns: []string{"*tfstate*", "*terraform-state*", "*tf-state*"},
 			Suppress:         []Suppression{},
 		},
-		Drift:  Drift{Mode: "refresh-only", Collapse: "shape", Noise: []Object{}},
+		Drift: Drift{
+			Mode: "refresh-only", Collapse: "shape", NeverHide: []string{"delete", "replace"}, Noise: []NoiseRule{},
+		},
 		Notify: Object{},
 		Cache:  Cache{TTL: "1h"},
 	}

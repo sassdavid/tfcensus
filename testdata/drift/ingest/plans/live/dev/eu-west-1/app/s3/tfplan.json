@@ -1,0 +1,71 @@
+{
+  "applyable": false,
+  "complete": true,
+  "configuration": {
+    "provider_config": {
+      "aws": {
+        "full_name": "registry.terraform.io/hashicorp/aws",
+        "name": "aws"
+      }
+    },
+    "root_module": {}
+  },
+  "errored": false,
+  "format_version": "1.2",
+  "planned_values": {
+    "root_module": {}
+  },
+  "resource_drift": [
+    {
+      "address": "aws_s3_bucket.assets",
+      "change": {
+        "actions": [
+          "update"
+        ],
+        "after": {
+          "arn": "arn:aws:s3:::acme-assets-dev",
+          "bucket": "acme-assets-dev",
+          "force_destroy": false,
+          "tags": {
+            "CostCenter": "finance",
+            "Environment": "dev"
+          },
+          "tags_all": {
+            "CostCenter": "finance",
+            "Environment": "dev",
+            "ManagedBy": "terraform"
+          }
+        },
+        "after_sensitive": {
+          "tags": {},
+          "tags_all": {}
+        },
+        "after_unknown": {},
+        "before": {
+          "arn": "arn:aws:s3:::acme-assets-dev",
+          "bucket": "acme-assets-dev",
+          "force_destroy": false,
+          "tags": {
+            "CostCenter": "platform",
+            "Environment": "dev"
+          },
+          "tags_all": {
+            "CostCenter": "platform",
+            "Environment": "dev",
+            "ManagedBy": "terraform"
+          }
+        },
+        "before_sensitive": {
+          "tags": {},
+          "tags_all": {}
+        }
+      },
+      "mode": "managed",
+      "name": "assets",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "type": "aws_s3_bucket"
+    }
+  ],
+  "terraform_version": "1.17.2",
+  "timestamp": "2026-11-12T06:00:00Z"
+}

@@ -171,14 +171,19 @@ func writeUnits(w io.Writer, format render.Format, d *app.Deps, res discovery.Re
 		return render.JSON(w, env)
 	case render.FormatMD:
 		return writeUnitsMarkdown(w, units)
-	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatCSV, render.FormatSARIF:
+	case render.FormatAuto,
+		render.FormatTTY,
+		render.FormatPlain,
+		render.FormatCSV,
+		render.FormatSARIF,
+		render.FormatGitHub:
 		return writeUnitsTable(w, units)
 	}
 	return writeUnitsTable(w, units)
 }
 
 func unitColumns() []string {
-	return []string{"REPO", "UNIT", "KIND", "BACKEND", "LOCK", colAccount, colRegion, "RESOLUTION", "WARNINGS"}
+	return []string{"REPO", colUnit, "KIND", "BACKEND", "LOCK", colAccount, colRegion, "RESOLUTION", "WARNINGS"}
 }
 
 func unitRow(u *discovery.Unit) []string {

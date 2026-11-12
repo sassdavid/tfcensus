@@ -216,7 +216,7 @@ func writeInventory(d *app.Deps, format render.Format, data inventoryData, disc 
 		return writeInventoryCSV(d.Stdout, data.Units)
 	case render.FormatMD:
 		return writeInventoryMarkdown(d.Stdout, data)
-	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatSARIF:
+	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatSARIF, render.FormatGitHub:
 	}
 	return writeInventoryTable(d.Stdout, data)
 }
@@ -232,9 +232,9 @@ func stateLabel(u *tfstate.UnitState) string {
 func inventoryColumns() []string {
 	return []string{
 		"REPO",
-		"UNIT",
+		colUnit,
 		"WORKSPACE",
-		"STATUS",
+		colStatus,
 		"SERIAL",
 		"VERSION",
 		"RESOURCES",

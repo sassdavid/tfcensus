@@ -38,7 +38,7 @@ func writeScan(d *app.Deps, format render.Format, rep *scan.Report, problems []s
 		return writeScanCSV(d.Stdout, rep)
 	case render.FormatMD:
 		return writeScanMarkdown(d.Stdout, rep, problems, now)
-	case render.FormatAuto, render.FormatTTY, render.FormatPlain:
+	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatGitHub:
 	}
 	return writeScanText(d.Stdout, rep, problems, now)
 }

@@ -31,6 +31,8 @@ func flagKeys() map[string]string {
 		flagRegion:            "regions",
 		flagDiscoverPattern:   "audit.discover_patterns",
 		flagLayers:            "scan.layers",
+		flagMode:              "drift.mode",
+		flagCollapse:          "drift.collapse",
 	}
 }
 
@@ -91,7 +93,7 @@ stdout carries data, stderr carries logs. Use --format json for scripting.`,
 
 	pf := root.PersistentFlags()
 	pf.StringVar(&g.format, "format", "",
-		"output format: tty, plain, md, json, csv or sarif (default tty when stdout is a terminal, else plain)")
+		"output format: tty, plain, md, json, csv, sarif or github (default tty when stdout is a terminal, else plain)")
 	pf.StringVar(&g.configFile, "config", "",
 		"config file to use instead of the discovered "+config.ProjectFileName+" (env "+config.EnvConfigFile+")")
 	pf.CountVarP(&g.verbose, "verbose", "v", "more logging: -v info, -vv debug, -vvv trace")
@@ -115,6 +117,7 @@ stdout carries data, stderr carries logs. Use --format json for scripting.`,
 		newAuditCmd(d, g),
 		newScanCmd(d, g),
 		newRulesCmd(d, g),
+		newDriftCmd(d, g),
 	)
 	return root, g
 }

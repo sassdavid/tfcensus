@@ -103,6 +103,9 @@ discovery:
 drift:
   collapse: shape
   mode: refresh-only
+  never_hide:
+    - delete
+    - replace
   noise: []
 notify: {}
 regions: []

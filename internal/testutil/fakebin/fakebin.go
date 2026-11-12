@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"slices"
+	"strings"
 	"syscall"
 	"testing"
 )
@@ -40,6 +41,14 @@ type Rule struct {
 	ExitCode        int      `json:"exit_code,omitempty"`
 	Block           bool     `json:"block,omitempty"`            // wait for SIGINT/SIGTERM, then exit 130
 	IgnoreInterrupt bool     `json:"ignore_interrupt,omitempty"` // with Block: only a kill ends the process
+	Files           []File   `json:"files,omitempty"`            // written before the rule answers
+}
+
+// File copies Src, a file or a directory relative to the fake's directory, to the path that
+// follows Flag in the call's args, as in "--report-file <path>" or "--report-file=<path>".
+type File struct {
+	Flag string `json:"flag"`
+	Src  string `json:"src"`
 }
 
 // Call is one recorded invocation.
@@ -145,6 +154,12 @@ func run(argv0 string, args []string, spec Spec, stdout, stderr io.Writer) int {
 		return exitNoRule
 	}
 	rule := spec.Rules[idx]
+	for _, f := range rule.Files {
+		if err := writeFile(argv0, args, f); err != nil {
+			_, _ = fmt.Fprintf(stderr, "fakebin: %v\n", err)
+			return 1
+		}
+	}
 	// Register before writing output: a caller that reacts to the output must not race the handler.
 	sig := make(chan os.Signal, 1)
 	if rule.Block {
@@ -203,6 +218,50 @@ func record(argv0 string, args []string, spec Spec) error {
 		return fmt.Errorf("record call: %w", err)
 	}
 	return nil
+}
+
+func writeFile(argv0 string, args []string, f File) error {
+	dst := ""
+	for i, a := range args {
+		if v, ok := strings.CutPrefix(a, f.Flag+"="); ok {
+			dst = v
+		} else if a == f.Flag && i+1 < len(args) {
+			dst = args[i+1]
+		}
+	}
+	if dst == "" {
+		return fmt.Errorf("flag %s is missing", f.Flag)
+	}
+	src := resolve(argv0, f.Src)
+	fi, err := os.Stat(src)
+	if err != nil {
+		return fmt.Errorf("stat %s: %w", src, err)
+	}
+	if !fi.IsDir() {
+		//nolint:gosec // G703: test helper writing where the code under test asked it to.
+		if err = os.MkdirAll(filepath.Dir(dst), 0o750); err != nil {
+			return fmt.Errorf("create %s: %w", filepath.Dir(dst), err)
+		}
+		return copyFile(src, dst)
+	}
+	return filepath.WalkDir(src, func(p string, e os.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		rel, relErr := filepath.Rel(src, p)
+		if relErr != nil {
+			return fmt.Errorf("copy %s: %w", p, relErr)
+		}
+		target := filepath.Join(dst, rel)
+		if e.IsDir() {
+			//nolint:gosec // G703: test helper writing where the code under test asked it to.
+			if mkErr := os.MkdirAll(target, 0o750); mkErr != nil {
+				return fmt.Errorf("create %s: %w", target, mkErr)
+			}
+			return nil
+		}
+		return copyFile(p, target)
+	})
 }
 
 func resolve(argv0, p string) string {

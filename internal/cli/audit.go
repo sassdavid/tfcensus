@@ -235,7 +235,7 @@ func writeAudit(
 		return writeAuditCSV(d.Stdout, rep)
 	case render.FormatMD:
 		return writeAuditMarkdown(d.Stdout, rep)
-	case render.FormatAuto, render.FormatTTY, render.FormatPlain:
+	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatGitHub:
 	}
 	return writeAuditTable(d.Stdout, rep)
 }

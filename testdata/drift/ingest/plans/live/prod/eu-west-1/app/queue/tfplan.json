@@ -1,0 +1,48 @@
+{
+  "applyable": false,
+  "complete": true,
+  "configuration": {
+    "provider_config": {
+      "aws": {
+        "full_name": "registry.terraform.io/hashicorp/aws",
+        "name": "aws"
+      }
+    },
+    "root_module": {}
+  },
+  "errored": false,
+  "format_version": "1.2",
+  "planned_values": {
+    "root_module": {}
+  },
+  "resource_drift": [
+    {
+      "address": "aws_sqs_queue.jobs",
+      "change": {
+        "actions": [
+          "delete"
+        ],
+        "after": null,
+        "after_sensitive": false,
+        "after_unknown": {},
+        "before": {
+          "arn": "arn:aws:sqs:eu-west-1:111111111111:acme-jobs",
+          "name": "acme-jobs",
+          "tags": {},
+          "tags_all": {},
+          "visibility_timeout_seconds": 30
+        },
+        "before_sensitive": {
+          "tags": {},
+          "tags_all": {}
+        }
+      },
+      "mode": "managed",
+      "name": "jobs",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "type": "aws_sqs_queue"
+    }
+  ],
+  "terraform_version": "1.17.2",
+  "timestamp": "2026-11-12T06:00:00Z"
+}

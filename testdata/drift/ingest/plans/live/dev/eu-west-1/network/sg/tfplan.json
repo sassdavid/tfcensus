@@ -1,0 +1,93 @@
+{
+  "applyable": false,
+  "complete": true,
+  "configuration": {
+    "provider_config": {
+      "aws": {
+        "full_name": "registry.terraform.io/hashicorp/aws",
+        "name": "aws"
+      }
+    },
+    "root_module": {}
+  },
+  "errored": false,
+  "format_version": "1.2",
+  "planned_values": {
+    "root_module": {}
+  },
+  "resource_drift": [
+    {
+      "address": "aws_security_group.web",
+      "change": {
+        "actions": [
+          "update"
+        ],
+        "after": {
+          "id": "sg-0aa11bb22cc33dd44",
+          "ingress": [
+            {
+              "cidr_blocks": [
+                "10.0.0.0/16",
+                "10.42.0.0/16"
+              ],
+              "description": "https",
+              "from_port": 443,
+              "protocol": "tcp",
+              "to_port": 443
+            }
+          ],
+          "name": "acme-web",
+          "tags": {},
+          "tags_all": {}
+        },
+        "after_sensitive": {
+          "ingress": [
+            {
+              "cidr_blocks": [
+                false,
+                false
+              ]
+            }
+          ],
+          "tags": {},
+          "tags_all": {}
+        },
+        "after_unknown": {},
+        "before": {
+          "id": "sg-0aa11bb22cc33dd44",
+          "ingress": [
+            {
+              "cidr_blocks": [
+                "10.0.0.0/16"
+              ],
+              "description": "https",
+              "from_port": 443,
+              "protocol": "tcp",
+              "to_port": 443
+            }
+          ],
+          "name": "acme-web",
+          "tags": {},
+          "tags_all": {}
+        },
+        "before_sensitive": {
+          "ingress": [
+            {
+              "cidr_blocks": [
+                false
+              ]
+            }
+          ],
+          "tags": {},
+          "tags_all": {}
+        }
+      },
+      "mode": "managed",
+      "name": "web",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "type": "aws_security_group"
+    }
+  ],
+  "terraform_version": "1.17.2",
+  "timestamp": "2026-11-12T06:00:00Z"
+}

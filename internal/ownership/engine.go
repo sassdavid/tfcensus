@@ -277,11 +277,11 @@ func compile(env *cel.Env, r Rule, id, pack string) (*compiled, error) {
 		}
 	}
 	if r.Expires != "" {
-		t, err := time.Parse(time.DateOnly, r.Expires)
+		t, err := ParseExpires(r.Expires)
 		if err != nil {
 			return nil, &RuleError{Rule: r.Name, Msg: fmt.Sprintf("expires %q: want YYYY-MM-DD", r.Expires)}
 		}
-		c.expires = t.AddDate(0, 0, 1) // the rule applies through the whole day
+		c.expires = t
 	}
 	ast, iss := env.Compile(r.Match)
 	if iss != nil && iss.Err() != nil {
@@ -339,6 +339,20 @@ type Decision struct {
 	Trace    []Step   `json:"trace,omitempty"`
 }
 
+// ParseExpires parses an expires date (YYYY-MM-DD, UTC) and returns the first instant after that
+// day, so a rule applies through its whole last day. Drift noise rules use the same rule.
+func ParseExpires(date string) (time.Time, error) {
+	t, err := time.Parse(time.DateOnly, date)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("parse expires: %w", err)
+	}
+	return t.AddDate(0, 0, 1), nil
+}
+
+// Expired reports whether a rule with the expires instant from [ParseExpires] no longer applies at
+// now. The zero instant never expires.
+func Expired(expires, now time.Time) bool { return !expires.IsZero() && !now.Before(expires) }
+
 // RuleNoMatch is the rule of a [Decision] in which no rule matched.
 const RuleNoMatch = "rules/no-match"
 
@@ -382,7 +396,7 @@ func (e *Engine) step(c *compiled, vars map[string]any, now time.Time, guarded s
 	switch {
 	case c.pack != "" && !e.packOn(c.pack):
 		s.Outcome = OutcomePackOff
-	case !c.expires.IsZero() && !now.Before(c.expires):
+	case Expired(c.expires, now):
 		s.Outcome, s.Detail = OutcomeExpired, "last day "+c.Expires
 	case c.pack == "" && guarded != "" && slices.Contains(e.opts.NeverHide, c.Category):
 		s.Outcome, s.Detail = OutcomeNeverHide, string(c.Category)+" is in never_hide and "+guarded
@@ -430,7 +444,7 @@ func (e *Engine) Expired() []string {
 	now := e.opts.Now()
 	var out []string
 	for _, c := range e.rules {
-		if c.pack == "" && !c.expires.IsZero() && !now.Before(c.expires) {
+		if c.pack == "" && Expired(c.expires, now) {
 			out = append(out, c.Name)
 		}
 	}

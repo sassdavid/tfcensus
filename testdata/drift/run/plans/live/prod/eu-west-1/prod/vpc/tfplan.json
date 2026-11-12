@@ -1,0 +1,57 @@
+{
+  "applyable": false,
+  "complete": true,
+  "configuration": {
+    "root_module": {}
+  },
+  "errored": false,
+  "format_version": "1.2",
+  "planned_values": {
+    "root_module": {}
+  },
+  "resource_drift": [
+    {
+      "address": "aws_vpc.main",
+      "change": {
+        "actions": [
+          "update"
+        ],
+        "after": {
+          "cidr_block": "10.42.0.0/16",
+          "id": "vpc-0a1b2c3d4e5f60718",
+          "tags": {
+            "CostCenter": "finance"
+          },
+          "tags_all": {
+            "CostCenter": "finance"
+          }
+        },
+        "after_sensitive": {
+          "tags": {},
+          "tags_all": {}
+        },
+        "after_unknown": {},
+        "before": {
+          "cidr_block": "10.42.0.0/16",
+          "id": "vpc-0a1b2c3d4e5f60718",
+          "tags": {
+            "CostCenter": "platform"
+          },
+          "tags_all": {
+            "CostCenter": "platform"
+          }
+        },
+        "before_sensitive": {
+          "tags": {},
+          "tags_all": {}
+        }
+      },
+      "mode": "managed",
+      "name": "main",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "type": "aws_vpc"
+    }
+  ],
+  "terraform_version": "1.17.2",
+  "timestamp": "2026-11-12T06:00:00Z"
+}

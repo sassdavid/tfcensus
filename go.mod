@@ -24,6 +24,7 @@ require (
 	github.com/aws/smithy-go v1.28.9
 	github.com/google/go-cmp v0.7.0
 	github.com/hashicorp/hcl/v2 v2.25.0
+	github.com/hashicorp/terraform-json v0.29.0
 	github.com/invopop/jsonschema v0.14.0
 	github.com/johannesboyne/gofakes3 v1.2.0
 	github.com/klauspost/compress v1.20.4
@@ -68,6 +69,7 @@ require (
 	github.com/buger/jsonparser v1.6.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
+	github.com/hashicorp/go-version v1.9.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/knadh/koanf/maps v0.1.3 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect

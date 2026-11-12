@@ -30,6 +30,12 @@ const (
 // findFile, or from find-prod.json when called with --filter ./live/prod/**.
 func fakeTerragrunt(t *testing.T, findFile string) string {
 	t.Helper()
+	return fakebin.Install(t, "terragrunt", fakebin.Spec{Rules: tgLiveRules(t, findFile)})
+}
+
+// tgLiveRules are the rules of [fakeTerragrunt].
+func tgLiveRules(t *testing.T, findFile string) []fakebin.Rule {
+	t.Helper()
 	abs := func(p string) string {
 		a, err := filepath.Abs(p)
 		require.NoError(t, err)
@@ -59,7 +65,7 @@ func fakeTerragrunt(t *testing.T, findFile string) string {
 		}
 		rules = append(rules, rule)
 	}
-	return fakebin.Install(t, "terragrunt", fakebin.Spec{Rules: rules})
+	return rules
 }
 
 type cliResult struct {

@@ -28,7 +28,8 @@ audit:
 drift:
   mode: refresh-only
   collapse: shape
-  noise: []
+  never_hide: [delete, replace]
+  noise: []               # see drift.md
 notify: {}
 cache: { ttl: 1h }
 ```

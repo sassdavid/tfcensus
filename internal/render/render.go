@@ -14,18 +14,19 @@ type Format string
 
 // Output formats. FormatAuto resolves to tty or plain depending on stdout.
 const (
-	FormatAuto  Format = ""
-	FormatTTY   Format = "tty"
-	FormatPlain Format = "plain"
-	FormatMD    Format = "md"
-	FormatJSON  Format = "json"
-	FormatCSV   Format = "csv"
-	FormatSARIF Format = "sarif"
+	FormatAuto   Format = ""
+	FormatTTY    Format = "tty"
+	FormatPlain  Format = "plain"
+	FormatMD     Format = "md"
+	FormatJSON   Format = "json"
+	FormatCSV    Format = "csv"
+	FormatSARIF  Format = "sarif"
+	FormatGitHub Format = "github" // GitHub Actions workflow commands, which show as annotations
 )
 
 // AllFormats lists the formats --format accepts.
 func AllFormats() []Format {
-	return []Format{FormatTTY, FormatPlain, FormatMD, FormatJSON, FormatCSV, FormatSARIF}
+	return []Format{FormatTTY, FormatPlain, FormatMD, FormatJSON, FormatCSV, FormatSARIF, FormatGitHub}
 }
 
 // ParseFormat validates a --format value. The empty string means auto.

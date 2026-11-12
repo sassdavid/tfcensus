@@ -26,8 +26,9 @@ import (
 )
 
 const (
-	scriptDir   = "../../testdata/script"
-	cassetteDir = "../../testdata/cassettes"
+	scriptDir     = "../../testdata/script"
+	cassetteDir   = "../../testdata/cassettes"
+	driftFixtures = "../../testdata/drift"
 )
 
 // Test-only environment read by the tfcensus command of the test binary.
@@ -140,6 +141,11 @@ func scriptParams(t *testing.T, files ...string) testscript.Params {
 				return err
 			}
 			env.Setenv("REPOS", repos)
+			driftDir, err := filepath.Abs(driftFixtures)
+			if err != nil {
+				return err
+			}
+			env.Setenv("DRIFT", driftDir)
 			return nil
 		},
 		Cmds: map[string]func(ts *testscript.TestScript, neg bool, args []string){
@@ -270,4 +276,18 @@ func TestSpec_ownership_3(t *testing.T) {
 func TestSpec_ownership_4(t *testing.T) {
 	t.Parallel()
 	testscript.Run(t, scriptParams(t, filepath.Join(scriptDir, "spec_ownership_4.txtar")))
+}
+
+// TestSpec_drift_1: ingest mode over recorded json-out-dir plans and a run report for 12 units:
+// 3 identical tag drifts collapse into 1 group and the failed unit is an error (goldens).
+func TestSpec_drift_1(t *testing.T) {
+	t.Parallel()
+	testscript.Run(t, scriptParams(t, filepath.Join(scriptDir, "spec_drift_1.txtar")))
+}
+
+// TestSpec_drift_2: a noise rule past its expires date stops hiding drift and warns, and
+// never_hide keeps a deleted resource visible.
+func TestSpec_drift_2(t *testing.T) {
+	t.Parallel()
+	testscript.Run(t, scriptParams(t, filepath.Join(scriptDir, "spec_drift_2.txtar")))
 }

@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sassdavid/tfcensus/schemas/drift-v1.json",
+  "title": "tfcensus drift --format json",
+  "description": "The report envelope (report-v1.json) with the drift payload. Changes carry attribute paths; before and after values appear only with --show-attributes, and sensitive and unknown values are masked even then. notify and report html read this file.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "tool", "version", "generated_at", "data", "errors"],
+  "properties": {
+    "schema_version": { "const": "1" },
+    "tool": { "const": "tfcensus" },
+    "version": { "type": "string", "minLength": 1 },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "errors": {
+      "description": "Units whose plan failed, and repos that couldn't be discovered or planned.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["message"],
+        "properties": {
+          "target": { "type": "string" },
+          "message": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "collapse", "summary", "units", "groups", "changes", "warnings"],
+      "properties": {
+        "mode": { "enum": ["refresh-only", "full"] },
+        "collapse": { "enum": ["shape", "strict", "none"] },
+        "summary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["units", "drifted", "clean", "failed", "early_exit", "excluded", "resources", "reverts", "hidden", "groups"],
+          "properties": {
+            "units": { "type": "integer", "minimum": 0 },
+            "drifted": { "type": "integer", "minimum": 0 },
+            "clean": { "type": "integer", "minimum": 0 },
+            "failed": { "type": "integer", "minimum": 0 },
+            "early_exit": { "type": "integer", "minimum": 0 },
+            "excluded": { "type": "integer", "minimum": 0 },
+            "resources": { "description": "Changes no noise rule hides.", "type": "integer", "minimum": 0 },
+            "reverts": { "description": "Visible changes the plan reverts (--mode full).", "type": "integer", "minimum": 0 },
+            "hidden": { "description": "Changes noise rules hide.", "type": "integer", "minimum": 0 },
+            "groups": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "units": {
+          "description": "Every unit of the run report and every unit with a plan, sorted by path.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["path", "status", "drifted", "reverts", "hidden", "pending", "outputs"],
+            "properties": {
+              "path": { "type": "string", "minLength": 1 },
+              "account": { "type": "string", "pattern": "^[0-9]{12}$" },
+              "region": { "type": "string" },
+              "status": { "enum": ["drifted", "clean", "failed", "early-exit", "excluded"] },
+              "reason": { "type": "string" },
+              "drifted": { "type": "integer", "minimum": 0 },
+              "reverts": { "type": "integer", "minimum": 0 },
+              "hidden": { "type": "integer", "minimum": 0 },
+              "pending": { "description": "Planned changes that aren't drift (--mode full).", "type": "integer", "minimum": 0 },
+              "outputs": { "description": "Names of the outputs that changed.", "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "groups": {
+          "description": "Visible changes collapsed by --collapse, largest first.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "type", "action", "attributes", "members"],
+            "properties": {
+              "id": { "type": "string", "pattern": "^g[0-9]+$" },
+              "type": { "type": "string" },
+              "action": { "$ref": "#/$defs/action" },
+              "revert": { "$ref": "#/$defs/action" },
+              "attributes": { "type": "array", "items": { "$ref": "#/$defs/attribute" } },
+              "members": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["unit", "address"],
+                  "properties": {
+                    "unit": { "type": "string" },
+                    "address": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "changes": {
+          "description": "Every drifted resource, hidden ones included, sorted by unit and address.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["unit", "address", "type", "action", "attributes"],
+            "properties": {
+              "unit": { "type": "string" },
+              "address": { "type": "string" },
+              "type": { "type": "string" },
+              "action": { "$ref": "#/$defs/action" },
+              "revert": { "$ref": "#/$defs/action" },
+              "attributes": { "type": "array", "items": { "$ref": "#/$defs/attribute" } },
+              "hidden": { "$ref": "#/$defs/noise" },
+              "protected": { "description": "Why a matching noise rule didn't hide the change (never_hide).", "type": "string" },
+              "group": { "type": "string", "pattern": "^g[0-9]+$" }
+            }
+          }
+        },
+        "warnings": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+  "$defs": {
+    "action": { "enum": ["create", "update", "delete", "replace"] },
+    "noise": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule", "reason"],
+      "properties": {
+        "rule": { "type": "string", "pattern": "^(preset|user)/" },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "attribute": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "kind"],
+      "properties": {
+        "path": { "type": "string" },
+        "kind": { "enum": ["added", "removed", "changed", "mixed"] },
+        "sensitive": { "type": "boolean" },
+        "unknown": { "type": "boolean" },
+        "forces_replacement": { "type": "boolean" },
+        "before": { "type": "string" },
+        "after": { "type": "string" },
+        "noise": { "$ref": "#/$defs/noise" }
+      }
+    }
+  }
+}

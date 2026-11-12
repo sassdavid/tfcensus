@@ -24,6 +24,8 @@ const (
 	probeConcurrency = 4
 	colAccount       = "ACCOUNT"
 	colRegion        = "REGION"
+	colUnit          = "UNIT"
+	colStatus        = "STATUS"
 	cellDenied       = "denied"
 	cellError        = "error"
 )
@@ -181,7 +183,12 @@ func writeDoctor(d *app.Deps, format render.Format, data doctorData, res *accoun
 		return render.JSON(d.Stdout, env)
 	case render.FormatMD:
 		return writeDoctorMarkdown(d.Stdout, data)
-	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatCSV, render.FormatSARIF:
+	case render.FormatAuto,
+		render.FormatTTY,
+		render.FormatPlain,
+		render.FormatCSV,
+		render.FormatSARIF,
+		render.FormatGitHub:
 	}
 	return writeDoctorText(d.Stdout, data)
 }
@@ -193,7 +200,7 @@ func sourceTarget(e *accounts.SourceError) string {
 	return e.Source
 }
 
-func sourceColumns() []string { return []string{"SOURCE", "KIND", colAccount, "NAME", "STATUS"} }
+func sourceColumns() []string { return []string{"SOURCE", "KIND", colAccount, "NAME", colStatus} }
 
 func sourceRow(s doctorSource) []string {
 	return []string{s.Source, dash(string(s.Kind)), dash(s.Account), dash(s.Name), sourceStatus(s)}

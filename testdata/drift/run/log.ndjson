@@ -1,0 +1,4 @@
+{"time": "2026-11-12T06:00:00Z", "level": "info", "working-dir": "./live/prod/eu-west-1/prod/vpc", "tf-path": "terraform", "tf-command-args": ["plan", "-refresh-only"], "msg": "Refreshing state..."}
+{"time": "2026-11-12T06:00:30Z", "level": "info", "working-dir": "./live/prod/eu-west-1/prod/vpc", "tf-path": "terraform", "tf-command-args": ["show", "-json", "tfplan"], "msg": "{}"}
+{"time": "2026-11-12T06:00:00Z", "level": "info", "working-dir": "./live/prod/eu-west-1/prod/db", "tf-path": "terraform", "tf-command-args": ["plan", "-refresh-only"], "msg": "Refreshing state..."}
+{"time": "2026-11-12T06:00:30Z", "level": "info", "working-dir": "./live/prod/eu-west-1/prod/db", "tf-path": "terraform", "tf-command-args": ["show", "-json", "tfplan"], "msg": "{}"}

@@ -1,0 +1,142 @@
+[
+  {
+    "Started": "2026-11-12T06:00:00Z",
+    "Ended": "2026-11-12T06:01:00Z",
+    "Name": "live/dev/eu-west-1/app/iam",
+    "Result": "succeeded",
+    "Cmd": "plan",
+    "Args": [
+      "-refresh-only",
+      "-lock=false",
+      "-detailed-exitcode"
+    ]
+  },
+  {
+    "Started": "2026-11-12T06:00:01Z",
+    "Ended": "2026-11-12T06:01:01Z",
+    "Name": "live/dev/eu-west-1/app/lambda",
+    "Result": "succeeded",
+    "Cmd": "plan",
+    "Args": [
+      "-refresh-only",
+      "-lock=false",
+      "-detailed-exitcode"
+    ]
+  },
+  {
+    "Started": "2026-11-12T06:00:02Z",
+    "Ended": "2026-11-12T06:01:02Z",
+    "Name": "live/dev/eu-west-1/app/s3",
+    "Result": "succeeded",
+    "Cmd": "plan",
+    "Args": [
+      "-refresh-only",
+      "-lock=false",
+      "-detailed-exitcode"
+    ]
+  },
+  {
+    "Started": "2026-11-12T06:00:03Z",
+    "Ended": "2026-11-12T06:01:03Z",
+    "Name": "live/dev/eu-west-1/network/sg",
+    "Result": "succeeded",
+    "Cmd": "plan",
+    "Args": [
+      "-refresh-only",
+      "-lock=false",
+      "-detailed-exitcode"
+    ]
+  },
+  {
+    "Started": "2026-11-12T06:00:04Z",
+    "Ended": "2026-11-12T06:01:04Z",
+    "Name": "live/prod/eu-west-1/app/queue",
+    "Result": "succeeded",
+    "Cmd": "plan",
+    "Args": [
+      "-refresh-only",
+      "-lock=false",
+      "-detailed-exitcode"
+    ]
+  },
+  {
+    "Started": "2026-11-12T06:00:05Z",
+    "Ended": "2026-11-12T06:01:05Z",
+    "Name": "live/prod/eu-west-1/app/s3",
+    "Result": "succeeded",
+    "Cmd": "plan",
+    "Args": [
+      "-refresh-only",
+      "-lock=false",
+      "-detailed-exitcode"
+    ]
+  },
+  {
+    "Started": "2026-11-12T06:00:06Z",
+    "Ended": "2026-11-12T06:01:06Z",
+    "Name": "live/prod/eu-west-1/data/cache",
+    "Result": "failed",
+    "Cmd": "plan",
+    "Args": [
+      "-refresh-only",
+      "-lock=false",
+      "-detailed-exitcode"
+    ],
+    "Reason": "run error"
+  },
+  {
+    "Started": "2026-11-12T06:00:07Z",
+    "Ended": "2026-11-12T06:01:07Z",
+    "Name": "live/prod/eu-west-1/data/db",
+    "Result": "succeeded",
+    "Cmd": "plan",
+    "Args": [
+      "-refresh-only",
+      "-lock=false",
+      "-detailed-exitcode"
+    ]
+  },
+  {
+    "Started": "2026-11-12T06:00:08Z",
+    "Ended": "2026-11-12T06:01:08Z",
+    "Name": "live/prod/eu-west-1/legacy",
+    "Result": "excluded",
+    "Reason": "exclude block"
+  },
+  {
+    "Started": "2026-11-12T06:00:09Z",
+    "Ended": "2026-11-12T06:01:09Z",
+    "Name": "live/prod/eu-west-1/network/vpc",
+    "Result": "succeeded",
+    "Cmd": "plan",
+    "Args": [
+      "-refresh-only",
+      "-lock=false",
+      "-detailed-exitcode"
+    ]
+  },
+  {
+    "Started": "2026-11-12T06:00:10Z",
+    "Ended": "2026-11-12T06:01:10Z",
+    "Name": "live/staging/eu-west-1/app/s3",
+    "Result": "succeeded",
+    "Cmd": "plan",
+    "Args": [
+      "-refresh-only",
+      "-lock=false",
+      "-detailed-exitcode"
+    ]
+  },
+  {
+    "Started": "2026-11-12T06:00:11Z",
+    "Ended": "2026-11-12T06:01:11Z",
+    "Name": "live/staging/eu-west-1/network/vpc",
+    "Result": "succeeded",
+    "Cmd": "plan",
+    "Args": [
+      "-refresh-only",
+      "-lock=false",
+      "-detailed-exitcode"
+    ]
+  }
+]
