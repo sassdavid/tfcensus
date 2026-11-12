@@ -1,0 +1,97 @@
+{
+  "live/network": {
+    "serial": 13,
+    "lineage": "6b1f0a52-0d1e-4c8e-9a0b-6c2f6e1d2a01",
+    "instances": [
+      {
+        "mode": "managed",
+        "type": "aws_vpc",
+        "name": "main",
+        "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]"
+      },
+      {
+        "module": "module.endpoints",
+        "mode": "data",
+        "type": "aws_iam_policy_document",
+        "name": "s3",
+        "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]"
+      }
+    ]
+  },
+  "live/network-endpoints": {
+    "serial": 5,
+    "lineage": "6b1f0a52-0d1e-4c8e-9a0b-6c2f6e1d2a02",
+    "instances": [
+      {
+        "mode": "managed",
+        "type": "aws_vpc_endpoint",
+        "name": "dynamodb",
+        "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]"
+      },
+      {
+        "module": "module.endpoints",
+        "mode": "managed",
+        "type": "aws_vpc_endpoint",
+        "name": "s3",
+        "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+        "dependencies": [
+          "aws_vpc.main",
+          "module.endpoints.data.aws_iam_policy_document.s3"
+        ]
+      },
+      {
+        "mode": "managed",
+        "type": "aws_route53_record",
+        "name": "api",
+        "each": "list",
+        "index_key": 0,
+        "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]"
+      },
+      {
+        "mode": "managed",
+        "type": "aws_route53_record",
+        "name": "api",
+        "each": "list",
+        "index_key": 1,
+        "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]"
+      }
+    ]
+  },
+  "live/network-sg": {
+    "serial": 1,
+    "lineage": "(new)",
+    "instances": [
+      {
+        "mode": "managed",
+        "type": "aws_security_group",
+        "name": "app",
+        "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+        "dependencies": [
+          "aws_vpc.main"
+        ]
+      },
+      {
+        "mode": "managed",
+        "type": "aws_vpc_security_group_ingress_rule",
+        "name": "app",
+        "each": "map",
+        "index_key": "https",
+        "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+        "dependencies": [
+          "aws_security_group.app"
+        ]
+      },
+      {
+        "mode": "managed",
+        "type": "aws_vpc_security_group_ingress_rule",
+        "name": "app",
+        "each": "map",
+        "index_key": "ssh",
+        "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+        "dependencies": [
+          "aws_security_group.app"
+        ]
+      }
+    ]
+  }
+}

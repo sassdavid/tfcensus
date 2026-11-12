@@ -1,0 +1,66 @@
+{
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "results": [],
+      "tool": {
+        "driver": {
+          "informationUri": "https://github.com/sassdavid/tfcensus",
+          "name": "tfcensus",
+          "rules": [
+            {
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "Make the unit's configuration match the moved resources, or fix the provider so it targets the account the resources are in, then plan again."
+              },
+              "id": "MV-VERIFY",
+              "shortDescription": {
+                "text": "A plan against the moved state changes a resource"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "Run terragrunt plan in the unit to see the error."
+              },
+              "id": "MV-PLAN",
+              "shortDescription": {
+                "text": "A plan against the moved state failed"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "Move the resource to a unit in its own account, or check the destination's provider and backend."
+              },
+              "id": "MV-ACCOUNT",
+              "shortDescription": {
+                "text": "A moved resource is in another account than the destination deploys to"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "Enable versioning on the bucket (backend audit check S3-VER) before applying."
+              },
+              "id": "MV-VERSIONING",
+              "shortDescription": {
+                "text": "The state bucket has no versioning, so a push can't be rolled back"
+              }
+            }
+          ],
+          "version": "VERSION"
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}

@@ -34,3 +34,7 @@ jobs:
           TFCENSUS_MOTO_URL: http://localhost:5000
           TFCENSUS_FLOCI_URL: http://localhost:4566
         run: mise run test:emulator
+      - name: move splits a unit across two moto accounts, applies and rolls back
+        env:
+          TFCENSUS_MOTO_URL: http://localhost:5000
+        run: mise run test:move-e2e

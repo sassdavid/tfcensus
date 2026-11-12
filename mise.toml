@@ -47,6 +47,10 @@ run = "go test -race -count=1 ./..."
 description = "Inventory layers against moto and Floci (needs TFCENSUS_MOTO_URL and TFCENSUS_FLOCI_URL; the live workflow runs it nightly)"
 run = "go test -tags emulator -count=1 -run TestSpec_inventory_5 -v ./internal/inventory/"
 
+[tasks."test:move-e2e"]
+description = "move split, apply and rollback against moto with real terraform and terragrunt (needs Docker or TFCENSUS_MOTO_URL; the live workflow runs it nightly)"
+run = "mise exec terraform@1.17.1 terragrunt@1.2.1 -- go test -count=1 -run 'TestSpec_move_2$' -v ./internal/cli/"
+
 [tasks.fuzz]
 description = "Run every Go fuzz target for 60s each (mise run fuzz -- 10s sets another duration)"
 run = "bash scripts/fuzz.sh"

@@ -29,6 +29,7 @@ const (
 	flagDiscoverPattern = "discover-pattern"
 	flagFailOn          = "fail-on"
 	infoURI             = "https://github.com/sassdavid/tfcensus"
+	fingerprintV1       = "tfcensusFinding/v1" // SARIF partialFingerprints key
 )
 
 func newAuditCmd(d *app.Deps, g *globals) *cobra.Command {
@@ -294,7 +295,7 @@ func auditSARIF(rep *audit.Report) *sarif.Log {
 			Locations: []sarif.Location{
 				{PhysicalLocation: sarif.PhysicalLocation{ArtifactLocation: sarif.ArtifactLocation{URI: uri}}},
 			},
-			PartialFingerprints: map[string]string{"tfcensusFinding/v1": f.Rule + "|" + f.Target + "|" + f.Key},
+			PartialFingerprints: map[string]string{fingerprintV1: f.Rule + "|" + f.Target + "|" + f.Key},
 		}
 		if f.Suppressed != nil {
 			just := f.Suppressed.Reason

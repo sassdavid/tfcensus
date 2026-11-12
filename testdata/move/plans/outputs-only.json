@@ -1,0 +1,28 @@
+{
+  "format_version": "1.2",
+  "terraform_version": "1.12.2",
+  "resource_changes": [
+    {
+      "address": "aws_vpc.main",
+      "mode": "managed",
+      "type": "aws_vpc",
+      "name": "main",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {"actions": ["no-op"], "before": {}, "after": {}, "after_unknown": {}}
+    },
+    {
+      "address": "data.aws_caller_identity.current",
+      "mode": "data",
+      "type": "aws_caller_identity",
+      "name": "current",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {"actions": ["read"], "before": null, "after": {}, "after_unknown": {}}
+    }
+  ],
+  "output_changes": {
+    "sg_id": {"actions": ["delete"], "before": "sg-0a1b2c3d4e5f60002", "after": null}
+  },
+  "applyable": true,
+  "complete": true,
+  "errored": false
+}
