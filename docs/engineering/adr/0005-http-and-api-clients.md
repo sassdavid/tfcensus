@@ -7,7 +7,11 @@
 - `hashicorp/go-retryablehttp` v0.7.8: retries 5xx, 429 and connection resets, with exponential backoff + jitter, and honours `Retry-After`.
 - Per-host `x/time/rate` limiter and per-host concurrency semaphore (default 4 per host).
 - A rate-limit-aware middleware that reads `x-ratelimit-remaining/reset` where the API sends it. It slows down below 10% remaining and fails with a clear message instead of hammering.
-- Proxies via `http.ProxyFromEnvironment`. `--ca-bundle` / `SSL_CERT_FILE` (also on macOS and Windows) adds corporate CAs.
+- Proxies via `http.ProxyFromEnvironment`. `SSL_CERT_FILE` (also on macOS and Windows) adds corporate CAs through `httpx.CATransport`. There is no `--ca-bundle` flag yet.
+- A POST is resent only after a 429 or a `Retry-After`, so a notifier never creates an issue twice. `Options.RetryPOST` turns this off for POSTs that only read, such as GraphQL queries.
+- Bitbucket Cloud sends `X-RateLimit-NearLimit: true` below 20% left and no remaining count; the client then drops to 1 request per second for that host.
+- `Options.SecretPathHosts` names hosts whose URL path is a secret (the Slack webhook host); logs show those paths as `[redacted]`.
+- The core (`internal/httpx/httpx.go` and its test) is shared with relgap and identical after the tool name swap (`mise run sibling:diff`). relgap adds its disk cache through `Options.Wrap`.
 - User-Agent: `tfcensus/<version> (+https://github.com/sassdavid/tfcensus)`. Never personal data.
 - Notifier tokens come from env only (see [notifications spec](../../plan/specs/notifications-and-reports.md)).
 

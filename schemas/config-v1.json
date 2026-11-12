@@ -410,8 +410,172 @@
       "type": "object"
     },
     "notify": {
-      "type": "object",
-      "description": "Notifiers."
+      "properties": {
+        "enabled": {
+          "items": {
+            "type": "string",
+            "enum": [
+              "slack",
+              "github-issues",
+              "bitbucket-pr-comment",
+              "file"
+            ]
+          },
+          "type": "array",
+          "description": "Notifiers tfcensus notify runs when --notify isn't given."
+        },
+        "categories": {
+          "items": {
+            "type": "string",
+            "enum": [
+              "double-managed",
+              "unmanaged",
+              "undetermined"
+            ]
+          },
+          "type": "array",
+          "description": "Scan categories the notifiers report."
+        },
+        "min_severity": {
+          "type": "string",
+          "enum": [
+            "info",
+            "low",
+            "medium",
+            "high"
+          ],
+          "description": "Lowest backend audit severity the notifiers report."
+        },
+        "top": {
+          "type": "integer",
+          "maximum": 50,
+          "minimum": 1,
+          "description": "Findings listed in a Slack message."
+        },
+        "slack": {
+          "properties": {
+            "webhook_env": {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+              "description": "Environment variable that holds the incoming webhook URL."
+            },
+            "when": {
+              "type": "string",
+              "enum": [
+                "findings",
+                "always"
+              ],
+              "description": "findings sends only when there is something to report; always sends every run."
+            },
+            "link": {
+              "type": "string",
+              "pattern": "^(https://.*)?$",
+              "description": "URL of the full report, such as a CI artifact, shown in the message."
+            }
+          },
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "github_issues": {
+          "properties": {
+            "repo": {
+              "type": "string",
+              "pattern": "^([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?$",
+              "description": "owner/name. Empty means GITHUB_REPOSITORY."
+            },
+            "api_url": {
+              "type": "string",
+              "pattern": "^(https?://.*)?$",
+              "description": "REST API base URL. Empty means GITHUB_API_URL, else https://api.github.com."
+            },
+            "token_env": {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+              "description": "Environment variable that holds the token (issues: write)."
+            },
+            "labels": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "description": "Labels added to new issues, besides tfcensus and tfcensus:\u003ckind\u003e."
+            },
+            "max_open": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Most open issues per report kind. Further scopes are listed in the run output and the summary issue."
+            },
+            "close_resolved": {
+              "type": "boolean",
+              "description": "Close an issue when a run covers its scope and finds nothing."
+            },
+            "summary": {
+              "type": "boolean",
+              "description": "Keep one summary issue per report kind."
+            }
+          },
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "bitbucket_pr_comment": {
+          "properties": {
+            "workspace": {
+              "type": "string",
+              "description": "Workspace. Empty means BITBUCKET_WORKSPACE."
+            },
+            "repo": {
+              "type": "string",
+              "description": "Repository slug. Empty means BITBUCKET_REPO_SLUG."
+            },
+            "pull_request": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Pull request ID. 0 means BITBUCKET_PR_ID."
+            },
+            "api_url": {
+              "type": "string",
+              "pattern": "^https?://",
+              "description": "REST API base URL."
+            },
+            "token_env": {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+              "description": "Environment variable that holds an access token or API token."
+            },
+            "email_env": {
+              "type": "string",
+              "pattern": "^([A-Za-z_][A-Za-z0-9_]*)?$",
+              "description": "Environment variable that holds the Atlassian account email. Set it to send an API token with basic auth; empty sends the token as a bearer token."
+            }
+          },
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "file": {
+          "properties": {
+            "dir": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Directory for tfcensus-\u003ckind\u003e.md and .json."
+            },
+            "formats": {
+              "items": {
+                "type": "string",
+                "enum": [
+                  "md",
+                  "json"
+                ]
+              },
+              "type": "array",
+              "description": "Files to write."
+            }
+          },
+          "additionalProperties": false,
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
     },
     "cache": {
       "properties": {

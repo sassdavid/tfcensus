@@ -30,7 +30,15 @@ drift:
   collapse: shape
   never_hide: [delete, replace]
   noise: []               # see drift.md
-notify: {}
+notify:                   # see notifications-and-reports.md and docs/runbooks/notify.md
+  enabled: []
+  categories: [double-managed, unmanaged]
+  min_severity: low
+  top: 10
+  slack: { webhook_env: SLACK_WEBHOOK_URL, when: findings, link: "" }
+  github_issues: { repo: "", api_url: "", token_env: GITHUB_TOKEN, labels: [], max_open: 10, close_resolved: true, summary: false }
+  bitbucket_pr_comment: { workspace: "", repo: "", pull_request: 0, api_url: https://api.bitbucket.org/2.0, token_env: BITBUCKET_TOKEN, email_env: "" }
+  file: { dir: ., formats: [md, json] }
 cache: { ttl: 1h }
 ```
 

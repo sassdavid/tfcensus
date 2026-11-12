@@ -56,4 +56,7 @@ Scope: config + resource-explorer + native (sg-rules, iam-attachments, route53, 
 - Not in M9: `move suggest` (tfautomv), recorded in move.md.
 
 ### M10: Notifications, HTML, MCP → v0.5.0 ([notifications-and-reports](specs/notifications-and-reports.md))
-- [ ] All criteria. The MCP server is registered in the author's Claude Code and used read-only for a real whois or scan question, recorded in `docs/dogfood.md`.
+- [ ] All criteria. Criteria 1 and 3 pass; the headless browser check of criterion 2 waits for its first CI run.
+- [x] The MCP server is registered in the author's Claude Code (local scope) and used read-only for a real whois and scan question: `docs/dogfood.md`.
+- `docs/runbooks/notify.md`. `bitbucket-issues` is dropped (API removed by Atlassian), see
+  [ADR-0012](adr/0012-notify-and-mcp-read-saved-reports.md).

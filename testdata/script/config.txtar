@@ -107,7 +107,37 @@ drift:
     - delete
     - replace
   noise: []
-notify: {}
+notify:
+  bitbucket_pr_comment:
+    api_url: https://api.bitbucket.org/2.0
+    email_env: ""
+    pull_request: 0
+    repo: ""
+    token_env: BITBUCKET_TOKEN
+    workspace: ""
+  categories:
+    - double-managed
+    - unmanaged
+  enabled: []
+  file:
+    dir: .
+    formats:
+      - md
+      - json
+  github_issues:
+    api_url: ""
+    close_resolved: true
+    labels: []
+    max_open: 10
+    repo: ""
+    summary: false
+    token_env: GITHUB_TOKEN
+  min_severity: low
+  slack:
+    link: ""
+    webhook_env: SLACK_WEBHOOK_URL
+    when: findings
+  top: 10
 regions: []
 rules: []
 scan:

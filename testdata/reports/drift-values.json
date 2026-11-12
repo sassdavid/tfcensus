@@ -1,0 +1,405 @@
+{
+  "schema_version": "1",
+  "tool": "tfcensus",
+  "version": "test",
+  "generated_at": "2026-11-10T12:00:00Z",
+  "data": {
+    "mode": "refresh-only",
+    "collapse": "shape",
+    "summary": {
+      "units": 12,
+      "drifted": 6,
+      "clean": 4,
+      "failed": 1,
+      "early_exit": 0,
+      "excluded": 1,
+      "resources": 6,
+      "reverts": 0,
+      "hidden": 2,
+      "groups": 4
+    },
+    "units": [
+      {
+        "path": "live/dev/eu-west-1/app/iam",
+        "status": "clean",
+        "drifted": 0,
+        "reverts": 0,
+        "hidden": 1,
+        "pending": 0,
+        "outputs": [
+          "role_tags"
+        ]
+      },
+      {
+        "path": "live/dev/eu-west-1/app/lambda",
+        "status": "clean",
+        "drifted": 0,
+        "reverts": 0,
+        "hidden": 1,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/dev/eu-west-1/app/s3",
+        "status": "drifted",
+        "drifted": 1,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/dev/eu-west-1/network/sg",
+        "status": "drifted",
+        "drifted": 1,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/prod/eu-west-1/app/queue",
+        "status": "drifted",
+        "drifted": 1,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/prod/eu-west-1/app/s3",
+        "status": "drifted",
+        "drifted": 1,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/prod/eu-west-1/data/cache",
+        "status": "failed",
+        "reason": "run error",
+        "drifted": 0,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/prod/eu-west-1/data/db",
+        "status": "drifted",
+        "drifted": 1,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/prod/eu-west-1/legacy",
+        "status": "excluded",
+        "reason": "exclude block",
+        "drifted": 0,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/prod/eu-west-1/network/vpc",
+        "status": "clean",
+        "drifted": 0,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/staging/eu-west-1/app/s3",
+        "status": "drifted",
+        "drifted": 1,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/staging/eu-west-1/network/vpc",
+        "status": "clean",
+        "drifted": 0,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      }
+    ],
+    "groups": [
+      {
+        "id": "g1",
+        "type": "aws_s3_bucket",
+        "action": "update",
+        "attributes": [
+          {
+            "path": "tags.CostCenter",
+            "kind": "changed",
+            "before": "\"platform\"",
+            "after": "\"finance\""
+          }
+        ],
+        "members": [
+          {
+            "unit": "live/dev/eu-west-1/app/s3",
+            "address": "aws_s3_bucket.assets"
+          },
+          {
+            "unit": "live/prod/eu-west-1/app/s3",
+            "address": "aws_s3_bucket.assets"
+          },
+          {
+            "unit": "live/staging/eu-west-1/app/s3",
+            "address": "aws_s3_bucket.assets"
+          }
+        ]
+      },
+      {
+        "id": "g2",
+        "type": "aws_db_instance",
+        "action": "update",
+        "attributes": [
+          {
+            "path": "instance_class",
+            "kind": "changed",
+            "before": "\"db.t4g.medium\"",
+            "after": "\"db.t4g.large\""
+          },
+          {
+            "path": "password",
+            "kind": "changed",
+            "sensitive": true,
+            "before": "(sensitive)",
+            "after": "(sensitive)"
+          }
+        ],
+        "members": [
+          {
+            "unit": "live/prod/eu-west-1/data/db",
+            "address": "aws_db_instance.main"
+          }
+        ]
+      },
+      {
+        "id": "g3",
+        "type": "aws_security_group",
+        "action": "update",
+        "attributes": [
+          {
+            "path": "ingress[*].cidr_blocks[*]",
+            "kind": "added",
+            "before": "null",
+            "after": "\"10.42.0.0/16\""
+          }
+        ],
+        "members": [
+          {
+            "unit": "live/dev/eu-west-1/network/sg",
+            "address": "aws_security_group.web"
+          }
+        ]
+      },
+      {
+        "id": "g4",
+        "type": "aws_sqs_queue",
+        "action": "delete",
+        "attributes": [],
+        "members": [
+          {
+            "unit": "live/prod/eu-west-1/app/queue",
+            "address": "aws_sqs_queue.jobs"
+          }
+        ]
+      }
+    ],
+    "changes": [
+      {
+        "unit": "live/dev/eu-west-1/app/iam",
+        "address": "aws_iam_role.app",
+        "type": "aws_iam_role",
+        "action": "update",
+        "attributes": [
+          {
+            "path": "tags_all.Owner",
+            "kind": "added",
+            "before": "null",
+            "after": "\"team-a\"",
+            "noise": {
+              "rule": "preset/aws-tags-all",
+              "reason": "the AWS provider copies default_tags into tags_all"
+            }
+          }
+        ],
+        "hidden": {
+          "rule": "preset/aws-tags-all",
+          "reason": "the AWS provider copies default_tags into tags_all"
+        }
+      },
+      {
+        "unit": "live/dev/eu-west-1/app/lambda",
+        "address": "aws_lambda_function.api",
+        "type": "aws_lambda_function",
+        "action": "update",
+        "attributes": [
+          {
+            "path": "last_modified",
+            "kind": "changed",
+            "before": "\"2026-11-01T10:00:00.000+0000\"",
+            "after": "\"2026-11-11T09:30:00.000+0000\"",
+            "noise": {
+              "rule": "preset/computed-hashes",
+              "reason": "hashes and timestamps computed from content outside the configuration"
+            }
+          },
+          {
+            "path": "source_code_hash",
+            "kind": "changed",
+            "before": "\"c2hhMjU2LWJlZm9yZQ==\"",
+            "after": "\"c2hhMjU2LWFmdGVy\"",
+            "noise": {
+              "rule": "preset/computed-hashes",
+              "reason": "hashes and timestamps computed from content outside the configuration"
+            }
+          }
+        ],
+        "hidden": {
+          "rule": "preset/computed-hashes",
+          "reason": "hashes and timestamps computed from content outside the configuration"
+        }
+      },
+      {
+        "unit": "live/dev/eu-west-1/app/s3",
+        "address": "aws_s3_bucket.assets",
+        "type": "aws_s3_bucket",
+        "action": "update",
+        "attributes": [
+          {
+            "path": "tags.CostCenter",
+            "kind": "changed",
+            "before": "\"platform\"",
+            "after": "\"finance\""
+          },
+          {
+            "path": "tags_all.CostCenter",
+            "kind": "changed",
+            "before": "\"platform\"",
+            "after": "\"finance\"",
+            "noise": {
+              "rule": "preset/aws-tags-all",
+              "reason": "the AWS provider copies default_tags into tags_all"
+            }
+          }
+        ],
+        "group": "g1"
+      },
+      {
+        "unit": "live/dev/eu-west-1/network/sg",
+        "address": "aws_security_group.web",
+        "type": "aws_security_group",
+        "action": "update",
+        "attributes": [
+          {
+            "path": "ingress[0].cidr_blocks[1]",
+            "kind": "added",
+            "before": "null",
+            "after": "\"10.42.0.0/16\""
+          }
+        ],
+        "group": "g3"
+      },
+      {
+        "unit": "live/prod/eu-west-1/app/queue",
+        "address": "aws_sqs_queue.jobs",
+        "type": "aws_sqs_queue",
+        "action": "delete",
+        "attributes": [],
+        "group": "g4"
+      },
+      {
+        "unit": "live/prod/eu-west-1/app/s3",
+        "address": "aws_s3_bucket.assets",
+        "type": "aws_s3_bucket",
+        "action": "update",
+        "attributes": [
+          {
+            "path": "tags.CostCenter",
+            "kind": "changed",
+            "before": "\"platform\"",
+            "after": "\"finance\""
+          },
+          {
+            "path": "tags_all.CostCenter",
+            "kind": "changed",
+            "before": "\"platform\"",
+            "after": "\"finance\"",
+            "noise": {
+              "rule": "preset/aws-tags-all",
+              "reason": "the AWS provider copies default_tags into tags_all"
+            }
+          }
+        ],
+        "group": "g1"
+      },
+      {
+        "unit": "live/prod/eu-west-1/data/db",
+        "address": "aws_db_instance.main",
+        "type": "aws_db_instance",
+        "action": "update",
+        "attributes": [
+          {
+            "path": "instance_class",
+            "kind": "changed",
+            "before": "\"db.t4g.medium\"",
+            "after": "\"db.t4g.large\""
+          },
+          {
+            "path": "password",
+            "kind": "changed",
+            "sensitive": true,
+            "before": "(sensitive)",
+            "after": "(sensitive)"
+          }
+        ],
+        "group": "g2"
+      },
+      {
+        "unit": "live/staging/eu-west-1/app/s3",
+        "address": "aws_s3_bucket.assets",
+        "type": "aws_s3_bucket",
+        "action": "update",
+        "attributes": [
+          {
+            "path": "tags.CostCenter",
+            "kind": "changed",
+            "before": "\"platform\"",
+            "after": "\"finance\""
+          },
+          {
+            "path": "tags_all.CostCenter",
+            "kind": "changed",
+            "before": "\"platform\"",
+            "after": "\"finance\"",
+            "noise": {
+              "rule": "preset/aws-tags-all",
+              "reason": "the AWS provider copies default_tags into tags_all"
+            }
+          }
+        ],
+        "group": "g1"
+      }
+    ],
+    "warnings": []
+  },
+  "errors": [
+    {
+      "target": "live/prod/eu-west-1/data/cache",
+      "message": "plan failed: run error"
+    }
+  ]
+}

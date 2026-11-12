@@ -22,12 +22,9 @@ type Config struct {
 	Rules         []Rule    `json:"rules"                              jsonschema_description:"Ownership rules, tried in order after the built-in packs. The first rule that matches an unmanaged resource sets its category."`
 	Audit         Audit     `json:"audit"`
 	Drift         Drift     `json:"drift"`
-	Notify        Object    `json:"notify"                             jsonschema_description:"Notifiers."`
+	Notify        Notify    `json:"notify"`
 	Cache         Cache     `json:"cache"`
 }
-
-// Object is a free-form mapping.
-type Object = map[string]any
 
 // Binaries names the external tools tfcensus runs.
 type Binaries struct {
@@ -132,6 +129,53 @@ type Drift struct {
 	Noise     []NoiseRule `json:"noise"                                                                    jsonschema_description:"Noise rules, tried in order. A rule hides the matching attribute changes, or the whole change when it has no attribute."`
 }
 
+// Notify configures the notifiers. Secrets never go here: each notifier names the environment
+// variable that holds its token or webhook URL.
+type Notify struct {
+	Enabled            []string        `json:"enabled"              jsonschema:"enum=slack,enum=github-issues,enum=bitbucket-pr-comment,enum=file" jsonschema_description:"Notifiers tfcensus notify runs when --notify isn't given."`
+	Categories         []string        `json:"categories"           jsonschema:"enum=double-managed,enum=unmanaged,enum=undetermined"              jsonschema_description:"Scan categories the notifiers report."`
+	MinSeverity        string          `json:"min_severity"         jsonschema:"enum=info,enum=low,enum=medium,enum=high"                          jsonschema_description:"Lowest backend audit severity the notifiers report."`
+	Top                int             `json:"top"                  jsonschema:"minimum=1,maximum=50"                                              jsonschema_description:"Findings listed in a Slack message."`
+	Slack              SlackNotify     `json:"slack"`
+	GitHubIssues       GitHubNotify    `json:"github_issues"`
+	BitbucketPRComment BitbucketNotify `json:"bitbucket_pr_comment"`
+	File               FileNotify      `json:"file"`
+}
+
+// SlackNotify configures the Slack incoming webhook notifier.
+type SlackNotify struct {
+	WebhookEnv string `json:"webhook_env" jsonschema:"pattern=^[A-Za-z_][A-Za-z0-9_]*$" jsonschema_description:"Environment variable that holds the incoming webhook URL."`
+	When       string `json:"when"        jsonschema:"enum=findings,enum=always"        jsonschema_description:"findings sends only when there is something to report; always sends every run."`
+	Link       string `json:"link"        jsonschema:"pattern=^(https://.*)?$"          jsonschema_description:"URL of the full report, such as a CI artifact, shown in the message."`
+}
+
+// GitHubNotify configures the GitHub issues notifier.
+type GitHubNotify struct {
+	Repo          string   `json:"repo"           jsonschema:"pattern=^([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?$" jsonschema_description:"owner/name. Empty means GITHUB_REPOSITORY."`
+	APIURL        string   `json:"api_url"        jsonschema:"pattern=^(https?://.*)?$"                     jsonschema_description:"REST API base URL. Empty means GITHUB_API_URL, else https://api.github.com."`
+	TokenEnv      string   `json:"token_env"      jsonschema:"pattern=^[A-Za-z_][A-Za-z0-9_]*$"             jsonschema_description:"Environment variable that holds the token (issues: write)."`
+	Labels        []string `json:"labels"                                                                   jsonschema_description:"Labels added to new issues, besides tfcensus and tfcensus:<kind>."`
+	MaxOpen       int      `json:"max_open"       jsonschema:"minimum=1"                                    jsonschema_description:"Most open issues per report kind. Further scopes are listed in the run output and the summary issue."`
+	CloseResolved bool     `json:"close_resolved"                                                           jsonschema_description:"Close an issue when a run covers its scope and finds nothing."`
+	Summary       bool     `json:"summary"                                                                  jsonschema_description:"Keep one summary issue per report kind."`
+}
+
+// BitbucketNotify configures the Bitbucket Cloud pull request comment notifier.
+type BitbucketNotify struct {
+	Workspace   string `json:"workspace"    jsonschema_description:"Workspace. Empty means BITBUCKET_WORKSPACE."`
+	Repo        string `json:"repo"         jsonschema_description:"Repository slug. Empty means BITBUCKET_REPO_SLUG."`
+	PullRequest int    `json:"pull_request" jsonschema_description:"Pull request ID. 0 means BITBUCKET_PR_ID."                                                                                                          jsonschema:"minimum=0"`
+	APIURL      string `json:"api_url"      jsonschema_description:"REST API base URL."                                                                                                                                 jsonschema:"pattern=^https?://"`
+	TokenEnv    string `json:"token_env"    jsonschema_description:"Environment variable that holds an access token or API token."                                                                                      jsonschema:"pattern=^[A-Za-z_][A-Za-z0-9_]*$"`
+	EmailEnv    string `json:"email_env"    jsonschema_description:"Environment variable that holds the Atlassian account email. Set it to send an API token with basic auth; empty sends the token as a bearer token." jsonschema:"pattern=^([A-Za-z_][A-Za-z0-9_]*)?$"`
+}
+
+// FileNotify configures the file notifier.
+type FileNotify struct {
+	Dir     string   `json:"dir"     jsonschema:"minLength=1"       jsonschema_description:"Directory for tfcensus-<kind>.md and .json."`
+	Formats []string `json:"formats" jsonschema:"enum=md,enum=json" jsonschema_description:"Files to write."`
+}
+
 // NoiseRule hides drift that matches every set selector. An entry is either a preset or a rule.
 type NoiseRule struct {
 	Preset    string `json:"preset"    jsonschema:"enum=aws-tags-all,enum=computed-hashes"           jsonschema_description:"A built-in rule. A preset entry takes no other key."`
@@ -154,6 +198,8 @@ const (
 	defaultNoncurrentDays = 30
 	defaultStaleLockHours = 24
 	defaultMaxStateMB     = 20
+	defaultNotifyTop      = 10
+	defaultMaxOpen        = 10
 )
 
 // Default returns the built-in configuration. Slices and maps are non-nil so that
@@ -196,8 +242,19 @@ func Default() Config {
 		Drift: Drift{
 			Mode: "refresh-only", Collapse: "shape", NeverHide: []string{"delete", "replace"}, Noise: []NoiseRule{},
 		},
-		Notify: Object{},
-		Cache:  Cache{TTL: "1h"},
+		Notify: Notify{
+			Enabled:     []string{},
+			Categories:  []string{"double-managed", "unmanaged"},
+			MinSeverity: "low",
+			Top:         defaultNotifyTop,
+			Slack:       SlackNotify{WebhookEnv: "SLACK_WEBHOOK_URL", When: "findings"},
+			GitHubIssues: GitHubNotify{ //nolint:gosec // TokenEnv names a variable; it holds no secret
+				TokenEnv: "GITHUB_TOKEN", Labels: []string{}, MaxOpen: defaultMaxOpen, CloseResolved: true,
+			},
+			BitbucketPRComment: BitbucketNotify{APIURL: "https://api.bitbucket.org/2.0", TokenEnv: "BITBUCKET_TOKEN"},
+			File:               FileNotify{Dir: ".", Formats: []string{"md", "json"}},
+		},
+		Cache: Cache{TTL: "1h"},
 	}
 }
 

@@ -1,0 +1,50 @@
+{
+  "schema_version": "1",
+  "tool": "tfcensus",
+  "version": "test",
+  "generated_at": "2026-11-12T09:00:00Z",
+  "data": {
+    "total": 3,
+    "units": [
+      {
+        "unit": "tf-scan/iam",
+        "workspace": "default",
+        "bucket": "acme-scan-tfstate",
+        "key": "iam/terraform.tfstate",
+        "status": "ok",
+        "instances": 2,
+        "accounts": [
+          "111111111111"
+        ],
+        "regions": null
+      },
+      {
+        "unit": "tf-scan/iam-dup",
+        "workspace": "default",
+        "bucket": "acme-scan-tfstate",
+        "key": "iam-dup/terraform.tfstate",
+        "status": "ok",
+        "instances": 1,
+        "accounts": [
+          "111111111111"
+        ],
+        "regions": null
+      },
+      {
+        "unit": "tf-scan/network",
+        "workspace": "default",
+        "bucket": "acme-scan-tfstate",
+        "key": "network/terraform.tfstate",
+        "status": "ok",
+        "instances": 5,
+        "accounts": [
+          "111111111111"
+        ],
+        "regions": [
+          "eu-west-1"
+        ]
+      }
+    ]
+  },
+  "errors": []
+}

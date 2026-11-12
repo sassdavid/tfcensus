@@ -1,0 +1,24 @@
+{
+  "schema_version": "1",
+  "tool": "tfcensus",
+  "version": "test",
+  "generated_at": "2026-11-12T09:00:00Z",
+  "data": {
+    "total": 3,
+    "units": [
+      {
+        "unit": "tf-scan/iam",
+        "workspace": "default",
+        "bucket": "acme-scan-tfstate",
+        "key": "iam/terraform.tfstate",
+        "status": "ok",
+        "instances": 2,
+        "accounts": [
+          "111111111111"
+        ],
+        "regions": null
+      }
+    ]
+  },
+  "errors": []
+}

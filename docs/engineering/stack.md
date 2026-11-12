@@ -42,7 +42,7 @@ goreleaser, chezmoi, k9s, golangci-lint.
 | XDG paths | `github.com/adrg/xdg` | v0.5.3 | stable; used by aqua, syft, k9s |
 | Logging | `log/slog` + `github.com/lmittmann/tint` | stdlib / v1.2.1 | zap rejected ([ADR-0004](adr/0004-logging.md)) |
 | Concurrency | `golang.org/x/sync` (errgroup) | **v0.25.0** | |
-| HTTP retry | `github.com/hashicorp/go-retryablehttp` | v0.7.8 | latest; used by terraform, tofu, trivy |
+| HTTP retry | `github.com/hashicorp/go-retryablehttp` | v0.7.8 | latest (2025-06-18, rechecked 2026-11-12); used by terraform, tofu, trivy. In go.mod from M10: `internal/httpx`, shared with relgap, carries the notifier requests |
 | Rate limit | `golang.org/x/time` | v0.16.0 | `rate.Limiter` per account, region and service for inventory layers |
 | Compression | `github.com/klauspost/compress` (zstd: `inventory --save-index *.zst`, cache files) | v1.20.4 | gzip from the stdlib for `.gz`; zstd is what whois.md names |
 | Styling | `charm.land/lipgloss/v2` (+ `/table`) | **v2.1.0** (released today) | latest at M0; gh/terragrunt/goreleaser are on v2.0.x |

@@ -1,0 +1,110 @@
+{
+  "schema_version": "1",
+  "tool": "tfcensus",
+  "version": "test",
+  "generated_at": "2026-11-12T09:00:00Z",
+  "data": {
+    "source": {
+      "file": "scan.json",
+      "cache": false,
+      "created": "2026-11-10T12:00:00Z",
+      "stale": false
+    },
+    "accounts": [
+      {
+        "account": "111111111111",
+        "counts": {
+          "aws-managed": 5,
+          "derived": 1,
+          "double-managed": 1,
+          "ignored": 2,
+          "managed": 6,
+          "other-iac": 1,
+          "undetermined": 1,
+          "unmanaged": 5
+        },
+        "coverage": 58.333333333333336
+      }
+    ],
+    "matching": 6,
+    "types": [
+      {
+        "type": "AWS::EC2::SecurityGroup",
+        "count": 1
+      },
+      {
+        "type": "AWS::EC2::VPC",
+        "count": 1
+      },
+      {
+        "type": "AWS::ElasticLoadBalancingV2::Listener",
+        "count": 1
+      },
+      {
+        "type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+        "count": 1
+      },
+      {
+        "type": "AWS::IAM::Role",
+        "count": 1
+      },
+      {
+        "type": "AWS::Lambda::Function",
+        "count": 1
+      }
+    ],
+    "top": [
+      {
+        "account": "111111111111",
+        "category": "managed",
+        "cfn_type": "AWS::IAM::Role",
+        "tf_types": [
+          "aws_iam_role"
+        ],
+        "arn": "arn:aws:iam::111111111111:role/acme-app",
+        "id": "AROAACMEAPP00000001",
+        "name": "acme-app",
+        "sources": [
+          "config"
+        ],
+        "reason": "matched tf-scan/iam aws_iam_role.app by identity",
+        "rule": "match/identity",
+        "managed_by": [
+          {
+            "unit": "tf-scan/iam",
+            "workspace": "default",
+            "address": "aws_iam_role.app"
+          }
+        ]
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "category": "managed",
+        "cfn_type": "AWS::EC2::SecurityGroup",
+        "tf_types": [
+          "aws_security_group"
+        ],
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0aa11bb22cc33dd44",
+        "id": "sg-0aa11bb22cc33dd44",
+        "name": "web",
+        "sources": [
+          "config"
+        ],
+        "reason": "matched tf-scan/network aws_security_group.web by identity",
+        "rule": "match/identity",
+        "managed_by": [
+          {
+            "unit": "tf-scan/network",
+            "workspace": "default",
+            "address": "aws_security_group.web"
+          }
+        ]
+      }
+    ],
+    "warnings": [
+      "rule \"growth-trial\" is past its expires date and no longer matches"
+    ]
+  },
+  "errors": []
+}

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:">
+<meta name="generator" content="tfcensus {{.Version}}">
+<title>tfcensus report</title>
+<style>{{.CSS}}</style>
+</head>
+<body data-ready="no">
+<main>
+<h1>tfcensus report</h1>
+<p class="meta">Newest result {{.Generated}}, written by tfcensus {{.Version}}.</p>
+<p class="meta">Inputs:{{range .Sources}} <code>{{.Name}}</code> ({{.Kind}}, {{.Generated}}){{end}}</p>
+<nav>{{if .Scan}}<a href="#scan">Scan</a>{{end}}{{if .Drift}}<a href="#drift">Drift</a>{{end}}{{if .Audit}}<a href="#audit">Backend audit</a>{{end}}</nav>
+{{with .Scan}}
+<section id="scan">
+<h2>Scan</h2>
+<p class="meta">Scan of {{.Generated}}{{if .Cached}}, from the scan cache{{end}}. Coverage is managed resources out of managed, double-managed and unmanaged ones.</p>
+<div class="wrap"><table>
+<thead><tr><th>Account</th>{{range .Categories}}<th class="num">{{.}}</th>{{end}}<th class="num">coverage</th></tr></thead>
+<tbody>
+{{range .Accounts}}<tr><td><code>{{.Account}}</code></td>{{range .Counts}}<td class="num">{{.}}</td>{{end}}<td class="num">{{.Coverage}}</td></tr>
+{{end}}<tr><th>{{.Total.Account}}</th>{{range .Total.Counts}}<th class="num">{{.}}</th>{{end}}<th class="num">{{.Total.Coverage}}</th></tr>
+</tbody>
+</table></div>
+{{with .Trend}}
+<h3>Coverage trend</h3>
+<svg class="trend" viewBox="0 0 {{.Width}} {{.Height}}" role="img" aria-label="Coverage per scan">
+{{range .Grid}}<line class="grid" x1="44" x2="624" y1="{{.Y}}" y2="{{.Y}}"></line><text x="38" y="{{.Y}}" text-anchor="end" dominant-baseline="middle">{{.Label}}</text>
+{{end}}{{range .XLabels}}<text x="{{.X}}" y="208" text-anchor="middle">{{.Label}}</text>
+{{end}}{{range .Series}}<polyline class="series" stroke="{{.Color}}" points="{{.Points}}"></polyline>
+{{$c := .Color}}{{range .Dots}}<circle cx="{{.X}}" cy="{{.Y}}" r="3" fill="{{$c}}"><title>{{.Title}}</title></circle>
+{{end}}{{end}}</svg>
+<div class="legend">{{range .Series}}<span style="color: {{.Color}}">{{.Name}}</span>{{end}}</div>
+{{end}}
+<h3>Findings</h3>
+<p class="note">{{.Managed}} managed resources are counted above and not listed.</p>
+<div class="filters">{{range .Filters}}<label>{{.Label}} <select data-filter-for="scan-findings" data-key="{{.Key}}"><option value="">all</option>{{range .Values}}<option>{{.}}</option>{{end}}</select></label>{{end}}<span class="count" data-count-for="scan-findings"></span></div>
+<div class="wrap"><table id="scan-findings" data-filterable>
+<thead><tr><th>Account</th><th>Region</th><th>Category</th><th>Type</th><th>ARN or ID</th><th>Owner</th><th>Rule</th><th>Reason</th><th>Managed by</th></tr></thead>
+<tbody>
+{{range .Findings}}<tr data-account="{{.Account}}" data-category="{{.Category}}" data-type="{{.Type}}"><td><code>{{.Account}}</code></td><td>{{.Region}}</td><td class="cat-{{.Category}}">{{.Category}}</td><td>{{.Type}}</td><td><code>{{.Key}}</code>{{if .Name}}<br>{{.Name}}{{end}}</td><td>{{.Owner}}</td><td><code>{{.Rule}}</code></td><td>{{.Reason}}</td><td>{{.ManagedBy}}</td></tr>
+{{end}}</tbody>
+</table></div>
+{{range .Warnings}}<p class="note">Warning: {{.}}</p>
+{{end}}</section>
+{{end}}
+{{with .Drift}}
+<section id="drift">
+<h2>Drift</h2>
+<p class="meta">Drift run of {{.Generated}}, {{.Mode}} mode. Attribute paths only; values are never shown.</p>
+<div class="wrap"><table>
+<thead><tr><th class="num">Units</th><th class="num">Drifted</th><th class="num">Clean</th><th class="num">Failed</th><th class="num">Early exit</th><th class="num">Excluded</th><th class="num">Drifted resources</th><th class="num">Hidden</th></tr></thead>
+<tbody><tr><td class="num">{{.Summary.Units}}</td><td class="num">{{.Summary.Drifted}}</td><td class="num">{{.Summary.Clean}}</td><td class="num">{{.Summary.Failed}}</td><td class="num">{{.Summary.EarlyExit}}</td><td class="num">{{.Summary.Excluded}}</td><td class="num">{{.Summary.Resources}}</td><td class="num">{{.Summary.Hidden}}</td></tr></tbody>
+</table></div>
+<h3>Units that aren't clean</h3>
+<div class="wrap"><table>
+<thead><tr><th>Unit</th><th>Account</th><th>Region</th><th>Status</th><th class="num">Drifted</th><th>Reason</th></tr></thead>
+<tbody>
+{{range .Units}}<tr><td><code>{{.Path}}</code></td><td><code>{{.Account}}</code></td><td>{{.Region}}</td><td class="st-{{.Status}}">{{.Status}}</td><td class="num">{{.Drifted}}</td><td>{{.Reason}}</td></tr>
+{{end}}</tbody>
+</table></div>
+<h3>Drifted resources</h3>
+<div class="filters">{{range .Filters}}<label>{{.Label}} <select data-filter-for="drift-changes" data-key="{{.Key}}"><option value="">all</option>{{range .Values}}<option>{{.}}</option>{{end}}</select></label>{{end}}<span class="count" data-count-for="drift-changes"></span></div>
+<div class="wrap"><table id="drift-changes" data-filterable>
+<thead><tr><th>Unit</th><th>Address</th><th>Type</th><th>Action</th><th>Attributes</th></tr></thead>
+<tbody>
+{{range .Changes}}<tr data-unit="{{.Unit}}"><td><code>{{.Unit}}</code></td><td><code>{{.Address}}</code></td><td>{{.Type}}</td><td>{{.Action}}</td><td><code>{{.Attributes}}</code></td></tr>
+{{end}}</tbody>
+</table></div>
+{{range .Warnings}}<p class="note">Warning: {{.}}</p>
+{{end}}</section>
+{{end}}
+{{with .Audit}}
+<section id="audit">
+<h2>Backend audit</h2>
+<p class="meta">Audit of {{.Generated}}. {{.Suppressed}} suppressed findings are not listed.</p>
+<div class="wrap"><table>
+<thead><tr>{{range .Counts}}<th class="num">{{.Severity}}</th>{{end}}</tr></thead>
+<tbody><tr>{{range .Counts}}<td class="num">{{.Count}}</td>{{end}}</tr></tbody>
+</table></div>
+<div class="filters">{{range .Filters}}<label>{{.Label}} <select data-filter-for="audit-findings" data-key="{{.Key}}"><option value="">all</option>{{range .Values}}<option>{{.}}</option>{{end}}</select></label>{{end}}<span class="count" data-count-for="audit-findings"></span></div>
+<div class="wrap"><table id="audit-findings" data-filterable>
+<thead><tr><th>Severity</th><th>Check</th><th>Target</th><th>Account</th><th>Reason</th><th>Remediation</th></tr></thead>
+<tbody>
+{{range .Findings}}<tr data-severity="{{.Severity}}" data-account="{{if .Account}}{{.Account}}{{else}}-{{end}}" data-rule="{{.Rule}}"><td class="sev-{{.Severity}}">{{.Severity}}</td><td><code>{{.Rule}}</code></td><td><code>{{.Target}}</code></td><td><code>{{.Account}}</code></td><td>{{.Reason}}</td><td>{{.Remediation}}</td></tr>
+{{end}}</tbody>
+</table></div>
+{{range .Incomplete}}<p class="note">Not checked: <code>{{.Target}}</code> {{.Message}}</p>
+{{end}}{{range .Warnings}}<p class="note">Warning: {{.}}</p>
+{{end}}</section>
+{{end}}
+</main>
+<script>{{.JS}}</script>
+</body>
+</html>

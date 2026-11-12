@@ -74,6 +74,36 @@ func (c *Cache) Load(key string) (*Snapshot, bool) {
 	return &s, true
 }
 
+// ErrNoSnapshot is returned by [Cache.Newest] when the cache holds no readable snapshot.
+var ErrNoSnapshot = errors.New("no scan snapshot in the cache; run tfcensus scan first")
+
+// Newest returns the most recently created snapshot, whatever its key, and reports whether it is
+// older than the TTL. Unreadable files are skipped.
+func (c *Cache) Newest() (*Snapshot, bool, error) {
+	if c == nil || c.Dir == "" {
+		return nil, false, ErrNoSnapshot
+	}
+	names, err := filepath.Glob(filepath.Join(c.Dir, "scan", "*.json.zst"))
+	if err != nil {
+		return nil, false, fmt.Errorf("list scan cache: %w", err)
+	}
+	var newest *Snapshot
+	for _, name := range names {
+		var s Snapshot
+		if tfstate.ReadIndexFile(name, &s) != nil || s.Format != snapshotFormat || s.Inventory == nil ||
+			s.Index == nil {
+			continue
+		}
+		if newest == nil || s.Created.After(newest.Created) {
+			newest = &s
+		}
+	}
+	if newest == nil {
+		return nil, false, ErrNoSnapshot
+	}
+	return newest, c.Now().Sub(newest.Created) >= c.TTL, nil
+}
+
 // Save stores s under s.Key.
 func (c *Cache) Save(s *Snapshot) error {
 	if c == nil || c.Dir == "" {

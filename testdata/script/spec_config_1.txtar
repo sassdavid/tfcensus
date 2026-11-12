@@ -37,43 +37,64 @@ accounts:
 discovery:
   render: never
 -- want-sources.txt --
-KEY                                 VALUE                                           SOURCE
-accounts.aggregator.name            ""                                              default
-accounts.aggregator.profile         ""                                              default
-accounts.aggregator.region          ""                                              default
-accounts.map.111111111111.name      acme-nonprod                                    project file $WORK/.tfcensus.yaml
-accounts.map.111111111111.profile   acme-nonprod                                    project file $WORK/.tfcensus.yaml
-accounts.org.enabled                false                                           default
-accounts.org.management_profile     ""                                              default
-accounts.org.ou_roles               {}                                              default
-accounts.org.role                   OrganizationAccountAccessRole                   default
-accounts.profiles                   ["acme-*"]                                      user file $WORK/.config/tfcensus/config.yaml
-audit.discover_patterns             ["*tfstate*","*terraform-state*","*tf-state*"]  default
-audit.policy.max_state_mb           20                                              default
-audit.policy.min_provider_versions  {}                                              default
-audit.policy.min_terraform_version  1.10                                            default
-audit.policy.noncurrent_days        7                                               project file $WORK/.tfcensus.yaml
-audit.policy.stale_lock_hours       24                                              default
-audit.suppress                      []                                              default
-binaries.terraform                  /opt/bin/tofu                                   flag --tf-path
-binaries.terragrunt                 terragrunt                                      default
-cache.ttl                           2h                                              user file $WORK/.config/tfcensus/config.yaml
-discovery.generate_stacks           true                                            env TFCENSUS_DISCOVERY__GENERATE_STACKS
-discovery.render                    never                                           project file $WORK/.tfcensus.yaml
-discovery.roots                     []                                              default
-drift.collapse                      shape                                           default
-drift.mode                          refresh-only                                    default
-drift.never_hide                    ["delete","replace"]                            default
-drift.noise                         []                                              default
-notify                              {}                                              default
-regions                             ["eu-west-1","eu-central-1"]                    env TFCENSUS_REGIONS
-rules                               []                                              default
-scan.cloudcontrol_types             []                                              default
-scan.layers                         auto                                            default
-scan.never_hide                     []                                              default
-scan.packs.aws-defaults             true                                            default
-scan.packs.aws-service              true                                            default
-scan.packs.derived                  true                                            default
-scan.packs.ephemeral                true                                            default
-scan.packs.other-iac                true                                            default
-schema_version                      1                                               project file $WORK/.tfcensus.yaml
+KEY                                       VALUE                                           SOURCE
+accounts.aggregator.name                  ""                                              default
+accounts.aggregator.profile               ""                                              default
+accounts.aggregator.region                ""                                              default
+accounts.map.111111111111.name            acme-nonprod                                    project file $WORK/.tfcensus.yaml
+accounts.map.111111111111.profile         acme-nonprod                                    project file $WORK/.tfcensus.yaml
+accounts.org.enabled                      false                                           default
+accounts.org.management_profile           ""                                              default
+accounts.org.ou_roles                     {}                                              default
+accounts.org.role                         OrganizationAccountAccessRole                   default
+accounts.profiles                         ["acme-*"]                                      user file $WORK/.config/tfcensus/config.yaml
+audit.discover_patterns                   ["*tfstate*","*terraform-state*","*tf-state*"]  default
+audit.policy.max_state_mb                 20                                              default
+audit.policy.min_provider_versions        {}                                              default
+audit.policy.min_terraform_version        1.10                                            default
+audit.policy.noncurrent_days              7                                               project file $WORK/.tfcensus.yaml
+audit.policy.stale_lock_hours             24                                              default
+audit.suppress                            []                                              default
+binaries.terraform                        /opt/bin/tofu                                   flag --tf-path
+binaries.terragrunt                       terragrunt                                      default
+cache.ttl                                 2h                                              user file $WORK/.config/tfcensus/config.yaml
+discovery.generate_stacks                 true                                            env TFCENSUS_DISCOVERY__GENERATE_STACKS
+discovery.render                          never                                           project file $WORK/.tfcensus.yaml
+discovery.roots                           []                                              default
+drift.collapse                            shape                                           default
+drift.mode                                refresh-only                                    default
+drift.never_hide                          ["delete","replace"]                            default
+drift.noise                               []                                              default
+notify.bitbucket_pr_comment.api_url       https://api.bitbucket.org/2.0                   default
+notify.bitbucket_pr_comment.email_env     ""                                              default
+notify.bitbucket_pr_comment.pull_request  0                                               default
+notify.bitbucket_pr_comment.repo          ""                                              default
+notify.bitbucket_pr_comment.token_env     BITBUCKET_TOKEN                                 default
+notify.bitbucket_pr_comment.workspace     ""                                              default
+notify.categories                         ["double-managed","unmanaged"]                  default
+notify.enabled                            []                                              default
+notify.file.dir                           .                                               default
+notify.file.formats                       ["md","json"]                                   default
+notify.github_issues.api_url              ""                                              default
+notify.github_issues.close_resolved       true                                            default
+notify.github_issues.labels               []                                              default
+notify.github_issues.max_open             10                                              default
+notify.github_issues.repo                 ""                                              default
+notify.github_issues.summary              false                                           default
+notify.github_issues.token_env            GITHUB_TOKEN                                    default
+notify.min_severity                       low                                             default
+notify.slack.link                         ""                                              default
+notify.slack.webhook_env                  SLACK_WEBHOOK_URL                               default
+notify.slack.when                         findings                                        default
+notify.top                                10                                              default
+regions                                   ["eu-west-1","eu-central-1"]                    env TFCENSUS_REGIONS
+rules                                     []                                              default
+scan.cloudcontrol_types                   []                                              default
+scan.layers                               auto                                            default
+scan.never_hide                           []                                              default
+scan.packs.aws-defaults                   true                                            default
+scan.packs.aws-service                    true                                            default
+scan.packs.derived                        true                                            default
+scan.packs.ephemeral                      true                                            default
+scan.packs.other-iac                      true                                            default
+schema_version                            1                                               project file $WORK/.tfcensus.yaml

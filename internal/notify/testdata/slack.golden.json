@@ -1,0 +1,49 @@
+{
+  "blocks": [
+    {
+      "text": {
+        "text": "tfcensus drift: 2 drifted resources in 2 of 3 scope(s)",
+        "type": "plain_text"
+      },
+      "type": "header"
+    },
+    {
+      "fields": [
+        {
+          "text": "*Scopes*\n3",
+          "type": "mrkdwn"
+        },
+        {
+          "text": "*With findings*\n2",
+          "type": "mrkdwn"
+        },
+        {
+          "text": "*Items*\n2",
+          "type": "mrkdwn"
+        },
+        {
+          "text": "*Failed plans*\n1",
+          "type": "mrkdwn"
+        }
+      ],
+      "type": "section"
+    },
+    {
+      "text": {
+        "text": "• `a` aws_vpc `x.a` (update)\n...and 2 more",
+        "type": "mrkdwn"
+      },
+      "type": "section"
+    },
+    {
+      "elements": [
+        {
+          "text": "\u003chttps://ci.example/run/1|Full report\u003e · tfcensus 0.5.0",
+          "type": "mrkdwn"
+        }
+      ],
+      "type": "context"
+    }
+  ],
+  "text": "tfcensus drift: 2 drifted resources in 2 of 3 scope(s)"
+}
