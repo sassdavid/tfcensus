@@ -120,6 +120,7 @@ stdout carries data, stderr carries logs. Use --format json for scripting.`,
 		newDriftCmd(d, g),
 		newWhoisCmd(d, g),
 		newCodifyCmd(d, g),
+		newMoveCmd(d, g),
 	)
 	return root, g
 }

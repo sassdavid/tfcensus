@@ -66,7 +66,7 @@ goreleaser, chezmoi, k9s, golangci-lint.
 | HTTP record/replay | `gopkg.in/dnaeon/go-vcr.v4` | v4.0.7 |
 | In-process S3 fake | `github.com/johannesboyne/gofakes3` | v1.2.0 (test-only: state-read tests, the 500-state benchmark and writing the inventory cassette) |
 | In-process AWS emulator | `github.com/sivchari/kumo` | v0.33.1 |
-| Containers in tests | `github.com/testcontainers/testcontainers-go` | v0.45.0, running `motoserver/moto:5.2.5` and Floci 2.4.0 ([testing plan](../plan/testing.md)) |
+| Containers in tests | `github.com/testcontainers/testcontainers-go` | v0.45.0 (published 2026-11-05, still the latest on 2026-11-12; added to go.mod at M9, test-only). `TestSpec_move_2` starts `motoserver/moto:5.2.5` (pinned by digest, as in `live.yml`) and skips without Docker; it brings 45 indirect test-only modules (moby client, otel, gopsutil) and moves no module relgap shares. Floci 2.4.0 still runs as a `live.yml` service ([testing plan](../plan/testing.md)) |
 
 ## AWS, Terraform and rules
 

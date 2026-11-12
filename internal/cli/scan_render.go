@@ -402,7 +402,7 @@ func scanSARIF(rep *scan.Report) *sarif.Log {
 			Locations: []sarif.Location{
 				{PhysicalLocation: sarif.PhysicalLocation{ArtifactLocation: sarif.ArtifactLocation{URI: uri}}},
 			},
-			PartialFingerprints: map[string]string{"tfcensusFinding/v1": string(f.Category) + "|" + f.Key()},
+			PartialFingerprints: map[string]string{fingerprintV1: string(f.Category) + "|" + f.Key()},
 		})
 	}
 	return l

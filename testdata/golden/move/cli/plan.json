@@ -1,0 +1,96 @@
+{
+  "schema_version": "1",
+  "tool": "tfcensus",
+  "version": "test",
+  "generated_at": "2026-11-12T09:00:00Z",
+  "data": {
+    "file": "split_network.hcl",
+    "command": "plan",
+    "blocks": [
+      {
+        "name": "split_network",
+        "strategy": "surgery",
+        "from": "live/network",
+        "status": "pending",
+        "result": "verified",
+        "units": [
+          {
+            "path": "live/network-sg",
+            "role": "destination",
+            "moved": [
+              "aws_security_group.app",
+              "aws_vpc_security_group_ingress_rule.app[\"https\"]",
+              "aws_vpc_security_group_ingress_rule.app[\"ssh\"]"
+            ],
+            "serial": {
+              "before": 0,
+              "after": 1
+            },
+            "new_state": true
+          },
+          {
+            "path": "live/network-endpoints",
+            "role": "destination",
+            "moved": [
+              "module.endpoints.aws_vpc_endpoint.s3",
+              "aws_route53_record.api[0]",
+              "aws_route53_record.api[1]"
+            ],
+            "skipped": [
+              "module.endpoints.data.aws_iam_policy_document.s3"
+            ],
+            "serial": {
+              "before": 4,
+              "after": 5
+            }
+          },
+          {
+            "path": "live/network",
+            "role": "source",
+            "moved": [
+              "aws_security_group.app",
+              "aws_vpc_security_group_ingress_rule.app[\"https\"]",
+              "aws_vpc_security_group_ingress_rule.app[\"ssh\"]",
+              "module.endpoints.aws_vpc_endpoint.s3",
+              "aws_route53_record.api[0]",
+              "aws_route53_record.api[1]"
+            ],
+            "skipped": [
+              "module.endpoints.data.aws_iam_policy_document.s3"
+            ],
+            "serial": {
+              "before": 12,
+              "after": 13
+            }
+          }
+        ],
+        "findings": [],
+        "notes": [
+          "live/network-endpoints: provider provider[\"registry.terraform.io/hashicorp/aws\"].dns -> provider[\"registry.terraform.io/hashicorp/aws\"]"
+        ]
+      },
+      {
+        "name": "rename_vpc",
+        "strategy": "surgery",
+        "from": "live/network",
+        "status": "pending",
+        "result": "verified",
+        "units": [
+          {
+            "path": "live/network",
+            "role": "in-place",
+            "moved": [
+              "aws_vpc.main -> aws_vpc.this"
+            ],
+            "serial": {
+              "before": 13,
+              "after": 14
+            }
+          }
+        ],
+        "findings": []
+      }
+    ]
+  },
+  "errors": []
+}

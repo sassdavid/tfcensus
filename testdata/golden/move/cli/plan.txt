@@ -1,0 +1,22 @@
+move plan split_network.hcl
+
+Block split_network (surgery): pending, verified
+  live/network-sg         destination  +3  0 -> 1 (new state)
+  live/network-endpoints  destination  +3  4 -> 5
+  live/network            source       -6  12 -> 13
+  Moved
+    aws_security_group.app -> live/network-sg
+    aws_vpc_security_group_ingress_rule.app["https"] -> live/network-sg
+    aws_vpc_security_group_ingress_rule.app["ssh"] -> live/network-sg
+    module.endpoints.aws_vpc_endpoint.s3 -> live/network-endpoints
+    aws_route53_record.api[0] -> live/network-endpoints
+    aws_route53_record.api[1] -> live/network-endpoints
+  Data sources left in the source
+    module.endpoints.data.aws_iam_policy_document.s3
+  Notes
+    live/network-endpoints: provider provider["registry.terraform.io/hashicorp/aws"].dns -> provider["registry.terraform.io/hashicorp/aws"]
+
+Block rename_vpc (surgery): pending, verified
+  live/network  in-place  1 action(s)  13 -> 14
+  Moved
+    aws_vpc.main -> aws_vpc.this

@@ -1,0 +1,127 @@
+{
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "results": [
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "live/network-sg"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "block split_network: aws_security_group.app: the plan would create it; a move may only leave no-op and read"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "MV-VERIFY|split_network.hcl|split_network|live/network-sg|aws_security_group.app"
+          },
+          "ruleId": "MV-VERIFY",
+          "ruleIndex": 0
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "live/network-endpoints"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "block split_network: aws_security_group.app: the plan would create it; a move may only leave no-op and read"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "MV-VERIFY|split_network.hcl|split_network|live/network-endpoints|aws_security_group.app"
+          },
+          "ruleId": "MV-VERIFY",
+          "ruleIndex": 0
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "live/network"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "block split_network: aws_security_group.app: the plan would create it; a move may only leave no-op and read"
+          },
+          "partialFingerprints": {
+            "tfcensusFinding/v1": "MV-VERIFY|split_network.hcl|split_network|live/network|aws_security_group.app"
+          },
+          "ruleId": "MV-VERIFY",
+          "ruleIndex": 0
+        }
+      ],
+      "tool": {
+        "driver": {
+          "informationUri": "https://github.com/sassdavid/tfcensus",
+          "name": "tfcensus",
+          "rules": [
+            {
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "Make the unit's configuration match the moved resources, or fix the provider so it targets the account the resources are in, then plan again."
+              },
+              "id": "MV-VERIFY",
+              "shortDescription": {
+                "text": "A plan against the moved state changes a resource"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "Run terragrunt plan in the unit to see the error."
+              },
+              "id": "MV-PLAN",
+              "shortDescription": {
+                "text": "A plan against the moved state failed"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "Move the resource to a unit in its own account, or check the destination's provider and backend."
+              },
+              "id": "MV-ACCOUNT",
+              "shortDescription": {
+                "text": "A moved resource is in another account than the destination deploys to"
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "Enable versioning on the bucket (backend audit check S3-VER) before applying."
+              },
+              "id": "MV-VERSIONING",
+              "shortDescription": {
+                "text": "The state bucket has no versioning, so a push can't be rolled back"
+              }
+            }
+          ],
+          "version": "VERSION"
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}

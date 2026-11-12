@@ -51,8 +51,9 @@ Scope: config + resource-explorer + native (sg-rules, iam-attachments, route53, 
 - [x] All criteria. FL-DOUBLE audit check shares the whois index.
 
 ### M9: move → v0.4.0 ([move](specs/move.md))
-- [ ] All move.md criteria, including the cross-account e2e against moto (two emulated accounts via AssumeRole) with rollback.
-- [ ] `docs/runbooks/move.md`: the runbook a colleague can follow (generalizes the author's earlier hand-written migration runbooks).
+- [x] All move.md criteria, including the cross-account e2e against moto (two emulated accounts via AssumeRole) with rollback.
+- [x] `docs/runbooks/move.md`: the runbook a colleague can follow (generalizes the author's earlier hand-written migration runbooks).
+- Not in M9: `move suggest` (tfautomv), recorded in move.md.
 
 ### M10: Notifications, HTML, MCP → v0.5.0 ([notifications-and-reports](specs/notifications-and-reports.md))
 - [ ] All criteria. The MCP server is registered in the author's Claude Code and used read-only for a real whois or scan question, recorded in `docs/dogfood.md`.

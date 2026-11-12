@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sassdavid/tfcensus/schemas/move-v1.json",
+  "title": "tfcensus move --format json",
+  "description": "The report envelope (report-v1.json) with what a move command did to each block and unit of a migration file. Addresses are identifiers; no attribute value appears.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "tool", "version", "generated_at", "data", "errors"],
+  "properties": {
+    "schema_version": {"const": "1"},
+    "tool": {"const": "tfcensus"},
+    "version": {"type": "string", "minLength": 1},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "errors": {
+      "description": "Always empty: move fails instead.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["message"],
+        "properties": {
+          "target": {"type": "string"},
+          "message": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "command", "blocks"],
+      "properties": {
+        "file": {"description": "The migration file's base name, which history records use.", "type": "string"},
+        "command": {"enum": ["plan", "apply", "rollback", "mark-applied", "status"]},
+        "blocks": {"type": "array", "items": {"$ref": "#/$defs/block"}}
+      }
+    }
+  },
+  "$defs": {
+    "block": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "strategy", "from", "status", "units", "findings"],
+      "properties": {
+        "name": {"type": "string"},
+        "strategy": {"enum": ["surgery", "native"]},
+        "from": {"type": "string"},
+        "status": {
+          "description": "From the units' histories: applied in every unit, in none, or in some.",
+          "enum": ["pending", "applied", "partial"]
+        },
+        "result": {
+          "enum": ["verified", "rejected", "skipped", "applied", "partially-applied", "written", "rolled-back", "marked-applied", "planned"]
+        },
+        "units": {"type": "array", "items": {"$ref": "#/$defs/unit"}},
+        "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}},
+        "notes": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "unit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "role"],
+      "properties": {
+        "path": {"type": "string"},
+        "role": {"enum": ["source", "destination", "in-place"]},
+        "status": {"enum": ["pending", "applied"]},
+        "moved": {
+          "description": "Instance addresses moved out of a source or into a destination, or the actions run in place.",
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "skipped": {"description": "Data source instances left in the source.", "type": "array", "items": {"type": "string"}},
+        "serial": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["before", "after"],
+          "properties": {"before": {"type": "integer", "minimum": 0}, "after": {"type": "integer", "minimum": 0}}
+        },
+        "new_state": {"type": "boolean"},
+        "file": {"description": "The file a native block writes into the unit.", "type": "string"},
+        "version_ids": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["before", "after"],
+          "properties": {
+            "before": {"description": "Empty when the unit had no state before.", "type": "string"},
+            "after": {"type": "string"}
+          }
+        }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule", "unit", "reason"],
+      "properties": {
+        "rule": {"enum": ["MV-VERIFY", "MV-PLAN", "MV-ACCOUNT", "MV-VERSIONING"]},
+        "unit": {"type": "string"},
+        "address": {"type": "string"},
+        "reason": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+move status split_network.hcl
+
+Block split_network (surgery): pending
+  live/network-sg         destination  pending
+  live/network-endpoints  destination  pending
+  live/network            source       pending
+
+Block rename_vpc (surgery): pending
+  live/network  in-place  pending

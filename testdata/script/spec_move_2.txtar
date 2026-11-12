@@ -1,0 +1,168 @@
+# move.md criterion 2: split live/acct-a/network into live/acct-b/network-sg (another account)
+# and live/acct-a/network-endpoints with surgery, verify, apply, then roll back. Run by
+# TestSpec_move_2 against moto, with real terraform and terragrunt.
+
+# Seed the source state: apply the resources the migration moves out.
+cd repo/live/acct-a/network
+cp moved.tf.before moved.tf
+exec terragrunt run --tf-path terraform -- apply -auto-approve -input=false -no-color
+rm moved.tf
+cd $WORK/repo
+s3get 111111111111 live/acct-a/network/terraform.tfstate $WORK/network.orig
+! s3get 222222222222 live/acct-b/network-sg/terraform.tfstate $WORK/none
+! s3get 111111111111 live/acct-a/network-endpoints/terraform.tfstate $WORK/none
+
+# plan verifies every unit against its new state and writes nothing.
+exec tfcensus move plan migrations/split.hcl --format json
+jsonschema move-v1.json stdout
+stdout '"result": "verified"'
+stdout '"terraform_data.rule\[\\"https\\"\]"'
+! stdout 'FIXTURE-SECRET'
+! s3get 222222222222 live/acct-b/network-sg/terraform.tfstate $WORK/none
+! exists live/acct-b/network-sg/_tfcensus_override.tf
+
+# apply refuses without --yes when there is no terminal.
+! exec tfcensus move apply migrations/split.hcl
+stderr 'refusing to modify state without --yes'
+
+exec tfcensus move apply migrations/split.hcl --yes
+stdout 'Block split_network \(surgery\): applied, applied'
+! stdout 'FIXTURE-SECRET'
+! stderr 'FIXTURE-SECRET'
+s3get 222222222222 live/acct-b/network-sg/terraform.tfstate $WORK/sg.state
+grep 'terraform_data' $WORK/sg.state
+s3get 111111111111 live/acct-a/network-endpoints/terraform.tfstate $WORK/endpoints.state
+
+# After the push, every unit plans clean against its real backend.
+cd live/acct-b/network-sg
+exec terragrunt run --tf-path terraform -- plan -detailed-exitcode -lock=false -input=false -no-color
+cd ../../acct-a/network-endpoints
+exec terragrunt run --tf-path terraform -- plan -detailed-exitcode -lock=false -input=false -no-color
+cd ../network
+exec terragrunt run --tf-path terraform -- plan -detailed-exitcode -lock=false -input=false -no-color
+cd $WORK/repo
+
+exec tfcensus move status migrations/split.hcl
+stdout 'live/acct-b/network-sg +destination +applied'
+stdout 'live/acct-a/network +source +applied'
+
+# A second apply skips the block.
+exec tfcensus move apply migrations/split.hcl --yes
+stdout 'applied, skipped'
+
+exec tfcensus move rollback migrations/split.hcl --yes
+stdout 'rolled-back'
+! stderr 'checksum'
+
+# The source is byte-identical to the original; the new units have no state again.
+s3get 111111111111 live/acct-a/network/terraform.tfstate $WORK/network.after
+cmp $WORK/network.orig $WORK/network.after
+! s3get 222222222222 live/acct-b/network-sg/terraform.tfstate $WORK/none
+! s3get 111111111111 live/acct-a/network-endpoints/terraform.tfstate $WORK/none
+
+# terraform reads the restored state: the DynamoDB digest matches and the lock is free.
+cd live/acct-a/network
+exec terragrunt run --tf-path terraform -- state list
+stdout 'terraform_data.sg'
+stdout 'module.endpoints.terraform_data.ep'
+cd $WORK/repo
+
+exec tfcensus move status migrations/split.hcl
+stdout 'Block split_network \(surgery\): pending'
+
+-- repo/root.hcl --
+locals {
+  account_id = read_terragrunt_config(find_in_parent_folders("account.hcl")).locals.id
+  endpoint   = get_env("AWS_ENDPOINT_URL")
+}
+
+remote_state {
+  backend = "s3"
+  generate = {
+    path      = "backend.tf"
+    if_exists = "overwrite_terragrunt"
+  }
+  config = {
+    bucket                  = "tfcensus-e2e-${local.account_id}"
+    key                     = "${path_relative_to_include()}/terraform.tfstate"
+    region                  = "us-east-1"
+    use_lockfile            = true
+    dynamodb_table          = local.account_id == "111111111111" ? "tfcensus-e2e-lock" : null
+    use_path_style          = true
+    skip_metadata_api_check = true
+    assume_role = {
+      role_arn = "arn:aws:iam::${local.account_id}:role/tfcensus-e2e"
+    }
+    endpoints = {
+      s3       = local.endpoint
+      sts      = local.endpoint
+      dynamodb = local.endpoint
+    }
+  }
+}
+-- repo/live/acct-a/account.hcl --
+locals {
+  id = "111111111111"
+}
+-- repo/live/acct-b/account.hcl --
+locals {
+  id = "222222222222"
+}
+-- repo/live/acct-a/network/terragrunt.hcl --
+include "root" {
+  path = find_in_parent_folders("root.hcl")
+}
+-- repo/live/acct-a/network/main.tf --
+resource "terraform_data" "vpc" {
+  input = "vpc-e2e"
+}
+-- repo/live/acct-a/network/moved.tf.before --
+resource "terraform_data" "sg" {
+  input = "FIXTURE-SECRET"
+}
+
+resource "terraform_data" "rule" {
+  for_each = toset(["https", "ssh"])
+  input    = each.key
+}
+
+module "endpoints" {
+  source = "./modules/endpoints"
+}
+-- repo/live/acct-a/network/modules/endpoints/main.tf --
+resource "terraform_data" "ep" {
+  input = "vpce-e2e"
+}
+-- repo/live/acct-a/network-endpoints/modules/endpoints/main.tf --
+resource "terraform_data" "ep" {
+  input = "vpce-e2e"
+}
+-- repo/live/acct-a/network-endpoints/terragrunt.hcl --
+include "root" {
+  path = find_in_parent_folders("root.hcl")
+}
+-- repo/live/acct-a/network-endpoints/main.tf --
+module "endpoints" {
+  source = "./modules/endpoints"
+}
+-- repo/live/acct-b/network-sg/terragrunt.hcl --
+include "root" {
+  path = find_in_parent_folders("root.hcl")
+}
+-- repo/live/acct-b/network-sg/main.tf --
+resource "terraform_data" "sg" {
+  input = "FIXTURE-SECRET"
+}
+
+resource "terraform_data" "rule" {
+  for_each = toset(["https", "ssh"])
+  input    = each.key
+}
+-- repo/migrations/split.hcl --
+migration "units" "split_network" {
+  from = "live/acct-a/network"
+  to = {
+    "live/acct-b/network-sg"        = ["terraform_data.sg", "terraform_data.rule[*]"]
+    "live/acct-a/network-endpoints" = ["module.endpoints"]
+  }
+}
