@@ -1,0 +1,45 @@
+{
+  "schema_version": "1",
+  "tool": "tfcensus",
+  "version": "test",
+  "generated_at": "2026-11-12T09:00:00Z",
+  "data": {
+    "instances": 3,
+    "double_managed": 2,
+    "units": [
+      {
+        "unit": "tf-scan/iam",
+        "workspace": "default",
+        "instances": 2,
+        "double_managed": 1,
+        "accounts": [
+          "111111111111"
+        ],
+        "regions": null,
+        "types": [
+          {
+            "type": "aws_iam_role",
+            "count": 2
+          }
+        ]
+      },
+      {
+        "unit": "tf-scan/iam-dup",
+        "workspace": "default",
+        "instances": 1,
+        "double_managed": 1,
+        "accounts": [
+          "111111111111"
+        ],
+        "regions": null,
+        "types": [
+          {
+            "type": "aws_iam_role",
+            "count": 1
+          }
+        ]
+      }
+    ]
+  },
+  "errors": []
+}

@@ -1,0 +1,60 @@
+:root {
+  --bg: #ffffff;
+  --fg: #1d2330;
+  --muted: #5b6475;
+  --line: #d9dde5;
+  --head: #f3f5f8;
+  --accent: #3b5bdb;
+  --warn: #c2410c;
+  --bad: #b42318;
+  --ok: #2f7d32;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14171f;
+    --fg: #e6e9ef;
+    --muted: #9aa3b5;
+    --line: #2c3240;
+    --head: #1c212c;
+    --accent: #8ea4ff;
+    --warn: #f59e0b;
+    --bad: #f87171;
+    --ok: #6fcf74;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 1.5rem max(1rem, env(safe-area-inset-left));
+  background: var(--bg);
+  color: var(--fg);
+  font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+main { max-width: 72rem; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin: 0 0 0.25rem; }
+h2 { font-size: 1.2rem; margin: 2rem 0 0.5rem; border-bottom: 1px solid var(--line); padding-bottom: 0.25rem; }
+h3 { font-size: 1rem; margin: 1.25rem 0 0.5rem; }
+p.meta, p.note { color: var(--muted); margin: 0.25rem 0; }
+nav { margin: 1rem 0; display: flex; gap: 1rem; flex-wrap: wrap; }
+a { color: var(--accent); }
+.wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { border-bottom: 1px solid var(--line); padding: 0.3rem 0.5rem; text-align: left; vertical-align: top; }
+th { background: var(--head); font-weight: 600; white-space: nowrap; }
+td.num, th.num { text-align: right; }
+code { font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; word-break: break-all; }
+.filters { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; margin: 0.5rem 0; }
+.filters label { display: flex; gap: 0.35rem; align-items: center; }
+select { font: inherit; padding: 0.15rem 0.3rem; background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 4px; }
+.count { color: var(--muted); }
+.cat-unmanaged, .sev-high, .st-failed { color: var(--bad); font-weight: 600; }
+.cat-double-managed, .sev-medium, .st-drifted { color: var(--warn); font-weight: 600; }
+.cat-managed, .st-clean { color: var(--ok); }
+svg.trend { width: 100%; max-width: 44rem; height: auto; }
+svg.trend text { fill: var(--muted); font-size: 11px; }
+svg.trend .grid { stroke: var(--line); stroke-width: 1; }
+svg.trend .series { fill: none; stroke-width: 2; }
+.legend { display: flex; gap: 1rem; flex-wrap: wrap; color: var(--muted); font-size: 12px; }
+.legend span::before { content: ""; display: inline-block; width: 0.8rem; height: 0.2rem; margin-right: 0.3rem; vertical-align: middle; background: currentColor; }

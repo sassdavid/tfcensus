@@ -34,7 +34,10 @@ stdout carries data, stderr carries logs. Use --format json for scripting.
 * [tfcensus doctor](tfcensus_doctor.md)	 - Check AWS credentials and which inventory layers each account and region supports
 * [tfcensus drift](tfcensus_drift.md)	 - Find drift between the units' state and AWS
 * [tfcensus inventory](tfcensus_inventory.md)	 - Read each unit's state: versions, providers, resource counts, serial and lineage
+* [tfcensus mcp](tfcensus_mcp.md)	 - Serve units, inventory, whois, scan_summary, audit_findings and drift_summary to an MCP client over stdio
 * [tfcensus move](tfcensus_move.md)	 - Move resources between the states of Terragrunt units
+* [tfcensus notify](tfcensus_notify.md)	 - Publish saved scan, drift and audit reports to Slack, GitHub issues, Bitbucket or files
+* [tfcensus report](tfcensus_report.md)	 - Render saved scan, drift, audit and index files without collecting again
 * [tfcensus rules](tfcensus_rules.md)	 - Work with ownership rules
 * [tfcensus scan](tfcensus_scan.md)	 - Find AWS resources that no unit manages
 * [tfcensus units](tfcensus_units.md)	 - List units with their state backend, target account and region

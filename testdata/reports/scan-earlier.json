@@ -1,0 +1,31 @@
+{
+  "schema_version": "1",
+  "tool": "tfcensus",
+  "version": "dev",
+  "generated_at": "2026-11-03T12:00:00Z",
+  "data": {
+    "regions": [],
+    "accounts": [
+      {
+        "account": "111111111111",
+        "counts": {
+          "aws-managed": 5,
+          "derived": 1,
+          "double-managed": 0,
+          "ignored": 2,
+          "managed": 1,
+          "other-iac": 1,
+          "undetermined": 1,
+          "unmanaged": 3
+        },
+        "coverage": 25
+      }
+    ],
+    "findings": [],
+    "runs": [],
+    "coverage": null,
+    "warnings": [],
+    "cached": false
+  },
+  "errors": []
+}

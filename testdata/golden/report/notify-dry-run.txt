@@ -1,0 +1,10 @@
+github-issues  acme/infra-live
+    create  drift  live/dev/eu-west-1/app/s3       1 item(s)
+    create  drift  live/dev/eu-west-1/network/sg   1 item(s)
+    create  drift  live/prod/eu-west-1/app/queue   1 item(s)
+    create  drift  live/prod/eu-west-1/app/s3      1 item(s)
+    create  drift  live/prod/eu-west-1/data/cache  plan failed, 0 item(s)
+    create  drift  live/prod/eu-west-1/data/db     1 item(s)
+    create  drift  live/staging/eu-west-1/app/s3   1 item(s)
+
+no changes made (--dry-run-notify)

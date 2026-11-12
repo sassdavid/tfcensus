@@ -52,6 +52,7 @@ type globals struct {
 	outFormat render.Format
 	started   bool
 	closers   []io.Closer
+	mcpServe  serveFunc // tests serve the MCP server in-process
 }
 
 func (g *globals) close() {
@@ -121,6 +122,9 @@ stdout carries data, stderr carries logs. Use --format json for scripting.`,
 		newWhoisCmd(d, g),
 		newCodifyCmd(d, g),
 		newMoveCmd(d, g),
+		newReportCmd(d, g),
+		newNotifyCmd(d, g),
+		newMCPCmd(d, g),
 	)
 	return root, g
 }

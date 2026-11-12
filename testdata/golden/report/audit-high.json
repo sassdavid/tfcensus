@@ -1,0 +1,126 @@
+{
+  "schema_version": "1",
+  "tool": "tfcensus",
+  "version": "test",
+  "generated_at": "2026-11-12T09:00:00Z",
+  "data": {
+    "counts": {
+      "high": 10,
+      "info": 2,
+      "low": 8,
+      "medium": 10
+    },
+    "suppressed": 2,
+    "findings": [
+      {
+        "rule": "S3-VER",
+        "severity": "high",
+        "target": "s3://acme-audit-bad",
+        "bucket": "acme-audit-bad",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "versioning is suspended: an overwritten or deleted state can't be restored",
+        "remediation": "Enable versioning, so an overwritten or deleted state can be restored."
+      },
+      {
+        "rule": "S3-KMSPOL",
+        "severity": "high",
+        "target": "s3://acme-audit-legacy",
+        "bucket": "acme-audit-legacy",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "key arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-open-4000-8000-000000000003 allows kms:Decrypt to principals in any account (statement AllowDecryptAnywhere)",
+        "remediation": "Remove kms:Decrypt for Principal \"*\", or restrict it with aws:PrincipalAccount or aws:PrincipalOrgID."
+      },
+      {
+        "rule": "S3-PAB",
+        "severity": "high",
+        "target": "s3://acme-audit-bad",
+        "bucket": "acme-audit-bad",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "bucket: BlockPublicAcls, IgnorePublicAcls, BlockPublicPolicy, RestrictPublicBuckets off",
+        "remediation": "Turn on all four public access block settings on the bucket and the account."
+      },
+      {
+        "rule": "S3-TLS",
+        "severity": "high",
+        "target": "s3://acme-audit-bad",
+        "bucket": "acme-audit-bad",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "the bucket has no policy, so plain HTTP requests aren't denied",
+        "remediation": "Add a Deny for Principal \"*\", Action s3:*, the bucket and bucket/* resources, with Bool aws:SecureTransport false as the only condition."
+      },
+      {
+        "rule": "S3-TLS",
+        "severity": "high",
+        "target": "s3://acme-audit-legacy",
+        "bucket": "acme-audit-legacy",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "plain HTTP isn't denied for s3:GetObject by anonymous, another account, the bucket's account, arn:aws:iam::111111111111:root",
+        "remediation": "Add a Deny for Principal \"*\", Action s3:*, the bucket and bucket/* resources, with Bool aws:SecureTransport false as the only condition."
+      },
+      {
+        "rule": "LK-STALE",
+        "severity": "high",
+        "target": "dynamodb://eu-west-1/acme-audit-locks-bad",
+        "table": "acme-audit-locks-bad",
+        "key": "acme-audit-bad/legacy/terraform.tfstate",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "lock held for 3d3h, over 24h",
+        "remediation": "Check that no run holds the lock, then release it with terraform force-unlock."
+      },
+      {
+        "rule": "LK-STALE",
+        "severity": "high",
+        "target": "s3://acme-audit-bad/legacy/terraform.tfstate.tflock",
+        "bucket": "acme-audit-bad",
+        "key": "legacy/terraform.tfstate.tflock",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "lock file is 3d0h old, over 24h",
+        "remediation": "Check that no run holds the lock, then release it with terraform force-unlock."
+      },
+      {
+        "rule": "FL-LINEAGE",
+        "severity": "high",
+        "target": "tf-audit/app",
+        "bucket": "acme-audit-good",
+        "key": "app/terraform.tfstate",
+        "unit": "tf-audit/app",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "lineage 1a2b3c4d-0000-4000-8000-000000000002 is shared by tf-audit/app (s3://acme-audit-good/app/terraform.tfstate) and tf-audit/copy (s3://acme-audit-good/copy/terraform.tfstate)",
+        "remediation": "One of the states is a copy. Keep the one the unit applies to and archive the other."
+      },
+      {
+        "rule": "FL-LINEAGE",
+        "severity": "high",
+        "target": "tf-audit/copy",
+        "bucket": "acme-audit-good",
+        "key": "copy/terraform.tfstate",
+        "unit": "tf-audit/copy",
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "reason": "lineage 1a2b3c4d-0000-4000-8000-000000000002 is shared by tf-audit/app (s3://acme-audit-good/app/terraform.tfstate) and tf-audit/copy (s3://acme-audit-good/copy/terraform.tfstate)",
+        "remediation": "One of the states is a copy. Keep the one the unit applies to and archive the other."
+      },
+      {
+        "rule": "FL-DOUBLE",
+        "severity": "high",
+        "target": "tf-audit/app",
+        "unit": "tf-audit/app",
+        "reason": "aws_iam_role arn:aws:iam::111111111111:role/acme-audit-app is managed by tf-audit/app (aws_iam_role.app) and tf-audit/copy (aws_iam_role.app) (matched on arn)",
+        "remediation": "Remove the resource from all but one state with terraform state rm, or a removed block."
+      }
+    ],
+    "incomplete": [],
+    "warnings": [
+      "audit.suppress[1] (check S3-LOG) expired on 2026-10-31 and no longer applies: 1 finding(s) reported again"
+    ]
+  },
+  "errors": []
+}

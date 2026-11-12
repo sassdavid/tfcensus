@@ -6,7 +6,7 @@ reports drift. It tells which unit manages a resource, writes import blocks for 
 manages, and moves resources between units. It is read-only by default: only `move apply`,
 `move rollback` and `move mark-applied` write.
 
-tfcensus is pre-release. Milestones M0 to M9 are in place: `units` lists units and their
+tfcensus is pre-release. Milestones M0 to M10 are in place: `units` lists units and their
 backends, `doctor` checks credentials and inventory layers, `inventory` reads each unit's state
 from S3 and prints identifiers and counts, never attribute values, and `audit backend` checks state
 buckets, lock tables and the fleet of states, with SARIF output. `scan` finds AWS resources that no
@@ -15,7 +15,10 @@ units ([docs/ci/drift.yml](docs/ci/drift.yml) is an example workflow). `whois` n
 that manage an ARN or id, offline from a saved index too, and `codify` turns a scan report into
 import blocks for one unit. `move` runs migration files that move resources between the states of
 units, in other accounts too, verified with plans and rolled back from S3 object versions
-([docs/runbooks/move.md](docs/runbooks/move.md)). The plan is in
+([docs/runbooks/move.md](docs/runbooks/move.md)). `notify` publishes saved scan, drift and audit
+reports to Slack, GitHub issues, Bitbucket pull request comments or files
+([docs/runbooks/notify.md](docs/runbooks/notify.md)), `report` renders them offline, and `mcp`
+serves them read-only to agents such as Claude Code. The plan is in
 [docs/plan](docs/plan/) and the CLI reference in [docs/cli](docs/cli/tfcensus.md).
 
 ## Install
@@ -40,6 +43,24 @@ gh attestation verify --owner sassdavid tfcensus_<version>_<os>_<arch>.tar.gz
 ```
 
 The read-only IAM policy tfcensus needs is in [docs/iam](docs/iam/).
+
+## HTML report
+
+`tfcensus report html` turns the JSON that `scan`, `drift` and `audit` print with `--format json`
+into one HTML file. The CSS and JavaScript are inside the file, and its Content-Security-Policy
+blocks every network request, so it opens offline and can be kept as a CI artifact.
+
+```sh
+tfcensus scan --format json > scan.json
+tfcensus drift --format json > drift.json
+tfcensus audit backend --format json > audit.json
+tfcensus report html --from scan.json --from drift.json --from audit.json -o census.html
+```
+
+The scan section has per-account counts and a findings table you can filter by account, category
+and type. Pass two or more scan files from different days to get a coverage trend. Drift shows
+attribute paths, never values, even when the drift JSON was written with `--show-attributes`.
+The same input files always give the same bytes, so the file can be compared or committed.
 
 ## Configuration
 

@@ -45,6 +45,8 @@ identical=(
   internal/execx/procattr_unix.go
   internal/execx/procattr_windows.go
   internal/execx/redact.go
+  internal/httpx/httpx.go
+  internal/httpx/httpx_test.go
   internal/mcpkit/doc.go
   internal/mcpkit/mcpkit_test.go
   internal/mcpkit/page.go

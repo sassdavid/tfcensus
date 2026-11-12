@@ -1,0 +1,69 @@
+{
+  "schema_version": "1",
+  "tool": "tfcensus",
+  "version": "test",
+  "generated_at": "2026-11-12T09:00:00Z",
+  "data": {
+    "mode": "refresh-only",
+    "summary": {
+      "units": 12,
+      "drifted": 6,
+      "clean": 4,
+      "failed": 1,
+      "early_exit": 0,
+      "excluded": 1,
+      "resources": 6,
+      "reverts": 0,
+      "hidden": 2,
+      "groups": 4
+    },
+    "units": [
+      {
+        "path": "live/dev/eu-west-1/app/iam",
+        "status": "clean",
+        "drifted": 0,
+        "reverts": 0,
+        "hidden": 1,
+        "pending": 0,
+        "outputs": [
+          "role_tags"
+        ]
+      },
+      {
+        "path": "live/dev/eu-west-1/app/lambda",
+        "status": "clean",
+        "drifted": 0,
+        "reverts": 0,
+        "hidden": 1,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/prod/eu-west-1/network/vpc",
+        "status": "clean",
+        "drifted": 0,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/staging/eu-west-1/network/vpc",
+        "status": "clean",
+        "drifted": 0,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      }
+    ],
+    "changes": [],
+    "warnings": []
+  },
+  "errors": [
+    {
+      "target": "live/prod/eu-west-1/data/cache",
+      "message": "plan failed: run error"
+    }
+  ]
+}

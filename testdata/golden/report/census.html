@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:">
+<meta name="generator" content="tfcensus test">
+<title>tfcensus report</title>
+<style>:root {
+  --bg: #ffffff;
+  --fg: #1d2330;
+  --muted: #5b6475;
+  --line: #d9dde5;
+  --head: #f3f5f8;
+  --accent: #3b5bdb;
+  --warn: #c2410c;
+  --bad: #b42318;
+  --ok: #2f7d32;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14171f;
+    --fg: #e6e9ef;
+    --muted: #9aa3b5;
+    --line: #2c3240;
+    --head: #1c212c;
+    --accent: #8ea4ff;
+    --warn: #f59e0b;
+    --bad: #f87171;
+    --ok: #6fcf74;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 1.5rem max(1rem, env(safe-area-inset-left));
+  background: var(--bg);
+  color: var(--fg);
+  font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+main { max-width: 72rem; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin: 0 0 0.25rem; }
+h2 { font-size: 1.2rem; margin: 2rem 0 0.5rem; border-bottom: 1px solid var(--line); padding-bottom: 0.25rem; }
+h3 { font-size: 1rem; margin: 1.25rem 0 0.5rem; }
+p.meta, p.note { color: var(--muted); margin: 0.25rem 0; }
+nav { margin: 1rem 0; display: flex; gap: 1rem; flex-wrap: wrap; }
+a { color: var(--accent); }
+.wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { border-bottom: 1px solid var(--line); padding: 0.3rem 0.5rem; text-align: left; vertical-align: top; }
+th { background: var(--head); font-weight: 600; white-space: nowrap; }
+td.num, th.num { text-align: right; }
+code { font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; word-break: break-all; }
+.filters { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; margin: 0.5rem 0; }
+.filters label { display: flex; gap: 0.35rem; align-items: center; }
+select { font: inherit; padding: 0.15rem 0.3rem; background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 4px; }
+.count { color: var(--muted); }
+.cat-unmanaged, .sev-high, .st-failed { color: var(--bad); font-weight: 600; }
+.cat-double-managed, .sev-medium, .st-drifted { color: var(--warn); font-weight: 600; }
+.cat-managed, .st-clean { color: var(--ok); }
+svg.trend { width: 100%; max-width: 44rem; height: auto; }
+svg.trend text { fill: var(--muted); font-size: 11px; }
+svg.trend .grid { stroke: var(--line); stroke-width: 1; }
+svg.trend .series { fill: none; stroke-width: 2; }
+.legend { display: flex; gap: 1rem; flex-wrap: wrap; color: var(--muted); font-size: 12px; }
+.legend span::before { content: ""; display: inline-block; width: 0.8rem; height: 0.2rem; margin-right: 0.3rem; vertical-align: middle; background: currentColor; }
+</style>
+</head>
+<body data-ready="no">
+<main>
+<h1>tfcensus report</h1>
+<p class="meta">Newest result 2026-11-10 12:00 UTC, written by tfcensus test.</p>
+<p class="meta">Inputs: <code>scan-earlier.json</code> (scan, 2026-11-03 12:00 UTC) <code>tf-audit.json</code> (audit, 2026-11-10 12:00 UTC) <code>drift-values.json</code> (drift, 2026-11-10 12:00 UTC) <code>scan.json</code> (scan, 2026-11-10 12:00 UTC)</p>
+<nav><a href="#scan">Scan</a><a href="#drift">Drift</a><a href="#audit">Backend audit</a></nav>
+
+<section id="scan">
+<h2>Scan</h2>
+<p class="meta">Scan of 2026-11-10 12:00 UTC. Coverage is managed resources out of managed, double-managed and unmanaged ones.</p>
+<div class="wrap"><table>
+<thead><tr><th>Account</th><th class="num">managed</th><th class="num">double-managed</th><th class="num">unmanaged</th><th class="num">other-iac</th><th class="num">aws-managed</th><th class="num">derived</th><th class="num">ignored</th><th class="num">undetermined</th><th class="num">coverage</th></tr></thead>
+<tbody>
+<tr><td><code>111111111111</code></td><td class="num">6</td><td class="num">1</td><td class="num">5</td><td class="num">1</td><td class="num">5</td><td class="num">1</td><td class="num">2</td><td class="num">1</td><td class="num">58.3%</td></tr>
+<tr><th>total</th><th class="num">6</th><th class="num">1</th><th class="num">5</th><th class="num">1</th><th class="num">5</th><th class="num">1</th><th class="num">2</th><th class="num">1</th><th class="num">58.3%</th></tr>
+</tbody>
+</table></div>
+
+<h3>Coverage trend</h3>
+<svg class="trend" viewBox="0 0 640 220" role="img" aria-label="Coverage per scan">
+<line class="grid" x1="44" x2="624" y1="188.0" y2="188.0"></line><text x="38" y="188.0" text-anchor="end" dominant-baseline="middle">0%</text>
+<line class="grid" x1="44" x2="624" y1="144.0" y2="144.0"></line><text x="38" y="144.0" text-anchor="end" dominant-baseline="middle">25%</text>
+<line class="grid" x1="44" x2="624" y1="100.0" y2="100.0"></line><text x="38" y="100.0" text-anchor="end" dominant-baseline="middle">50%</text>
+<line class="grid" x1="44" x2="624" y1="56.0" y2="56.0"></line><text x="38" y="56.0" text-anchor="end" dominant-baseline="middle">75%</text>
+<line class="grid" x1="44" x2="624" y1="12.0" y2="12.0"></line><text x="38" y="12.0" text-anchor="end" dominant-baseline="middle">100%</text>
+<text x="44.0" y="208" text-anchor="middle">2026-11-03</text>
+<text x="624.0" y="208" text-anchor="middle">2026-11-10</text>
+<polyline class="series" stroke="#3b5bdb" points="44.0,144.0 624.0,85.3"></polyline>
+<circle cx="44.0" cy="144.0" r="3" fill="#3b5bdb"><title>total 25.0% on 2026-11-03</title></circle>
+<circle cx="624.0" cy="85.3" r="3" fill="#3b5bdb"><title>total 58.3% on 2026-11-10</title></circle>
+</svg>
+<div class="legend"><span style="color: #3b5bdb">total</span></div>
+
+<h3>Findings</h3>
+<p class="note">6 managed resources are counted above and not listed.</p>
+<div class="filters"><label>Account <select data-filter-for="scan-findings" data-key="account"><option value="">all</option><option>111111111111</option></select></label><label>Category <select data-filter-for="scan-findings" data-key="category"><option value="">all</option><option>aws-managed</option><option>derived</option><option>double-managed</option><option>ignored</option><option>other-iac</option><option>undetermined</option><option>unmanaged</option></select></label><label>Type <select data-filter-for="scan-findings" data-key="type"><option value="">all</option><option>AWS::EC2::Instance</option><option>AWS::EC2::InternetGateway</option><option>AWS::EC2::KeyPair</option><option>AWS::EC2::NetworkInterface</option><option>AWS::EC2::SecurityGroup</option><option>AWS::EC2::VPC</option><option>AWS::ElasticLoadBalancingV2::ListenerRule</option><option>AWS::IAM::Role</option><option>AWS::IAM::User</option><option>AWS::KMS::Key</option><option>AWS::Logs::LogGroup</option><option>AWS::S3::Bucket</option><option>AWS::SQS::Queue</option></select></label><span class="count" data-count-for="scan-findings"></span></div>
+<div class="wrap"><table id="scan-findings" data-filterable>
+<thead><tr><th>Account</th><th>Region</th><th>Category</th><th>Type</th><th>ARN or ID</th><th>Owner</th><th>Rule</th><th>Reason</th><th>Managed by</th></tr></thead>
+<tbody>
+<tr data-account="111111111111" data-category="double-managed" data-type="AWS::IAM::Role"><td><code>111111111111</code></td><td>global</td><td class="cat-double-managed">double-managed</td><td>AWS::IAM::Role</td><td><code>arn:aws:iam::111111111111:role/acme-shared</code><br>acme-shared</td><td></td><td><code>match/double-managed</code></td><td>managed by aws_iam_role.shared and aws_iam_role.shared in different states</td><td>tf-scan/iam aws_iam_role.shared, tf-scan/iam-dup aws_iam_role.shared</td></tr>
+<tr data-account="111111111111" data-category="unmanaged" data-type="AWS::IAM::Role"><td><code>111111111111</code></td><td>global</td><td class="cat-unmanaged">unmanaged</td><td>AWS::IAM::Role</td><td><code>arn:aws:iam::111111111111:role/clickops-admin</code><br>clickops-admin</td><td></td><td><code>rules/no-match</code></td><td>no state manages it and no rule matches</td><td></td></tr>
+<tr data-account="111111111111" data-category="unmanaged" data-type="AWS::IAM::User"><td><code>111111111111</code></td><td>global</td><td class="cat-unmanaged">unmanaged</td><td>AWS::IAM::User</td><td><code>arn:aws:iam::111111111111:user/sandbox-user</code><br>sandbox-user</td><td></td><td><code>rules/no-match</code></td><td>no state manages it and no rule matches</td><td></td></tr>
+<tr data-account="111111111111" data-category="aws-managed" data-type="AWS::IAM::Role"><td><code>111111111111</code></td><td>global</td><td class="cat-aws-managed">aws-managed</td><td>AWS::IAM::Role</td><td><code>arn:aws:iam::111111111111:role/aws-service-role/support.amazonaws.com/AWSServiceRoleForSupport</code><br>AWSServiceRoleForSupport</td><td>aws</td><td><code>pack/aws-service/service-linked-role</code></td><td>service-linked role that an AWS service created</td><td></td></tr>
+<tr data-account="111111111111" data-category="unmanaged" data-type="AWS::EC2::SecurityGroup"><td><code>111111111111</code></td><td>eu-west-1</td><td class="cat-unmanaged">unmanaged</td><td>AWS::EC2::SecurityGroup</td><td><code>arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0c11c0b5000000003</code><br>clickops-debug</td><td></td><td><code>rules/no-match</code></td><td>no state manages it and no rule matches</td><td></td></tr>
+<tr data-account="111111111111" data-category="unmanaged" data-type="AWS::ElasticLoadBalancingV2::ListenerRule"><td><code>111111111111</code></td><td>eu-west-1</td><td class="cat-unmanaged">unmanaged</td><td>AWS::ElasticLoadBalancingV2::ListenerRule</td><td><code>arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener-rule/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2/9683b2d02a6cabee</code></td><td></td><td><code>rules/no-match</code></td><td>no state manages it and no rule matches</td><td></td></tr>
+<tr data-account="111111111111" data-category="unmanaged" data-type="AWS::S3::Bucket"><td><code>111111111111</code></td><td>eu-west-1</td><td class="cat-unmanaged">unmanaged</td><td>AWS::S3::Bucket</td><td><code>arn:aws:s3:::acme-growth-experiments</code><br>acme-growth-experiments</td><td></td><td><code>rules/no-match</code></td><td>no state manages it and no rule matches</td><td></td></tr>
+<tr data-account="111111111111" data-category="other-iac" data-type="AWS::SQS::Queue"><td><code>111111111111</code></td><td>eu-west-1</td><td class="cat-other-iac">other-iac</td><td>AWS::SQS::Queue</td><td><code>arn:aws:sqs:eu-west-1:111111111111:billing-events</code><br>billing-events</td><td>cloudformation</td><td><code>pack/other-iac/cloudformation</code></td><td>tagged by a CloudFormation stack (CloudFormation, CDK, StackSets, Control Tower)</td><td></td></tr>
+<tr data-account="111111111111" data-category="aws-managed" data-type="AWS::EC2::InternetGateway"><td><code>111111111111</code></td><td>eu-west-1</td><td class="cat-aws-managed">aws-managed</td><td>AWS::EC2::InternetGateway</td><td><code>arn:aws:ec2:eu-west-1:111111111111:internet-gateway/igw-0def00000000000c3</code></td><td>aws</td><td><code>pack/aws-defaults/default-vpc-children</code></td><td>internet gateway, route table or DHCP options of the default VPC</td><td></td></tr>
+<tr data-account="111111111111" data-category="aws-managed" data-type="AWS::EC2::SecurityGroup"><td><code>111111111111</code></td><td>eu-west-1</td><td class="cat-aws-managed">aws-managed</td><td>AWS::EC2::SecurityGroup</td><td><code>arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0def00000000000b2</code><br>default</td><td>aws</td><td><code>pack/aws-defaults/default-security-group</code></td><td>default security group that AWS creates with every VPC</td><td></td></tr>
+<tr data-account="111111111111" data-category="aws-managed" data-type="AWS::EC2::VPC"><td><code>111111111111</code></td><td>eu-west-1</td><td class="cat-aws-managed">aws-managed</td><td>AWS::EC2::VPC</td><td><code>arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0def00000000000a1</code></td><td>aws</td><td><code>pack/aws-defaults/default-vpc</code></td><td>default VPC that AWS creates in every region</td><td></td></tr>
+<tr data-account="111111111111" data-category="aws-managed" data-type="AWS::KMS::Key"><td><code>111111111111</code></td><td>eu-west-1</td><td class="cat-aws-managed">aws-managed</td><td>AWS::KMS::Key</td><td><code>arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-aws0-4000-8000-000000000001</code></td><td>aws</td><td><code>pack/aws-service/aws-managed-kms-key</code></td><td>AWS managed KMS key (KeyManager AWS)</td><td></td></tr>
+<tr data-account="111111111111" data-category="derived" data-type="AWS::EC2::NetworkInterface"><td><code>111111111111</code></td><td>eu-west-1</td><td class="cat-derived">derived</td><td>AWS::EC2::NetworkInterface</td><td><code>arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0aa00000000000d4</code></td><td>aws</td><td><code>pack/derived/requester-managed-eni</code></td><td>network interface that a service manages (requester-managed or a service interface type)</td><td></td></tr>
+<tr data-account="111111111111" data-category="ignored" data-type="AWS::EC2::Instance"><td><code>111111111111</code></td><td>eu-west-1</td><td class="cat-ignored">ignored</td><td>AWS::EC2::Instance</td><td><code>arn:aws:ec2:eu-west-1:111111111111:instance/i-0aa00000000000e5</code></td><td>platform</td><td><code>user/sandbox</code></td><td>Sandbox experiments are cleaned up every week</td><td></td></tr>
+<tr data-account="111111111111" data-category="ignored" data-type="AWS::Logs::LogGroup"><td><code>111111111111</code></td><td>eu-west-1</td><td class="cat-ignored">ignored</td><td>AWS::Logs::LogGroup</td><td><code>arn:aws:logs:eu-west-1:111111111111:log-group:/aws/lambda/acme-api</code><br>/aws/lambda/acme-api</td><td></td><td><code>pack/ephemeral/managed-lambda-log-group</code></td><td>log group that Lambda created for a function a unit manages</td><td></td></tr>
+<tr data-account="111111111111" data-category="undetermined" data-type="AWS::EC2::KeyPair"><td><code>111111111111</code></td><td>eu-west-1</td><td class="cat-undetermined">undetermined</td><td>AWS::EC2::KeyPair</td><td><code>arn:aws:ec2:eu-west-1:111111111111:key-pair/key-0aa00000000000f6</code></td><td></td><td><code>match/no-type-mapping</code></td><td>no type mapping for AWS::EC2::KeyPair</td><td></td></tr>
+</tbody>
+</table></div>
+<p class="note">Warning: rule &#34;growth-trial&#34; is past its expires date and no longer matches</p>
+</section>
+
+
+<section id="drift">
+<h2>Drift</h2>
+<p class="meta">Drift run of 2026-11-10 12:00 UTC, refresh-only mode. Attribute paths only; values are never shown.</p>
+<div class="wrap"><table>
+<thead><tr><th class="num">Units</th><th class="num">Drifted</th><th class="num">Clean</th><th class="num">Failed</th><th class="num">Early exit</th><th class="num">Excluded</th><th class="num">Drifted resources</th><th class="num">Hidden</th></tr></thead>
+<tbody><tr><td class="num">12</td><td class="num">6</td><td class="num">4</td><td class="num">1</td><td class="num">0</td><td class="num">1</td><td class="num">6</td><td class="num">2</td></tr></tbody>
+</table></div>
+<h3>Units that aren't clean</h3>
+<div class="wrap"><table>
+<thead><tr><th>Unit</th><th>Account</th><th>Region</th><th>Status</th><th class="num">Drifted</th><th>Reason</th></tr></thead>
+<tbody>
+<tr><td><code>live/dev/eu-west-1/app/s3</code></td><td><code></code></td><td></td><td class="st-drifted">drifted</td><td class="num">1</td><td></td></tr>
+<tr><td><code>live/dev/eu-west-1/network/sg</code></td><td><code></code></td><td></td><td class="st-drifted">drifted</td><td class="num">1</td><td></td></tr>
+<tr><td><code>live/prod/eu-west-1/app/queue</code></td><td><code></code></td><td></td><td class="st-drifted">drifted</td><td class="num">1</td><td></td></tr>
+<tr><td><code>live/prod/eu-west-1/app/s3</code></td><td><code></code></td><td></td><td class="st-drifted">drifted</td><td class="num">1</td><td></td></tr>
+<tr><td><code>live/prod/eu-west-1/data/cache</code></td><td><code></code></td><td></td><td class="st-failed">failed</td><td class="num">0</td><td>run error</td></tr>
+<tr><td><code>live/prod/eu-west-1/data/db</code></td><td><code></code></td><td></td><td class="st-drifted">drifted</td><td class="num">1</td><td></td></tr>
+<tr><td><code>live/prod/eu-west-1/legacy</code></td><td><code></code></td><td></td><td class="st-excluded">excluded</td><td class="num">0</td><td>exclude block</td></tr>
+<tr><td><code>live/staging/eu-west-1/app/s3</code></td><td><code></code></td><td></td><td class="st-drifted">drifted</td><td class="num">1</td><td></td></tr>
+</tbody>
+</table></div>
+<h3>Drifted resources</h3>
+<div class="filters"><label>Unit <select data-filter-for="drift-changes" data-key="unit"><option value="">all</option><option>live/dev/eu-west-1/app/s3</option><option>live/dev/eu-west-1/network/sg</option><option>live/prod/eu-west-1/app/queue</option><option>live/prod/eu-west-1/app/s3</option><option>live/prod/eu-west-1/data/db</option><option>live/staging/eu-west-1/app/s3</option></select></label><span class="count" data-count-for="drift-changes"></span></div>
+<div class="wrap"><table id="drift-changes" data-filterable>
+<thead><tr><th>Unit</th><th>Address</th><th>Type</th><th>Action</th><th>Attributes</th></tr></thead>
+<tbody>
+<tr data-unit="live/dev/eu-west-1/app/s3"><td><code>live/dev/eu-west-1/app/s3</code></td><td><code>aws_s3_bucket.assets</code></td><td>aws_s3_bucket</td><td>update</td><td><code>tags.CostCenter</code></td></tr>
+<tr data-unit="live/dev/eu-west-1/network/sg"><td><code>live/dev/eu-west-1/network/sg</code></td><td><code>aws_security_group.web</code></td><td>aws_security_group</td><td>update</td><td><code>ingress[0].cidr_blocks[1]</code></td></tr>
+<tr data-unit="live/prod/eu-west-1/app/queue"><td><code>live/prod/eu-west-1/app/queue</code></td><td><code>aws_sqs_queue.jobs</code></td><td>aws_sqs_queue</td><td>delete</td><td><code></code></td></tr>
+<tr data-unit="live/prod/eu-west-1/app/s3"><td><code>live/prod/eu-west-1/app/s3</code></td><td><code>aws_s3_bucket.assets</code></td><td>aws_s3_bucket</td><td>update</td><td><code>tags.CostCenter</code></td></tr>
+<tr data-unit="live/prod/eu-west-1/data/db"><td><code>live/prod/eu-west-1/data/db</code></td><td><code>aws_db_instance.main</code></td><td>aws_db_instance</td><td>update</td><td><code>instance_class, password</code></td></tr>
+<tr data-unit="live/staging/eu-west-1/app/s3"><td><code>live/staging/eu-west-1/app/s3</code></td><td><code>aws_s3_bucket.assets</code></td><td>aws_s3_bucket</td><td>update</td><td><code>tags.CostCenter</code></td></tr>
+</tbody>
+</table></div>
+</section>
+
+
+<section id="audit">
+<h2>Backend audit</h2>
+<p class="meta">Audit of 2026-11-10 12:00 UTC. 2 suppressed findings are not listed.</p>
+<div class="wrap"><table>
+<thead><tr><th class="num">high</th><th class="num">medium</th><th class="num">low</th><th class="num">info</th></tr></thead>
+<tbody><tr><td class="num">10</td><td class="num">10</td><td class="num">8</td><td class="num">2</td></tr></tbody>
+</table></div>
+<div class="filters"><label>Severity <select data-filter-for="audit-findings" data-key="severity"><option value="">all</option><option>high</option><option>info</option><option>low</option><option>medium</option></select></label><label>Account <select data-filter-for="audit-findings" data-key="account"><option value="">all</option><option>-</option><option>111111111111</option></select></label><label>Check <select data-filter-for="audit-findings" data-key="rule"><option value="">all</option><option>FL-ABSENT</option><option>FL-DOUBLE</option><option>FL-EMPTY</option><option>FL-LINEAGE</option><option>FL-ORPHAN</option><option>FL-PROV</option><option>FL-SECRET</option><option>FL-SIZE</option><option>FL-TFVER</option><option>LK-BOTH</option><option>LK-MD5</option><option>LK-MODE</option><option>LK-PITR</option><option>LK-STALE</option><option>S3-ENC</option><option>S3-KMSPOL</option><option>S3-LC</option><option>S3-LEGACY</option><option>S3-LOG</option><option>S3-OWN</option><option>S3-PAB</option><option>S3-REPL</option><option>S3-TLS</option><option>S3-VER</option></select></label><span class="count" data-count-for="audit-findings"></span></div>
+<div class="wrap"><table id="audit-findings" data-filterable>
+<thead><tr><th>Severity</th><th>Check</th><th>Target</th><th>Account</th><th>Reason</th><th>Remediation</th></tr></thead>
+<tbody>
+<tr data-severity="high" data-account="111111111111" data-rule="S3-VER"><td class="sev-high">high</td><td><code>S3-VER</code></td><td><code>s3://acme-audit-bad</code></td><td><code>111111111111</code></td><td>versioning is suspended: an overwritten or deleted state can&#39;t be restored</td><td>Enable versioning, so an overwritten or deleted state can be restored.</td></tr>
+<tr data-severity="high" data-account="111111111111" data-rule="S3-KMSPOL"><td class="sev-high">high</td><td><code>S3-KMSPOL</code></td><td><code>s3://acme-audit-legacy</code></td><td><code>111111111111</code></td><td>key arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-open-4000-8000-000000000003 allows kms:Decrypt to principals in any account (statement AllowDecryptAnywhere)</td><td>Remove kms:Decrypt for Principal &#34;*&#34;, or restrict it with aws:PrincipalAccount or aws:PrincipalOrgID.</td></tr>
+<tr data-severity="high" data-account="111111111111" data-rule="S3-PAB"><td class="sev-high">high</td><td><code>S3-PAB</code></td><td><code>s3://acme-audit-bad</code></td><td><code>111111111111</code></td><td>bucket: BlockPublicAcls, IgnorePublicAcls, BlockPublicPolicy, RestrictPublicBuckets off</td><td>Turn on all four public access block settings on the bucket and the account.</td></tr>
+<tr data-severity="high" data-account="111111111111" data-rule="S3-TLS"><td class="sev-high">high</td><td><code>S3-TLS</code></td><td><code>s3://acme-audit-bad</code></td><td><code>111111111111</code></td><td>the bucket has no policy, so plain HTTP requests aren&#39;t denied</td><td>Add a Deny for Principal &#34;*&#34;, Action s3:*, the bucket and bucket/* resources, with Bool aws:SecureTransport false as the only condition.</td></tr>
+<tr data-severity="high" data-account="111111111111" data-rule="S3-TLS"><td class="sev-high">high</td><td><code>S3-TLS</code></td><td><code>s3://acme-audit-legacy</code></td><td><code>111111111111</code></td><td>plain HTTP isn&#39;t denied for s3:GetObject by anonymous, another account, the bucket&#39;s account, arn:aws:iam::111111111111:root</td><td>Add a Deny for Principal &#34;*&#34;, Action s3:*, the bucket and bucket/* resources, with Bool aws:SecureTransport false as the only condition.</td></tr>
+<tr data-severity="high" data-account="111111111111" data-rule="LK-STALE"><td class="sev-high">high</td><td><code>LK-STALE</code></td><td><code>dynamodb://eu-west-1/acme-audit-locks-bad</code></td><td><code>111111111111</code></td><td>lock held for 3d3h, over 24h</td><td>Check that no run holds the lock, then release it with terraform force-unlock.</td></tr>
+<tr data-severity="high" data-account="111111111111" data-rule="LK-STALE"><td class="sev-high">high</td><td><code>LK-STALE</code></td><td><code>s3://acme-audit-bad/legacy/terraform.tfstate.tflock</code></td><td><code>111111111111</code></td><td>lock file is 3d0h old, over 24h</td><td>Check that no run holds the lock, then release it with terraform force-unlock.</td></tr>
+<tr data-severity="high" data-account="111111111111" data-rule="FL-LINEAGE"><td class="sev-high">high</td><td><code>FL-LINEAGE</code></td><td><code>tf-audit/app</code></td><td><code>111111111111</code></td><td>lineage 1a2b3c4d-0000-4000-8000-000000000002 is shared by tf-audit/app (s3://acme-audit-good/app/terraform.tfstate) and tf-audit/copy (s3://acme-audit-good/copy/terraform.tfstate)</td><td>One of the states is a copy. Keep the one the unit applies to and archive the other.</td></tr>
+<tr data-severity="high" data-account="111111111111" data-rule="FL-LINEAGE"><td class="sev-high">high</td><td><code>FL-LINEAGE</code></td><td><code>tf-audit/copy</code></td><td><code>111111111111</code></td><td>lineage 1a2b3c4d-0000-4000-8000-000000000002 is shared by tf-audit/app (s3://acme-audit-good/app/terraform.tfstate) and tf-audit/copy (s3://acme-audit-good/copy/terraform.tfstate)</td><td>One of the states is a copy. Keep the one the unit applies to and archive the other.</td></tr>
+<tr data-severity="high" data-account="-" data-rule="FL-DOUBLE"><td class="sev-high">high</td><td><code>FL-DOUBLE</code></td><td><code>tf-audit/app</code></td><td><code></code></td><td>aws_iam_role arn:aws:iam::111111111111:role/acme-audit-app is managed by tf-audit/app (aws_iam_role.app) and tf-audit/copy (aws_iam_role.app) (matched on arn)</td><td>Remove the resource from all but one state with terraform state rm, or a removed block.</td></tr>
+<tr data-severity="medium" data-account="111111111111" data-rule="S3-ENC"><td class="sev-medium">medium</td><td><code>S3-ENC</code></td><td><code>s3://acme-audit-bad</code></td><td><code>111111111111</code></td><td>default encryption is SSE-S3: anyone with s3:GetObject can read state, no key policy applies</td><td>Set default encryption to SSE-KMS with a customer-managed key, so key policy controls who can decrypt state.</td></tr>
+<tr data-severity="medium" data-account="111111111111" data-rule="S3-OWN"><td class="sev-medium">medium</td><td><code>S3-OWN</code></td><td><code>s3://acme-audit-bad</code></td><td><code>111111111111</code></td><td>object ownership is ObjectWriter: ACLs are on</td><td>Set object ownership to BucketOwnerEnforced, which turns ACLs off.</td></tr>
+<tr data-severity="medium" data-account="111111111111" data-rule="S3-REPL"><td class="sev-medium">medium</td><td><code>S3-REPL</code></td><td><code>s3://acme-audit-bad</code></td><td><code>111111111111</code></td><td>no replication: losing the region loses every state</td><td>Configure cross-region replication to a versioned, KMS-encrypted bucket.</td></tr>
+<tr data-severity="medium" data-account="111111111111" data-rule="S3-REPL"><td class="sev-medium">medium</td><td><code>S3-REPL</code></td><td><code>s3://acme-audit-legacy</code></td><td><code>111111111111</code></td><td>replica acme-audit-legacy-replica is in the same region; replica acme-audit-legacy-replica versioning is suspended; replica acme-audit-legacy-replica: default encryption is SSE-S3: anyone with s3:GetObject can read state, no key policy applies</td><td>Configure cross-region replication to a versioned, KMS-encrypted bucket.</td></tr>
+<tr data-severity="medium" data-account="111111111111" data-rule="S3-LC"><td class="sev-medium">medium</td><td><code>S3-LC</code></td><td><code>s3://acme-audit-bad</code></td><td><code>111111111111</code></td><td>no lifecycle rule expires noncurrent versions of every state: they are kept forever</td><td>Add a lifecycle rule with NoncurrentVersionExpiration of at least the policy&#39;s noncurrent_days.</td></tr>
+<tr data-severity="medium" data-account="111111111111" data-rule="S3-LC"><td class="sev-medium">medium</td><td><code>S3-LC</code></td><td><code>s3://acme-audit-legacy</code></td><td><code>111111111111</code></td><td>noncurrent versions expire after 3 days, under 7: a bad apply found late can&#39;t be rolled back</td><td>Add a lifecycle rule with NoncurrentVersionExpiration of at least the policy&#39;s noncurrent_days.</td></tr>
+<tr data-severity="medium" data-account="111111111111" data-rule="LK-PITR"><td class="sev-medium">medium</td><td><code>LK-PITR</code></td><td><code>dynamodb://eu-west-1/acme-audit-locks-bad</code></td><td><code>111111111111</code></td><td>encrypted with an AWS owned key, not KMS; point-in-time recovery is off</td><td>Turn on point-in-time recovery and encrypt the table with a KMS key.</td></tr>
+<tr data-severity="medium" data-account="111111111111" data-rule="FL-ORPHAN"><td class="sev-medium">medium</td><td><code>FL-ORPHAN</code></td><td><code>s3://acme-audit-bad/retired/terraform.tfstate</code></td><td><code>111111111111</code></td><td>no discovered unit resolves to this key</td><td>Delete or archive the state, or add the unit that owns it to the scanned repos.</td></tr>
+<tr data-severity="medium" data-account="111111111111" data-rule="FL-ORPHAN"><td class="sev-medium">medium</td><td><code>FL-ORPHAN</code></td><td><code>s3://acme-tfstate-orphans/lost/terraform.tfstate</code></td><td><code>111111111111</code></td><td>state in a discovered bucket that no unit uses</td><td>Delete or archive the state, or add the unit that owns it to the scanned repos.</td></tr>
+<tr data-severity="medium" data-account="111111111111" data-rule="FL-TFVER"><td class="sev-medium">medium</td><td><code>FL-TFVER</code></td><td><code>tf-audit/legacy</code></td><td><code>111111111111</code></td><td>written by 1.5.7, older than the policy&#39;s 1.10</td><td>Upgrade the unit&#39;s terraform or tofu to at least the policy&#39;s min_terraform_version.</td></tr>
+<tr data-severity="low" data-account="111111111111" data-rule="S3-LOG"><td class="sev-low">low</td><td><code>S3-LOG</code></td><td><code>s3://acme-audit-bad</code></td><td><code>111111111111</code></td><td>no server access logging and no CloudTrail trail records S3 data events for the bucket</td><td>Turn on server access logging or CloudTrail S3 data events for the bucket.</td></tr>
+<tr data-severity="low" data-account="111111111111" data-rule="S3-LEGACY"><td class="sev-low">low</td><td><code>S3-LEGACY</code></td><td><code>s3://acme-audit-legacy</code></td><td><code>111111111111</code></td><td>the policy has the RootAccess statement that terragrunt before 1.2 added</td><td>Remove the RootAccess statement that terragrunt before 1.2 added; the account root has access through IAM.</td></tr>
+<tr data-severity="low" data-account="-" data-rule="LK-MODE"><td class="sev-low">low</td><td><code>LK-MODE</code></td><td><code>tf-audit/legacy</code></td><td><code></code></td><td>locks with dynamodb_table acme-audit-locks-bad only</td><td>Set use_lockfile = true: dynamodb_table is deprecated since Terraform 1.11. Keep both during the migration.</td></tr>
+<tr data-severity="low" data-account="111111111111" data-rule="LK-MD5"><td class="sev-low">low</td><td><code>LK-MD5</code></td><td><code>dynamodb://eu-west-1/acme-audit-locks-bad</code></td><td><code>111111111111</code></td><td>digest for s3://acme-audit-bad/gone/terraform.tfstate, which doesn&#39;t exist</td><td>Delete the -md5 item: its state object no longer exists.</td></tr>
+<tr data-severity="low" data-account="111111111111" data-rule="FL-ABSENT"><td class="sev-low">low</td><td><code>FL-ABSENT</code></td><td><code>tf-audit/planned</code></td><td><code>111111111111</code></td><td>s3://acme-audit-good/planned/terraform.tfstate doesn&#39;t exist: never applied, or a wrong key</td><td>Apply the unit, or fix its backend key.</td></tr>
+<tr data-severity="low" data-account="111111111111" data-rule="FL-EMPTY"><td class="sev-low">low</td><td><code>FL-EMPTY</code></td><td><code>tf-audit/empty</code></td><td><code>111111111111</code></td><td>the state manages no resources</td><td>Destroy the unit&#39;s code and state, or check that the key is right.</td></tr>
+<tr data-severity="low" data-account="111111111111" data-rule="FL-PROV"><td class="sev-low">low</td><td><code>FL-PROV</code></td><td><code>tf-audit/legacy</code></td><td><code>111111111111</code></td><td>hashicorp/aws 4.67.0 in .terraform.lock.hcl is older than the policy&#39;s 5.0</td><td>Upgrade the provider in .terraform.lock.hcl with terraform init -upgrade.</td></tr>
+<tr data-severity="low" data-account="111111111111" data-rule="FL-SIZE"><td class="sev-low">low</td><td><code>FL-SIZE</code></td><td><code>tf-audit/legacy</code></td><td><code>111111111111</code></td><td>state is 4.8 KiB, over the policy&#39;s 0.004 MiB</td><td>Split the unit.</td></tr>
+<tr data-severity="info" data-account="-" data-rule="LK-BOTH"><td class="sev-info">info</td><td><code>LK-BOTH</code></td><td><code>tf-audit/app</code></td><td><code></code></td><td>locks with both use_lockfile and dynamodb_table acme-audit-locks-good</td><td>Both lock files and DynamoDB are configured, which is fine while migrating. Remove dynamodb_table afterwards.</td></tr>
+<tr data-severity="info" data-account="111111111111" data-rule="FL-SECRET"><td class="sev-info">info</td><td><code>FL-SECRET</code></td><td><code>tf-audit/secrets</code></td><td><code>111111111111</code></td><td>sensitive-looking attributes stored in plain state: aws_db_instance.main (password); aws_iam_access_key.ci (secret, ses_smtp_password_v4); random_password.db (bcrypt_hash, result)</td><td>Use write-only arguments or ephemeral resources, or keep the secret in a secrets manager.</td></tr>
+</tbody>
+</table></div>
+<p class="note">Warning: audit.suppress[1] (check S3-LOG) expired on 2026-10-31 and no longer applies: 1 finding(s) reported again</p>
+</section>
+
+</main>
+<script>"use strict";
+(function () {
+  function apply(table) {
+    var selects = document.querySelectorAll('select[data-filter-for="' + table.id + '"]');
+    var rows = table.tBodies[0].rows;
+    var shown = 0;
+    for (var i = 0; i < rows.length; i++) {
+      var row = rows[i];
+      var keep = true;
+      for (var j = 0; j < selects.length; j++) {
+        var want = selects[j].value;
+        if (want !== "" && row.getAttribute("data-" + selects[j].getAttribute("data-key")) !== want) {
+          keep = false;
+          break;
+        }
+      }
+      row.hidden = !keep;
+      if (keep) {
+        shown++;
+      }
+    }
+    var count = document.querySelector('[data-count-for="' + table.id + '"]');
+    if (count) {
+      count.textContent = shown + " of " + rows.length + " shown";
+    }
+  }
+  var tables = document.querySelectorAll("table[data-filterable]");
+  for (var t = 0; t < tables.length; t++) {
+    (function (table) {
+      var selects = document.querySelectorAll('select[data-filter-for="' + table.id + '"]');
+      for (var s = 0; s < selects.length; s++) {
+        selects[s].addEventListener("change", function () { apply(table); });
+      }
+      apply(table);
+    })(tables[t]);
+  }
+  document.body.setAttribute("data-ready", "ok");
+})();
+</script>
+</body>
+</html>

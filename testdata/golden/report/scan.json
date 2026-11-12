@@ -1,0 +1,171 @@
+{
+  "schema_version": "1",
+  "tool": "tfcensus",
+  "version": "test",
+  "generated_at": "2026-11-12T09:00:00Z",
+  "data": {
+    "source": {
+      "file": "scan.json",
+      "cache": false,
+      "created": "2026-11-10T12:00:00Z",
+      "stale": false
+    },
+    "accounts": [
+      {
+        "account": "111111111111",
+        "counts": {
+          "aws-managed": 5,
+          "derived": 1,
+          "double-managed": 1,
+          "ignored": 2,
+          "managed": 6,
+          "other-iac": 1,
+          "undetermined": 1,
+          "unmanaged": 5
+        },
+        "coverage": 58.333333333333336
+      }
+    ],
+    "matching": 6,
+    "types": [
+      {
+        "type": "AWS::IAM::Role",
+        "count": 2
+      },
+      {
+        "type": "AWS::EC2::SecurityGroup",
+        "count": 1
+      },
+      {
+        "type": "AWS::ElasticLoadBalancingV2::ListenerRule",
+        "count": 1
+      },
+      {
+        "type": "AWS::IAM::User",
+        "count": 1
+      },
+      {
+        "type": "AWS::S3::Bucket",
+        "count": 1
+      }
+    ],
+    "top": [
+      {
+        "account": "111111111111",
+        "category": "double-managed",
+        "cfn_type": "AWS::IAM::Role",
+        "tf_types": [
+          "aws_iam_role"
+        ],
+        "arn": "arn:aws:iam::111111111111:role/acme-shared",
+        "id": "AROAACMESHARED00002",
+        "name": "acme-shared",
+        "sources": [
+          "config"
+        ],
+        "reason": "managed by aws_iam_role.shared and aws_iam_role.shared in different states",
+        "rule": "match/double-managed",
+        "managed_by": [
+          {
+            "unit": "tf-scan/iam",
+            "workspace": "default",
+            "address": "aws_iam_role.shared"
+          },
+          {
+            "unit": "tf-scan/iam-dup",
+            "workspace": "default",
+            "address": "aws_iam_role.shared"
+          }
+        ]
+      },
+      {
+        "account": "111111111111",
+        "category": "unmanaged",
+        "cfn_type": "AWS::IAM::Role",
+        "tf_types": [
+          "aws_iam_role"
+        ],
+        "arn": "arn:aws:iam::111111111111:role/clickops-admin",
+        "id": "AROACLICKOPS0000004",
+        "name": "clickops-admin",
+        "created": "2026-08-12T15:30:00Z",
+        "sources": [
+          "config"
+        ],
+        "reason": "no state manages it and no rule matches",
+        "rule": "rules/no-match"
+      },
+      {
+        "account": "111111111111",
+        "category": "unmanaged",
+        "cfn_type": "AWS::IAM::User",
+        "tf_types": [
+          "aws_iam_user"
+        ],
+        "arn": "arn:aws:iam::111111111111:user/sandbox-user",
+        "id": "AIDASANDBOX00000005",
+        "name": "sandbox-user",
+        "sources": [
+          "config"
+        ],
+        "reason": "no state manages it and no rule matches",
+        "rule": "rules/no-match"
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "category": "unmanaged",
+        "cfn_type": "AWS::EC2::SecurityGroup",
+        "tf_types": [
+          "aws_security_group"
+        ],
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0c11c0b5000000003",
+        "id": "sg-0c11c0b5000000003",
+        "name": "clickops-debug",
+        "created": "2026-10-01T09:00:00Z",
+        "sources": [
+          "config"
+        ],
+        "reason": "no state manages it and no rule matches",
+        "rule": "rules/no-match"
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "category": "unmanaged",
+        "cfn_type": "AWS::ElasticLoadBalancingV2::ListenerRule",
+        "tf_types": [
+          "aws_lb_listener_rule"
+        ],
+        "arn": "arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener-rule/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2/9683b2d02a6cabee",
+        "id": "arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener-rule/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2/9683b2d02a6cabee",
+        "sources": [
+          "cloudcontrol"
+        ],
+        "reason": "no state manages it and no rule matches",
+        "rule": "rules/no-match"
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "category": "unmanaged",
+        "cfn_type": "AWS::S3::Bucket",
+        "tf_types": [
+          "aws_s3_bucket"
+        ],
+        "arn": "arn:aws:s3:::acme-growth-experiments",
+        "id": "acme-growth-experiments",
+        "name": "acme-growth-experiments",
+        "sources": [
+          "config"
+        ],
+        "reason": "no state manages it and no rule matches",
+        "rule": "rules/no-match"
+      }
+    ],
+    "warnings": [
+      "rule \"growth-trial\" is past its expires date and no longer matches"
+    ]
+  },
+  "errors": []
+}

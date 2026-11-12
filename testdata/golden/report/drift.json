@@ -1,0 +1,149 @@
+{
+  "schema_version": "1",
+  "tool": "tfcensus",
+  "version": "test",
+  "generated_at": "2026-11-12T09:00:00Z",
+  "data": {
+    "mode": "refresh-only",
+    "summary": {
+      "units": 12,
+      "drifted": 6,
+      "clean": 4,
+      "failed": 1,
+      "early_exit": 0,
+      "excluded": 1,
+      "resources": 6,
+      "reverts": 0,
+      "hidden": 2,
+      "groups": 4
+    },
+    "units": [
+      {
+        "path": "live/dev/eu-west-1/app/s3",
+        "status": "drifted",
+        "drifted": 1,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/dev/eu-west-1/network/sg",
+        "status": "drifted",
+        "drifted": 1,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/prod/eu-west-1/app/queue",
+        "status": "drifted",
+        "drifted": 1,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/prod/eu-west-1/app/s3",
+        "status": "drifted",
+        "drifted": 1,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/prod/eu-west-1/data/cache",
+        "status": "failed",
+        "reason": "run error",
+        "drifted": 0,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/prod/eu-west-1/data/db",
+        "status": "drifted",
+        "drifted": 1,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/staging/eu-west-1/app/s3",
+        "status": "drifted",
+        "drifted": 1,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      }
+    ],
+    "changes": [
+      {
+        "unit": "live/dev/eu-west-1/app/s3",
+        "address": "aws_s3_bucket.assets",
+        "type": "aws_s3_bucket",
+        "action": "update",
+        "attributes": [
+          "tags.CostCenter"
+        ]
+      },
+      {
+        "unit": "live/dev/eu-west-1/network/sg",
+        "address": "aws_security_group.web",
+        "type": "aws_security_group",
+        "action": "update",
+        "attributes": [
+          "ingress[0].cidr_blocks[1]"
+        ]
+      },
+      {
+        "unit": "live/prod/eu-west-1/app/queue",
+        "address": "aws_sqs_queue.jobs",
+        "type": "aws_sqs_queue",
+        "action": "delete",
+        "attributes": []
+      },
+      {
+        "unit": "live/prod/eu-west-1/app/s3",
+        "address": "aws_s3_bucket.assets",
+        "type": "aws_s3_bucket",
+        "action": "update",
+        "attributes": [
+          "tags.CostCenter"
+        ]
+      },
+      {
+        "unit": "live/prod/eu-west-1/data/db",
+        "address": "aws_db_instance.main",
+        "type": "aws_db_instance",
+        "action": "update",
+        "attributes": [
+          "instance_class",
+          "password"
+        ]
+      },
+      {
+        "unit": "live/staging/eu-west-1/app/s3",
+        "address": "aws_s3_bucket.assets",
+        "type": "aws_s3_bucket",
+        "action": "update",
+        "attributes": [
+          "tags.CostCenter"
+        ]
+      }
+    ],
+    "warnings": []
+  },
+  "errors": [
+    {
+      "target": "live/prod/eu-west-1/data/cache",
+      "message": "plan failed: run error"
+    }
+  ]
+}
