@@ -17,6 +17,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/cli"
 	"github.com/sassdavid/tfcensus/internal/testutil"
 	"github.com/sassdavid/tfcensus/internal/testutil/awstest"
+	"github.com/sassdavid/tfcensus/internal/testutil/sarifcheck"
 )
 
 const (
@@ -283,6 +284,7 @@ func TestSpec_audit_1(t *testing.T) {
 				out = stableJSON(res.stdout)
 			}
 			if format == "sarif" {
+				require.NoError(t, sarifcheck.Validate(out))
 				out = stableSARIF(t, res.stdout)
 			}
 			testutil.Golden(t, filepath.Join(auditGolden, "tf-audit."+ext), out)

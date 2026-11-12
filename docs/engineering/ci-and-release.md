@@ -20,7 +20,7 @@
 
 | Workflow | Trigger | Jobs |
 |---|---|---|
-| `ci.yml` | PR, push main | lint; test matrix (ubuntu, macos, windows) on the Go minor of the `go` directive; fuzz (`mise run fuzz`); docs-up-to-date; schema tests; goreleaser snapshot (6 archives, checksums, SBOMs, third-party notices in every archive) |
+| `ci.yml` | PR, push main | lint; test matrix (ubuntu, macos, windows) on the Go minor of the `go` directive; fuzz (`mise run fuzz`); docs-up-to-date; schema tests; SARIF dry run (upload-sarif with `CODEQL_ACTION_TEST_MODE` on each SARIF golden, so nothing is uploaded); goreleaser snapshot (6 archives, checksums, SBOMs, third-party notices in every archive) |
 | `security.yml` | PR, weekly | govulncheck (SARIF), zizmor, dependency review |
 | `live.yml` | nightly, manual | Inventory layers against moto and Floci service containers, pinned by digest (`mise run test:emulator`). **No AWS account needed.** The terraform/tofu/terragrunt e2e against moto joins it with the first e2e test. An optional real-AWS OIDC job is added only if a sandbox account ever exists |
 | `release-please.yml` | push main | opens or updates the release PR (version bump + CHANGELOG.md from Conventional Commits). On merge it creates the tag and a draft release (`draft` + `force-tag-creation`) |

@@ -14,6 +14,7 @@ exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml --format csv --refresh
 cmp stdout $WORK/golden/scan.csv
 
 exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml --format sarif --refresh
+sarifschema stdout
 cmp stdout $WORK/golden/scan.sarif
 
 exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml --format json --refresh

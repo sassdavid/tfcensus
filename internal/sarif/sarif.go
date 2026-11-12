@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/url"
+	"strings"
 )
 
 // Version and SchemaURI identify SARIF 2.1.0.
@@ -49,6 +51,7 @@ type Driver struct {
 type Rule struct {
 	ID                   string         `json:"id"`
 	ShortDescription     Message        `json:"shortDescription"`
+	FullDescription      Message        `json:"fullDescription,omitzero"`
 	Help                 Message        `json:"help"`
 	DefaultConfiguration Configuration  `json:"defaultConfiguration"`
 	Properties           map[string]any `json:"properties,omitempty"`
@@ -81,15 +84,42 @@ type Location struct {
 	PhysicalLocation PhysicalLocation `json:"physicalLocation"`
 }
 
-// PhysicalLocation names an artifact.
+// PhysicalLocation names an artifact and, when known, a line in it.
 type PhysicalLocation struct {
 	ArtifactLocation ArtifactLocation `json:"artifactLocation"`
+	Region           *Region          `json:"region,omitempty"`
+}
+
+// Region is a line of an artifact.
+type Region struct {
+	StartLine int `json:"startLine"` // 1-based
 }
 
 // ArtifactLocation is a URI, relative to the repository root or absolute (s3://, dynamodb://).
 type ArtifactLocation struct {
 	URI string `json:"uri"`
 }
+
+const fileScheme = "file"
+
+// FileURI returns the artifact URI of a slash-separated path. A relative path stays relative to
+// the repository root, as GitHub code scanning prefers; an absolute one (/src, C:/src, //host/share)
+// becomes a file URI, so Windows paths never reach the log as bare drive letters.
+func FileURI(path string) string {
+	switch {
+	case strings.HasPrefix(path, "//"):
+		host, rest, _ := strings.Cut(path[2:], "/")
+		return (&url.URL{Scheme: fileScheme, Host: host, Path: "/" + rest}).String()
+	case strings.HasPrefix(path, "/"):
+		return (&url.URL{Scheme: fileScheme, Path: path}).String()
+	case len(path) >= 3 && path[1] == ':' && path[2] == '/' && isLetter(path[0]):
+		return (&url.URL{Scheme: fileScheme, Path: "/" + path}).String()
+	default:
+		return (&url.URL{Path: path}).String()
+	}
+}
+
+func isLetter(c byte) bool { return 'a' <= c && c <= 'z' || 'A' <= c && c <= 'Z' }
 
 // Suppression records why a result is accepted.
 type Suppression struct {
