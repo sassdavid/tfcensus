@@ -74,7 +74,7 @@ goreleaser, chezmoi, k9s, golangci-lint.
 |---|---|---|
 | AWS core | `github.com/aws/aws-sdk-go-v2` · `/config` · `/credentials` · `github.com/aws/smithy-go` | v1.48.0 · v1.33.18 · v1.21.0 · v1.28.9 |
 | AWS services | `service/sts` v1.52.0 · `s3` v1.114.10 · `organizations` v1.62.8 · `resourceexplorer2` v1.33.12 · `configservice` v1.74.12 · `cloudcontrol` v1.38.12 · `ec2` v1.344.3 · `iam` v1.65.0 · `route53` v1.70.10 · `dynamodb` v1.74.0 · `kms` v1.62.6 · `elasticloadbalancingv2` v1.64.0 · `cloudtrail` v1.65.12 · `s3control` v1.80.1 | released together 2026-11-10 (the 3-day minimum age was waived at M5, and again for `cloudcontrol` at M6, so it matches the other service clients). `ec2`, `iam` and `route53` are new at M5, for the native inventory listers. `cloudcontrol` is new at M6, for the Cloud Control layer. `elasticloadbalancingv2` isn't imported yet |
-| Plan/schema structs | `github.com/hashicorp/terraform-json` | v0.29.0 (published 2026-10-06, still the latest on 2026-11-12). Added at M7 for drift. It brings `github.com/hashicorp/go-version` v1.9.0, the version relgap already uses (MPL-2.0) |
+| Plan/schema structs | `github.com/hashicorp/terraform-json` | v0.29.0 (published 2026-10-06, still the latest on 2026-11-12). Added at M7 for drift. It brings `github.com/hashicorp/go-version` v1.9.0, the version relgap already uses (MPL-2.0). codify imports go-version directly since M8 (same version, now a direct requirement) |
 | Exec terraform | `github.com/hashicorp/terraform-exec` | v0.26.0 |
 | HCL read/write | `github.com/hashicorp/hcl/v2` (+ `hclwrite`) | v2.25.0 |
 | cty | `github.com/zclconf/go-cty` | v1.20.0 |

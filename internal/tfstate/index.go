@@ -2,9 +2,6 @@ package tfstate
 
 import (
 	"cmp"
-	"maps"
-	"slices"
-	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws/arn"
 )
@@ -18,18 +15,6 @@ const (
 	KeyARN      KeyKind = "arn"
 	KeyID       KeyKind = "id"
 )
-
-func keyRank(k KeyKind) int {
-	return slices.Index([]KeyKind{KeyIdentity, KeyARN, KeyID}, k)
-}
-
-// Key is one way to find a managed resource instance. Every kind includes the resource type, so
-// an aws_sns_topic_policy whose arn is the topic's ARN doesn't collide with the topic.
-type Key struct {
-	Kind  KeyKind
-	Type  string
-	Value string // canonical identity, the ARN, or account/region/id
-}
 
 // Entry is one managed resource instance in the index, with identifiers only.
 type Entry struct {
@@ -49,32 +34,10 @@ type Entry struct {
 	Region        string            `json:"region,omitempty"`    // from identity, ARN, region attribute, or the unit's target
 }
 
-// Keys returns the entry's match keys, strongest first.
-func (e *Entry) Keys() []Key {
-	var keys []Key
-	if len(e.Identity) > 0 {
-		id := maps.Clone(e.Identity)
-		if _, ok := id["account_id"]; !ok && e.Account != "" {
-			id["account_id"] = e.Account
-		}
-		if _, ok := id["region"]; !ok && e.Region != "" {
-			id["region"] = e.Region
-		}
-		keys = append(keys, Key{Kind: KeyIdentity, Type: e.Type, Value: (&Instance{Identity: id}).IdentityString()})
-	}
-	if e.ARN != "" {
-		keys = append(keys, Key{Kind: KeyARN, Type: e.Type, Value: e.ARN})
-	}
-	// Without an account an ID such as a role name says nothing about which resource it is, and
-	// other providers' IDs (random_password's is always "none") aren't AWS resource IDs.
-	if e.ID != "" && e.Account != "" && awsProvider(e.Provider) {
-		keys = append(keys, Key{Kind: KeyID, Type: e.Type, Value: e.Account + "/" + e.Region + "/" + e.ID})
-	}
-	return keys
-}
-
-func awsProvider(source string) bool {
-	return source == "hashicorp/aws" || source == "hashicorp/awscc"
+// AWS reports whether the entry comes from the aws or awscc provider, whose IDs are AWS resource
+// IDs.
+func (e *Entry) AWS() bool {
+	return e.Provider == "hashicorp/aws" || e.Provider == "hashicorp/awscc"
 }
 
 // Ref points at one instance in one unit's state.
@@ -104,7 +67,8 @@ type IndexedUnit struct {
 	Instances int     `json:"instances"`
 }
 
-// Index maps every managed resource instance in the fleet to its match keys.
+// Index lists every managed resource instance in the fleet with its identifiers. DoubleManaged is
+// filled by the match package, which owns the match keys.
 type Index struct {
 	Units         []IndexedUnit   `json:"units"`
 	Entries       []Entry         `json:"entries"`
@@ -137,7 +101,7 @@ func BuildIndex(states []UnitState) *Index {
 		}
 		ix.Units = append(ix.Units, iu)
 	}
-	ix.DoubleManaged = doubleManaged(ix.Entries)
+	ix.DoubleManaged = []DoubleManaged{}
 	return ix
 }
 
@@ -175,58 +139,3 @@ func arnField(a *arn.ARN, f func(*arn.ARN) string) string {
 
 // globalARN reports whether a is an ARN without an account, such as an S3 bucket's.
 func globalARN(a *arn.ARN) bool { return a != nil && a.AccountID == "" }
-
-// doubleManaged finds keys that instances of more than one state share. When the same states
-// collide on several keys, only the strongest key is reported.
-func doubleManaged(entries []Entry) []DoubleManaged {
-	byKey := map[Key][]Ref{}
-	for i := range entries {
-		e := &entries[i]
-		ref := Ref{Unit: e.Unit, Workspace: e.Workspace, Address: e.Address}
-		for _, k := range e.Keys() {
-			byKey[k] = append(byKey[k], ref)
-		}
-	}
-	best := map[string]DoubleManaged{}
-	for k, refs := range byKey {
-		if !multipleStates(refs) {
-			continue
-		}
-		slices.SortFunc(refs, compareRefs)
-		group := refsKey(refs)
-		if cur, ok := best[group]; ok && keyRank(cur.Kind) <= keyRank(k.Kind) {
-			continue
-		}
-		best[group] = DoubleManaged{Kind: k.Kind, Type: k.Type, Key: k.Value, Refs: refs}
-	}
-	out := slices.Collect(maps.Values(best))
-	slices.SortFunc(out, func(a, b DoubleManaged) int {
-		return cmp.Or(strings.Compare(a.Type, b.Type), strings.Compare(a.Key, b.Key))
-	})
-	if out == nil {
-		out = []DoubleManaged{}
-	}
-	return out
-}
-
-func multipleStates(refs []Ref) bool {
-	for _, r := range refs[1:] {
-		if r.Unit != refs[0].Unit || r.Workspace != refs[0].Workspace {
-			return true
-		}
-	}
-	return false
-}
-
-func compareRefs(a, b Ref) int {
-	return cmp.Or(strings.Compare(a.Unit, b.Unit), strings.Compare(a.Workspace, b.Workspace),
-		strings.Compare(a.Address, b.Address))
-}
-
-func refsKey(refs []Ref) string {
-	parts := make([]string, len(refs))
-	for i, r := range refs {
-		parts[i] = r.Unit + "\x00" + r.Workspace + "\x00" + r.Address
-	}
-	return strings.Join(parts, "\x01")
-}

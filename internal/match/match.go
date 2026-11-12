@@ -37,6 +37,7 @@ const (
 	RuleNoMapping    = "match/no-type-mapping"
 	RuleNotInState   = "match/not-in-state"
 	RuleDoubleManage = "match/double-managed"
+	RuleAmbiguous    = "match/ambiguous"
 )
 
 // Result is the match for one live resource.
@@ -62,16 +63,32 @@ type Matcher struct {
 	// inline holds the rule keys of aws_security_group inline rules, which only match when no
 	// aws_security_group_rule does.
 	inline map[string][]tfstate.Ref
+	// byARN and byID find entries of any type by normalized ARN or raw TF id, for whois.
+	byARN   map[string][]tfstate.Ref
+	byID    map[string][]tfstate.Ref
+	entries map[tfstate.Ref]*tfstate.Entry
 }
 
 // New indexes the state entries for matching.
 func New(m *typemap.Map, ix *tfstate.Index) *Matcher {
-	mt := &Matcher{m: m, index: map[key][]tfstate.Ref{}, inline: map[string][]tfstate.Ref{}}
+	mt := &Matcher{
+		m: m, index: map[key][]tfstate.Ref{}, inline: map[string][]tfstate.Ref{},
+		byARN: map[string][]tfstate.Ref{}, byID: map[string][]tfstate.Ref{},
+		entries: make(map[tfstate.Ref]*tfstate.Entry, len(ix.Entries)),
+	}
 	for i := range ix.Entries {
 		e := &ix.Entries[i]
 		ref := tfstate.Ref{Unit: e.Unit, Workspace: e.Workspace, Address: e.Address}
+		mt.entries[ref] = e
 		for _, k := range mt.stateKeys(e) {
 			mt.index[k] = appendRef(mt.index[k], ref)
+		}
+		if e.ARN != "" {
+			a := typemap.NormalizeARN(e.ARN)
+			mt.byARN[a] = appendRef(mt.byARN[a], ref)
+		}
+		if e.ID != "" && e.AWS() {
+			mt.byID[e.ID] = appendRef(mt.byID[e.ID], ref)
 		}
 		for _, rk := range e.RuleKeys {
 			v := e.Account + "/" + e.Region + "/" + rk
@@ -140,7 +157,8 @@ func (mt *Matcher) stateKeys(e *tfstate.Entry) []key {
 		keys = append(keys, key{tfstate.KeyARN, e.Type, typemap.NormalizeARN(e.ARN)})
 	}
 	account := cmp.Or(e.Identity[typemap.IdentityAccountID], e.Account)
-	if e.ID != "" && account != "" {
+	// Other providers' IDs (random_password's is always "none") aren't AWS resource IDs.
+	if e.ID != "" && account != "" && e.AWS() {
 		keys = append(keys, key{tfstate.KeyID, e.Type, account + "/" + region + "/" + e.ID})
 	}
 	return keys
@@ -219,6 +237,32 @@ func fields(t *typemap.Type, r *inventory.CloudResource) func(string) string {
 	}
 }
 
+// liveIdentity returns the identity of r as TF type t, and false when a required attribute has
+// no value. Account and region come from r; a global type's region is empty.
+func liveIdentity(t *typemap.Type, r *inventory.CloudResource, lookup func(string) string) (map[string]string, bool) {
+	if len(t.IdentityAttrs) == 0 {
+		return nil, false
+	}
+	region := r.Region
+	if t.Global {
+		region = ""
+	}
+	id := map[string]string{}
+	for _, a := range t.IdentityAttrs {
+		var v string
+		switch a {
+		case typemap.IdentityAccountID:
+			v = r.Account
+		case typemap.IdentityRegion:
+			v = region
+		default:
+			v = lookup(a)
+		}
+		id[a] = v
+	}
+	return id, complete(t, id)
+}
+
 // liveKeys returns the keys of r as TF type t, strongest first.
 func liveKeys(t *typemap.Type, r *inventory.CloudResource) []key {
 	lookup := fields(t, r)
@@ -227,23 +271,8 @@ func liveKeys(t *typemap.Type, r *inventory.CloudResource) []key {
 		region = ""
 	}
 	var keys []key
-	if len(t.IdentityAttrs) > 0 {
-		id := map[string]string{}
-		for _, a := range t.IdentityAttrs {
-			var v string
-			switch a {
-			case typemap.IdentityAccountID:
-				v = r.Account
-			case typemap.IdentityRegion:
-				v = region
-			default:
-				v = lookup(a)
-			}
-			id[a] = v
-		}
-		if complete(t, id) {
-			keys = append(keys, key{tfstate.KeyIdentity, t.TF, canonical(id)})
-		}
+	if id, ok := liveIdentity(t, r, lookup); ok {
+		keys = append(keys, key{tfstate.KeyIdentity, t.TF, canonical(id)})
 	}
 	if r.ARN != "" {
 		keys = append(keys, key{tfstate.KeyARN, t.TF, typemap.NormalizeARN(r.ARN)})
@@ -254,6 +283,29 @@ func liveKeys(t *typemap.Type, r *inventory.CloudResource) []key {
 		}
 	}
 	return keys
+}
+
+// ImportIdentity returns the identity of r as TF type t for an import block: the attributes with
+// a value. It reports false when a required attribute has none.
+func ImportIdentity(t *typemap.Type, r *inventory.CloudResource) (map[string]string, bool) {
+	id, ok := liveIdentity(t, r, fields(t, r))
+	if !ok {
+		return nil, false
+	}
+	maps.DeleteFunc(id, func(_, v string) bool { return v == "" })
+	return id, true
+}
+
+// ImportID returns the TF id of r as TF type t, from the first of the type's id templates that
+// renders. It reports false when the type has no template or none renders.
+func ImportID(t *typemap.Type, r *inventory.CloudResource) (string, bool) {
+	lookup := fields(t, r)
+	for _, tmpl := range t.ID {
+		if v, ok := tmpl.Render(lookup); ok && v != "" {
+			return v, true
+		}
+	}
+	return "", false
 }
 
 // Match categorizes every live resource. Results keep the order of resources.

@@ -218,10 +218,12 @@ func resources(dir string, attrs map[string]string) ([]typemap.GenResource, erro
 		if parseErr != nil {
 			return nil, parseErr
 		}
+		required, listErr := listRequired(filepath.Join(dir, e.Name()), attrs)
+		if listErr != nil {
+			return nil, listErr
+		}
 		for _, r := range found {
-			if cur, ok := byTF[r.TF]; !ok || (cur.Identity == "" && r.Identity != "") {
-				byTF[r.TF] = r
-			}
+			merge(byTF, r, required[r.TF])
 		}
 	}
 	if len(byTF) == 0 {
@@ -234,11 +236,29 @@ func resources(dir string, attrs map[string]string) ([]typemap.GenResource, erro
 	return out, nil
 }
 
+// merge adds r to byTF. A registration with an identity wins, and a list registration marks the
+// type as listable with the list config's required attributes.
+func merge(byTF map[string]typemap.GenResource, r typemap.GenResource, required []string) {
+	cur, ok := byTF[r.TF]
+	list := r.List || cur.List
+	if !ok || (cur.Identity == "" && r.Identity != "") {
+		cur = r
+	}
+	cur.List = list
+	if list {
+		cur.ListRequired = required
+	}
+	byTF[r.TF] = cur
+}
+
 // resourceFuncs are the generated methods that register resources. List resources repeat a
 // resource's identity, so they fill in an identity the resource registration lacks.
 func resourceFuncs() []string {
-	return []string{"SDKResources", "FrameworkResources", "SDKListResources", "FrameworkListResources"}
+	return append([]string{"SDKResources", "FrameworkResources"}, listFuncs()...)
 }
+
+// listFuncs are the generated methods that register list resources.
+func listFuncs() []string { return []string{"SDKListResources", "FrameworkListResources"} }
 
 func servicePackage(path, service string, attrs map[string]string) ([]typemap.GenResource, error) {
 	f, err := parser.ParseFile(token.NewFileSet(), path, nil, parser.SkipObjectResolution)
@@ -252,6 +272,7 @@ func servicePackage(path, service string, attrs map[string]string) ([]typemap.Ge
 		if !ok || fd.Recv == nil || !slices.Contains(resourceFuncs(), fd.Name.Name) {
 			continue
 		}
+		list := slices.Contains(listFuncs(), fd.Name.Name)
 		ast.Inspect(fd.Body, func(n ast.Node) bool {
 			lit, isLit := n.(*ast.CompositeLit)
 			if !isLit {
@@ -262,6 +283,7 @@ func servicePackage(path, service string, attrs map[string]string) ([]typemap.Ge
 				errs = append(errs, fmt.Errorf("%s: %w", service, litErr))
 			}
 			if isResource {
+				r.List = list
 				out = append(out, r)
 				return false
 			}
@@ -419,6 +441,12 @@ func addIdentityAttr(r *typemap.GenResource, p ast.Expr, attrs map[string]string
 func resolveName(e ast.Expr, attrs map[string]string) string {
 	if s, ok := stringLit(e); ok {
 		return s
+	}
+	if id, ok := e.(*ast.Ident); ok {
+		if v, known := attrs[id.Name]; known {
+			return v
+		}
+		return unresolved
 	}
 	sel, ok := e.(*ast.SelectorExpr)
 	if !ok {

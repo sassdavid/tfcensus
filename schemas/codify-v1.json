@@ -1,0 +1,223 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sassdavid/tfcensus/schemas/codify-v1.json",
+  "title": "tfcensus codify --format json",
+  "description": "The report envelope (report-v1.json) with the import blocks codify wrote, the findings it skipped and the next steps.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "tool",
+    "version",
+    "generated_at",
+    "data",
+    "errors"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1"
+    },
+    "tool": {
+      "const": "tfcensus"
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "errors": {
+      "description": "Always empty: codify fails instead.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "target": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "target",
+        "selected",
+        "imports",
+        "lists",
+        "skipped",
+        "notes",
+        "into",
+        "files",
+        "next"
+      ],
+      "properties": {
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "source"
+          ],
+          "properties": {
+            "engine": {
+              "enum": [
+                "terraform",
+                "opentofu"
+              ]
+            },
+            "version": {
+              "type": "string"
+            },
+            "aws_provider": {
+              "type": "string"
+            },
+            "source": {
+              "description": "--target, or detected from the lock file and the binary.",
+              "enum": [
+                "--target",
+                "detected"
+              ]
+            }
+          }
+        },
+        "selected": {
+          "description": "Unmanaged findings that --types and --select picked.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "imports": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "address",
+              "type",
+              "name",
+              "account",
+              "by"
+            ],
+            "properties": {
+              "address": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string",
+                "pattern": "^[a-z_][a-z0-9_]*$"
+              },
+              "account": {
+                "type": "string"
+              },
+              "region": {
+                "type": "string"
+              },
+              "arn": {
+                "type": "string"
+              },
+              "cloud_id": {
+                "type": "string"
+              },
+              "by": {
+                "enum": [
+                  "identity",
+                  "id"
+                ]
+              },
+              "identity": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "id": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "lists": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "name"
+            ],
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "region": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "skipped": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "key",
+              "type",
+              "reason"
+            ],
+            "properties": {
+              "key": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "into": {
+          "type": "string"
+        },
+        "files": {
+          "description": "File names written into the directory.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "next": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

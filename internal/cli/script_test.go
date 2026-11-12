@@ -29,6 +29,8 @@ const (
 	scriptDir     = "../../testdata/script"
 	cassetteDir   = "../../testdata/cassettes"
 	driftFixtures = "../../testdata/drift"
+	whoisFixtures = "../../testdata/whois"
+	codifyFixture = "../../testdata/codify"
 )
 
 // Test-only environment read by the tfcensus command of the test binary.
@@ -146,6 +148,16 @@ func scriptParams(t *testing.T, files ...string) testscript.Params {
 				return err
 			}
 			env.Setenv("DRIFT", driftDir)
+			whoisDir, err := filepath.Abs(whoisFixtures)
+			if err != nil {
+				return err
+			}
+			env.Setenv("WHOIS", whoisDir)
+			codifyDir, err := filepath.Abs(codifyFixture)
+			if err != nil {
+				return err
+			}
+			env.Setenv("CODIFY", codifyDir)
 			return nil
 		},
 		Cmds: map[string]func(ts *testscript.TestScript, neg bool, args []string){
@@ -290,4 +302,11 @@ func TestSpec_drift_1(t *testing.T) {
 func TestSpec_drift_2(t *testing.T) {
 	t.Parallel()
 	testscript.Run(t, scriptParams(t, filepath.Join(scriptDir, "spec_drift_2.txtar")))
+}
+
+// TestSpec_whois_and_codify_1: whois goldens for single, double-managed and unmanaged resources,
+// offline from a saved index and live over a stubbed account.
+func TestSpec_whois_and_codify_1(t *testing.T) {
+	t.Parallel()
+	testscript.Run(t, scriptParams(t, filepath.Join(scriptDir, "spec_whois_and_codify_1.txtar")))
 }

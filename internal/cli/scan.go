@@ -210,27 +210,47 @@ func newScanEnv(cmd *cobra.Command, d *app.Deps, cfg *config.Config, a scanArgs)
 			return nil, usageError(fmt.Errorf("--%s %s matches no mapped type", flagTypes, strings.Join(a.types, ",")))
 		}
 	}
+	e.layers = scanLayers(cfg)
+	e.cc = ccTypes(cfg, e.layers, e.cfn)
+	if e.failOn, err = parseFailOn(a.failOn); err != nil {
+		return nil, err
+	}
+	return e, nil
+}
+
+// scanLayers returns the configured inventory layers.
+func scanLayers(cfg *config.Config) []string {
+	var out []string
 	for l := range strings.SplitSeq(cmp.Or(cfg.Scan.Layers, inventory.LayersAuto), ",") {
 		if l = strings.TrimSpace(l); l != "" {
-			e.layers = append(e.layers, l)
+			out = append(out, l)
 		}
 	}
-	e.cc = slices.Clone(cfg.Scan.CloudControlTypes)
-	// Without an allowlist, naming the cc layer lists the --types through Cloud Control.
-	if len(e.cc) == 0 &&
-		slices.ContainsFunc(e.layers, func(l string) bool { return l == "cc" || l == inventory.LayerCC }) {
-		e.cc = slices.Clone(e.cfn)
+	return out
+}
+
+// ccTypes returns the types the Cloud Control layer lists: the allowlist, else the selected types
+// when the cc layer is named.
+func ccTypes(cfg *config.Config, layers, types []string) []string {
+	cc := slices.Clone(cfg.Scan.CloudControlTypes)
+	if len(cc) == 0 && slices.ContainsFunc(layers, func(l string) bool { return l == "cc" || l == inventory.LayerCC }) {
+		cc = slices.Clone(types)
 	}
-	slices.Sort(e.cc)
-	e.cc = slices.Compact(e.cc)
-	for _, f := range a.failOn {
+	slices.Sort(cc)
+	return slices.Compact(cc)
+}
+
+// parseFailOn validates the --fail-on categories scan and whois share.
+func parseFailOn(values []string) ([]scan.Category, error) {
+	var out []scan.Category
+	for _, f := range values {
 		c := scan.Category(strings.TrimSpace(f))
 		if c != scan.CategoryUnmanaged && c != scan.CategoryDoubleManaged {
 			return nil, usageError(fmt.Errorf("--%s %q: want unmanaged or double-managed", flagFailOn, f))
 		}
-		e.failOn = append(e.failOn, c)
+		out = append(out, c)
 	}
-	return e, nil
+	return out, nil
 }
 
 // stateLookup backs the in_state rule function once the state index is known.
@@ -356,7 +376,6 @@ func (e *scanEnv) snapshot(loader *accounts.Loader, disc discovery.Result) (*sna
 }
 
 func (e *scanEnv) collect(loader *accounts.Loader, disc discovery.Result) (*scan.Snapshot, error) {
-	ctx := e.cmd.Context()
 	s := &scan.Snapshot{Problems: []scan.Problem{}}
 	for _, de := range disc.Errors {
 		s.Problems = append(s.Problems, scan.Problem{Target: de.Repo, Message: de.Err.Error()})
@@ -376,23 +395,44 @@ func (e *scanEnv) collect(loader *accounts.Loader, disc discovery.Result) (*scan
 	if s.Index, err = e.stateIndex(loader, accts, disc, s); err != nil {
 		return nil, err
 	}
-	prober, err := newProber(e.d, e.a.refresh)
+	s.Inventory, err = collectLive(e.cmd, e.d, e.m, liveRequest{
+		accounts: accts.Accounts, regions: func(a *accounts.Account) []string { return e.regions(a, disc) },
+		layers: e.layers, types: e.cfn, cc: e.cc, refresh: e.a.refresh,
+	})
 	if err != nil {
 		return nil, err
 	}
-	targets := make([]inventory.Target, 0, len(accts.Accounts))
-	for _, acct := range accts.Accounts {
-		rep, perr := prober.Probe(ctx, acct, e.regions(acct, disc))
+	return s, nil
+}
+
+// liveRequest is what collectLive lists.
+type liveRequest struct {
+	accounts []*accounts.Account
+	regions  func(*accounts.Account) []string // empty lets the probe choose
+	layers   []string
+	types    []string // CloudFormation types; empty means every type
+	cc       []string
+	refresh  bool
+}
+
+// collectLive probes each account and runs the inventory layers, as scan and whois do.
+func collectLive(cmd *cobra.Command, d *app.Deps, m *typemap.Map, req liveRequest) (*inventory.Result, error) {
+	ctx := cmd.Context()
+	prober, err := newProber(d, req.refresh)
+	if err != nil {
+		return nil, err
+	}
+	targets := make([]inventory.Target, 0, len(req.accounts))
+	for _, acct := range req.accounts {
+		rep, perr := prober.Probe(ctx, acct, req.regions(acct))
 		if perr != nil {
 			return nil, fmt.Errorf("probe account %s: %w", acct.ID, perr)
 		}
 		targets = append(targets, inventory.Target{Account: acct, Report: rep})
 	}
-	env := &inventory.Env{
-		Map: e.m, Limits: inventory.NewLimiters(nil), Logger: e.d.Logger, CloudControlTypes: e.cc,
-	}
-	s.Inventory, err = inventory.NewCollector(inventory.Options{Env: env}).Collect(ctx, inventory.Request{
-		Targets: targets, Layers: e.layers, Types: e.cfn,
+	env := &inventory.Env{Map: m, Limits: inventory.NewLimiters(nil), Logger: d.Logger, CloudControlTypes: req.cc}
+	res, err := inventory.NewCollector(inventory.Options{Env: env}).Collect(ctx, inventory.Request{
+		Targets: targets, Layers: req.layers, Types: req.types,
 	})
 	if errors.Is(err, inventory.ErrUnknownLayer) {
 		return nil, usageError(err)
@@ -400,7 +440,7 @@ func (e *scanEnv) collect(loader *accounts.Loader, disc discovery.Result) (*scan
 	if err != nil {
 		return nil, fmt.Errorf("list live resources: %w", err)
 	}
-	return s, nil
+	return res, nil
 }
 
 // regions returns the regions to scan in acct: the configured regions, else the regions of the
@@ -428,37 +468,62 @@ func (e *scanEnv) stateIndex(
 	s *scan.Snapshot,
 ) (*tfstate.Index, error) {
 	if e.a.index != "" {
-		var env struct {
-			Data *tfstate.Index `json:"data"`
-		}
-		if err := tfstate.ReadIndexFile(e.a.index, &env); err != nil {
-			return nil, usageError(err)
-		}
-		if env.Data == nil {
-			return nil, usageError(fmt.Errorf("--%s %s has no index", flagIndex, e.a.index))
-		}
-		return env.Data, nil
+		return readIndex(e.a.index)
 	}
-	cwd, err := e.d.Getwd()
+	ix, problems, err := readStates(e.cmd, e.d, e.cfg, e.m, stateRequest{
+		loader: loader, accts: accts, disc: disc, concurrency: e.a.concurrency,
+	})
+	s.Problems = append(s.Problems, problems...)
+	return ix, err
+}
+
+// readIndex reads an index file written by inventory --save-index.
+func readIndex(path string) (*tfstate.Index, error) {
+	var env struct {
+		Data *tfstate.Index `json:"data"`
+	}
+	if err := tfstate.ReadIndexFile(path, &env); err != nil {
+		return nil, usageError(err)
+	}
+	if env.Data == nil {
+		return nil, usageError(fmt.Errorf("--%s %s has no index", flagIndex, path))
+	}
+	return env.Data, nil
+}
+
+// stateRequest is what readStates reads.
+type stateRequest struct {
+	loader      *accounts.Loader
+	accts       *accounts.Result // nil without configured accounts
+	disc        discovery.Result
+	concurrency int
+}
+
+// readStates reads every discovered unit's state and indexes it. States that fail become problems.
+func readStates(cmd *cobra.Command, d *app.Deps, cfg *config.Config, m *typemap.Map, req stateRequest) (
+	*tfstate.Index, []scan.Problem, error,
+) {
+	cwd, err := d.Getwd()
 	if err != nil {
-		return nil, fmt.Errorf("get working directory: %w", err)
+		return nil, nil, fmt.Errorf("get working directory: %w", err)
 	}
 	reader := tfstate.NewReader(tfstate.Options{
-		Client:      stateClient(newBackends(loader, accts, e.cfg, e.d)),
+		Client:      stateClient(newBackends(req.loader, req.accts, cfg, d)),
 		WorkDir:     cwd,
-		Concurrency: e.a.concurrency,
-		TFPath:      e.cfg.Binaries.Terraform,
-		Logger:      e.d.Logger,
+		Concurrency: req.concurrency,
+		TFPath:      cfg.Binaries.Terraform,
+		Logger:      d.Logger,
 	})
-	states := reader.Read(e.cmd.Context(), disc.Units)
+	states := reader.Read(cmd.Context(), req.disc.Units)
+	var problems []scan.Problem
 	for i := range states {
 		if u := &states[i]; u.Status == tfstate.StatusError {
-			s.Problems = append(s.Problems, scan.Problem{
+			problems = append(problems, scan.Problem{
 				Target: stateLabel(u), Message: u.Error, Auth: errors.Is(u.Err, accounts.ErrAuth),
 			})
 		}
 	}
-	return tfstate.BuildIndex(states), nil
+	return match.Index(m, states), problems, nil
 }
 
 // scanIncomplete is the error for a scan that missed something: exit 4 when every problem was a

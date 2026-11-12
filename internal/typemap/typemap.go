@@ -50,8 +50,12 @@ type GenResource struct {
 	IdentityFrom  map[string]string `yaml:"identity_from,omitempty"`  // identity attribute to resource attribute, when they differ
 	// IdentityOptional lists the type's own identity attributes that may be empty.
 	IdentityOptional []string `yaml:"identity_optional,omitempty"`
-	RE               []string `yaml:"re,omitempty"`  // tagging and Resource Explorer types
-	CFN              string   `yaml:"cfn,omitempty"` // a candidate from awscc's type names, unconfirmed
+	// List reports whether the provider has a list resource for the type, which terraform query
+	// uses.
+	List         bool     `yaml:"list,omitempty"`
+	ListRequired []string `yaml:"list_required,omitempty"` // list config attributes a list block must set
+	RE           []string `yaml:"re,omitempty"`            // tagging and Resource Explorer types
+	CFN          string   `yaml:"cfn,omitempty"`           // a candidate from awscc's type names, unconfirmed
 }
 
 // Curated is one hand-written entry of data/curated.yaml.

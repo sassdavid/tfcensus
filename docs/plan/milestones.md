@@ -48,7 +48,7 @@ Scope: config + resource-explorer + native (sg-rules, iam-attachments, route53, 
 - [x] All drift.md criteria. A GitHub Actions example workflow in `docs/ci/`.
 
 ### M8: whois + codify → v0.3.0 ([whois-and-codify](specs/whois-and-codify.md))
-- [ ] All criteria. FL-DOUBLE audit check shares the whois index.
+- [x] All criteria. FL-DOUBLE audit check shares the whois index.
 
 ### M9: move → v0.4.0 ([move](specs/move.md))
 - [ ] All move.md criteria, including the cross-account e2e against moto (two emulated accounts via AssumeRole) with rollback.

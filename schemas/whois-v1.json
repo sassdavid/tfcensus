@@ -1,0 +1,260 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sassdavid/tfcensus/schemas/whois-v1.json",
+  "title": "tfcensus whois --format json",
+  "description": "The report envelope (report-v1.json) with one answer per query. Answers carry identifiers, tags and state addresses, never state attribute values.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "tool",
+    "version",
+    "generated_at",
+    "data",
+    "errors"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1"
+    },
+    "tool": {
+      "const": "tfcensus"
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "errors": {
+      "description": "Repos that failed discovery, account sources that failed, and states that couldn't be read.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "target": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "answers",
+        "warnings"
+      ],
+      "properties": {
+        "answers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/answer"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "category": {
+      "enum": [
+        "managed",
+        "double-managed",
+        "unmanaged",
+        "other-iac",
+        "aws-managed",
+        "derived",
+        "ignored",
+        "undetermined"
+      ]
+    },
+    "answer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "query",
+        "finding",
+        "managed_by",
+        "live"
+      ],
+      "properties": {
+        "query": {
+          "description": "The ARN or id as given.",
+          "type": "string",
+          "minLength": 1
+        },
+        "finding": {
+          "$ref": "#/$defs/finding"
+        },
+        "key": {
+          "description": "The match key: identity, arn or id.",
+          "enum": [
+            "identity",
+            "arn",
+            "id",
+            "rule"
+          ]
+        },
+        "managed_by": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "unit",
+              "workspace",
+              "address"
+            ],
+            "properties": {
+              "unit": {
+                "description": "repo/path",
+                "type": "string"
+              },
+              "workspace": {
+                "type": "string"
+              },
+              "address": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "account": {
+                "type": "string"
+              },
+              "region": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "live": {
+          "description": "What the ownership rules saw of a resource no state manages.",
+          "enum": [
+            "not-needed",
+            "offline",
+            "found",
+            "not-found",
+            "not-listed",
+            "no-credentials"
+          ]
+        }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "account",
+        "category",
+        "sources",
+        "reason",
+        "rule"
+      ],
+      "properties": {
+        "account": {
+          "description": "Empty for a bare id that no state manages.",
+          "type": "string",
+          "pattern": "^([0-9]{12})?$"
+        },
+        "region": {
+          "type": "string"
+        },
+        "category": {
+          "$ref": "#/$defs/category"
+        },
+        "cfn_type": {
+          "type": "string"
+        },
+        "source_type": {
+          "type": "string"
+        },
+        "tf_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "arn": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "sources": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "owner": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rule": {
+          "description": "The match rule (match/...), ownership rule (pack/<pack>/<name>, user/<name>, rules/no-match) or whois/not-found that decided the category.",
+          "type": "string",
+          "minLength": 1
+        },
+        "managed_by": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "unit",
+              "workspace",
+              "address"
+            ],
+            "properties": {
+              "unit": {
+                "type": "string"
+              },
+              "workspace": {
+                "type": "string"
+              },
+              "address": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

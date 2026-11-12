@@ -17,9 +17,11 @@ import (
 	"github.com/sassdavid/tfcensus/internal/buildinfo"
 	"github.com/sassdavid/tfcensus/internal/config"
 	"github.com/sassdavid/tfcensus/internal/discovery"
+	"github.com/sassdavid/tfcensus/internal/match"
 	"github.com/sassdavid/tfcensus/internal/render"
 	"github.com/sassdavid/tfcensus/internal/sarif"
 	"github.com/sassdavid/tfcensus/internal/tfstate"
+	"github.com/sassdavid/tfcensus/internal/typemap"
 )
 
 const (
@@ -156,7 +158,11 @@ func runAudit(cmd *cobra.Command, d *app.Deps, format render.Format, cfg *config
 			opts.Accounts = accts.Accounts
 		}
 	}
-	rep, err := audit.Run(ctx, opts, audit.Input{Units: disc.Units, States: states, Index: tfstate.BuildIndex(states)})
+	m, err := typemap.Load()
+	if err != nil {
+		return err
+	}
+	rep, err := audit.Run(ctx, opts, audit.Input{Units: disc.Units, States: states, Index: match.Index(m, states)})
 	if err != nil {
 		return fmt.Errorf("audit backends: %w", err)
 	}

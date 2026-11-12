@@ -21,8 +21,10 @@ import (
 	"github.com/sassdavid/tfcensus/internal/buildinfo"
 	"github.com/sassdavid/tfcensus/internal/config"
 	"github.com/sassdavid/tfcensus/internal/discovery"
+	"github.com/sassdavid/tfcensus/internal/match"
 	"github.com/sassdavid/tfcensus/internal/render"
 	"github.com/sassdavid/tfcensus/internal/tfstate"
+	"github.com/sassdavid/tfcensus/internal/typemap"
 )
 
 const (
@@ -126,7 +128,11 @@ func runInventory(cmd *cobra.Command, d *app.Deps, format render.Format, cfg *co
 	if states == nil {
 		states = []tfstate.UnitState{}
 	}
-	index := tfstate.BuildIndex(states)
+	m, err := typemap.Load()
+	if err != nil {
+		return err
+	}
+	index := match.Index(m, states)
 	data := inventoryData{Units: states, DoubleManaged: index.DoubleManaged}
 	if err = writeInventory(d, format, data, disc); err != nil {
 		return err
