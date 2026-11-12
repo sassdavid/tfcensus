@@ -89,12 +89,13 @@ has the reasons.
   `TestSpec_notifications_and_reports_1`, `TestGitHubMaxOpenAndSummary`, `TestGitHubClosesDuplicates`,
   `TestBitbucketLifecycle`, `TestSlack`, `TestFile` in `internal/notify`; `TestNotify*` in
   `internal/cli`.
-- [ ] The HTML report renders offline (headless browser smoke test in CI), and is deterministic.
+- [x] The HTML report renders offline (headless browser smoke test in CI), and is deterministic.
   `TestSpec_notifications_and_reports_2`: two runs give the same bytes and match
-  `testdata/golden/report/census.html`, and no `src` or `href` leaves the file (passing). The
-  Chrome check hasn't run yet: the development machine has no Chrome, and a local
-  `chromedp/headless-shell` container hung even on a data URL. Tick this after the first CI run
-  on ubuntu-latest passes it.
+  `testdata/golden/report/census.html`, and no `src` or `href` leaves the file. The Chrome check
+  (`--headless=new --dump-dom`, every host unresolvable, `data-ready="ok"`) passed in the
+  `test (ubuntu-latest, 1.27.3)` job of the PR run (ci #43246311112) and of the push to main
+  (ci #43247790958), with `go test -count=1`. On a Linux CI runner the test fails when Chrome is
+  missing, so a pass means the check ran.
 - [x] An in-process MCP client test confirms no tool can trigger exec or write (static allowlist test).
   `TestSpec_notifications_and_reports_3` calls every tool against the `report` goldens with no
   program on PATH and a transport that fails on any request; `TestMCP_staticNoExecNoWrite` checks
