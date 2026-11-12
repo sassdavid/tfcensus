@@ -121,6 +121,15 @@ type Envelope struct {
 	GeneratedAt   time.Time `json:"generated_at"`
 	Data          any       `json:"data"`
 	Errors        []Error   `json:"errors"`
+	Page          *Page     `json:"page,omitempty"` // set by the MCP server when it splits a result
+}
+
+// Page says which part of a split result an envelope holds.
+type Page struct {
+	Items      string `json:"items"`                 // what was split, such as "entries"
+	Returned   int    `json:"returned"`              // items in this page
+	Total      int    `json:"total"`                 // items in the whole result
+	NextCursor string `json:"next_cursor,omitempty"` // empty on the last page
 }
 
 // Error is a per-target error carried in the envelope.

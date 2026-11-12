@@ -45,6 +45,11 @@ identical=(
   internal/execx/procattr_unix.go
   internal/execx/procattr_windows.go
   internal/execx/redact.go
+  internal/mcpkit/doc.go
+  internal/mcpkit/mcpkit_test.go
+  internal/mcpkit/page.go
+  internal/mcpkit/roots.go
+  internal/mcpkit/server.go
   internal/prose/doc.go
   internal/prose/prose.go
   internal/prose/prose_test.go
@@ -58,6 +63,8 @@ identical=(
   internal/testutil/fakebin/doc.go
   internal/testutil/fakebin/fakebin.go
   internal/testutil/golden.go
+  internal/testutil/mcptest/doc.go
+  internal/testutil/mcptest/mcptest.go
   internal/testutil/sarifcheck/doc.go
   internal/testutil/sarifcheck/sarif-schema-2.1.0.LICENSE
   internal/testutil/sarifcheck/sarif-schema-2.1.0.json

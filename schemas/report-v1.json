@@ -46,6 +46,32 @@
           }
         }
       }
+    },
+    "page": {
+      "description": "Present only in MCP tool results that were split to fit the size cap. The data holds the returned items; pass next_cursor back to the same tool for the rest.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items", "returned", "total"],
+      "properties": {
+        "items": {
+          "description": "Name of the list that was split, such as entries, pins or tools.",
+          "type": "string",
+          "minLength": 1
+        },
+        "returned": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "next_cursor": {
+          "description": "Opaque. Absent on the last page.",
+          "type": "string",
+          "minLength": 1
+        }
+      }
     }
   }
 }
