@@ -17,9 +17,11 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/sassdavid/tfcensus/internal/discovery"
+	"github.com/sassdavid/tfcensus/internal/match"
 	"github.com/sassdavid/tfcensus/internal/testutil"
 	"github.com/sassdavid/tfcensus/internal/testutil/awstest"
 	"github.com/sassdavid/tfcensus/internal/tfstate"
+	"github.com/sassdavid/tfcensus/internal/typemap"
 )
 
 const (
@@ -108,6 +110,14 @@ func byLabel(states []tfstate.UnitState) map[string]tfstate.UnitState {
 	return m
 }
 
+// fleetIndex builds the index with its double-managed resources, as the CLI does.
+func fleetIndex(t *testing.T, states []tfstate.UnitState) *tfstate.Index {
+	t.Helper()
+	m, err := typemap.Load()
+	require.NoError(t, err)
+	return match.Index(m, states)
+}
+
 func marshal(t *testing.T, v any) []byte {
 	t.Helper()
 	b, err := json.MarshalIndent(v, "", "  ")
@@ -172,7 +182,7 @@ func TestSpec_statereader_1(t *testing.T) {
 
 	statesJSON := marshal(t, states)
 	testutil.Golden(t, filepath.Join(goldenDir, "fleet-states.json"), statesJSON)
-	indexJSON := marshal(t, tfstate.BuildIndex(states))
+	indexJSON := marshal(t, fleetIndex(t, states))
 	testutil.Golden(t, filepath.Join(goldenDir, "fleet-index.json"), indexJSON)
 }
 
@@ -199,7 +209,7 @@ func TestSpec_statereader_2(t *testing.T) {
 func TestSpec_statereader_3(t *testing.T) {
 	t.Parallel()
 
-	ix := tfstate.BuildIndex(readFleet(t))
+	ix := fleetIndex(t, readFleet(t))
 	require.Len(t, ix.DoubleManaged, 1)
 	assert.Equal(t, tfstate.DoubleManaged{
 		Kind: tfstate.KeyARN,
@@ -212,7 +222,7 @@ func TestSpec_statereader_3(t *testing.T) {
 	}, ix.DoubleManaged[0])
 }
 
-func TestIndexKeys(t *testing.T) {
+func TestIndexEntries(t *testing.T) {
 	t.Parallel()
 
 	ix := tfstate.BuildIndex(readFleet(t))
@@ -221,22 +231,15 @@ func TestIndexKeys(t *testing.T) {
 		entries[e.Unit+" "+e.Address] = e
 	}
 	bucket := entries["tf-fleet/app aws_s3_bucket.assets"]
-	assert.Equal(t, []tfstate.Key{
-		{
-			Kind:  tfstate.KeyIdentity,
-			Type:  "aws_s3_bucket",
-			Value: "account_id=111111111111,bucket=acme-assets-dev,region=eu-west-1",
-		},
-		{Kind: tfstate.KeyARN, Type: "aws_s3_bucket", Value: "arn:aws:s3:::acme-assets-dev"},
-		{Kind: tfstate.KeyID, Type: "aws_s3_bucket", Value: "111111111111/eu-west-1/acme-assets-dev"},
-	}, bucket.Keys())
+	assert.Equal(t, "111111111111", bucket.Account)
+	assert.Equal(t, "eu-west-1", bucket.Region)
+	assert.True(t, bucket.AWS())
 
 	role := entries["tf-fleet/app aws_iam_role.app"]
 	assert.Empty(t, role.Region, "IAM ARNs have no region")
-	assert.Equal(t, "account_id=111111111111,name=acme-app", role.Keys()[0].Value)
 
 	random := entries["tf-fleet/app random_password.db"]
-	assert.Empty(t, random.Keys(), "random_password ids are not AWS IDs")
+	assert.False(t, random.AWS(), "random_password ids are not AWS IDs")
 
 	cert := entries["tf-fleet/app aws_acm_certificate.cdn"]
 	assert.Equal(t, "us-east-1", cert.Region)

@@ -23,3 +23,21 @@ func (p *servicePackage) FrameworkResources(ctx context.Context) []*inttypes.Ser
 		},
 	}
 }
+
+func (p *servicePackage) FrameworkListResources(ctx context.Context) iter.Seq[*inttypes.ServicePackageFrameworkListResource] {
+	return slices.Values([]*inttypes.ServicePackageFrameworkListResource{
+		{
+			Factory:  newPolicyResourceAsListResource,
+			TypeName: "aws_iam_policy",
+			Name:     "Policy",
+			Region:   inttypes.ResourceRegionDisabled(),
+			Identity: inttypes.GlobalARNIdentity(),
+		},
+		{
+			Factory:  newThingResourceAsListResource,
+			TypeName: "aws_iam_thing",
+			Name:     "Thing",
+			Region:   inttypes.ResourceRegionDisabled(),
+		},
+	})
+}

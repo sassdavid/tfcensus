@@ -1,0 +1,222 @@
+# whois for a single-managed, a double-managed and an unmanaged resource, in tty, md and json
+# (goldens). Offline from the saved index in testdata/whois, then live over a stubbed account.
+env TEST_NOW=2026-11-10T12:00:00Z
+env AWS_CONFIG_FILE=$WORK/aws/config
+cd $REPOS
+jsonschema index-v1.json $WHOIS/index.json
+
+# Offline: no cassette, so any AWS call fails the run.
+exec tfcensus whois --index $WHOIS/index.json --config tf-scan/tfcensus.yaml arn:aws:iam::111111111111:role/acme-app arn:aws:iam::111111111111:role/acme-shared arn:aws:iam::111111111111:role/clickops-admin --format tty
+cmp stdout $WORK/golden/offline.txt
+
+exec tfcensus whois --index $WHOIS/index.json --config tf-scan/tfcensus.yaml arn:aws:iam::111111111111:role/acme-app arn:aws:iam::111111111111:role/acme-shared arn:aws:iam::111111111111:role/clickops-admin --format md
+cmp stdout $WORK/golden/offline.md
+
+exec tfcensus whois --index $WHOIS/index.json --config tf-scan/tfcensus.yaml arn:aws:iam::111111111111:role/acme-app arn:aws:iam::111111111111:role/acme-shared arn:aws:iam::111111111111:role/clickops-admin --format json
+jsonschema whois-v1.json stdout
+jsonschema report-v1.json stdout
+cmp stdout $WORK/golden/offline.json
+
+# Double-managed exits 3 under --fail-on double-managed; --min-count 2 needs two answers.
+exec expect-exit 3 tfcensus whois --index $WHOIS/index.json --config tf-scan/tfcensus.yaml --fail-on double-managed arn:aws:iam::111111111111:role/acme-shared
+stderr '1 answer\(s\) in double-managed'
+exec tfcensus whois --index $WHOIS/index.json --config tf-scan/tfcensus.yaml --fail-on double-managed --min-count 2 arn:aws:iam::111111111111:role/acme-shared
+exec tfcensus whois --index $WHOIS/index.json --config tf-scan/tfcensus.yaml --fail-on double-managed arn:aws:iam::111111111111:role/acme-app
+
+# Batch from stdin, with a bare id narrowed by --type and a service-linked role the packs explain.
+stdin $WORK/queries.txt
+exec tfcensus whois --index $WHOIS/index.json --config tf-scan/tfcensus.yaml --stdin --type aws_security_group,aws_iam_role
+cmp stdout $WORK/golden/stdin.txt
+
+# Live: no index, so whois reads the states and lists the unmanaged roles' type in the account.
+env TEST_CASSETTE=$CASSETTES/aws/whois-live
+exec tfcensus whois --repo tf-scan --config tf-scan/tfcensus.yaml arn:aws:iam::111111111111:role/acme-app arn:aws:iam::111111111111:role/acme-shared arn:aws:iam::111111111111:role/clickops-admin arn:aws:iam::111111111111:role/legacy-stack-role arn:aws:iam::111111111111:role/deleted-last-week --format tty
+cmp stdout $WORK/golden/live.txt
+
+-- queries.txt --
+# one per line; blank lines and comments are skipped
+sg-0aa11bb22cc33dd44
+acme-shared
+
+arn:aws:iam::111111111111:role/aws-service-role/support.amazonaws.com/AWSServiceRoleForSupport
+sg-0aa11bb22cc33dd44
+-- aws/config --
+[default]
+region = eu-west-1
+aws_access_key_id = AKIAFAKEDEFAULT
+aws_secret_access_key = fake-default-secret
+-- golden/offline.txt --
+arn:aws:iam::111111111111:role/acme-app: managed by identity
+  tf-scan/iam  aws_iam_role.app  111111111111  global
+
+arn:aws:iam::111111111111:role/acme-shared: double-managed by identity
+  warning: 2 states manage it; keep it in one
+  tf-scan/iam      aws_iam_role.shared  111111111111  global
+  tf-scan/iam-dup  aws_iam_role.shared  111111111111  global
+
+arn:aws:iam::111111111111:role/clickops-admin: unmanaged
+  no state manages it and no rule matches (rules/no-match); tags not read (offline)
+
+warning: rule "growth-trial" is past its expires date and no longer matches
+
+3 queries: 1 managed, 1 double-managed, 1 unmanaged
+-- golden/offline.md --
+| QUERY | CATEGORY | KEY | UNIT | ADDRESS | ACCOUNT | REGION | DETAIL |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| arn:aws:iam::111111111111:role/acme-app | managed | identity | tf-scan/iam | aws_iam_role.app | 111111111111 | global | matched tf-scan/iam aws_iam_role.app by identity |
+| arn:aws:iam::111111111111:role/acme-shared | double-managed | identity | tf-scan/iam | aws_iam_role.shared | 111111111111 | global | managed by aws_iam_role.shared and aws_iam_role.shared in different states |
+| arn:aws:iam::111111111111:role/acme-shared | double-managed | identity | tf-scan/iam-dup | aws_iam_role.shared | 111111111111 | global | managed by aws_iam_role.shared and aws_iam_role.shared in different states |
+| arn:aws:iam::111111111111:role/clickops-admin | unmanaged | - | - | - | 111111111111 | global | no state manages it and no rule matches (rules/no-match); tags not read (offline) |
+
+- warning: rule "growth-trial" is past its expires date and no longer matches
+
+3 queries: 1 managed, 1 double-managed, 1 unmanaged
+-- golden/offline.json --
+{
+  "schema_version": "1",
+  "tool": "tfcensus",
+  "version": "dev",
+  "generated_at": "2026-11-10T12:00:00Z",
+  "data": {
+    "answers": [
+      {
+        "query": "arn:aws:iam::111111111111:role/acme-app",
+        "finding": {
+          "account": "111111111111",
+          "category": "managed",
+          "cfn_type": "AWS::IAM::Role",
+          "tf_types": [
+            "aws_iam_role"
+          ],
+          "arn": "arn:aws:iam::111111111111:role/acme-app",
+          "name": "acme-app",
+          "sources": null,
+          "reason": "matched tf-scan/iam aws_iam_role.app by identity",
+          "rule": "match/identity",
+          "managed_by": [
+            {
+              "unit": "tf-scan/iam",
+              "workspace": "default",
+              "address": "aws_iam_role.app"
+            }
+          ]
+        },
+        "key": "identity",
+        "managed_by": [
+          {
+            "unit": "tf-scan/iam",
+            "workspace": "default",
+            "address": "aws_iam_role.app",
+            "type": "aws_iam_role",
+            "account": "111111111111"
+          }
+        ],
+        "live": "not-needed"
+      },
+      {
+        "query": "arn:aws:iam::111111111111:role/acme-shared",
+        "finding": {
+          "account": "111111111111",
+          "category": "double-managed",
+          "cfn_type": "AWS::IAM::Role",
+          "tf_types": [
+            "aws_iam_role"
+          ],
+          "arn": "arn:aws:iam::111111111111:role/acme-shared",
+          "name": "acme-shared",
+          "sources": null,
+          "reason": "managed by aws_iam_role.shared and aws_iam_role.shared in different states",
+          "rule": "match/double-managed",
+          "managed_by": [
+            {
+              "unit": "tf-scan/iam",
+              "workspace": "default",
+              "address": "aws_iam_role.shared"
+            },
+            {
+              "unit": "tf-scan/iam-dup",
+              "workspace": "default",
+              "address": "aws_iam_role.shared"
+            }
+          ]
+        },
+        "key": "identity",
+        "managed_by": [
+          {
+            "unit": "tf-scan/iam",
+            "workspace": "default",
+            "address": "aws_iam_role.shared",
+            "type": "aws_iam_role",
+            "account": "111111111111"
+          },
+          {
+            "unit": "tf-scan/iam-dup",
+            "workspace": "default",
+            "address": "aws_iam_role.shared",
+            "type": "aws_iam_role",
+            "account": "111111111111"
+          }
+        ],
+        "live": "not-needed"
+      },
+      {
+        "query": "arn:aws:iam::111111111111:role/clickops-admin",
+        "finding": {
+          "account": "111111111111",
+          "category": "unmanaged",
+          "cfn_type": "AWS::IAM::Role",
+          "tf_types": [
+            "aws_iam_role"
+          ],
+          "arn": "arn:aws:iam::111111111111:role/clickops-admin",
+          "name": "clickops-admin",
+          "sources": null,
+          "reason": "no state manages it and no rule matches",
+          "rule": "rules/no-match"
+        },
+        "managed_by": [],
+        "live": "offline"
+      }
+    ],
+    "warnings": [
+      "rule \"growth-trial\" is past its expires date and no longer matches"
+    ]
+  },
+  "errors": []
+}
+-- golden/stdin.txt --
+sg-0aa11bb22cc33dd44: managed by id
+  tf-scan/network  aws_security_group.web  111111111111  eu-west-1
+
+acme-shared: double-managed by id
+  warning: 2 states manage it; keep it in one
+  tf-scan/iam      aws_iam_role.shared  111111111111  global
+  tf-scan/iam-dup  aws_iam_role.shared  111111111111  global
+
+arn:aws:iam::111111111111:role/aws-service-role/support.amazonaws.com/AWSServiceRoleForSupport: aws-managed (owner aws)
+  service-linked role that an AWS service created (pack/aws-service/service-linked-role); tags not read (offline)
+
+warning: rule "growth-trial" is past its expires date and no longer matches
+
+3 queries: 1 managed, 1 double-managed, 1 aws-managed
+-- golden/live.txt --
+arn:aws:iam::111111111111:role/acme-app: managed by identity
+  tf-scan/iam  aws_iam_role.app  111111111111  global
+
+arn:aws:iam::111111111111:role/acme-shared: double-managed by identity
+  warning: 2 states manage it; keep it in one
+  tf-scan/iam      aws_iam_role.shared  111111111111  global
+  tf-scan/iam-dup  aws_iam_role.shared  111111111111  global
+
+arn:aws:iam::111111111111:role/clickops-admin: unmanaged
+  no state manages it and no rule matches (rules/no-match); live: found
+
+arn:aws:iam::111111111111:role/legacy-stack-role: other-iac (owner cloudformation)
+  tagged by a CloudFormation stack (CloudFormation, CDK, StackSets, Control Tower) (pack/other-iac/cloudformation); live: found
+
+arn:aws:iam::111111111111:role/deleted-last-week: undetermined
+  the live inventory of its account and region doesn't have it (whois/not-found); live: not-found
+
+warning: rule "growth-trial" is past its expires date and no longer matches
+
+5 queries: 1 managed, 1 double-managed, 1 unmanaged, 1 other-iac, 1 undetermined

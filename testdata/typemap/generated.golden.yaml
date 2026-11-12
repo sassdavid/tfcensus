@@ -16,6 +16,7 @@ resources:
     identity: global-arn
     identity_attrs:
       - arn
+    list: true
     cfn: AWS::IAM::Policy
   - tf: aws_iam_thing
     service: iam
@@ -31,6 +32,10 @@ resources:
       name: fqdn
     identity_optional:
       - set_identifier
+    list: true
+    list_required:
+      - name
+      - zone_id
   - tf: aws_security_group_rule
     service: ec2
   - tf: aws_vpc

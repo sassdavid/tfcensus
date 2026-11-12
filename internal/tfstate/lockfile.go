@@ -15,13 +15,37 @@ import (
 // LockFileName is the dependency lock file terraform init and tofu init write.
 const LockFileName = ".terraform.lock.hcl"
 
+// LockedProvider is a provider selected in a lock file.
+type LockedProvider struct {
+	Version string
+	Host    string // the registry host, such as registry.opentofu.org
+}
+
+// OpenTofu reports whether the provider comes from the OpenTofu registry, which only tofu init
+// selects from.
+func (p LockedProvider) OpenTofu() bool { return p.Host == hostOpenTofu }
+
 // ReadLockFile returns the provider versions selected in dir's lock file, keyed by normalized
 // source (see [Provider]). A missing file returns an empty map.
 func ReadLockFile(dir string) (map[string]string, error) {
+	locked, err := ReadLockProviders(dir)
+	if err != nil {
+		return nil, err
+	}
+	out := make(map[string]string, len(locked))
+	for source, p := range locked {
+		out[source] = p.Version
+	}
+	return out, nil
+}
+
+// ReadLockProviders returns the providers selected in dir's lock file, keyed by normalized source.
+// A missing file returns an empty map.
+func ReadLockProviders(dir string) (map[string]LockedProvider, error) {
 	path := filepath.Join(dir, LockFileName)
 	src, err := os.ReadFile(path)
 	if errors.Is(err, fs.ErrNotExist) {
-		return map[string]string{}, nil
+		return map[string]LockedProvider{}, nil
 	}
 	if err != nil {
 		return nil, fmt.Errorf("read lock file: %w", err)
@@ -36,7 +60,7 @@ func ReadLockFile(dir string) (map[string]string, error) {
 	if diags.HasErrors() {
 		return nil, fmt.Errorf("parse lock file: %w", diags)
 	}
-	out := map[string]string{}
+	out := map[string]LockedProvider{}
 	for _, b := range content.Blocks {
 		attrs, _, attrDiags := b.Body.PartialContent(&hcl.BodySchema{
 			Attributes: []hcl.AttributeSchema{{Name: "version"}},
@@ -52,8 +76,8 @@ func ReadLockFile(dir string) (map[string]string, error) {
 		if valDiags.HasErrors() || v.IsNull() || !v.IsKnown() || v.Type() != cty.String {
 			continue
 		}
-		source, _ := normalizeSource(b.Labels[0])
-		out[source] = v.AsString()
+		source, host := normalizeSource(b.Labels[0])
+		out[source] = LockedProvider{Version: v.AsString(), Host: host}
 	}
 	return out, nil
 }

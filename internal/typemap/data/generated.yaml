@@ -32,6 +32,7 @@ resources:
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     cfn: AWS::AccountAccess::Application
   - tf: aws_accountaccess_entitlement
     service: accountaccess
@@ -41,12 +42,16 @@ resources:
       - region
       - application_arn
       - entitlement_id
+    list: true
+    list_required:
+      - application_arn
     cfn: AWS::AccountAccess::Entitlement
   - tf: aws_acm_certificate
     service: acm
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     re:
       - acm:certificate
   - tf: aws_acm_certificate_validation
@@ -88,6 +93,7 @@ resources:
       - account_id
       - region
       - registry_id
+    list: true
     cfn: AWS::AgentRegistry::Registry
   - tf: aws_alb
     service: elbv2
@@ -158,6 +164,7 @@ resources:
       - group
       - organization_arn
       - organizational_unit_arn
+    list: true
   - tf: aws_amplify_app
     service: amplify
     re:
@@ -191,6 +198,9 @@ resources:
       - region
       - rest_api_id
       - id
+    list: true
+    list_required:
+      - rest_api_id
   - tf: aws_api_gateway_documentation_part
     service: apigateway
   - tf: aws_api_gateway_documentation_version
@@ -213,6 +223,10 @@ resources:
       - rest_api_id
       - resource_id
       - http_method
+    list: true
+    list_required:
+      - resource_id
+      - rest_api_id
   - tf: aws_api_gateway_integration_response
     service: apigateway
     identity: regional-parameterized
@@ -223,6 +237,11 @@ resources:
       - resource_id
       - http_method
       - status_code
+    list: true
+    list_required:
+      - http_method
+      - resource_id
+      - rest_api_id
   - tf: aws_api_gateway_method
     service: apigateway
     identity: regional-parameterized
@@ -232,6 +251,10 @@ resources:
       - rest_api_id
       - resource_id
       - http_method
+    list: true
+    list_required:
+      - resource_id
+      - rest_api_id
   - tf: aws_api_gateway_method_response
     service: apigateway
     identity: regional-parameterized
@@ -242,6 +265,11 @@ resources:
       - resource_id
       - http_method
       - status_code
+    list: true
+    list_required:
+      - http_method
+      - resource_id
+      - rest_api_id
   - tf: aws_api_gateway_method_settings
     service: apigateway
   - tf: aws_api_gateway_model
@@ -256,6 +284,9 @@ resources:
       - region
       - rest_api_id
       - id
+    list: true
+    list_required:
+      - rest_api_id
   - tf: aws_api_gateway_rest_api
     service: apigateway
     identity: regional-single-parameter
@@ -263,6 +294,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
   - tf: aws_api_gateway_rest_api_policy
     service: apigateway
   - tf: aws_api_gateway_rest_api_put
@@ -282,6 +314,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     cfn: AWS::ApiGatewayV2::Api
   - tf: aws_apigatewayv2_api_mapping
     service: apigatewayv2
@@ -303,6 +336,9 @@ resources:
       - region
       - api_id
       - id
+    list: true
+    list_required:
+      - api_id
     cfn: AWS::ApiGatewayV2::Integration
   - tf: aws_apigatewayv2_integration_response
     service: apigatewayv2
@@ -318,6 +354,9 @@ resources:
       - region
       - api_id
       - id
+    list: true
+    list_required:
+      - api_id
     cfn: AWS::ApiGatewayV2::Route
   - tf: aws_apigatewayv2_route_response
     service: apigatewayv2
@@ -343,6 +382,9 @@ resources:
       - resource_id
       - scalable_dimension
       - name
+    list: true
+    list_required:
+      - service_namespace
   - tf: aws_appautoscaling_scheduled_action
     service: appautoscaling
   - tf: aws_appautoscaling_target
@@ -354,6 +396,9 @@ resources:
       - service_namespace
       - resource_id
       - scalable_dimension
+    list: true
+    list_required:
+      - service_namespace
   - tf: aws_appconfig_application
     service: appconfig
     re:
@@ -414,6 +459,7 @@ resources:
       - account_id
       - region
       - name
+    list: true
     cfn: AWS::AppFlow::ConnectorProfile
   - tf: aws_appflow_flow
     service: appflow
@@ -422,6 +468,7 @@ resources:
       - account_id
       - region
       - name
+    list: true
     re:
       - appflow:flow
     cfn: AWS::AppFlow::Flow
@@ -591,6 +638,7 @@ resources:
     identity: regional-arn
     identity_attrs:
       - resource_arn
+    list: true
     cfn: AWS::ARCZonalShift::ZonalAutoshiftConfiguration
   - tf: aws_athena_capacity_reservation
     service: athena
@@ -666,6 +714,7 @@ resources:
       - account_id
       - region
       - name
+    list: true
   - tf: aws_autoscaling_group_tag
     service: autoscaling
   - tf: aws_autoscaling_lifecycle_hook
@@ -717,6 +766,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     re:
       - backup:backup-plan
   - tf: aws_backup_region_settings
@@ -746,6 +796,7 @@ resources:
       - region
       - plan_id
       - id
+    list: true
   - tf: aws_backup_vault
     service: backup
     identity: regional-single-parameter
@@ -753,6 +804,7 @@ resources:
       - account_id
       - region
       - name
+    list: true
   - tf: aws_backup_vault_lock_configuration
     service: backup
   - tf: aws_backup_vault_notifications
@@ -769,6 +821,7 @@ resources:
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     re:
       - batch:job-definition
     cfn: AWS::Batch::JobDefinition
@@ -777,6 +830,7 @@ resources:
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     re:
       - batch:job-queue
     cfn: AWS::Batch::JobQueue
@@ -812,6 +866,7 @@ resources:
     identity: regional-arn
     identity_attrs:
       - job_arn
+    list: true
   - tf: aws_bedrock_foundation_model_agreement
     service: bedrock
     identity: regional-single-parameter
@@ -834,6 +889,7 @@ resources:
     identity: regional-arn
     identity_attrs:
       - job_arn
+    list: true
   - tf: aws_bedrock_model_invocation_logging_configuration
     service: bedrock
     identity: regional-singleton
@@ -900,6 +956,7 @@ resources:
       - account_id
       - region
       - profile_id
+    list: true
     cfn: AWS::BedrockAgentCore::BrowserProfile
   - tf: aws_bedrockagentcore_code_interpreter
     service: bedrockagentcore
@@ -910,6 +967,7 @@ resources:
       - account_id
       - region
       - evaluator_id
+    list: true
     cfn: AWS::BedrockAgentCore::Evaluator
   - tf: aws_bedrockagentcore_gateway
     service: bedrockagentcore
@@ -922,6 +980,9 @@ resources:
       - region
       - gateway_identifier
       - rule_id
+    list: true
+    list_required:
+      - gateway_identifier
     cfn: AWS::BedrockAgentCore::GatewayRule
   - tf: aws_bedrockagentcore_gateway_target
     service: bedrockagentcore
@@ -939,6 +1000,7 @@ resources:
       - account_id
       - region
       - harness_id
+    list: true
     cfn: AWS::BedrockAgentCore::Harness
   - tf: aws_bedrockagentcore_memory
     service: bedrockagentcore
@@ -970,6 +1032,7 @@ resources:
       - account_id
       - region
       - online_evaluation_config_id
+    list: true
     cfn: AWS::BedrockAgentCore::OnlineEvaluationConfig
   - tf: aws_bedrockagentcore_policy
     service: bedrockagentcore
@@ -979,6 +1042,9 @@ resources:
       - region
       - policy_engine_id
       - policy_id
+    list: true
+    list_required:
+      - policy_engine_id
     cfn: AWS::BedrockAgentCore::Policy
   - tf: aws_bedrockagentcore_policy_engine
     service: bedrockagentcore
@@ -987,6 +1053,7 @@ resources:
       - account_id
       - region
       - policy_engine_id
+    list: true
     cfn: AWS::BedrockAgentCore::PolicyEngine
   - tf: aws_bedrockagentcore_registry
     service: bedrockagentcore
@@ -995,11 +1062,13 @@ resources:
       - account_id
       - region
       - registry_id
+    list: true
   - tf: aws_bedrockagentcore_resource_policy
     service: bedrockagentcore
     identity: regional-arn
     identity_attrs:
       - resource_arn
+    list: true
     cfn: AWS::BedrockAgentCore::ResourcePolicy
   - tf: aws_bedrockagentcore_token_vault_cmk
     service: bedrockagentcore
@@ -1016,16 +1085,19 @@ resources:
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
   - tf: aws_bedrockdataautomation_library
     service: bedrockdataautomation
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
   - tf: aws_bedrockdataautomation_project
     service: bedrockdataautomation
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
   - tf: aws_billing_view
     service: billing
     global: true
@@ -1111,6 +1183,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     cfn: AWS::CleanRooms::Collaboration
   - tf: aws_cleanrooms_configured_table
     service: cleanrooms
@@ -1119,6 +1192,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     re:
       - cleanrooms:configuredtable
     cfn: AWS::CleanRooms::ConfiguredTable
@@ -1129,6 +1203,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     cfn: AWS::CleanRooms::Membership
   - tf: aws_cloud9_environment_ec2
     service: cloud9
@@ -1181,6 +1256,7 @@ resources:
     identity_attrs:
       - account_id
       - id
+    list: true
     re:
       - cloudfront:distribution
     cfn: AWS::CloudFront::Distribution
@@ -1211,6 +1287,7 @@ resources:
     identity_attrs:
       - account_id
       - name
+    list: true
     cfn: AWS::CloudFront::KeyValueStore
   - tf: aws_cloudfront_monitoring_subscription
     service: cloudfront
@@ -1297,6 +1374,7 @@ resources:
       - account_id
       - region
       - name
+    list: true
     cfn: AWS::CloudWatch::AlarmMuteRule
   - tf: aws_cloudwatch_composite_alarm
     service: cloudwatch
@@ -1387,6 +1465,7 @@ resources:
       - account_id
       - region
       - name
+    list: true
   - tf: aws_cloudwatch_event_target
     service: events
     identity: regional-parameterized
@@ -1396,6 +1475,10 @@ resources:
       - event_bus_name
       - rule
       - target_id
+    list: true
+    list_required:
+      - event_bus_name
+      - rule
   - tf: aws_cloudwatch_log_account_policy
     service: logs
     identity: regional-parameterized
@@ -1475,6 +1558,7 @@ resources:
       - account_id
       - region
       - name
+    list: true
     re:
       - logs:log-group
   - tf: aws_cloudwatch_log_index_policy
@@ -1492,6 +1576,9 @@ resources:
       - region
       - log_group_name
       - name
+    list: true
+    list_required:
+      - log_group_name
   - tf: aws_cloudwatch_log_resource_policy
     service: logs
     identity: regional-parameterized
@@ -1511,6 +1598,9 @@ resources:
       - region
       - integration_arn
       - id
+    list: true
+    list_required:
+      - integration_arn
   - tf: aws_cloudwatch_log_storage_tier_policy
     service: logs
     identity: regional-singleton
@@ -1525,6 +1615,9 @@ resources:
       - region
       - log_group_name
       - name
+    list: true
+    list_required:
+      - log_group_name
   - tf: aws_cloudwatch_log_subscription_filter
     service: logs
     identity: regional-parameterized
@@ -1533,6 +1626,9 @@ resources:
       - region
       - log_group_name
       - name
+    list: true
+    list_required:
+      - log_group_name
   - tf: aws_cloudwatch_log_transformer
     service: logs
     identity: regional-arn
@@ -1545,6 +1641,7 @@ resources:
       - account_id
       - region
       - alarm_name
+    list: true
     re:
       - cloudwatch:alarm
   - tf: aws_cloudwatch_metric_stream
@@ -1584,6 +1681,7 @@ resources:
       - account_id
       - region
       - grant_id
+    list: true
   - tf: aws_cloudwatchomni_access_profile
     service: cloudwatchomni
     identity: regional-parameterized
@@ -1592,6 +1690,9 @@ resources:
       - region
       - space_id
       - profile_id
+    list: true
+    list_required:
+      - space_id
   - tf: aws_cloudwatchomni_dashboard
     service: cloudwatchomni
     identity: regional-parameterized
@@ -1600,6 +1701,9 @@ resources:
       - region
       - space_id
       - dashboard_id
+    list: true
+    list_required:
+      - space_id
   - tf: aws_cloudwatchomni_domain
     service: cloudwatchomni
     identity: regional-single-parameter
@@ -1607,6 +1711,7 @@ resources:
       - account_id
       - region
       - domain_id
+    list: true
   - tf: aws_cloudwatchomni_organization_domain
     service: cloudwatchomni
     identity: regional-single-parameter
@@ -1614,6 +1719,7 @@ resources:
       - account_id
       - region
       - domain_id
+    list: true
   - tf: aws_cloudwatchomni_space
     service: cloudwatchomni
     identity: regional-single-parameter
@@ -1621,6 +1727,7 @@ resources:
       - account_id
       - region
       - space_id
+    list: true
   - tf: aws_cloudwatchomni_view
     service: cloudwatchomni
     identity: regional-single-parameter
@@ -1628,6 +1735,7 @@ resources:
       - account_id
       - region
       - name
+    list: true
   - tf: aws_codeartifact_domain
     service: codeartifact
     identity: regional-arn
@@ -1665,6 +1773,7 @@ resources:
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     re:
       - codebuild:project
     cfn: AWS::CodeBuild::Project
@@ -1752,6 +1861,7 @@ resources:
       - account_id
       - region
       - name
+    list: true
     re:
       - codepipeline:pipeline
   - tf: aws_codepipeline_custom_action_type
@@ -1865,6 +1975,7 @@ resources:
       - account_id
       - region
       - name
+    list: true
     re:
       - config:config-rule
     cfn: AWS::Config::ConfigRule
@@ -1953,6 +2064,9 @@ resources:
       - account_id
       - region
       - config_rule_name
+    list: true
+    list_required:
+      - config_rule_names
     cfn: AWS::Config::RemediationConfiguration
   - tf: aws_config_retention_configuration
     service: configservice
@@ -2274,6 +2388,7 @@ resources:
       - account_id
       - region
       - identifier
+    list: true
     re:
       - rds:db
     cfn: AWS::RDS::DBInstance
@@ -2292,6 +2407,7 @@ resources:
       - account_id
       - region
       - name
+    list: true
     re:
       - rds:pg
     cfn: AWS::RDS::DBParameterGroup
@@ -2321,6 +2437,7 @@ resources:
       - account_id
       - region
       - name
+    list: true
     re:
       - rds:subgrp
     cfn: AWS::RDS::DBSubnetGroup
@@ -2335,6 +2452,10 @@ resources:
       - account_id
       - region
       - id
+    list: true
+    list_required:
+      - name
+      - values
   - tf: aws_default_subnet
     service: ec2
   - tf: aws_default_vpc
@@ -2408,6 +2529,7 @@ resources:
       - account_id
       - region
       - agent_space_id
+    list: true
     cfn: AWS::DevOpsAgent::AgentSpace
   - tf: aws_devopsagent_asset
     service: devopsagent
@@ -2417,6 +2539,9 @@ resources:
       - region
       - agent_space_id
       - asset_id
+    list: true
+    list_required:
+      - agent_space_id
     cfn: AWS::DevOpsAgent::Asset
   - tf: aws_devopsguru_event_sources_config
     service: devopsguru
@@ -2448,6 +2573,9 @@ resources:
       - region
       - directory_id
       - name
+    list: true
+    list_required:
+      - directory_id
   - tf: aws_directory_service_ip_route
     service: ds
     identity: regional-parameterized
@@ -2460,6 +2588,9 @@ resources:
     identity_optional:
       - cidr_ip
       - cidr_ipv6
+    list: true
+    list_required:
+      - directory_id
   - tf: aws_directory_service_ip_routes_exclusive
     service: ds
     identity: regional-single-parameter
@@ -2487,6 +2618,9 @@ resources:
       - region
       - directory_id
       - sam_account_name
+    list: true
+    list_required:
+      - directory_id
   - tf: aws_directoryservicedata_user
     service: directoryservicedata
     identity: regional-parameterized
@@ -2495,6 +2629,9 @@ resources:
       - region
       - directory_id
       - sam_account_name
+    list: true
+    list_required:
+      - directory_id
   - tf: aws_dlm_lifecycle_policy
     service: dlm
     re:
@@ -2510,6 +2647,7 @@ resources:
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     cfn: AWS::DMS::DataProvider
   - tf: aws_dms_endpoint
     service: dms
@@ -2526,12 +2664,14 @@ resources:
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     cfn: AWS::DMS::InstanceProfile
   - tf: aws_dms_migration_project
     service: dms
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     cfn: AWS::DMS::MigrationProject
   - tf: aws_dms_replication_config
     service: dms
@@ -2595,6 +2735,7 @@ resources:
       - account_id
       - region
       - identifier
+    list: true
     re:
       - dsql:cluster
     cfn: AWS::DSQL::Cluster
@@ -2607,6 +2748,7 @@ resources:
       - account_id
       - region
       - identifier
+    list: true
   - tf: aws_dsql_stream
     service: dsql
     identity: regional-parameterized
@@ -2615,6 +2757,9 @@ resources:
       - region
       - cluster_identifier
       - stream_identifier
+    list: true
+    list_required:
+      - cluster_identifier
   - tf: aws_dx_bgp_peer
     service: directconnect
   - tf: aws_dx_connection
@@ -2669,6 +2814,9 @@ resources:
       - region
       - table_name
       - index_name
+    list: true
+    list_required:
+      - table_name
   - tf: aws_dynamodb_global_table
     service: dynamodb
     cfn: AWS::DynamoDB::GlobalTable
@@ -2686,6 +2834,7 @@ resources:
       - account_id
       - region
       - name
+    list: true
     re:
       - dynamodb:table
     cfn: AWS::DynamoDB::Table
@@ -2705,6 +2854,9 @@ resources:
       - range_key_value
     identity_optional:
       - range_key_value
+    list: true
+    list_required:
+      - table_name
   - tf: aws_dynamodb_table_replica
     service: dynamodb
   - tf: aws_dynamodb_tag
@@ -2734,6 +2886,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     re:
       - ec2:volume
   - tf: aws_ebs_volume_copy
@@ -2830,6 +2983,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     cfn: AWS::EC2::NetworkInsightsAccessScope
   - tf: aws_ec2_network_insights_analysis
     service: ec2
@@ -2848,6 +3002,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     cfn: AWS::EC2::SecondaryNetwork
   - tf: aws_ec2_secondary_subnet
     service: ec2
@@ -2856,6 +3011,10 @@ resources:
       - account_id
       - region
       - id
+    list: true
+    list_required:
+      - name
+      - values
   - tf: aws_ec2_serial_console_access
     service: ec2
     identity: regional-singleton
@@ -2911,6 +3070,7 @@ resources:
       - account_id
       - region
       - transit_gateway_metering_policy_id
+    list: true
     cfn: AWS::EC2::TransitGatewayMeteringPolicy
   - tf: aws_ec2_transit_gateway_metering_policy_entry
     service: ec2
@@ -2948,6 +3108,9 @@ resources:
       - region
       - transit_gateway_policy_table_id
       - policy_rule_number
+    list: true
+    list_required:
+      - transit_gateway_policy_table_id
     cfn: AWS::EC2::TransitGatewayPolicyTableEntry
   - tf: aws_ec2_transit_gateway_prefix_list_reference
     service: ec2
@@ -2959,6 +3122,9 @@ resources:
       - region
       - transit_gateway_route_table_id
       - destination_cidr_block
+    list: true
+    list_required:
+      - transit_gateway_route_table_id
     cfn: AWS::EC2::TransitGatewayRoute
   - tf: aws_ec2_transit_gateway_route_table
     service: ec2
@@ -2976,6 +3142,7 @@ resources:
       - region
       - transit_gateway_attachment_id
       - transit_gateway_route_table_id
+    list: true
     cfn: AWS::EC2::TransitGatewayRouteTablePropagation
   - tf: aws_ec2_transit_gateway_vpc_attachment
     service: ec2
@@ -2991,6 +3158,7 @@ resources:
       - account_id
       - region
       - repository
+    list: true
   - tf: aws_ecr_pull_through_cache_rule
     service: ecr
     cfn: AWS::ECR::PullThroughCacheRule
@@ -3013,6 +3181,7 @@ resources:
       - account_id
       - region
       - name
+    list: true
     re:
       - ecr:repository
     cfn: AWS::ECR::Repository
@@ -3026,6 +3195,7 @@ resources:
       - account_id
       - region
       - repository
+    list: true
   - tf: aws_ecrpublic_repository
     service: ecrpublic
     re:
@@ -3049,6 +3219,7 @@ resources:
       - account_id
       - region
       - name
+    list: true
     re:
       - ecs:cluster
     cfn: AWS::ECS::Cluster
@@ -3059,12 +3230,16 @@ resources:
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
+    list_required:
+      - cluster_arn
     cfn: AWS::ECS::Daemon
   - tf: aws_ecs_daemon_task_definition
     service: ecs
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     cfn: AWS::ECS::DaemonTaskDefinition
   - tf: aws_ecs_express_gateway_service
     service: ecs
@@ -3077,6 +3252,9 @@ resources:
       - region
       - cluster
       - name
+    list: true
+    list_required:
+      - cluster
     re:
       - ecs:service
     cfn: AWS::ECS::Service
@@ -3090,6 +3268,7 @@ resources:
       - region
       - family
       - revision
+    list: true
     re:
       - ecs:task-definition
     cfn: AWS::ECS::TaskDefinition
@@ -3139,6 +3318,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     cfn: AWS::EFS::MountTarget
   - tf: aws_efs_replication_configuration
     service: efs
@@ -3159,6 +3339,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     re:
       - ec2:elastic-ip
     cfn: AWS::EC2::EIP
@@ -3175,6 +3356,9 @@ resources:
       - region
       - cluster_name
       - principal_arn
+    list: true
+    list_required:
+      - cluster_name
     re:
       - eks:access-entry
     cfn: AWS::EKS::AccessEntry
@@ -3187,6 +3371,10 @@ resources:
       - cluster_name
       - principal_arn
       - policy_arn
+    list: true
+    list_required:
+      - cluster_name
+      - principal_arn
   - tf: aws_eks_addon
     service: eks
     identity: regional-parameterized
@@ -3195,6 +3383,9 @@ resources:
       - region
       - cluster_name
       - addon_name
+    list: true
+    list_required:
+      - cluster_name
     re:
       - eks:addon
     cfn: AWS::EKS::Addon
@@ -3214,6 +3405,7 @@ resources:
       - account_id
       - region
       - name
+    list: true
     re:
       - eks:cluster
     cfn: AWS::EKS::Cluster
@@ -3247,6 +3439,9 @@ resources:
       - region
       - cluster_name
       - node_group_name
+    list: true
+    list_required:
+      - cluster_name
     re:
       - eks:nodegroup
   - tf: aws_eks_pod_identity_association
@@ -3334,6 +3529,7 @@ resources:
       - account_id
       - region
       - name
+    list: true
   - tf: aws_elb_attachment
     service: elb
   - tf: aws_emr_block_public_access_configuration
@@ -3407,6 +3603,7 @@ resources:
     identity_attrs:
       - account_id
       - region
+    list: true
   - tf: aws_fis_target_account_configuration
     service: fis
     cfn: AWS::FIS::TargetAccountConfiguration
@@ -3417,6 +3614,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     re:
       - ec2:vpc-flow-log
     cfn: AWS::EC2::FlowLog
@@ -3566,6 +3764,7 @@ resources:
       - account_id
       - region
       - name
+    list: true
     cfn: AWS::Glue::Catalog
   - tf: aws_glue_catalog_database
     service: glue
@@ -3580,6 +3779,9 @@ resources:
       - name
       - database_name
       - catalog_id
+    list: true
+    list_required:
+      - database_name
   - tf: aws_glue_catalog_table_optimizer
     service: glue
   - tf: aws_glue_classifier
@@ -3612,6 +3814,7 @@ resources:
       - account_id
       - region
       - name
+    list: true
     re:
       - glue:job
     cfn: AWS::Glue::Job
@@ -3726,6 +3929,7 @@ resources:
     identity_attrs:
       - account_id
       - id
+    list: true
   - tf: aws_iam_account_alias
     service: iam
     global: true
@@ -3739,6 +3943,7 @@ resources:
     identity_attrs:
       - account_id
       - name
+    list: true
     cfn: AWS::IAM::Group
   - tf: aws_iam_group_membership
     service: iam
@@ -3758,6 +3963,7 @@ resources:
       - account_id
       - group
       - policy_arn
+    list: true
   - tf: aws_iam_group_policy_attachments_exclusive
     service: iam
     global: true
@@ -3768,6 +3974,7 @@ resources:
     identity_attrs:
       - account_id
       - name
+    list: true
     re:
       - iam:instance-profile
     cfn: AWS::IAM::InstanceProfile
@@ -3777,6 +3984,7 @@ resources:
     identity: global-arn
     identity_attrs:
       - arn
+    list: true
     re:
       - iam:oidc-provider
   - tf: aws_iam_organizations_features
@@ -3794,6 +4002,7 @@ resources:
     identity: global-arn
     identity_attrs:
       - arn
+    list: true
   - tf: aws_iam_policy_attachment
     service: iam
     global: true
@@ -3807,6 +4016,7 @@ resources:
     identity_attrs:
       - account_id
       - name
+    list: true
     re:
       - iam:role
     cfn: AWS::IAM::Role
@@ -3821,6 +4031,9 @@ resources:
       - account_id
       - role
       - name
+    list: true
+    list_required:
+      - role_name
     cfn: AWS::IAM::RolePolicy
   - tf: aws_iam_role_policy_attachment
     service: iam
@@ -3830,6 +4043,7 @@ resources:
       - account_id
       - role
       - policy_arn
+    list: true
   - tf: aws_iam_role_policy_attachments_exclusive
     service: iam
     global: true
@@ -3871,6 +4085,7 @@ resources:
     identity_attrs:
       - account_id
       - name
+    list: true
     re:
       - iam:user
     cfn: AWS::IAM::User
@@ -3891,6 +4106,9 @@ resources:
       - account_id
       - user
       - name
+    list: true
+    list_required:
+      - user_name
     cfn: AWS::IAM::UserPolicy
   - tf: aws_iam_user_policy_attachment
     service: iam
@@ -3900,6 +4118,7 @@ resources:
       - account_id
       - user
       - policy_arn
+    list: true
   - tf: aws_iam_user_policy_attachments_exclusive
     service: iam
     global: true
@@ -4030,6 +4249,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     re:
       - ec2:instance
     cfn: AWS::EC2::Instance
@@ -4040,6 +4260,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     re:
       - ec2:internet-gateway
     cfn: AWS::EC2::InternetGateway
@@ -4202,6 +4423,7 @@ resources:
       - account_id
       - region
       - key_name
+    list: true
     re:
       - ec2:key-pair
     cfn: AWS::EC2::KeyPair
@@ -4224,6 +4446,7 @@ resources:
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     re:
       - firehose:deliverystream
   - tf: aws_kinesis_resource_policy
@@ -4268,6 +4491,7 @@ resources:
       - account_id
       - region
       - name
+    list: true
     cfn: AWS::KMS::Alias
   - tf: aws_kms_ciphertext
     service: kms
@@ -4284,6 +4508,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     re:
       - kms:key
     cfn: AWS::KMS::Key
@@ -4329,6 +4554,9 @@ resources:
       - region
       - function_name
       - name
+    list: true
+    list_required:
+      - function_name
     cfn: AWS::Lambda::Alias
   - tf: aws_lambda_capacity_provider
     service: lambda
@@ -4337,6 +4565,7 @@ resources:
       - account_id
       - region
       - name
+    list: true
     cfn: AWS::Lambda::CapacityProvider
   - tf: aws_lambda_code_signing_config
     service: lambda
@@ -4350,6 +4579,7 @@ resources:
       - account_id
       - region
       - uuid
+    list: true
     re:
       - lambda:event-source-mapping
     cfn: AWS::Lambda::EventSourceMapping
@@ -4360,6 +4590,7 @@ resources:
       - account_id
       - region
       - function_name
+    list: true
     re:
       - lambda:function
     cfn: AWS::Lambda::Function
@@ -4375,6 +4606,7 @@ resources:
       - region
       - function_name
       - qualifier
+    list: true
   - tf: aws_lambda_function_url
     service: lambda
   - tf: aws_lambda_invocation
@@ -4387,6 +4619,7 @@ resources:
       - region
       - layer_name
       - version
+    list: true
     cfn: AWS::Lambda::LayerVersion
   - tf: aws_lambda_layer_version_permission
     service: lambda
@@ -4402,6 +4635,9 @@ resources:
       - qualifier
     identity_optional:
       - qualifier
+    list: true
+    list_required:
+      - function_name
     cfn: AWS::Lambda::Permission
   - tf: aws_lambda_provisioned_concurrency_config
     service: lambda
@@ -4410,6 +4646,7 @@ resources:
     identity: regional-arn
     identity_attrs:
       - resource_arn
+    list: true
     cfn: AWS::Lambda::ResourcePolicy
   - tf: aws_lambda_runtime_management_config
     service: lambda
@@ -4418,11 +4655,13 @@ resources:
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
   - tf: aws_lambdamicrovms_image
     service: lambdamicrovms
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
   - tf: aws_lambdamicrovms_microvm
     service: lambdamicrovms
     identity: regional-single-parameter
@@ -4430,6 +4669,7 @@ resources:
       - account_id
       - region
       - microvm_id
+    list: true
   - tf: aws_lambdaweb_function
     service: lambdaweb
     identity: regional-single-parameter
@@ -4437,6 +4677,7 @@ resources:
       - account_id
       - region
       - function_name
+    list: true
   - tf: aws_lambdaweb_function_endpoint
     service: lambdaweb
     identity: regional-parameterized
@@ -4445,6 +4686,9 @@ resources:
       - region
       - function_name
       - endpoint_name
+    list: true
+    list_required:
+      - function_name
   - tf: aws_lambdaweb_function_revision
     service: lambdaweb
     identity: regional-parameterized
@@ -4453,6 +4697,9 @@ resources:
       - region
       - function_name
       - revision_id
+    list: true
+    list_required:
+      - function_name
   - tf: aws_lambdaweb_resource_policy
     service: lambdaweb
     identity: regional-arn
@@ -4473,6 +4720,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     re:
       - ec2:launch-template
     cfn: AWS::EC2::LaunchTemplate
@@ -4481,6 +4729,7 @@ resources:
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     re:
       - elasticloadbalancing:loadbalancer
   - tf: aws_lb_cookie_stickiness_policy
@@ -4490,6 +4739,9 @@ resources:
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
+    list_required:
+      - load_balancer_arn
     re:
       - elasticloadbalancing:listener
   - tf: aws_lb_listener_certificate
@@ -4499,6 +4751,9 @@ resources:
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
+    list_required:
+      - listener_arn
     re:
       - elasticloadbalancing:listener-rule
   - tf: aws_lb_ssl_negotiation_policy
@@ -4508,6 +4763,7 @@ resources:
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     re:
       - elasticloadbalancing:targetgroup
   - tf: aws_lb_target_group_attachment
@@ -4525,6 +4781,7 @@ resources:
       - port
       - availability_zone
       - quic_server_id
+    list: true
   - tf: aws_lb_trust_store
     service: elbv2
     identity: regional-arn
@@ -4716,6 +4973,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
   - tf: aws_mailmanager_ingress_point
     service: mailmanager
     identity: regional-single-parameter
@@ -4723,6 +4981,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
   - tf: aws_mailmanager_relay
     service: mailmanager
     identity: regional-single-parameter
@@ -4730,6 +4989,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
   - tf: aws_mailmanager_rule_set
     service: mailmanager
     identity: regional-single-parameter
@@ -4737,6 +4997,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
   - tf: aws_mailmanager_traffic_policy
     service: mailmanager
     identity: regional-single-parameter
@@ -4744,6 +5005,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
   - tf: aws_main_route_table_association
     service: ec2
   - tf: aws_media_convert_queue
@@ -4852,6 +5114,7 @@ resources:
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     cfn: AWS::MSK::Cluster
   - tf: aws_msk_cluster_policy
     service: kafka
@@ -4874,6 +5137,7 @@ resources:
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     cfn: AWS::MSK::ServerlessCluster
   - tf: aws_msk_single_scram_secret_association
     service: kafka
@@ -4884,6 +5148,9 @@ resources:
       - account_id
       - region
       - name
+      - cluster_arn
+    list: true
+    list_required:
       - cluster_arn
     cfn: AWS::MSK::Topic
   - tf: aws_msk_vpc_connection
@@ -4911,6 +5178,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     re:
       - ec2:natgateway
     cfn: AWS::EC2::NatGateway
@@ -4953,6 +5221,9 @@ resources:
       - region
       - graph_identifier
       - vpc_id
+    list: true
+    list_required:
+      - graph_identifier
     cfn: AWS::NeptuneGraph::PrivateGraphEndpoint
   - tf: aws_network_acl
     service: ec2
@@ -4961,6 +5232,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     re:
       - ec2:network-acl
     cfn: AWS::EC2::NetworkAcl
@@ -4976,6 +5248,7 @@ resources:
       - egress
       - rule_number
       - protocol
+    list: true
   - tf: aws_network_interface
     service: ec2
     identity: regional-single-parameter
@@ -4983,6 +5256,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     re:
       - ec2:network-interface
     cfn: AWS::EC2::NetworkInterface
@@ -4998,6 +5272,7 @@ resources:
     identity: regional-arn
     identity_attrs:
       - container_association_arn
+    list: true
     cfn: AWS::NetworkFirewall::ContainerAssociation
   - tf: aws_networkfirewall_firewall
     service: networkfirewall
@@ -5145,35 +5420,41 @@ resources:
       - admin_account_id
     identity_from:
       admin_account_id: account_id
+    list: true
   - tf: aws_networksecuritymanager_deployment
     service: networksecuritymanager
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     cfn: AWS::NetworkSecurityManager::Deployment
   - tf: aws_networksecuritymanager_policy
     service: networksecuritymanager
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     cfn: AWS::NetworkSecurityManager::Policy
   - tf: aws_networksecuritymanager_rule
     service: networksecuritymanager
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     cfn: AWS::NetworkSecurityManager::Rule
   - tf: aws_networksecuritymanager_scope
     service: networksecuritymanager
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     cfn: AWS::NetworkSecurityManager::Scope
   - tf: aws_networksecuritymanager_template
     service: networksecuritymanager
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     cfn: AWS::NetworkSecurityManager::Template
   - tf: aws_notifications_channel_association
     service: notifications
@@ -5267,6 +5548,7 @@ resources:
       - account_id
       - region
       - rule_name
+    list: true
     cfn: AWS::ObservabilityAdmin::TelemetryRule
   - tf: aws_observabilityadmin_telemetry_rule_for_organization
     service: observabilityadmin
@@ -5275,6 +5557,7 @@ resources:
       - account_id
       - region
       - rule_name
+    list: true
   - tf: aws_odb_autonomous_database
     service: odb
     identity: regional-single-parameter
@@ -5331,6 +5614,9 @@ resources:
       - region
       - name
       - type
+    list: true
+    list_required:
+      - type
     cfn: AWS::OpenSearchServerless::AccessPolicy
   - tf: aws_opensearchserverless_collection
     service: opensearchserverless
@@ -5339,6 +5625,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     re:
       - aoss:collection
     cfn: AWS::OpenSearchServerless::Collection
@@ -5349,6 +5636,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     cfn: AWS::OpenSearchServerless::CollectionGroup
   - tf: aws_opensearchserverless_lifecycle_policy
     service: opensearchserverless
@@ -5357,6 +5645,9 @@ resources:
       - account_id
       - region
       - name
+      - type
+    list: true
+    list_required:
       - type
     cfn: AWS::OpenSearchServerless::LifecyclePolicy
   - tf: aws_opensearchserverless_security_config
@@ -5367,6 +5658,9 @@ resources:
       - region
       - name
       - type
+    list: true
+    list_required:
+      - type
     cfn: AWS::OpenSearchServerless::SecurityConfig
   - tf: aws_opensearchserverless_security_policy
     service: opensearchserverless
@@ -5376,6 +5670,9 @@ resources:
       - region
       - name
       - type
+    list: true
+    list_required:
+      - type
     cfn: AWS::OpenSearchServerless::SecurityPolicy
   - tf: aws_opensearchserverless_vpc_endpoint
     service: opensearchserverless
@@ -5384,6 +5681,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     cfn: AWS::OpenSearchServerless::VpcEndpoint
   - tf: aws_organizations_account
     service: organizations
@@ -5402,6 +5700,7 @@ resources:
     identity_attrs:
       - account_id
       - service_principal
+    list: true
   - tf: aws_organizations_delegated_administrator
     service: organizations
     global: true
@@ -5468,6 +5767,7 @@ resources:
       - name
     identity_from:
       name: pipeline_name
+    list: true
     re:
       - osis:pipeline
     cfn: AWS::OSIS::Pipeline
@@ -5478,12 +5778,14 @@ resources:
       - account_id
       - region
       - id
+    list: true
     cfn: AWS::OSIS::PipelineEndpoint
   - tf: aws_osis_resource_policy
     service: osis
     identity: regional-arn
     identity_attrs:
       - resource_arn
+    list: true
   - tf: aws_outposts_capacity_task
     service: outposts
     identity: regional-parameterized
@@ -5538,6 +5840,9 @@ resources:
       - region
       - configuration_set_name
       - event_destination_name
+    list: true
+    list_required:
+      - configuration_set_names
   - tf: aws_pinpointsmsvoicev2_keyword
     service: pinpointsmsvoicev2
     identity: regional-parameterized
@@ -5546,6 +5851,9 @@ resources:
       - region
       - origination_identity_arn
       - keyword
+    list: true
+    list_required:
+      - origination_identity_arn
   - tf: aws_pinpointsmsvoicev2_opt_out_list
     service: pinpointsmsvoicev2
   - tf: aws_pinpointsmsvoicev2_phone_number
@@ -5557,10 +5865,14 @@ resources:
       - account_id
       - region
       - id
+    list: true
   - tf: aws_pinpointsmsvoicev2_resource_policy
     service: pinpointsmsvoicev2
     identity: regional-arn
     identity_attrs:
+      - resource_arn
+    list: true
+    list_required:
       - resource_arn
   - tf: aws_pinpointsmsvoicev2_sender_id
     service: pinpointsmsvoicev2
@@ -5570,6 +5882,7 @@ resources:
       - region
       - sender_id
       - iso_country_code
+    list: true
   - tf: aws_pipes_pipe
     service: pipes
     re:
@@ -5586,6 +5899,7 @@ resources:
     identity: global-arn
     identity_attrs:
       - arn
+    list: true
     cfn: AWS::PricingPlanManager::Subscription
   - tf: aws_prometheus_alert_manager_definition
     service: amp
@@ -5596,6 +5910,9 @@ resources:
       - account_id
       - region
       - id
+      - workspace_id
+    list: true
+    list_required:
       - workspace_id
   - tf: aws_prometheus_query_logging_configuration
     service: amp
@@ -5613,6 +5930,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
   - tf: aws_prometheus_scraper_logging_configuration
     service: amp
     identity: regional-single-parameter
@@ -5620,6 +5938,7 @@ resources:
       - account_id
       - region
       - scraper_id
+    list: true
   - tf: aws_prometheus_workspace
     service: amp
   - tf: aws_prometheus_workspace_configuration
@@ -5641,6 +5960,7 @@ resources:
       - account_id
       - region
       - aws_account_id
+    list: true
   - tf: aws_quicksight_account_settings
     service: quicksight
   - tf: aws_quicksight_account_subscription
@@ -5716,6 +6036,7 @@ resources:
       - region
       - principal
       - resource_share_arn
+    list: true
     cfn: AWS::RAM::PrincipalAssociation
   - tf: aws_ram_resource_association
     service: ram
@@ -5725,6 +6046,7 @@ resources:
       - region
       - resource_share_arn
       - resource_arn
+    list: true
     cfn: AWS::RAM::ResourceAssociation
   - tf: aws_ram_resource_share
     service: ram
@@ -5759,6 +6081,7 @@ resources:
       - account_id
       - region
       - cluster_identifier
+    list: true
     re:
       - rds:cluster
   - tf: aws_rds_cluster_activity_stream
@@ -5772,6 +6095,7 @@ resources:
       - account_id
       - region
       - identifier
+    list: true
   - tf: aws_rds_cluster_parameter_group
     service: rds
   - tf: aws_rds_cluster_role_association
@@ -5809,6 +6133,7 @@ resources:
       - account_id
       - region
       - tenant_database_resource_id
+    list: true
   - tf: aws_redshift_authentication_profile
     service: redshift
   - tf: aws_redshift_cluster
@@ -5924,6 +6249,7 @@ resources:
       - account_id
       - region
       - collection_id
+    list: true
     cfn: AWS::Rekognition::Collection
   - tf: aws_rekognition_project
     service: rekognition
@@ -5954,6 +6280,9 @@ resources:
       - region
       - service_arn
       - assertion_id
+    list: true
+    list_required:
+      - service_arn
   - tf: aws_resiliencehubv2_input_source
     service: resiliencehubv2
     identity: regional-parameterized
@@ -5962,17 +6291,22 @@ resources:
       - region
       - service_arn
       - input_source_id
+    list: true
+    list_required:
+      - service_arn
   - tf: aws_resiliencehubv2_policy
     service: resiliencehubv2
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     cfn: AWS::ResilienceHubV2::Policy
   - tf: aws_resiliencehubv2_service
     service: resiliencehubv2
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     cfn: AWS::ResilienceHubV2::Service
   - tf: aws_resiliencehubv2_service_function
     service: resiliencehubv2
@@ -5982,12 +6316,16 @@ resources:
       - region
       - service_arn
       - service_function_id
+    list: true
+    list_required:
+      - service_arn
     cfn: AWS::ResilienceHubV2::ServiceFunction
   - tf: aws_resiliencehubv2_system
     service: resiliencehubv2
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     cfn: AWS::ResilienceHubV2::System
   - tf: aws_resiliencehubv2_user_journey
     service: resiliencehubv2
@@ -5997,6 +6335,9 @@ resources:
       - region
       - system_arn
       - user_journey_id
+    list: true
+    list_required:
+      - system_arn
     cfn: AWS::ResilienceHubV2::UserJourney
   - tf: aws_resourceexplorer2_index
     service: resourceexplorer2
@@ -6039,6 +6380,9 @@ resources:
       - destination_cidr_block
       - destination_ipv6_cidr_block
       - destination_prefix_list_id
+    list: true
+    list_required:
+      - route_table_id
     cfn: AWS::EC2::Route
   - tf: aws_route53_cidr_collection
     service: route53
@@ -6081,6 +6425,9 @@ resources:
       name: fqdn
     identity_optional:
       - set_identifier
+    list: true
+    list_required:
+      - zone_id
   - tf: aws_route53_records_exclusive
     service: route53
     global: true
@@ -6121,6 +6468,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     re:
       - route53resolver:resolver-rule
   - tf: aws_route53_resolver_rule_association
@@ -6130,6 +6478,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
   - tf: aws_route53_traffic_policy
     service: route53
     global: true
@@ -6146,6 +6495,9 @@ resources:
       - account_id
       - zone_id
       - vpc_id
+    list: true
+    list_required:
+      - zone_id
   - tf: aws_route53_zone
     service: route53
     global: true
@@ -6153,6 +6505,7 @@ resources:
     identity_attrs:
       - account_id
       - zone_id
+    list: true
     re:
       - route53:hostedzone
   - tf: aws_route53_zone_association
@@ -6166,6 +6519,9 @@ resources:
       - vpc_region
     identity_optional:
       - vpc_region
+    list: true
+    list_required:
+      - vpc_id
   - tf: aws_route53domains_delegation_signer_record
     service: route53domains
     global: true
@@ -6235,6 +6591,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     re:
       - ec2:route-table
     cfn: AWS::EC2::RouteTable
@@ -6245,6 +6602,9 @@ resources:
       - account_id
       - region
       - id
+    list: true
+    list_required:
+      - route_table_id
   - tf: aws_rum_app_monitor
     service: rum
     re:
@@ -6270,6 +6630,7 @@ resources:
       - account_id
       - region
       - bucket
+    list: true
     re:
       - s3:bucket
     cfn: AWS::S3::Bucket
@@ -6284,6 +6645,7 @@ resources:
       - account_id
       - region
       - bucket
+    list: true
   - tf: aws_s3_bucket_analytics_configuration
     service: s3
   - tf: aws_s3_bucket_cors_configuration
@@ -6293,6 +6655,7 @@ resources:
       - account_id
       - region
       - bucket
+    list: true
   - tf: aws_s3_bucket_intelligent_tiering_configuration
     service: s3
   - tf: aws_s3_bucket_inventory
@@ -6304,6 +6667,7 @@ resources:
       - account_id
       - region
       - bucket
+    list: true
   - tf: aws_s3_bucket_logging
     service: s3
     identity: regional-single-parameter
@@ -6311,6 +6675,7 @@ resources:
       - account_id
       - region
       - bucket
+    list: true
   - tf: aws_s3_bucket_metadata_configuration
     service: s3
     identity: regional-single-parameter
@@ -6327,6 +6692,7 @@ resources:
       - account_id
       - region
       - bucket
+    list: true
   - tf: aws_s3_bucket_object
     service: s3
     identity: regional-parameterized
@@ -6344,6 +6710,7 @@ resources:
       - account_id
       - region
       - bucket
+    list: true
   - tf: aws_s3_bucket_policy
     service: s3
     identity: regional-single-parameter
@@ -6351,6 +6718,7 @@ resources:
       - account_id
       - region
       - bucket
+    list: true
     cfn: AWS::S3::BucketPolicy
   - tf: aws_s3_bucket_public_access_block
     service: s3
@@ -6359,6 +6727,7 @@ resources:
       - account_id
       - region
       - bucket
+    list: true
   - tf: aws_s3_bucket_replication_configuration
     service: s3
   - tf: aws_s3_bucket_request_payment_configuration
@@ -6370,6 +6739,7 @@ resources:
       - account_id
       - region
       - bucket
+    list: true
   - tf: aws_s3_bucket_versioning
     service: s3
     identity: regional-single-parameter
@@ -6377,6 +6747,7 @@ resources:
       - account_id
       - region
       - bucket
+    list: true
   - tf: aws_s3_bucket_website_configuration
     service: s3
     identity: regional-single-parameter
@@ -6391,6 +6762,7 @@ resources:
       - account_id
       - region
       - bucket
+    list: true
     re:
       - s3express:bucket
   - tf: aws_s3_object
@@ -6401,6 +6773,9 @@ resources:
       - region
       - bucket
       - key
+    list: true
+    list_required:
+      - bucket
   - tf: aws_s3_object_copy
     service: s3
   - tf: aws_s3control_access_grant
@@ -6431,6 +6806,7 @@ resources:
       - account_id
       - region
       - name
+    list: true
   - tf: aws_s3control_multi_region_access_point_policy
     service: s3control
   - tf: aws_s3control_multi_region_access_point_routes
@@ -6440,6 +6816,7 @@ resources:
       - account_id
       - region
       - mrap
+    list: true
   - tf: aws_s3control_object_lambda_access_point
     service: s3control
   - tf: aws_s3control_object_lambda_access_point_policy
@@ -6453,6 +6830,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     cfn: AWS::S3Files::AccessPoint
   - tf: aws_s3files_file_system
     service: s3files
@@ -6461,6 +6839,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     cfn: AWS::S3Files::FileSystem
   - tf: aws_s3files_file_system_policy
     service: s3files
@@ -6468,6 +6847,9 @@ resources:
     identity_attrs:
       - account_id
       - region
+      - file_system_id
+    list: true
+    list_required:
       - file_system_id
     cfn: AWS::S3Files::FileSystemPolicy
   - tf: aws_s3files_mount_target
@@ -6477,6 +6859,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     cfn: AWS::S3Files::MountTarget
   - tf: aws_s3files_synchronization_configuration
     service: s3files
@@ -6485,6 +6868,7 @@ resources:
       - account_id
       - region
       - file_system_id
+    list: true
   - tf: aws_s3outposts_endpoint
     service: s3outposts
     cfn: AWS::S3Outposts::Endpoint
@@ -6544,6 +6928,7 @@ resources:
       - account_id
       - region
       - algorithm_name
+    list: true
     cfn: AWS::SageMaker::Algorithm
   - tf: aws_sagemaker_app
     service: sagemaker
@@ -6608,6 +6993,7 @@ resources:
       - region
       - hub_name
       - hub_content_name
+    list: true
   - tf: aws_sagemaker_human_task_ui
     service: sagemaker
     cfn: AWS::SageMaker::HumanTaskUi
@@ -6618,6 +7004,7 @@ resources:
       - account_id
       - region
       - name
+    list: true
   - tf: aws_sagemaker_image
     service: sagemaker
     re:
@@ -6633,6 +7020,7 @@ resources:
       - account_id
       - region
       - name
+    list: true
     cfn: AWS::SageMaker::InferenceComponent
   - tf: aws_sagemaker_labeling_job
     service: sagemaker
@@ -6711,6 +7099,7 @@ resources:
       - account_id
       - region
       - training_job_name
+    list: true
   - tf: aws_sagemaker_user_profile
     service: sagemaker
     identity: regional-parameterized
@@ -6741,6 +7130,7 @@ resources:
       - region
       - group_name
       - name
+    list: true
     cfn: AWS::Scheduler::Schedule
   - tf: aws_scheduler_schedule_group
     service: scheduler
@@ -6766,6 +7156,7 @@ resources:
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     re:
       - secretsmanager:secret
     cfn: AWS::SecretsManager::Secret
@@ -6774,6 +7165,7 @@ resources:
     identity: regional-arn
     identity_attrs:
       - secret_arn
+    list: true
   - tf: aws_secretsmanager_secret_rotation
     service: secretsmanager
     identity: regional-arn
@@ -6787,6 +7179,9 @@ resources:
       - region
       - secret_id
       - version_id
+    list: true
+    list_required:
+      - secret_id
   - tf: aws_secretsmanager_tag
     service: secretsmanager
   - tf: aws_security_group
@@ -6796,6 +7191,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     re:
       - ec2:security-group
     cfn: AWS::EC2::SecurityGroup
@@ -6831,6 +7227,7 @@ resources:
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     cfn: AWS::SecurityHub::AutomationRuleV2
   - tf: aws_securityhub_configuration_policy
     service: securityhub
@@ -6854,6 +7251,7 @@ resources:
       - account_id
       - region
       - connector_id
+    list: true
     cfn: AWS::SecurityHub::ConnectorV2
   - tf: aws_securityhub_feature_v2
     service: securityhub
@@ -6873,6 +7271,7 @@ resources:
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     cfn: AWS::SecurityHub::Insight
   - tf: aws_securityhub_invite_accepter
     service: securityhub
@@ -6909,6 +7308,9 @@ resources:
     identity: regional-arn
     identity_attrs:
       - standards_control_arn
+    list: true
+    list_required:
+      - standards_subscription_arn
   - tf: aws_securityhub_standards_control_association
     service: securityhub
     identity: regional-parameterized
@@ -7099,6 +7501,7 @@ resources:
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     re:
       - states:stateMachine
   - tf: aws_shield_application_layer_automatic_response
@@ -7151,6 +7554,7 @@ resources:
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
     re:
       - sns:topic
     cfn: AWS::SNS::Topic
@@ -7164,11 +7568,15 @@ resources:
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
   - tf: aws_sns_topic_subscription
     service: sns
     identity: regional-arn
     identity_attrs:
       - arn
+    list: true
+    list_required:
+      - topic_arn
   - tf: aws_spot_datafeed_subscription
     service: ec2
   - tf: aws_spot_fleet_request
@@ -7180,6 +7588,7 @@ resources:
     identity: regional-custom-inherent-region
     identity_attrs:
       - url
+    list: true
     re:
       - sqs:queue
     cfn: AWS::SQS::Queue
@@ -7188,6 +7597,7 @@ resources:
     identity: regional-custom-inherent-region
     identity_attrs:
       - queue_url
+    list: true
   - tf: aws_sqs_queue_redrive_allow_policy
     service: sqs
     identity: regional-custom-inherent-region
@@ -7207,6 +7617,7 @@ resources:
       - account_id
       - region
       - association_id
+    list: true
     re:
       - ssm:association
     cfn: AWS::SSM::Association
@@ -7219,6 +7630,10 @@ resources:
       - account_id
       - region
       - name
+    list: true
+    list_required:
+      - key
+      - values
     re:
       - ssm:document
     cfn: AWS::SSM::Document
@@ -7257,6 +7672,7 @@ resources:
       - account_id
       - region
       - name
+    list: true
     re:
       - ssm:parameter
     cfn: AWS::SSM::Parameter
@@ -7267,6 +7683,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     re:
       - ssm:patchbaseline
     cfn: AWS::SSM::PatchBaseline
@@ -7278,6 +7695,7 @@ resources:
       - region
       - patch_group
       - baseline_id
+    list: true
   - tf: aws_ssm_resource_data_sync
     service: ssm
     cfn: AWS::SSM::ResourceDataSync
@@ -7285,6 +7703,9 @@ resources:
     service: ssm
     identity: regional-arn
     identity_attrs:
+      - arn
+    list: true
+    list_required:
       - arn
     cfn: AWS::SSM::ServiceSetting
   - tf: aws_ssmcontacts_contact
@@ -7334,6 +7755,11 @@ resources:
       - target_type
       - permission_set_arn
       - instance_arn
+    list: true
+    list_required:
+      - account_id
+      - instance_arn
+      - permission_set_arn
   - tf: aws_ssoadmin_application
     service: ssoadmin
     identity: regional-global-arn-format
@@ -7386,6 +7812,9 @@ resources:
       - region
       - instance_arn
       - region_name
+    list: true
+    list_required:
+      - instance_arn
   - tf: aws_ssoadmin_trusted_token_issuer
     service: ssoadmin
     identity: regional-global-arn-format
@@ -7422,6 +7851,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     re:
       - ec2:subnet
     cfn: AWS::EC2::Subnet
@@ -7576,6 +8006,7 @@ resources:
       - device_name
       - volume_id
       - instance_id
+    list: true
     cfn: AWS::EC2::VolumeAttachment
   - tf: aws_vpc
     service: ec2
@@ -7584,6 +8015,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     re:
       - ec2:vpc
     cfn: AWS::EC2::VPC
@@ -7616,6 +8048,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
     re:
       - ec2:vpc-endpoint
     cfn: AWS::EC2::VPCEndpoint
@@ -7636,6 +8069,7 @@ resources:
       - region
       - vpc_endpoint_id
       - route_table_id
+    list: true
   - tf: aws_vpc_endpoint_security_group_association
     service: ec2
   - tf: aws_vpc_endpoint_service
@@ -7710,6 +8144,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
   - tf: aws_vpc_security_group_ingress_rule
     service: ec2
     identity: regional-single-parameter
@@ -7717,6 +8152,7 @@ resources:
       - account_id
       - region
       - id
+    list: true
   - tf: aws_vpc_security_group_rules_exclusive
     service: ec2
   - tf: aws_vpc_security_group_vpc_association
@@ -7879,6 +8315,9 @@ resources:
       - id
       - name
       - scope
+    list: true
+    list_required:
+      - scope
     cfn: AWS::WAFv2::IPSet
   - tf: aws_wafv2_regex_pattern_set
     service: wafv2
@@ -7902,6 +8341,9 @@ resources:
       - region
       - web_acl_arn
       - name
+    list: true
+    list_required:
+      - web_acl_arn
   - tf: aws_wafv2_web_acl_rule_group_association
     service: wafv2
   - tf: aws_workmail_default_domain
@@ -7919,6 +8361,9 @@ resources:
       - region
       - organization_id
       - domain_name
+    list: true
+    list_required:
+      - organization_id
   - tf: aws_workmail_group
     service: workmail
     identity: regional-parameterized
@@ -7927,6 +8372,9 @@ resources:
       - region
       - organization_id
       - group_id
+    list: true
+    list_required:
+      - organization_id
   - tf: aws_workmail_organization
     service: workmail
     identity: regional-single-parameter
@@ -7934,6 +8382,7 @@ resources:
       - account_id
       - region
       - organization_id
+    list: true
   - tf: aws_workmail_user
     service: workmail
     identity: regional-parameterized
@@ -7942,6 +8391,9 @@ resources:
       - region
       - organization_id
       - user_id
+    list: true
+    list_required:
+      - organization_id
   - tf: aws_workspaces_connection_alias
     service: workspaces
     re:
@@ -7959,6 +8411,7 @@ resources:
       - account_id
       - region
       - pool_id
+    list: true
   - tf: aws_workspaces_workspace
     service: workspaces
     cfn: AWS::WorkSpaces::Workspace

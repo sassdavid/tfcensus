@@ -1,0 +1,180 @@
+{
+    "schema_version": "1",
+    "tool": "tfcensus",
+    "version": "dev",
+    "generated_at": "2026-11-10T12:00:00Z",
+    "data": {
+        "units": [
+            {
+                "unit": "tf-scan/iam",
+                "workspace": "default",
+                "bucket": "acme-scan-tfstate",
+                "key": "iam/terraform.tfstate",
+                "status": "ok",
+                "serial": 4,
+                "lineage": "6b1d2f3e-4a5b-4c6d-9e7f-8091a2b3c4d5",
+                "instances": 2
+            },
+            {
+                "unit": "tf-scan/iam-dup",
+                "workspace": "default",
+                "bucket": "acme-scan-tfstate",
+                "key": "iam-dup/terraform.tfstate",
+                "status": "ok",
+                "serial": 2,
+                "lineage": "7c2e3a4f-5b6c-4d7e-8f80-91a2b3c4d5e6",
+                "instances": 1
+            },
+            {
+                "unit": "tf-scan/network",
+                "workspace": "default",
+                "bucket": "acme-scan-tfstate",
+                "key": "network/terraform.tfstate",
+                "status": "ok",
+                "serial": 12,
+                "lineage": "5a0c1e2d-3f4a-4b5c-8d6e-7f8091a2b3c4",
+                "instances": 5
+            }
+        ],
+        "entries": [
+            {
+                "unit": "tf-scan/iam",
+                "workspace": "default",
+                "address": "aws_iam_role.app",
+                "type": "aws_iam_role",
+                "provider": "hashicorp/aws",
+                "id": "acme-app",
+                "arn": "arn:aws:iam::111111111111:role/acme-app",
+                "identity": {
+                    "account_id": "111111111111",
+                    "name": "acme-app"
+                },
+                "account": "111111111111"
+            },
+            {
+                "unit": "tf-scan/iam",
+                "workspace": "default",
+                "address": "aws_iam_role.shared",
+                "type": "aws_iam_role",
+                "provider": "hashicorp/aws",
+                "id": "acme-shared",
+                "arn": "arn:aws:iam::111111111111:role/acme-shared",
+                "identity": {
+                    "account_id": "111111111111",
+                    "name": "acme-shared"
+                },
+                "account": "111111111111"
+            },
+            {
+                "unit": "tf-scan/iam-dup",
+                "workspace": "default",
+                "address": "aws_iam_role.shared",
+                "type": "aws_iam_role",
+                "provider": "hashicorp/aws",
+                "id": "acme-shared",
+                "arn": "arn:aws:iam::111111111111:role/acme-shared",
+                "identity": {
+                    "account_id": "111111111111",
+                    "name": "acme-shared"
+                },
+                "account": "111111111111"
+            },
+            {
+                "unit": "tf-scan/network",
+                "workspace": "default",
+                "address": "aws_vpc.main",
+                "type": "aws_vpc",
+                "provider": "hashicorp/aws",
+                "id": "vpc-0a1b2c3d4e5f60718",
+                "arn": "arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0a1b2c3d4e5f60718",
+                "identity": {
+                    "account_id": "111111111111",
+                    "id": "vpc-0a1b2c3d4e5f60718",
+                    "region": "eu-west-1"
+                },
+                "account": "111111111111",
+                "region": "eu-west-1"
+            },
+            {
+                "unit": "tf-scan/network",
+                "workspace": "default",
+                "address": "aws_security_group.web",
+                "type": "aws_security_group",
+                "provider": "hashicorp/aws",
+                "id": "sg-0aa11bb22cc33dd44",
+                "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0aa11bb22cc33dd44",
+                "identity": {
+                    "account_id": "111111111111",
+                    "id": "sg-0aa11bb22cc33dd44",
+                    "region": "eu-west-1"
+                },
+                "account": "111111111111",
+                "region": "eu-west-1"
+            },
+            {
+                "unit": "tf-scan/network",
+                "workspace": "default",
+                "address": "aws_lb.web",
+                "type": "aws_lb",
+                "provider": "hashicorp/aws",
+                "id": "arn:aws:elasticloadbalancing:eu-west-1:111111111111:loadbalancer/app/web/50dc6c495c0c9188",
+                "arn": "arn:aws:elasticloadbalancing:eu-west-1:111111111111:loadbalancer/app/web/50dc6c495c0c9188",
+                "identity": {
+                    "arn": "arn:aws:elasticloadbalancing:eu-west-1:111111111111:loadbalancer/app/web/50dc6c495c0c9188"
+                },
+                "account": "111111111111",
+                "region": "eu-west-1"
+            },
+            {
+                "unit": "tf-scan/network",
+                "workspace": "default",
+                "address": "aws_lb_listener.https",
+                "type": "aws_lb_listener",
+                "provider": "hashicorp/aws",
+                "id": "arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2",
+                "arn": "arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2",
+                "identity": {
+                    "arn": "arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2"
+                },
+                "account": "111111111111",
+                "region": "eu-west-1"
+            },
+            {
+                "unit": "tf-scan/network",
+                "workspace": "default",
+                "address": "aws_lambda_function.api",
+                "type": "aws_lambda_function",
+                "provider": "hashicorp/aws",
+                "id": "acme-api",
+                "arn": "arn:aws:lambda:eu-west-1:111111111111:function:acme-api",
+                "identity": {
+                    "account_id": "111111111111",
+                    "function_name": "acme-api",
+                    "region": "eu-west-1"
+                },
+                "account": "111111111111",
+                "region": "eu-west-1"
+            }
+        ],
+        "double_managed": [
+            {
+                "kind": "identity",
+                "type": "aws_iam_role",
+                "key": "account_id=111111111111,name=acme-shared",
+                "refs": [
+                    {
+                        "unit": "tf-scan/iam",
+                        "workspace": "default",
+                        "address": "aws_iam_role.shared"
+                    },
+                    {
+                        "unit": "tf-scan/iam-dup",
+                        "workspace": "default",
+                        "address": "aws_iam_role.shared"
+                    }
+                ]
+            }
+        ]
+    },
+    "errors": []
+}
