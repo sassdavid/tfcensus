@@ -51,10 +51,18 @@ identical=(
   internal/render/doc.go
   internal/render/render.go
   internal/render/render_test.go
+  internal/sarif/doc.go
+  internal/sarif/sarif.go
+  internal/sarif/sarif_test.go
   internal/testutil/doc.go
   internal/testutil/fakebin/doc.go
   internal/testutil/fakebin/fakebin.go
   internal/testutil/golden.go
+  internal/testutil/sarifcheck/doc.go
+  internal/testutil/sarifcheck/sarif-schema-2.1.0.LICENSE
+  internal/testutil/sarifcheck/sarif-schema-2.1.0.json
+  internal/testutil/sarifcheck/sarifcheck.go
+  internal/testutil/sarifcheck/sarifcheck_test.go
   internal/testutil/vcr/doc.go
   internal/testutil/vcr/vcr.go
   internal/testutil/vcr/vcr_test.go

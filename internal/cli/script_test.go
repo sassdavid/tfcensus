@@ -21,6 +21,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/testutil"
 	"github.com/sassdavid/tfcensus/internal/testutil/awstest"
 	"github.com/sassdavid/tfcensus/internal/testutil/fakebin"
+	"github.com/sassdavid/tfcensus/internal/testutil/sarifcheck"
 	"github.com/sassdavid/tfcensus/internal/testutil/vcr"
 	"github.com/sassdavid/tfcensus/schemas"
 )
@@ -161,8 +162,26 @@ func scriptParams(t *testing.T, files ...string) testscript.Params {
 			return nil
 		},
 		Cmds: map[string]func(ts *testscript.TestScript, neg bool, args []string){
-			"jsonschema": cmdJSONSchema,
+			"jsonschema":  cmdJSONSchema,
+			"sarifschema": cmdSARIFSchema,
 		},
+	}
+}
+
+// cmdSARIFSchema validates stdout, stderr or a file against the SARIF 2.1.0 schema that GitHub's
+// upload-sarif action uses:
+//
+//	sarifschema stdout
+func cmdSARIFSchema(ts *testscript.TestScript, neg bool, args []string) {
+	if len(args) != 1 {
+		ts.Fatalf("usage: sarifschema <stdout|stderr|file>")
+	}
+	err := sarifcheck.Validate([]byte(ts.ReadFile(args[0])))
+	switch {
+	case neg && err == nil:
+		ts.Fatalf("%s unexpectedly valid SARIF", args[0])
+	case !neg && err != nil:
+		ts.Fatalf("%s isn't valid SARIF 2.1.0: %v", args[0], err)
 	}
 }
 
