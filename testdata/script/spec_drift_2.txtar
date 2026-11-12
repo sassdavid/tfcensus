@@ -1,0 +1,101 @@
+# Noise rules: sg-office expired on 2026-10-31, so the security group drift is back and a warning
+# names the rule. queue-gone matches the deleted queue, but delete is in never_hide (the default),
+# so the queue stays visible. db-class hides one attribute and leaves the sensitive password.
+env TEST_NOW=2026-11-12T08:00:00Z
+cd $DRIFT/ingest
+
+! exec tfcensus drift --config $WORK/tfcensus.yaml --from-json-out-dir plans --report-file report.json --format tty
+cmp stdout $WORK/golden/drift.txt
+stderr 'noise rule "sg-office" is past its expires date'
+
+# With never_hide emptied, the same rule hides the queue.
+! exec tfcensus drift --config $WORK/hide-all.yaml --from-json-out-dir plans --report-file report.json --format json
+stdout '"rule": "user/queue-gone"'
+! stdout '"protected"'
+
+# Rule errors are usage errors, found before any plan is read.
+exec expect-exit 2 tfcensus drift --config $WORK/bad.yaml --from-json-out-dir plans
+stderr 'drift.noise\[0\]: a preset entry takes no other key'
+stderr 'drift.noise\[1\] \(broken\): invalid attribute pattern "ingress\[x\]"'
+
+-- tfcensus.yaml --
+schema_version: 1
+drift:
+  noise:
+    - name: sg-office
+      type: aws_security_group
+      attribute: 'ingress[*].cidr_blocks'
+      reason: office VPN range, removed after the move
+      expires: "2026-10-31"
+    - name: queue-gone
+      type: aws_sqs_queue
+      reason: queues are recreated by the job runner
+    - name: db-class
+      address: aws_db_instance.main
+      attribute: instance_class
+      reason: resized by the on-call runbook
+-- hide-all.yaml --
+schema_version: 1
+drift:
+  never_hide: []
+  noise:
+    - name: queue-gone
+      type: aws_sqs_queue
+      reason: queues are recreated by the job runner
+-- bad.yaml --
+schema_version: 1
+drift:
+  noise:
+    - preset: aws-tags-all
+      reason: extra
+    - name: broken
+      attribute: 'ingress[x]'
+      reason: bad pattern
+-- golden/drift.txt --
+UNIT                                STATUS    DRIFTED  HIDDEN  REASON
+live/dev/eu-west-1/app/iam          drifted   1        0       -
+live/dev/eu-west-1/app/lambda       drifted   1        0       -
+live/dev/eu-west-1/app/s3           drifted   1        0       -
+live/dev/eu-west-1/network/sg       drifted   1        0       -
+live/prod/eu-west-1/app/queue       drifted   1        0       -
+live/prod/eu-west-1/app/s3          drifted   1        0       -
+live/prod/eu-west-1/data/cache      failed    0        0       run error
+live/prod/eu-west-1/data/db         drifted   1        0       -
+live/prod/eu-west-1/legacy          excluded  0        0       exclude block
+live/prod/eu-west-1/network/vpc     clean     0        0       -
+live/staging/eu-west-1/app/s3       drifted   1        0       -
+live/staging/eu-west-1/network/vpc  clean     0        0       -
+
+Drift (8 resources in 6 groups)
+g1  aws_s3_bucket update in 3 unit(s)
+  tags.CostCenter      changed
+  tags_all.CostCenter  changed
+  members:
+    live/dev/eu-west-1/app/s3      aws_s3_bucket.assets
+    live/prod/eu-west-1/app/s3     aws_s3_bucket.assets
+    live/staging/eu-west-1/app/s3  aws_s3_bucket.assets
+g2  aws_db_instance update in 1 unit(s)
+  password  changed, sensitive
+  members:
+    live/prod/eu-west-1/data/db  aws_db_instance.main
+g3  aws_iam_role update in 1 unit(s)
+  tags_all.Owner  added
+  members:
+    live/dev/eu-west-1/app/iam  aws_iam_role.app
+g4  aws_lambda_function update in 1 unit(s)
+  last_modified     changed
+  source_code_hash  changed
+  members:
+    live/dev/eu-west-1/app/lambda  aws_lambda_function.api
+g5  aws_security_group update in 1 unit(s)
+  ingress[*].cidr_blocks[*]  added
+  members:
+    live/dev/eu-west-1/network/sg  aws_security_group.web
+g6  aws_sqs_queue delete in 1 unit(s)
+  members:
+    live/prod/eu-west-1/app/queue  aws_sqs_queue.jobs  (delete is in never_hide, so user/queue-gone doesn't apply)
+
+live/prod/eu-west-1/data/cache: error: plan failed: run error
+warning: noise rule "sg-office" is past its expires date (2026-10-31) and no longer hides drift: 1 change(s) reported again
+
+12 units (8 drifted, 2 clean, 1 failed, 1 excluded); 8 drifted resources in 6 groups; 0 hidden by noise rules

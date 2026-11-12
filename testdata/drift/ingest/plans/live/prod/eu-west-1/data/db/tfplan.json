@@ -1,0 +1,61 @@
+{
+  "applyable": false,
+  "complete": true,
+  "configuration": {
+    "provider_config": {
+      "aws": {
+        "full_name": "registry.terraform.io/hashicorp/aws",
+        "name": "aws"
+      }
+    },
+    "root_module": {}
+  },
+  "errored": false,
+  "format_version": "1.2",
+  "planned_values": {
+    "root_module": {}
+  },
+  "resource_drift": [
+    {
+      "address": "aws_db_instance.main",
+      "change": {
+        "actions": [
+          "update"
+        ],
+        "after": {
+          "engine": "postgres",
+          "identifier": "acme-main",
+          "instance_class": "db.t4g.large",
+          "password": "FIXTURE-SECRET-ROTATED",
+          "tags": {},
+          "tags_all": {}
+        },
+        "after_sensitive": {
+          "password": true,
+          "tags": {},
+          "tags_all": {}
+        },
+        "after_unknown": {},
+        "before": {
+          "engine": "postgres",
+          "identifier": "acme-main",
+          "instance_class": "db.t4g.medium",
+          "password": "FIXTURE-SECRET",
+          "tags": {},
+          "tags_all": {}
+        },
+        "before_sensitive": {
+          "password": true,
+          "tags": {},
+          "tags_all": {}
+        }
+      },
+      "mode": "managed",
+      "name": "main",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "type": "aws_db_instance"
+    }
+  ],
+  "terraform_version": "1.17.2",
+  "timestamp": "2026-11-12T06:00:00Z"
+}

@@ -322,7 +322,8 @@
           "enum": [
             "refresh-only",
             "full"
-          ]
+          ],
+          "description": "refresh-only reports drift; full also tells drift the plan reverts from drift it keeps."
         },
         "collapse": {
           "type": "string",
@@ -330,14 +331,79 @@
             "shape",
             "strict",
             "none"
-          ]
+          ],
+          "description": "How identical changes in several units become one group."
+        },
+        "never_hide": {
+          "items": {
+            "type": "string",
+            "enum": [
+              "create",
+              "update",
+              "delete",
+              "replace"
+            ]
+          },
+          "type": "array",
+          "description": "Drift actions that no noise rule can hide."
         },
         "noise": {
           "items": {
+            "properties": {
+              "preset": {
+                "type": "string",
+                "enum": [
+                  "aws-tags-all",
+                  "computed-hashes"
+                ],
+                "description": "A built-in rule. A preset entry takes no other key."
+              },
+              "name": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+                "description": "Rule name, shown on hidden drift as user/\u003cname\u003e."
+              },
+              "unit": {
+                "type": "string",
+                "description": "Unit path glob; * matches any characters, / included."
+              },
+              "type": {
+                "type": "string",
+                "description": "Resource type glob, such as aws_s3_*."
+              },
+              "address": {
+                "type": "string",
+                "description": "Resource address glob, such as module.tags.*."
+              },
+              "attribute": {
+                "type": "string",
+                "description": "Attribute path such as tags_all or ingress[*].cidr_blocks. It also matches everything below it."
+              },
+              "action": {
+                "type": "string",
+                "enum": [
+                  "create",
+                  "update",
+                  "delete",
+                  "replace"
+                ],
+                "description": "Drift action."
+              },
+              "reason": {
+                "type": "string",
+                "description": "Why the drift is noise. Required for rules."
+              },
+              "expires": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "description": "Last day the rule applies, as a quoted \"YYYY-MM-DD\" date (UTC). After it the rule stops hiding drift and drift warns."
+              }
+            },
+            "additionalProperties": false,
             "type": "object"
           },
           "type": "array",
-          "description": "Noise rules."
+          "description": "Noise rules, tried in order. A rule hides the matching attribute changes, or the whole change when it has no attribute."
         }
       },
       "additionalProperties": false,

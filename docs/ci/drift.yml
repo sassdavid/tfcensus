@@ -1,0 +1,71 @@
+# Drift detection for a Terragrunt live repository: copy this file to .github/workflows/drift.yml
+# there. The repo's mise.toml pins terragrunt, terraform and tfcensus
+# (mise use github:sassdavid/tfcensus), and its .tfcensus.yaml holds the drift.noise rules.
+# AWS access is a read-only role assumed with OIDC; set its ARN as the DRIFT_ROLE_ARN variable.
+#
+# terragrunt plans every unit once into $RUNNER_TEMP. tfcensus then reads those plans three times
+# (annotations, the step summary, SARIF) and gates the job last. The plans hold state values, so
+# they stay on the runner and are never uploaded.
+name: drift
+
+on:
+  schedule:
+    - cron: "17 5 * * 1-5"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: drift
+  cancel-in-progress: false
+
+jobs:
+  drift:
+    name: drift
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      id-token: write # OIDC token for the AWS role
+      security-events: write # SARIF upload
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+        with:
+          version: 2026.11.5
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.DRIFT_ROLE_ARN }}
+          aws-region: eu-west-1
+      # Exit 2 means a plan has changes and 1 that a unit failed. The report records both, and
+      # tfcensus turns them into findings and errors below.
+      - name: terragrunt plan -refresh-only
+        env:
+          TG_TF_PATH: terraform
+        run: |
+          terragrunt run --all --tf-path terraform --json-out-dir "$RUNNER_TEMP/plans" --report-file "$RUNNER_TEMP/report.json" \
+            --report-format json --log-format json --no-color \
+            -- plan -refresh-only -lock=false -detailed-exitcode || true
+      - name: annotations
+        run: |
+          tfcensus drift --from-json-out-dir "$RUNNER_TEMP/plans" --report-file "$RUNNER_TEMP/report.json" \
+            --format github || true
+      - name: step summary
+        run: |
+          tfcensus drift --from-json-out-dir "$RUNNER_TEMP/plans" --report-file "$RUNNER_TEMP/report.json" --format md \
+            >> "$GITHUB_STEP_SUMMARY" || true
+      - name: sarif
+        run: |
+          tfcensus drift --from-json-out-dir "$RUNNER_TEMP/plans" --report-file "$RUNNER_TEMP/report.json" --format sarif \
+            > drift.sarif || true
+      - uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          sarif_file: drift.sarif
+          category: drift
+      # Exit 3: drift or a failed unit. Exit 1 or 2: tfcensus couldn't read the plans.
+      - name: gate
+        run: |
+          tfcensus drift --from-json-out-dir "$RUNNER_TEMP/plans" --report-file "$RUNNER_TEMP/report.json" \
+            --format plain --fail-on drift,errors

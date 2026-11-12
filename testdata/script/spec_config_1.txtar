@@ -63,6 +63,7 @@ discovery.render                    never                                       
 discovery.roots                     []                                              default
 drift.collapse                      shape                                           default
 drift.mode                          refresh-only                                    default
+drift.never_hide                    ["delete","replace"]                            default
 drift.noise                         []                                              default
 notify                              {}                                              default
 regions                             ["eu-west-1","eu-central-1"]                    env TFCENSUS_REGIONS

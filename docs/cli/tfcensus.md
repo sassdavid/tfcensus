@@ -14,7 +14,7 @@ stdout carries data, stderr carries logs. Use --format json for scripting.
 ```
       --color string            colorize output: auto, always or never (default "auto")
       --config string           config file to use instead of the discovered .tfcensus.yaml (env TFCENSUS_CONFIG)
-      --format string           output format: tty, plain, md, json, csv or sarif (default tty when stdout is a terminal, else plain)
+      --format string           output format: tty, plain, md, json, csv, sarif or github (default tty when stdout is a terminal, else plain)
   -h, --help[=true|false]       help for tfcensus
       --log-file string         write logs to this file instead of stderr
       --log-format string       log format: text or json (default "text")
@@ -31,6 +31,7 @@ stdout carries data, stderr carries logs. Use --format json for scripting.
 * [tfcensus completion](tfcensus_completion.md)	 - Generate the autocompletion script for the specified shell
 * [tfcensus config](tfcensus_config.md)	 - Inspect and validate configuration
 * [tfcensus doctor](tfcensus_doctor.md)	 - Check AWS credentials and which inventory layers each account and region supports
+* [tfcensus drift](tfcensus_drift.md)	 - Find drift between the units' state and AWS
 * [tfcensus inventory](tfcensus_inventory.md)	 - Read each unit's state: versions, providers, resource counts, serial and lineage
 * [tfcensus rules](tfcensus_rules.md)	 - Work with ownership rules
 * [tfcensus scan](tfcensus_scan.md)	 - Find AWS resources that no unit manages

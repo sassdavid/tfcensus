@@ -1,0 +1,764 @@
+# drift ingest over 12 recorded units: one collapsed group of 3 tag drifts, one failed unit, every
+# format. The failed unit makes the exit code 1; --fail-on drift makes it 3.
+env TEST_NOW=2026-11-12T08:00:00Z
+cd $DRIFT/ingest
+
+! exec tfcensus drift --config $WORK/tfcensus.yaml --from-json-out-dir plans --report-file report.json --format tty
+cmp stdout $WORK/golden/drift.txt
+stderr '1 unit\(s\) failed'
+
+! exec tfcensus drift --config $WORK/tfcensus.yaml --from-json-out-dir plans --report-file report.json --format md
+cmp stdout $WORK/golden/drift.md
+
+! exec tfcensus drift --config $WORK/tfcensus.yaml --from-json-out-dir plans --report-file report.json --format json
+jsonschema drift-v1.json stdout
+jsonschema report-v1.json stdout
+cmp stdout $WORK/golden/drift.json
+
+! exec tfcensus drift --config $WORK/tfcensus.yaml --from-json-out-dir plans --report-file report.json --format github
+cmp stdout $WORK/golden/drift.github
+
+! exec tfcensus drift --config $WORK/tfcensus.yaml --from-json-out-dir plans --report-file report.json --format sarif
+cmp stdout $WORK/golden/drift.sarif
+
+exec expect-exit 3 tfcensus drift --config $WORK/tfcensus.yaml --from-json-out-dir plans --report-file report.json --fail-on drift --min-count 6 --format json
+stderr 'matched \(drift: 6\)'
+exec expect-exit 1 tfcensus drift --config $WORK/tfcensus.yaml --from-json-out-dir plans --report-file report.json --fail-on drift --min-count 7 --format json
+exec expect-exit 3 tfcensus drift --config $WORK/tfcensus.yaml --from-json-out-dir plans --report-file report.json --fail-on errors --format json
+exec expect-exit 2 tfcensus drift --config $WORK/tfcensus.yaml --from-json-out-dir plans --report-file report.json --fail-on drift:reverts
+stderr 'needs --mode full'
+
+-- tfcensus.yaml --
+schema_version: 1
+drift:
+  noise:
+    - preset: aws-tags-all
+    - preset: computed-hashes
+-- golden/drift.txt --
+UNIT                                STATUS    DRIFTED  HIDDEN  REASON
+live/dev/eu-west-1/app/iam          clean     0        1       -
+live/dev/eu-west-1/app/lambda       clean     0        1       -
+live/dev/eu-west-1/app/s3           drifted   1        0       -
+live/dev/eu-west-1/network/sg       drifted   1        0       -
+live/prod/eu-west-1/app/queue       drifted   1        0       -
+live/prod/eu-west-1/app/s3          drifted   1        0       -
+live/prod/eu-west-1/data/cache      failed    0        0       run error
+live/prod/eu-west-1/data/db         drifted   1        0       -
+live/prod/eu-west-1/legacy          excluded  0        0       exclude block
+live/prod/eu-west-1/network/vpc     clean     0        0       -
+live/staging/eu-west-1/app/s3       drifted   1        0       -
+live/staging/eu-west-1/network/vpc  clean     0        0       -
+
+Drift (6 resources in 4 groups)
+g1  aws_s3_bucket update in 3 unit(s)
+  tags.CostCenter  changed
+  members:
+    live/dev/eu-west-1/app/s3      aws_s3_bucket.assets
+    live/prod/eu-west-1/app/s3     aws_s3_bucket.assets
+    live/staging/eu-west-1/app/s3  aws_s3_bucket.assets
+g2  aws_db_instance update in 1 unit(s)
+  instance_class  changed
+  password        changed, sensitive
+  members:
+    live/prod/eu-west-1/data/db  aws_db_instance.main
+g3  aws_security_group update in 1 unit(s)
+  ingress[*].cidr_blocks[*]  added
+  members:
+    live/dev/eu-west-1/network/sg  aws_security_group.web
+g4  aws_sqs_queue delete in 1 unit(s)
+  members:
+    live/prod/eu-west-1/app/queue  aws_sqs_queue.jobs
+
+live/prod/eu-west-1/data/cache: error: plan failed: run error
+
+12 units (6 drifted, 4 clean, 1 failed, 1 excluded); 6 drifted resources in 4 groups; 2 hidden by noise rules
+-- golden/drift.md --
+12 units (6 drifted, 4 clean, 1 failed, 1 excluded); 6 drifted resources in 4 groups; 2 hidden by noise rules
+
+Errors:
+
+- `live/prod/eu-west-1/data/cache`: plan failed: run error
+
+<details><summary>g1: aws_s3_bucket update in 3 unit(s)</summary>
+
+| ATTRIBUTE | CHANGE |
+| --- | --- |
+| tags.CostCenter | changed |
+
+Members:
+
+- `live/dev/eu-west-1/app/s3` `aws_s3_bucket.assets`
+- `live/prod/eu-west-1/app/s3` `aws_s3_bucket.assets`
+- `live/staging/eu-west-1/app/s3` `aws_s3_bucket.assets`
+
+</details>
+
+<details><summary>g2: aws_db_instance update in 1 unit(s)</summary>
+
+| ATTRIBUTE | CHANGE |
+| --- | --- |
+| instance_class | changed |
+| password | changed, sensitive |
+
+Members:
+
+- `live/prod/eu-west-1/data/db` `aws_db_instance.main`
+
+</details>
+
+<details><summary>g3: aws_security_group update in 1 unit(s)</summary>
+
+| ATTRIBUTE | CHANGE |
+| --- | --- |
+| ingress[*].cidr_blocks[*] | added |
+
+Members:
+
+- `live/dev/eu-west-1/network/sg` `aws_security_group.web`
+
+</details>
+
+<details><summary>g4: aws_sqs_queue delete in 1 unit(s)</summary>
+
+Members:
+
+- `live/prod/eu-west-1/app/queue` `aws_sqs_queue.jobs`
+
+</details>
+-- golden/drift.json --
+{
+  "schema_version": "1",
+  "tool": "tfcensus",
+  "version": "dev",
+  "generated_at": "2026-11-12T08:00:00Z",
+  "data": {
+    "mode": "refresh-only",
+    "collapse": "shape",
+    "summary": {
+      "units": 12,
+      "drifted": 6,
+      "clean": 4,
+      "failed": 1,
+      "early_exit": 0,
+      "excluded": 1,
+      "resources": 6,
+      "reverts": 0,
+      "hidden": 2,
+      "groups": 4
+    },
+    "units": [
+      {
+        "path": "live/dev/eu-west-1/app/iam",
+        "status": "clean",
+        "drifted": 0,
+        "reverts": 0,
+        "hidden": 1,
+        "pending": 0,
+        "outputs": [
+          "role_tags"
+        ]
+      },
+      {
+        "path": "live/dev/eu-west-1/app/lambda",
+        "status": "clean",
+        "drifted": 0,
+        "reverts": 0,
+        "hidden": 1,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/dev/eu-west-1/app/s3",
+        "status": "drifted",
+        "drifted": 1,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/dev/eu-west-1/network/sg",
+        "status": "drifted",
+        "drifted": 1,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/prod/eu-west-1/app/queue",
+        "status": "drifted",
+        "drifted": 1,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/prod/eu-west-1/app/s3",
+        "status": "drifted",
+        "drifted": 1,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/prod/eu-west-1/data/cache",
+        "status": "failed",
+        "reason": "run error",
+        "drifted": 0,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/prod/eu-west-1/data/db",
+        "status": "drifted",
+        "drifted": 1,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/prod/eu-west-1/legacy",
+        "status": "excluded",
+        "reason": "exclude block",
+        "drifted": 0,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/prod/eu-west-1/network/vpc",
+        "status": "clean",
+        "drifted": 0,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/staging/eu-west-1/app/s3",
+        "status": "drifted",
+        "drifted": 1,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/staging/eu-west-1/network/vpc",
+        "status": "clean",
+        "drifted": 0,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      }
+    ],
+    "groups": [
+      {
+        "id": "g1",
+        "type": "aws_s3_bucket",
+        "action": "update",
+        "attributes": [
+          {
+            "path": "tags.CostCenter",
+            "kind": "changed"
+          }
+        ],
+        "members": [
+          {
+            "unit": "live/dev/eu-west-1/app/s3",
+            "address": "aws_s3_bucket.assets"
+          },
+          {
+            "unit": "live/prod/eu-west-1/app/s3",
+            "address": "aws_s3_bucket.assets"
+          },
+          {
+            "unit": "live/staging/eu-west-1/app/s3",
+            "address": "aws_s3_bucket.assets"
+          }
+        ]
+      },
+      {
+        "id": "g2",
+        "type": "aws_db_instance",
+        "action": "update",
+        "attributes": [
+          {
+            "path": "instance_class",
+            "kind": "changed"
+          },
+          {
+            "path": "password",
+            "kind": "changed",
+            "sensitive": true
+          }
+        ],
+        "members": [
+          {
+            "unit": "live/prod/eu-west-1/data/db",
+            "address": "aws_db_instance.main"
+          }
+        ]
+      },
+      {
+        "id": "g3",
+        "type": "aws_security_group",
+        "action": "update",
+        "attributes": [
+          {
+            "path": "ingress[*].cidr_blocks[*]",
+            "kind": "added"
+          }
+        ],
+        "members": [
+          {
+            "unit": "live/dev/eu-west-1/network/sg",
+            "address": "aws_security_group.web"
+          }
+        ]
+      },
+      {
+        "id": "g4",
+        "type": "aws_sqs_queue",
+        "action": "delete",
+        "attributes": [],
+        "members": [
+          {
+            "unit": "live/prod/eu-west-1/app/queue",
+            "address": "aws_sqs_queue.jobs"
+          }
+        ]
+      }
+    ],
+    "changes": [
+      {
+        "unit": "live/dev/eu-west-1/app/iam",
+        "address": "aws_iam_role.app",
+        "type": "aws_iam_role",
+        "action": "update",
+        "attributes": [
+          {
+            "path": "tags_all.Owner",
+            "kind": "added",
+            "noise": {
+              "rule": "preset/aws-tags-all",
+              "reason": "the AWS provider copies default_tags into tags_all"
+            }
+          }
+        ],
+        "hidden": {
+          "rule": "preset/aws-tags-all",
+          "reason": "the AWS provider copies default_tags into tags_all"
+        }
+      },
+      {
+        "unit": "live/dev/eu-west-1/app/lambda",
+        "address": "aws_lambda_function.api",
+        "type": "aws_lambda_function",
+        "action": "update",
+        "attributes": [
+          {
+            "path": "last_modified",
+            "kind": "changed",
+            "noise": {
+              "rule": "preset/computed-hashes",
+              "reason": "hashes and timestamps computed from content outside the configuration"
+            }
+          },
+          {
+            "path": "source_code_hash",
+            "kind": "changed",
+            "noise": {
+              "rule": "preset/computed-hashes",
+              "reason": "hashes and timestamps computed from content outside the configuration"
+            }
+          }
+        ],
+        "hidden": {
+          "rule": "preset/computed-hashes",
+          "reason": "hashes and timestamps computed from content outside the configuration"
+        }
+      },
+      {
+        "unit": "live/dev/eu-west-1/app/s3",
+        "address": "aws_s3_bucket.assets",
+        "type": "aws_s3_bucket",
+        "action": "update",
+        "attributes": [
+          {
+            "path": "tags.CostCenter",
+            "kind": "changed"
+          },
+          {
+            "path": "tags_all.CostCenter",
+            "kind": "changed",
+            "noise": {
+              "rule": "preset/aws-tags-all",
+              "reason": "the AWS provider copies default_tags into tags_all"
+            }
+          }
+        ],
+        "group": "g1"
+      },
+      {
+        "unit": "live/dev/eu-west-1/network/sg",
+        "address": "aws_security_group.web",
+        "type": "aws_security_group",
+        "action": "update",
+        "attributes": [
+          {
+            "path": "ingress[0].cidr_blocks[1]",
+            "kind": "added"
+          }
+        ],
+        "group": "g3"
+      },
+      {
+        "unit": "live/prod/eu-west-1/app/queue",
+        "address": "aws_sqs_queue.jobs",
+        "type": "aws_sqs_queue",
+        "action": "delete",
+        "attributes": [],
+        "group": "g4"
+      },
+      {
+        "unit": "live/prod/eu-west-1/app/s3",
+        "address": "aws_s3_bucket.assets",
+        "type": "aws_s3_bucket",
+        "action": "update",
+        "attributes": [
+          {
+            "path": "tags.CostCenter",
+            "kind": "changed"
+          },
+          {
+            "path": "tags_all.CostCenter",
+            "kind": "changed",
+            "noise": {
+              "rule": "preset/aws-tags-all",
+              "reason": "the AWS provider copies default_tags into tags_all"
+            }
+          }
+        ],
+        "group": "g1"
+      },
+      {
+        "unit": "live/prod/eu-west-1/data/db",
+        "address": "aws_db_instance.main",
+        "type": "aws_db_instance",
+        "action": "update",
+        "attributes": [
+          {
+            "path": "instance_class",
+            "kind": "changed"
+          },
+          {
+            "path": "password",
+            "kind": "changed",
+            "sensitive": true
+          }
+        ],
+        "group": "g2"
+      },
+      {
+        "unit": "live/staging/eu-west-1/app/s3",
+        "address": "aws_s3_bucket.assets",
+        "type": "aws_s3_bucket",
+        "action": "update",
+        "attributes": [
+          {
+            "path": "tags.CostCenter",
+            "kind": "changed"
+          },
+          {
+            "path": "tags_all.CostCenter",
+            "kind": "changed",
+            "noise": {
+              "rule": "preset/aws-tags-all",
+              "reason": "the AWS provider copies default_tags into tags_all"
+            }
+          }
+        ],
+        "group": "g1"
+      }
+    ],
+    "warnings": []
+  },
+  "errors": [
+    {
+      "target": "live/prod/eu-west-1/data/cache",
+      "message": "plan failed: run error"
+    }
+  ]
+}
+-- golden/drift.github --
+::error file=live/prod/eu-west-1/data/cache/terragrunt.hcl,title=tfcensus drift%3A plan failed::live/prod/eu-west-1/data/cache: run error
+::warning file=live/dev/eu-west-1/app/s3/terragrunt.hcl,title=tfcensus drift g1%3A aws_s3_bucket update in 3 unit(s)::live/dev/eu-west-1/app/s3 aws_s3_bucket.assets%0Alive/prod/eu-west-1/app/s3 aws_s3_bucket.assets%0Alive/staging/eu-west-1/app/s3 aws_s3_bucket.assets%0AAttributes: tags.CostCenter
+::warning file=live/prod/eu-west-1/data/db/terragrunt.hcl,title=tfcensus drift g2%3A aws_db_instance update in 1 unit(s)::live/prod/eu-west-1/data/db aws_db_instance.main%0AAttributes: instance_class, password
+::warning file=live/dev/eu-west-1/network/sg/terragrunt.hcl,title=tfcensus drift g3%3A aws_security_group update in 1 unit(s)::live/dev/eu-west-1/network/sg aws_security_group.web%0AAttributes: ingress[*].cidr_blocks[*]
+::warning file=live/prod/eu-west-1/app/queue/terragrunt.hcl,title=tfcensus drift g4%3A aws_sqs_queue delete in 1 unit(s)::live/prod/eu-west-1/app/queue aws_sqs_queue.jobs%0AAttributes: (whole resource)
+::notice title=tfcensus drift::12 units (6 drifted, 4 clean, 1 failed, 1 excluded); 6 drifted resources in 4 groups; 2 hidden by noise rules
+-- golden/drift.sarif --
+{
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "tfcensus",
+          "version": "dev",
+          "informationUri": "https://github.com/sassdavid/tfcensus",
+          "rules": [
+            {
+              "id": "drift",
+              "shortDescription": {
+                "text": "Resource changed outside terraform"
+              },
+              "help": {
+                "text": "Change the code to match, apply to revert the change, or add a drift.noise rule with a reason."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "plan-failed",
+              "shortDescription": {
+                "text": "The unit's plan failed, so its drift is unknown"
+              },
+              "help": {
+                "text": "Run terragrunt plan in the unit and fix the error."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "drift",
+          "ruleIndex": 0,
+          "level": "warning",
+          "message": {
+            "text": "aws_iam_role.app (aws_iam_role) drifted: update; attributes: tags_all.Owner"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "live/dev/eu-west-1/app/iam/terragrunt.hcl"
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "tfcensusDrift/v1": "live/dev/eu-west-1/app/iam|aws_iam_role.app|update"
+          },
+          "suppressions": [
+            {
+              "kind": "external",
+              "status": "accepted",
+              "justification": "preset/aws-tags-all: the AWS provider copies default_tags into tags_all"
+            }
+          ]
+        },
+        {
+          "ruleId": "drift",
+          "ruleIndex": 0,
+          "level": "warning",
+          "message": {
+            "text": "aws_lambda_function.api (aws_lambda_function) drifted: update; attributes: last_modified, source_code_hash"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "live/dev/eu-west-1/app/lambda/terragrunt.hcl"
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "tfcensusDrift/v1": "live/dev/eu-west-1/app/lambda|aws_lambda_function.api|update"
+          },
+          "suppressions": [
+            {
+              "kind": "external",
+              "status": "accepted",
+              "justification": "preset/computed-hashes: hashes and timestamps computed from content outside the configuration"
+            }
+          ]
+        },
+        {
+          "ruleId": "drift",
+          "ruleIndex": 0,
+          "level": "warning",
+          "message": {
+            "text": "aws_s3_bucket.assets (aws_s3_bucket) drifted: update; attributes: tags.CostCenter"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "live/dev/eu-west-1/app/s3/terragrunt.hcl"
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "tfcensusDrift/v1": "live/dev/eu-west-1/app/s3|aws_s3_bucket.assets|update"
+          },
+          "properties": {
+            "group": "g1"
+          }
+        },
+        {
+          "ruleId": "drift",
+          "ruleIndex": 0,
+          "level": "warning",
+          "message": {
+            "text": "aws_security_group.web (aws_security_group) drifted: update; attributes: ingress[0].cidr_blocks[1]"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "live/dev/eu-west-1/network/sg/terragrunt.hcl"
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "tfcensusDrift/v1": "live/dev/eu-west-1/network/sg|aws_security_group.web|update"
+          },
+          "properties": {
+            "group": "g3"
+          }
+        },
+        {
+          "ruleId": "drift",
+          "ruleIndex": 0,
+          "level": "warning",
+          "message": {
+            "text": "aws_sqs_queue.jobs (aws_sqs_queue) drifted: delete; attributes: (whole resource)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "live/prod/eu-west-1/app/queue/terragrunt.hcl"
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "tfcensusDrift/v1": "live/prod/eu-west-1/app/queue|aws_sqs_queue.jobs|delete"
+          },
+          "properties": {
+            "group": "g4"
+          }
+        },
+        {
+          "ruleId": "drift",
+          "ruleIndex": 0,
+          "level": "warning",
+          "message": {
+            "text": "aws_s3_bucket.assets (aws_s3_bucket) drifted: update; attributes: tags.CostCenter"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "live/prod/eu-west-1/app/s3/terragrunt.hcl"
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "tfcensusDrift/v1": "live/prod/eu-west-1/app/s3|aws_s3_bucket.assets|update"
+          },
+          "properties": {
+            "group": "g1"
+          }
+        },
+        {
+          "ruleId": "drift",
+          "ruleIndex": 0,
+          "level": "warning",
+          "message": {
+            "text": "aws_db_instance.main (aws_db_instance) drifted: update; attributes: instance_class, password"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "live/prod/eu-west-1/data/db/terragrunt.hcl"
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "tfcensusDrift/v1": "live/prod/eu-west-1/data/db|aws_db_instance.main|update"
+          },
+          "properties": {
+            "group": "g2"
+          }
+        },
+        {
+          "ruleId": "drift",
+          "ruleIndex": 0,
+          "level": "warning",
+          "message": {
+            "text": "aws_s3_bucket.assets (aws_s3_bucket) drifted: update; attributes: tags.CostCenter"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "live/staging/eu-west-1/app/s3/terragrunt.hcl"
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "tfcensusDrift/v1": "live/staging/eu-west-1/app/s3|aws_s3_bucket.assets|update"
+          },
+          "properties": {
+            "group": "g1"
+          }
+        },
+        {
+          "ruleId": "plan-failed",
+          "ruleIndex": 1,
+          "level": "error",
+          "message": {
+            "text": "live/prod/eu-west-1/data/cache: plan failed: run error"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "live/prod/eu-west-1/data/cache/terragrunt.hcl"
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "tfcensusDrift/v1": "failed|live/prod/eu-west-1/data/cache"
+          }
+        }
+      ]
+    }
+  ]
+}

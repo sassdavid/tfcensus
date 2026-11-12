@@ -45,7 +45,7 @@ Scope: config + resource-explorer + native (sg-rules, iam-attachments, route53, 
 - [ ] v0.1.0 tagged and released. Homebrew cask, `mise use github:sassdavid/tfcensus`, and the container image all work.
 
 ### M7: Drift (F4) → v0.2.0 ([drift](specs/drift.md))
-- [ ] All drift.md criteria. A GitHub Actions example workflow in `docs/ci/`.
+- [x] All drift.md criteria. A GitHub Actions example workflow in `docs/ci/`.
 
 ### M8: whois + codify → v0.3.0 ([whois-and-codify](specs/whois-and-codify.md))
 - [ ] All criteria. FL-DOUBLE audit check shares the whois index.
