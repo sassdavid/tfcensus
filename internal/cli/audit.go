@@ -58,6 +58,15 @@ func newAuditBackendCmd(d *app.Deps, g *globals) *cobra.Command {
 		a      auditArgs
 		failOn string
 	)
+	formats := []render.Format{
+		render.FormatTTY,
+		render.FormatPlain,
+		render.FormatMD,
+		render.FormatJSON,
+		render.FormatCSV,
+		render.FormatSARIF,
+		render.FormatGitHub,
+	}
 	cmd := &cobra.Command{
 		Use:   "backend [paths...]",
 		Short: "Check state buckets, lock tables and the fleet of states",
@@ -87,10 +96,7 @@ run, and 4 when every failure was a credential problem.`,
   tfcensus audit backend --fail-on high --format sarif > audit.sarif
   tfcensus audit backend --profile 'acme-*' --discover --format json`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := g.outFormat.Check(
-				render.FormatTTY, render.FormatPlain, render.FormatMD, render.FormatJSON, render.FormatCSV,
-				render.FormatSARIF,
-			); err != nil {
+			if err := g.checkFormats(formats...); err != nil {
 				return usageError(err)
 			}
 			if a.concurrency < 1 {
@@ -108,11 +114,12 @@ run, and 4 when every failure was a credential problem.`,
 				return err
 			}
 			a.paths = args
-			return runAudit(cmd, d, g.outFormat, &res.Config, a)
+			return runAudit(cmd, d, g.sink(cmd, d), &res.Config, a)
 		},
 	}
 	addDiscoveryFlags(cmd, &a.filters)
 	addAccountFlags(cmd, d)
+	addOutputFlags(cmd, g, formats...)
 	f := cmd.Flags()
 	f.IntVar(&a.concurrency, flagConcurrency, tfstate.DefaultConcurrency, "states read at the same time")
 	f.BoolVar(&a.discover, flagDiscover, false,
@@ -138,7 +145,7 @@ func severityChoices() []complete.Choice {
 	}
 }
 
-func runAudit(cmd *cobra.Command, d *app.Deps, format render.Format, cfg *config.Config, a auditArgs) error {
+func runAudit(cmd *cobra.Command, d *app.Deps, sink render.Sink, cfg *config.Config, a auditArgs) error {
 	ctx := cmd.Context()
 	suppress, err := audit.NewSuppressions(cfg.Audit.Suppress)
 	if err != nil {
@@ -186,7 +193,9 @@ func runAudit(cmd *cobra.Command, d *app.Deps, format render.Format, cfg *config
 	for _, w := range rep.Warnings {
 		d.Logger.WarnContext(ctx, w)
 	}
-	if err = writeAudit(d, format, rep, disc, states); err != nil {
+	if err = sink.Write(func(w io.Writer, f render.Format) error {
+		return writeAudit(w, d, f, rep, disc, states)
+	}); err != nil {
 		return err
 	}
 	if err = errors.Join(discoveryError(disc), inventoryError(states), incompleteError(rep)); err != nil {
@@ -231,6 +240,7 @@ func failOnError(rep *audit.Report, failOn audit.Severity) error {
 }
 
 func writeAudit(
+	w io.Writer,
 	d *app.Deps,
 	format render.Format,
 	rep *audit.Report,
@@ -251,16 +261,18 @@ func writeAudit(
 		for _, p := range rep.Incomplete {
 			env.Errors = append(env.Errors, render.Error{Target: p.Target, Message: problemText(p)})
 		}
-		return render.JSON(d.Stdout, env)
+		return render.JSON(w, env)
 	case render.FormatSARIF:
-		return sarif.Write(d.Stdout, auditSARIF(rep))
+		return sarif.Write(w, auditSARIF(rep))
 	case render.FormatCSV:
-		return writeAuditCSV(d.Stdout, rep)
+		return writeAuditCSV(w, rep)
 	case render.FormatMD:
-		return writeAuditMarkdown(d.Stdout, rep)
-	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatGitHub:
+		return writeAuditMarkdown(w, rep)
+	case render.FormatGitHub:
+		return sarif.WriteGitHub(w, auditSARIF(rep))
+	case render.FormatAuto, render.FormatTTY, render.FormatPlain:
 	}
-	return writeAuditTable(d.Stdout, rep)
+	return writeAuditTable(w, rep)
 }
 
 func problemText(p audit.Problem) string {

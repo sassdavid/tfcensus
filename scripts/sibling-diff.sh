@@ -34,6 +34,7 @@ identical=(
   internal/buildinfo/doc.go
   internal/cli/completion.go
   internal/cli/completion_test.go
+  internal/cli/out.go
   internal/cli/run.go
   internal/cli/version.go
   internal/cli/version_test.go
@@ -50,6 +51,9 @@ identical=(
   internal/execx/procattr_unix.go
   internal/execx/procattr_windows.go
   internal/execx/redact.go
+  internal/ghcomment/doc.go
+  internal/ghcomment/ghcomment.go
+  internal/ghcomment/ghcomment_test.go
   internal/httpx/httpx.go
   internal/httpx/httpx_test.go
   internal/mcpkit/doc.go
@@ -61,9 +65,15 @@ identical=(
   internal/prose/prose.go
   internal/prose/prose_test.go
   internal/render/doc.go
+  internal/render/out.go
+  internal/render/out_test.go
   internal/render/render.go
   internal/render/render_test.go
+  internal/render/truncate.go
+  internal/render/truncate_test.go
   internal/sarif/doc.go
+  internal/sarif/github.go
+  internal/sarif/github_test.go
   internal/sarif/sarif.go
   internal/sarif/sarif_test.go
   internal/testutil/doc.go

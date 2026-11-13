@@ -18,6 +18,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/buildinfo"
 	"github.com/sassdavid/tfcensus/internal/complete"
 	"github.com/sassdavid/tfcensus/internal/config"
+	"github.com/sassdavid/tfcensus/internal/ghcomment"
 	"github.com/sassdavid/tfcensus/internal/httpx"
 	"github.com/sassdavid/tfcensus/internal/notify"
 	"github.com/sassdavid/tfcensus/internal/render"
@@ -49,7 +50,7 @@ func newNotifyCmd(d *app.Deps, g *globals) *cobra.Command {
 	var a notifyArgs
 	cmd := &cobra.Command{
 		Use:   "notify",
-		Short: "Publish saved scan, drift and audit reports to Slack, GitHub issues, Bitbucket or files",
+		Short: "Publish saved scan, drift and audit reports to Slack, GitHub, Bitbucket or files",
 		Long: `notify reads the JSON that scan, drift and audit print with --format json and publishes it.
 It never collects anything itself.
 
@@ -59,6 +60,9 @@ It never collects anything itself.
                         A re-run updates the body only when it changed, and closes the issue when
                         the run covered the scope and found nothing. notify.github_issues.max_open
                         caps new issues
+  github-pr-comment     one comment per report on a GitHub pull request, edited in place. The
+                        pull request comes from GITHUB_EVENT_PATH; a report with nothing open
+                        turns the comment into "Nothing to report"
   bitbucket-pr-comment  one comment per report on a Bitbucket Cloud pull request, edited in place
   file                  tfcensus-<kind>.md and .json in notify.file.dir, rewritten only on change
 
@@ -67,7 +71,8 @@ and a hash of the body, so runs find their own issues and skip unchanged ones. O
 with the tfcensus label are read.
 
 Secrets come from the environment only: the variables named by notify.slack.webhook_env,
-notify.github_issues.token_env and notify.bitbucket_pr_comment.token_env. They are never
+notify.github_issues.token_env, notify.github_pr_comment.token_env and
+notify.bitbucket_pr_comment.token_env. They are never
 logged; -vvv shows request headers with Authorization redacted.
 
 --dry-run-notify reads the existing issues and comments with GET requests and prints what
@@ -77,6 +82,7 @@ Exit codes: 0 when every notifier succeeded, 4 when every failure was a refused 
 for any other failure.`,
 		Example: `  tfcensus drift --format json > drift.json; tfcensus notify --from drift.json --notify github-issues
   tfcensus notify --from scan.json --from audit.json --dry-run-notify
+  tfcensus notify --from drift.json --notify github-pr-comment   # in a pull_request workflow
   GITHUB_TOKEN=... tfcensus notify --from drift.json --notify github-issues,slack`,
 		Args: noArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -270,6 +276,15 @@ func newNotifier(d *app.Deps, cfg *config.Config, name string, dryRun bool) (not
 			Token: env(gh.TokenEnv), Labels: gh.Labels, MaxOpen: gh.MaxOpen, CloseResolved: gh.CloseResolved,
 			Summary: gh.Summary, DryRun: dryRun, WriteGap: githubWriteGap,
 		})
+	case notify.NameGitHubPR:
+		hc, err := notifyClient(d, nil)
+		if err != nil {
+			return nil, err
+		}
+		pr := nc.GitHubPRComment
+		return notify.NewGitHubPR(hc, ghcomment.Config{ //nolint:wrapcheck // the error names the notifier
+			Repo: pr.Repo, APIURL: pr.APIURL, PullRequest: pr.PullRequest, Token: env(pr.TokenEnv), DryRun: dryRun,
+		}, d.Env.Lookup)
 	case notify.NameBitbucket:
 		hc, err := notifyClient(d, nil)
 		if err != nil {
@@ -320,6 +335,7 @@ func notifierChoices() []complete.Choice {
 	desc := map[string]string{
 		notify.NameSlack:     "one message per report to an incoming webhook",
 		notify.NameGitHub:    "one GitHub issue per scope",
+		notify.NameGitHubPR:  "one comment per report on a GitHub pull request",
 		notify.NameBitbucket: "one comment per report on one pull request",
 		notify.NameFile:      "tfcensus-<kind>.md and .json files",
 	}

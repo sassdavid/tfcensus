@@ -57,9 +57,11 @@ tfcensus scan [paths...] [flags]
       --index string                    read the state index from this file (from inventory --save-index) instead of reading states
       --layers string                   inventory layers: auto, or a comma-separated list of any of config, re, cc or native (config scan.layers) (default "auto")
       --management-profile string       profile that lists the organization's accounts, else the default AWS credentials (config accounts.org.management_profile)
+      --md-max-chars int                cut Markdown output to this many characters at a row or section boundary; 0 means no limit (default 60000)
       --min-count int                   findings --fail-on needs before it exits 3 (default 1)
       --org[=true|false]                list the accounts of the AWS organization and assume --org-role in each (config accounts.org.enabled)
       --org-role string                 role assumed in each member account (config accounts.org.role) (default "OrganizationAccountAccessRole")
+      --out stringArray                 also write the report to a file as format=path (repeatable); format is one of plain, md, json, csv, sarif or github
       --profile stringArray             AWS profile from ~/.aws/config, or a glob such as 'acme-*' (repeatable; config accounts.profiles)
       --refresh[=true|false]            list and read states again even when the cache is fresh
       --region stringArray              AWS region (repeatable; config regions)

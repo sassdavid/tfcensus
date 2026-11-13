@@ -23,7 +23,7 @@ import (
 // ownerTags are the tags the report shows next to an unmanaged resource, when present.
 func ownerTags() []string { return []string{"owner", "Owner", "created-by", "CreatedBy", "creator"} }
 
-func writeScan(d *app.Deps, format render.Format, rep *scan.Report, problems []scan.Problem) error {
+func writeScan(w io.Writer, d *app.Deps, format render.Format, rep *scan.Report, problems []scan.Problem) error {
 	now := d.Clock()
 	switch format {
 	case render.FormatJSON:
@@ -31,16 +31,18 @@ func writeScan(d *app.Deps, format render.Format, rep *scan.Report, problems []s
 		for _, p := range problems {
 			env.Errors = append(env.Errors, render.Error{Target: p.Target, Message: p.Message})
 		}
-		return render.JSON(d.Stdout, env)
+		return render.JSON(w, env)
 	case render.FormatSARIF:
-		return sarif.Write(d.Stdout, scanSARIF(rep))
+		return sarif.Write(w, scanSARIF(rep))
 	case render.FormatCSV:
-		return writeScanCSV(d.Stdout, rep)
+		return writeScanCSV(w, rep)
 	case render.FormatMD:
-		return writeScanMarkdown(d.Stdout, rep, problems, now)
-	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatGitHub:
+		return writeScanMarkdown(w, rep, problems, now)
+	case render.FormatGitHub:
+		return sarif.WriteGitHub(w, scanSARIF(rep))
+	case render.FormatAuto, render.FormatTTY, render.FormatPlain:
 	}
-	return writeScanText(d.Stdout, rep, problems, now)
+	return writeScanText(w, rep, problems, now)
 }
 
 func summaryColumns() []string {

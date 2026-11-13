@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"slices"
@@ -47,6 +48,14 @@ type driftArgs struct {
 
 func newDriftCmd(d *app.Deps, g *globals) *cobra.Command {
 	a := driftArgs{}
+	formats := []render.Format{
+		render.FormatTTY,
+		render.FormatPlain,
+		render.FormatMD,
+		render.FormatJSON,
+		render.FormatSARIF,
+		render.FormatGitHub,
+	}
 	cmd := &cobra.Command{
 		Use:   "drift [paths...]",
 		Short: "Find drift between the units' state and AWS",
@@ -78,12 +87,10 @@ is 1 when a unit or a repo failed and no gate matched, and 0 otherwise. terrafor
 -detailed-exitcode (2 for changes) is read internally and never returned.`,
 		Example: `  tfcensus drift ~/src/infra/acme-live --filter './live/prod/**' --fail-on drift
   tfcensus drift --mode full --fail-on drift:reverts --format md > drift.md
-  tfcensus drift --from-json-out-dir out --report-file out/report.json --format github`,
+  tfcensus drift --from-json-out-dir out --report-file out/report.json --format github \
+    --out sarif=drift.sarif --out md=drift.md --fail-on drift`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := g.outFormat.Check(
-				render.FormatTTY, render.FormatPlain, render.FormatMD, render.FormatJSON, render.FormatSARIF,
-				render.FormatGitHub,
-			); err != nil {
+			if err := g.checkFormats(formats...); err != nil {
 				return usageError(err)
 			}
 			if a.minCount < 1 {
@@ -102,7 +109,7 @@ is 1 when a unit or a repo failed and no gate matched, and 0 otherwise. terrafor
 				return err
 			}
 			a.paths = args
-			return runDrift(cmd, d, g.outFormat, &res.Config, a)
+			return runDrift(cmd, d, g.sink(cmd, d), &res.Config, a)
 		},
 	}
 	addDiscoveryFlags(cmd, &a.filters)
@@ -120,6 +127,7 @@ is 1 when a unit or a repo failed and no gate matched, and 0 otherwise. terrafor
 	f.IntVar(&a.minCount, flagMinCount, 1, "count a --fail-on gate needs before it exits 3")
 	f.BoolVar(&a.showAttributes, flagShowAttributes, false,
 		"show before and after values; sensitive and unknown values stay masked")
+	addOutputFlags(cmd, g, formats...)
 	cmd.MarkFlagsMutuallyExclusive(flagFromJSONOutDir, flagFilter)
 	cmd.MarkFlagsMutuallyExclusive(flagFromJSONOutDir, flagGenerateStacks)
 	registerCompletions(cmd, map[string]cobra.CompletionFunc{
@@ -192,7 +200,7 @@ func newDriftSettings(cfg *config.Config, a driftArgs) (*driftSettings, error) {
 	return s, nil
 }
 
-func runDrift(cmd *cobra.Command, d *app.Deps, format render.Format, cfg *config.Config, a driftArgs) error {
+func runDrift(cmd *cobra.Command, d *app.Deps, sink render.Sink, cfg *config.Config, a driftArgs) error {
 	s, err := newDriftSettings(cfg, a)
 	if err != nil {
 		return err
@@ -219,7 +227,9 @@ func runDrift(cmd *cobra.Command, d *app.Deps, format render.Format, cfg *config
 	for _, w := range rep.Warnings {
 		d.Logger.WarnContext(cmd.Context(), w)
 	}
-	if err = writeDrift(d, format, rep, problems); err != nil {
+	if err = sink.Write(func(w io.Writer, f render.Format) error {
+		return writeDrift(w, d, f, rep, problems)
+	}); err != nil {
 		return err
 	}
 	return driftGate(rep, problems, s.gates, a.minCount)

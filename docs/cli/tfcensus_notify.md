@@ -1,6 +1,6 @@
 ## tfcensus notify
 
-Publish saved scan, drift and audit reports to Slack, GitHub issues, Bitbucket or files
+Publish saved scan, drift and audit reports to Slack, GitHub, Bitbucket or files
 
 ### Synopsis
 
@@ -13,6 +13,9 @@ It never collects anything itself.
                         A re-run updates the body only when it changed, and closes the issue when
                         the run covered the scope and found nothing. notify.github_issues.max_open
                         caps new issues
+  github-pr-comment     one comment per report on a GitHub pull request, edited in place. The
+                        pull request comes from GITHUB_EVENT_PATH; a report with nothing open
+                        turns the comment into "Nothing to report"
   bitbucket-pr-comment  one comment per report on a Bitbucket Cloud pull request, edited in place
   file                  tfcensus-<kind>.md and .json in notify.file.dir, rewritten only on change
 
@@ -21,7 +24,8 @@ and a hash of the body, so runs find their own issues and skip unchanged ones. O
 with the tfcensus label are read.
 
 Secrets come from the environment only: the variables named by notify.slack.webhook_env,
-notify.github_issues.token_env and notify.bitbucket_pr_comment.token_env. They are never
+notify.github_issues.token_env, notify.github_pr_comment.token_env and
+notify.bitbucket_pr_comment.token_env. They are never
 logged; -vvv shows request headers with Authorization redacted.
 
 --dry-run-notify reads the existing issues and comments with GET requests and prints what
@@ -39,6 +43,7 @@ tfcensus notify [flags]
 ```
   tfcensus drift --format json > drift.json; tfcensus notify --from drift.json --notify github-issues
   tfcensus notify --from scan.json --from audit.json --dry-run-notify
+  tfcensus notify --from drift.json --notify github-pr-comment   # in a pull_request workflow
   GITHUB_TOKEN=... tfcensus notify --from drift.json --notify github-issues,slack
 ```
 
@@ -48,7 +53,7 @@ tfcensus notify [flags]
       --dry-run-notify[=true|false]   print what would change; read with GET only and write nothing
       --from stringArray              scan, drift or audit JSON file (repeatable)
   -h, --help[=true|false]             help for notify
-      --notify strings                notifiers to run instead of notify.enabled: slack, github-issues, bitbucket-pr-comment or file
+      --notify strings                notifiers to run instead of notify.enabled: slack, github-issues, github-pr-comment, bitbucket-pr-comment or file
 ```
 
 ### Options inherited from parent commands

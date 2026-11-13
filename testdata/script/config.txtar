@@ -132,6 +132,11 @@ notify:
     repo: ""
     summary: false
     token_env: GITHUB_TOKEN
+  github_pr_comment:
+    api_url: ""
+    pull_request: 0
+    repo: ""
+    token_env: GITHUB_TOKEN
   min_severity: low
   slack:
     link: ""

@@ -1,7 +1,7 @@
 # Publish tfcensus reports with notify
 
 This runbook sets up `tfcensus notify` in CI, so that drift, unmanaged resources and backend
-audit findings reach Slack, GitHub issues, a Bitbucket pull request or a file. It also covers
+audit findings reach Slack, GitHub issues, a GitHub or Bitbucket pull request, or a file. It also covers
 what happens on re-runs and how to recover from mistakes.
 
 ## How it works
@@ -17,6 +17,7 @@ listed, including the ones with nothing to report, and those count as resolved.
 | Notifier | Writes | Re-run with no change |
 |---|---|---|
 | `github-issues` | one issue per scope | no request except the list |
+| `github-pr-comment` | one comment per report on one GitHub pull request | no request except the list |
 | `bitbucket-pr-comment` | one comment per report on one pull request | no request except the list |
 | `slack` | one message per report to an incoming webhook | sends again, see below |
 | `file` | `tfcensus-<kind>.md` and `tfcensus-<kind>.json` | leaves the files alone |
@@ -39,6 +40,7 @@ Secrets come from environment variables only. The config names the variables, ne
 |---|---|---|
 | `slack` | `SLACK_WEBHOOK_URL` | `notify.slack.webhook_env` |
 | `github-issues` | `GITHUB_TOKEN` | `notify.github_issues.token_env` |
+| `github-pr-comment` | `GITHUB_TOKEN` | `notify.github_pr_comment.token_env` |
 | `bitbucket-pr-comment` | `BITBUCKET_TOKEN`, and the email variable for basic auth | `notify.bitbucket_pr_comment.token_env`, `.email_env` |
 
 tfcensus doesn't log them. With `-vvv` the request headers are logged with `Authorization`
@@ -67,6 +69,11 @@ notify:
     max_open: 10
     close_resolved: true
     summary: false
+  github_pr_comment:
+    repo: ""                # owner/name; empty means GITHUB_REPOSITORY
+    api_url: ""             # empty means GITHUB_API_URL, else https://api.github.com
+    pull_request: 0         # 0 means the pull request of the GITHUB_EVENT_PATH event
+    token_env: GITHUB_TOKEN
   bitbucket_pr_comment:
     workspace: ""           # empty means BITBUCKET_WORKSPACE
     repo: ""                # empty means BITBUCKET_REPO_SLUG
@@ -136,6 +143,23 @@ tfcensus creates the labels it needs the first time it opens an issue. Writes ar
 second apart, as GitHub's REST API guidance asks, and a 429 or a secondary rate limit is retried
 after `Retry-After`. A create that fails with a server error is not retried, so it can't open
 two issues.
+
+## GitHub pull request comment
+
+`github-pr-comment` writes one comment per report kind on the pull request a workflow runs for.
+In GitHub Actions the repository comes from `GITHUB_REPOSITORY` and the pull request number from
+the event file in `GITHUB_EVENT_PATH`, which `pull_request`, `pull_request_target` and
+`issue_comment` events on a pull request carry. Other events need
+`notify.github_pr_comment.pull_request`.
+
+The job needs `permissions: pull-requests: write` and `GITHUB_TOKEN` in the step's environment.
+Pull requests from forks get a read-only token; the comment then fails with exit 4, so write the
+Markdown to the step summary as well (`docs/ci/drift-pr.yml` does both).
+
+The comment carries the same marker with `"scope":"pull-request"`. A re-run edits it only when
+the hash changed. When nothing is left to report, an existing comment is edited to "Nothing to
+report" and no new comment is created. Comments longer than 60,000 characters are cut at a table
+row or section, with a footer that says what was cut.
 
 ## Bitbucket pull request comment
 

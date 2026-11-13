@@ -51,7 +51,11 @@ type globals struct {
 	tfPath     string
 	tgPath     string
 
+	outSpecs   []string // --out, on commands that write a report
+	mdMaxChars int
+
 	outFormat render.Format
+	outputs   []render.Output
 	started   bool
 	closers   []io.Closer
 	mcpServe  serveFunc // tests serve the MCP server in-process

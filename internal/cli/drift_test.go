@@ -8,6 +8,7 @@ import (
 	"slices"
 	"strings"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -191,8 +192,8 @@ func writeDriftUnits(t *testing.T, dir string, n int) {
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "report.json"), b, 0o600))
 }
 
-// TestSpec_drift_4: --format md stays under 60 KB for a generated 300-unit run and ends with a
-// truncation footer.
+// TestSpec_drift_4: --format md stays under 60,000 characters (--md-max-chars) for a generated
+// 300-unit run, cuts between groups and ends with a truncation footer.
 func TestSpec_drift_4(t *testing.T) {
 	t.Parallel()
 
@@ -202,10 +203,11 @@ func TestSpec_drift_4(t *testing.T) {
 	res := runCLI(t, bin, "drift", "--from-json-out-dir", filepath.Join(dir, "plans"),
 		"--report-file", filepath.Join(dir, "report.json"), "--format", "md")
 	require.Equal(t, cli.ExitOK, res.code, res.stderr)
-	assert.Less(t, len(res.stdout), 60*1024)
+	assert.LessOrEqual(t, utf8.RuneCountInString(res.stdout), 60_000)
 	assert.True(t, strings.HasPrefix(res.stdout, "300 units (300 drifted); 300 drifted resources in 300 groups"))
-	assert.Regexp(t, `\nTruncated: \d+ of 300 groups shown, to stay under 60 KB\. `+
-		`Run tfcensus drift --format json for the full report\.\n$`, res.stdout)
+	assert.Regexp(t, "</details>\n\n---\n\nTruncated to 60000 characters: cut \\d+ sections, "+
+		"starting at \"g\\d+: aws_ssm_parameter update in 1 unit\\(s\\)\"\\. "+
+		"Run `tfcensus drift --format json` for the full report\\.\n$", res.stdout)
 	assert.Empty(t, fakebin.Calls(t, bin), "ingest mode runs nothing")
 }
 

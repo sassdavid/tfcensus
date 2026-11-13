@@ -82,6 +82,10 @@ notify.github_issues.max_open             10                                    
 notify.github_issues.repo                 ""                                              default
 notify.github_issues.summary              false                                           default
 notify.github_issues.token_env            GITHUB_TOKEN                                    default
+notify.github_pr_comment.api_url          ""                                              default
+notify.github_pr_comment.pull_request     0                                               default
+notify.github_pr_comment.repo             ""                                              default
+notify.github_pr_comment.token_env        GITHUB_TOKEN                                    default
 notify.min_severity                       low                                             default
 notify.slack.link                         ""                                              default
 notify.slack.webhook_env                  SLACK_WEBHOOK_URL                               default

@@ -39,6 +39,13 @@ func newInventoryCmd(d *app.Deps, g *globals) *cobra.Command {
 		saveIndex   string
 		concurrency int
 	)
+	formats := []render.Format{
+		render.FormatTTY,
+		render.FormatPlain,
+		render.FormatMD,
+		render.FormatJSON,
+		render.FormatCSV,
+	}
 	cmd := &cobra.Command{
 		Use:   "inventory [paths...]",
 		Short: "Read each unit's state: versions, providers, resource counts, serial and lineage",
@@ -64,9 +71,7 @@ with zstd for a .zst name and gzip for .gz.`,
   tfcensus inventory --profile 'acme-*' --format json > inventory.json
   tfcensus inventory --format csv --save-index index.json.zst`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := g.outFormat.Check(
-				render.FormatTTY, render.FormatPlain, render.FormatMD, render.FormatJSON, render.FormatCSV,
-			); err != nil {
+			if err := g.checkFormats(formats...); err != nil {
 				return usageError(err)
 			}
 			if concurrency < 1 {
@@ -76,13 +81,14 @@ with zstd for a .zst name and gzip for .gz.`,
 			if err != nil {
 				return err
 			}
-			return runInventory(cmd, d, g.outFormat, &res.Config, inventoryArgs{
+			return runInventory(cmd, d, g.sink(cmd, d), &res.Config, inventoryArgs{
 				filters: filters, paths: args, saveIndex: saveIndex, concurrency: concurrency,
 			})
 		},
 	}
 	addDiscoveryFlags(cmd, &filters)
 	addAccountFlags(cmd, d)
+	addOutputFlags(cmd, g, formats...)
 	f := cmd.Flags()
 	f.StringVar(&saveIndex, flagSaveIndex, "",
 		"write the identifier index to this file (.zst: zstd, .gz: gzip, else plain JSON)")
@@ -105,7 +111,7 @@ type inventoryData struct {
 	DoubleManaged []tfstate.DoubleManaged `json:"double_managed"`
 }
 
-func runInventory(cmd *cobra.Command, d *app.Deps, format render.Format, cfg *config.Config, a inventoryArgs) error {
+func runInventory(cmd *cobra.Command, d *app.Deps, sink render.Sink, cfg *config.Config, a inventoryArgs) error {
 	ctx := cmd.Context()
 	loader := newLoader(d)
 	disc, err := discoverUnits(cmd, d, cfg, a.filters, a.paths, loader)
@@ -139,7 +145,9 @@ func runInventory(cmd *cobra.Command, d *app.Deps, format render.Format, cfg *co
 	}
 	index := match.Index(m, states)
 	data := inventoryData{Units: states, DoubleManaged: index.DoubleManaged}
-	if err = writeInventory(d, format, data, disc); err != nil {
+	if err = sink.Write(func(w io.Writer, f render.Format) error {
+		return writeInventory(w, d, f, data, disc)
+	}); err != nil {
 		return err
 	}
 	if a.saveIndex != "" {
@@ -210,7 +218,7 @@ func stateClient(b *accounts.Backends) func(context.Context, *discovery.Unit) (t
 	}
 }
 
-func writeInventory(d *app.Deps, format render.Format, data inventoryData, disc discovery.Result) error {
+func writeInventory(w io.Writer, d *app.Deps, format render.Format, data inventoryData, disc discovery.Result) error {
 	switch format {
 	case render.FormatJSON:
 		env := render.NewEnvelope(buildinfo.Get().Version, d.Clock(), data)
@@ -222,14 +230,14 @@ func writeInventory(d *app.Deps, format render.Format, data inventoryData, disc 
 				env.Errors = append(env.Errors, render.Error{Target: stateLabel(u), Message: u.Error})
 			}
 		}
-		return render.JSON(d.Stdout, env)
+		return render.JSON(w, env)
 	case render.FormatCSV:
-		return writeInventoryCSV(d.Stdout, data.Units)
+		return writeInventoryCSV(w, data.Units)
 	case render.FormatMD:
-		return writeInventoryMarkdown(d.Stdout, data)
+		return writeInventoryMarkdown(w, data)
 	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatSARIF, render.FormatGitHub:
 	}
-	return writeInventoryTable(d.Stdout, data)
+	return writeInventoryTable(w, data)
 }
 
 // stateLabel is repo/path, with :workspace for a workspace other than default.

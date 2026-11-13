@@ -85,6 +85,21 @@ func Files(exts ...string) cobra.CompletionFunc {
 	}
 }
 
+// Assign returns a completion function for key=path values such as --out json=report.json. It
+// offers each value of cs followed by "=", and file names once the key is typed.
+func Assign(cs []Choice) cobra.CompletionFunc {
+	return func(_ *cobra.Command, _ []string, toComplete string) ([]cobra.Completion, cobra.ShellCompDirective) {
+		if strings.Contains(toComplete, "=") {
+			return nil, cobra.ShellCompDirectiveDefault
+		}
+		keys := make([]Choice, len(cs))
+		for i, c := range cs {
+			keys[i] = Choice{Value: c.Value + "=", Desc: c.Desc}
+		}
+		return withPrefix(keys, "", toComplete), cobra.ShellCompDirectiveNoFileComp | cobra.ShellCompDirectiveNoSpace
+	}
+}
+
 // Dirs returns a completion function for directory names.
 func Dirs() cobra.CompletionFunc {
 	return func(*cobra.Command, []string, string) ([]cobra.Completion, cobra.ShellCompDirective) {

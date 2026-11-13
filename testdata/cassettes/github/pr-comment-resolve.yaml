@@ -1,0 +1,61 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        host: api.github.com
+        form:
+            per_page:
+                - "100"
+        headers:
+            Accept:
+                - application/vnd.github+json
+            X-Github-Api-Version:
+                - "2022-11-28"
+        url: https://api.github.com/repos/sassdavid/infra-live/issues/42/comments?per_page=100
+        method: GET
+      response:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 1181
+        body: '[{"author_association":"NONE","body":"Looks good to me.","created_at":"2026-11-13T09:00:00Z","html_url":"https://github.com/sassdavid/infra-live/pull/42#issuecomment-990","id":990,"issue_url":"https://api.github.com/repos/sassdavid/infra-live/issues/42","node_id":"IC_kwDOAAAAAc4AAAC","updated_at":"2026-11-13T09:00:00Z","url":"https://api.github.com/repos/sassdavid/infra-live/issues/comments/990","user":{"id":41898282,"login":"github-actions[bot]","type":"Bot"}},{"author_association":"NONE","body":"\u003c!-- tfcensus:v1 {\"kind\":\"drift\",\"scope\":\"pull-request\",\"hash\":\"sha256:daa0467bb492b6a7efa4986b\"} --\u003e\n\n## Drift\n\n2 drifted resources.\n\n---\nWritten by [tfcensus](https://github.com/sassdavid/tfcensus). The next run edits this comment.\n","created_at":"2026-11-13T09:00:00Z","html_url":"https://github.com/sassdavid/infra-live/pull/42#issuecomment-1001","id":1001,"issue_url":"https://api.github.com/repos/sassdavid/infra-live/issues/42","node_id":"IC_kwDOAAAAAc4AAAN","updated_at":"2026-11-13T09:00:00Z","url":"https://api.github.com/repos/sassdavid/infra-live/issues/comments/1001","user":{"id":41898282,"login":"github-actions[bot]","type":"Bot"}}]'
+        headers:
+            Content-Type:
+                - application/json; charset=utf-8
+        status: ""
+        code: 200
+        duration: 150.584µs
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 273
+        host: api.github.com
+        body: '{"body":"\u003c!-- tfcensus:v1 {\"kind\":\"drift\",\"scope\":\"pull-request\",\"hash\":\"sha256:33909f932af4d66e9ac93d29\"} --\u003e\n\n## Drift\n\nNothing to report.\n\n---\nWritten by [tfcensus](https://github.com/sassdavid/tfcensus). The next run edits this comment.\n"}'
+        headers:
+            Accept:
+                - application/vnd.github+json
+            Content-Type:
+                - application/json
+            X-Github-Api-Version:
+                - "2022-11-28"
+        url: https://api.github.com/repos/sassdavid/infra-live/issues/comments/1001
+        method: PATCH
+      response:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 712
+        body: '{"author_association":"NONE","body":"\u003c!-- tfcensus:v1 {\"kind\":\"drift\",\"scope\":\"pull-request\",\"hash\":\"sha256:33909f932af4d66e9ac93d29\"} --\u003e\n\n## Drift\n\nNothing to report.\n\n---\nWritten by [tfcensus](https://github.com/sassdavid/tfcensus). The next run edits this comment.\n","created_at":"2026-11-13T09:00:00Z","html_url":"https://github.com/sassdavid/infra-live/pull/42#issuecomment-1001","id":1001,"issue_url":"https://api.github.com/repos/sassdavid/infra-live/issues/42","node_id":"IC_kwDOAAAAAc4AAAN","updated_at":"2026-11-13T10:00:00Z","url":"https://api.github.com/repos/sassdavid/infra-live/issues/comments/1001","user":{"id":41898282,"login":"github-actions[bot]","type":"Bot"}}'
+        headers:
+            Content-Type:
+                - application/json; charset=utf-8
+        status: ""
+        code: 200
+        duration: 40.791µs

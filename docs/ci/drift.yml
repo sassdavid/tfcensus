@@ -3,9 +3,11 @@
 # (mise use github:sassdavid/tfcensus), and its .tfcensus.yaml holds the drift.noise rules.
 # AWS access is a read-only role assumed with OIDC; set its ARN as the DRIFT_ROLE_ARN variable.
 #
-# terragrunt plans every unit once into $RUNNER_TEMP. tfcensus then reads those plans three times
-# (annotations, the step summary, SARIF) and gates the job last. The plans hold state values, so
-# they stay on the runner and are never uploaded.
+# terragrunt plans every unit once into $RUNNER_TEMP. One tfcensus run reads those plans, prints
+# annotations, writes SARIF and Markdown with --out, and gates the job with its exit code. The
+# later steps run even when the gate fails. The plans hold state values, so they stay on the runner
+# and are never uploaded; the reports name attribute paths only. docs/ci/drift-pr.yml comments on
+# pull requests instead.
 name: drift
 
 on:
@@ -48,24 +50,17 @@ jobs:
           terragrunt run --all --tf-path terraform --json-out-dir "$RUNNER_TEMP/plans" --report-file "$RUNNER_TEMP/report.json" \
             --report-format json --log-format json --no-color \
             -- plan -refresh-only -lock=false -detailed-exitcode || true
-      - name: annotations
+      # Exit 3: drift or a failed unit. Exit 1 or 2: tfcensus couldn't read the plans. --out writes
+      # every file before the exit code is set.
+      - name: tfcensus drift
         run: |
           tfcensus drift --from-json-out-dir "$RUNNER_TEMP/plans" --report-file "$RUNNER_TEMP/report.json" \
-            --format github || true
+            --format github --out sarif=drift.sarif --out md=drift.md --fail-on drift,errors
       - name: step summary
-        run: |
-          tfcensus drift --from-json-out-dir "$RUNNER_TEMP/plans" --report-file "$RUNNER_TEMP/report.json" --format md \
-            >> "$GITHUB_STEP_SUMMARY" || true
-      - name: sarif
-        run: |
-          tfcensus drift --from-json-out-dir "$RUNNER_TEMP/plans" --report-file "$RUNNER_TEMP/report.json" --format sarif \
-            > drift.sarif || true
+        if: ${{ !cancelled() && hashFiles('drift.md') != '' }}
+        run: cat drift.md >> "$GITHUB_STEP_SUMMARY"
       - uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        if: ${{ !cancelled() && hashFiles('drift.sarif') != '' }}
         with:
           sarif_file: drift.sarif
           category: drift
-      # Exit 3: drift or a failed unit. Exit 1 or 2: tfcensus couldn't read the plans.
-      - name: gate
-        run: |
-          tfcensus drift --from-json-out-dir "$RUNNER_TEMP/plans" --report-file "$RUNNER_TEMP/report.json" \
-            --format plain --fail-on drift,errors

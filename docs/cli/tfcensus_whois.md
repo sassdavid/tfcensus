@@ -45,9 +45,11 @@ tfcensus whois <arn|id>... [flags]
       --index string                   read the state index from this file (from inventory --save-index) instead of reading states
       --live[=true|false]              list an unmanaged resource's type live so the rules see its tags (default true, false with --index) (default true)
       --management-profile string      profile that lists the organization's accounts, else the default AWS credentials (config accounts.org.management_profile)
+      --md-max-chars int               cut Markdown output to this many characters at a row or section boundary; 0 means no limit (default 60000)
       --min-count int                  answers --fail-on needs before it exits 3 (default 1)
       --org[=true|false]               list the accounts of the AWS organization and assume --org-role in each (config accounts.org.enabled)
       --org-role string                role assumed in each member account (config accounts.org.role) (default "OrganizationAccountAccessRole")
+      --out stringArray                also write the report to a file as format=path (repeatable); format is one of plain, md, json or sarif
       --profile stringArray            AWS profile from ~/.aws/config, or a glob such as 'acme-*' (repeatable; config accounts.profiles)
       --region stringArray             AWS region (repeatable; config regions)
       --render string                  when to use terragrunt render: auto, always or never (config discovery.render) (default "auto")

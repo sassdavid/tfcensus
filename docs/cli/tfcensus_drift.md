@@ -40,7 +40,8 @@ tfcensus drift [paths...] [flags]
 ```
   tfcensus drift ~/src/infra/acme-live --filter './live/prod/**' --fail-on drift
   tfcensus drift --mode full --fail-on drift:reverts --format md > drift.md
-  tfcensus drift --from-json-out-dir out --report-file out/report.json --format github
+  tfcensus drift --from-json-out-dir out --report-file out/report.json --format github \
+    --out sarif=drift.sarif --out md=drift.md --fail-on drift
 ```
 
 ### Options
@@ -52,8 +53,10 @@ tfcensus drift [paths...] [flags]
       --from-json-out-dir string       read the plans of an earlier terragrunt run --json-out-dir instead of running terragrunt
       --generate-stacks[=true|false]   run terragrunt stack generate first, so units in stacks are listed (config discovery.generate_stacks)
   -h, --help[=true|false]              help for drift
+      --md-max-chars int               cut Markdown output to this many characters at a row or section boundary; 0 means no limit (default 60000)
       --min-count int                  count a --fail-on gate needs before it exits 3 (default 1)
       --mode string                    plan mode: refresh-only or full; full also tells reverted drift from kept drift (config drift.mode) (default "refresh-only")
+      --out stringArray                also write the report to a file as format=path (repeatable); format is one of plain, md, json, sarif or github
       --render string                  when to use terragrunt render: auto, always or never (config discovery.render) (default "auto")
       --report-file string             the JSON --report-file of that run
       --show-attributes[=true|false]   show before and after values; sensitive and unknown values stay masked

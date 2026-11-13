@@ -54,7 +54,7 @@ Decisions made at M7:
   A change it keeps records which rule didn't apply.
 
 ## Output and gates
-- tty / md (capped at 60 KB, `<details>` per group) / json (`schemas/drift-v1.json`) / GitHub workflow annotations / sarif.
+- tty / md (cut at `--md-max-chars`, 60,000 characters by default, `<details>` per group) / json (`schemas/drift-v1.json`) / GitHub workflow annotations / sarif.
 - `--fail-on drift` (any), `drift:reverts` (only drift the current code would revert), `errors`.
 - Exit codes follow the shared contract (3 when matched). Terraform's own `-detailed-exitcode` is aggregated internally.
 
@@ -75,4 +75,6 @@ Decisions made at M7:
 - [x] Ingest-mode tests from recorded `json-out-dir` + report fixtures (12 units, 3 identical tag drifts → 1 collapsed group, 1 failed unit).
 - [x] Noise rule with an expired date stops hiding and warns. `never_hide` is enforced.
 - [x] Run mode is verified with a fake terragrunt that writes fixture plans (argv asserted).
-- [x] Markdown output under 60 KB for a 300-unit fixture with a truncation footer.
+- [x] Markdown output under 60 KB for a 300-unit fixture with a truncation footer. Since M13 the
+  cap is 60,000 characters (`--md-max-chars`, [engineering ADR-0014](../../engineering/adr/0014-report-outputs-and-pr-comment.md));
+  `TestSpec_drift_4` checks it.

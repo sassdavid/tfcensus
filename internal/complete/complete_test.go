@@ -74,6 +74,12 @@ func TestCompletionFuncs(t *testing.T) {
 			cobra.ShellCompDirectiveFilterFileExt,
 		},
 		{"files any", complete.Files(), "", nil, cobra.ShellCompDirectiveDefault},
+		{
+			"assign key", complete.Assign(choices()), "a",
+			[]string{"auto=\tpick one", "always="},
+			cobra.ShellCompDirectiveNoFileComp | cobra.ShellCompDirectiveNoSpace,
+		},
+		{"assign path", complete.Assign(choices()), "auto=re", nil, cobra.ShellCompDirectiveDefault},
 		{"dirs", complete.Dirs(), "", nil, cobra.ShellCompDirectiveFilterDirs},
 		{"no files", complete.NoFiles, "", nil, cobra.ShellCompDirectiveNoFileComp},
 	}

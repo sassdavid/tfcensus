@@ -1,0 +1,65 @@
+# Drift on pull requests to a Terragrunt live repository: copy this file to
+# .github/workflows/drift-pr.yml there. Set up the repository as for docs/ci/drift.yml: mise.toml
+# pins terragrunt, terraform and tfcensus, and DRIFT_ROLE_ARN names a read-only role for OIDC.
+#
+# The job plans every unit of the pull request's head once, then tfcensus writes the report as
+# JSON, Markdown and annotations in one run. tfcensus notify keeps one comment on the pull request:
+# a re-run edits it only when the report changed, and drift that is gone turns it into "Nothing to
+# report". A pull request from a fork gets no OIDC token and a read-only GITHUB_TOKEN, so the job
+# runs only for branches of this repository.
+name: drift-pr
+
+on:
+  pull_request:
+    paths:
+      - "**/*.hcl"
+      - "**/*.tf"
+      - ".tfcensus.yaml"
+
+permissions: {}
+
+concurrency:
+  group: drift-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  drift:
+    name: drift
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      id-token: write # OIDC token for the AWS role
+      pull-requests: write # the sticky comment
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+        with:
+          version: 2026.11.5
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.DRIFT_ROLE_ARN }}
+          aws-region: eu-west-1
+      - name: terragrunt plan -refresh-only
+        env:
+          TG_TF_PATH: terraform
+        run: |
+          terragrunt run --all --tf-path terraform --json-out-dir "$RUNNER_TEMP/plans" --report-file "$RUNNER_TEMP/report.json" \
+            --report-format json --log-format json --no-color \
+            -- plan -refresh-only -lock=false -detailed-exitcode || true
+      # Exit 1 means a unit failed; the report and the comment say which. Only exit 2 (tfcensus
+      # couldn't read the plans) stops the job here.
+      - name: tfcensus drift
+        run: |
+          code=0
+          tfcensus drift --from-json-out-dir "$RUNNER_TEMP/plans" --report-file "$RUNNER_TEMP/report.json" \
+            --format github --out json=drift.json --out md=drift.md || code=$?
+          if [ "$code" -eq 2 ]; then exit 2; fi
+          cat drift.md >> "$GITHUB_STEP_SUMMARY"
+      - name: pull request comment
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: tfcensus notify --from drift.json --notify github-pr-comment

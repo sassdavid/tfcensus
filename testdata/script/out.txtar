@@ -1,0 +1,51 @@
+# --out writes several formats in one run, with the exit code --format gives. Each file matches the
+# single-format run, and Markdown is cut at --md-max-chars.
+env TEST_NOW=2026-11-12T08:00:00Z
+cd $DRIFT/ingest
+
+exec expect-exit 3 tfcensus drift --config $WORK/tfcensus.yaml --from-json-out-dir plans --report-file report.json --fail-on drift --format json --out sarif=$WORK/drift.sarif --out md=$WORK/drift.md --out github=$WORK/drift.github --out plain=$WORK/drift.txt
+cp stdout $WORK/multi.json
+sarifschema $WORK/drift.sarif
+jsonschema report-v1.json $WORK/multi.json
+
+exec expect-exit 3 tfcensus drift --config $WORK/tfcensus.yaml --from-json-out-dir plans --report-file report.json --fail-on drift --format json
+cmp stdout $WORK/multi.json
+exec expect-exit 3 tfcensus drift --config $WORK/tfcensus.yaml --from-json-out-dir plans --report-file report.json --fail-on drift --format sarif
+cmp stdout $WORK/drift.sarif
+exec expect-exit 3 tfcensus drift --config $WORK/tfcensus.yaml --from-json-out-dir plans --report-file report.json --fail-on drift --format md
+cmp stdout $WORK/drift.md
+exec expect-exit 3 tfcensus drift --config $WORK/tfcensus.yaml --from-json-out-dir plans --report-file report.json --fail-on drift --format github
+cmp stdout $WORK/drift.github
+exec expect-exit 3 tfcensus drift --config $WORK/tfcensus.yaml --from-json-out-dir plans --report-file report.json --fail-on drift --format plain
+cmp stdout $WORK/drift.txt
+
+# Without a gate the failed unit makes it 1, with or without --out.
+exec expect-exit 1 tfcensus drift --config $WORK/tfcensus.yaml --from-json-out-dir plans --report-file report.json --format plain --out md=$WORK/drift.md
+
+# --md-max-chars cuts the Markdown at a section and names what it cut.
+exec expect-exit 3 tfcensus drift --config $WORK/tfcensus.yaml --from-json-out-dir plans --report-file report.json --fail-on drift --format plain --out md=$WORK/short.md --md-max-chars 900
+grep 'Truncated to 900 characters: cut \d+ sections, starting at "g\d+: ' $WORK/short.md
+grep 'Run `tfcensus drift --format json` for the full report\.$' $WORK/short.md
+exec expect-exit 3 tfcensus drift --config $WORK/tfcensus.yaml --from-json-out-dir plans --report-file report.json --fail-on drift --format md --md-max-chars 900
+cmp stdout $WORK/short.md
+
+# Usage errors exit 2.
+exec expect-exit 2 tfcensus drift --from-json-out-dir plans --out tty=$WORK/x.txt
+stderr 'invalid --out format "tty"'
+exec expect-exit 2 tfcensus drift --from-json-out-dir plans --out csv=$WORK/x.csv
+stderr '--out csv=.*x.csv: format "csv" is not supported by this command'
+exec expect-exit 2 tfcensus drift --from-json-out-dir plans --out md
+stderr 'want format=path'
+exec expect-exit 2 tfcensus drift --from-json-out-dir plans --out md=$WORK/a.md --out json=$WORK/a.md
+stderr 'already an --out file'
+exec expect-exit 2 tfcensus drift --from-json-out-dir plans --md-max-chars -1
+stderr '--md-max-chars must be 0 or more'
+! exists $WORK/x.txt
+! exists $WORK/x.csv
+
+-- tfcensus.yaml --
+schema_version: 1
+drift:
+  noise:
+    - preset: aws-tags-all
+    - preset: computed-hashes

@@ -30,6 +30,7 @@ const (
 
 func newUnitsCmd(d *app.Deps, g *globals) *cobra.Command {
 	var filters []string
+	formats := []render.Format{render.FormatTTY, render.FormatPlain, render.FormatMD, render.FormatJSON}
 	cmd := &cobra.Command{
 		Use:   "units [paths...]",
 		Short: "List units with their state backend, target account and region",
@@ -50,12 +51,7 @@ the config, or the working directory.`,
   tfcensus units --filter './live/prod/**' --format json
   tfcensus units --render never --generate-stacks`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := g.outFormat.Check(
-				render.FormatTTY,
-				render.FormatPlain,
-				render.FormatMD,
-				render.FormatJSON,
-			); err != nil {
+			if err := g.checkFormats(formats...); err != nil {
 				return usageError(err)
 			}
 			res, err := g.loadConfig(cmd, d)
@@ -66,13 +62,16 @@ the config, or the working directory.`,
 			if err != nil {
 				return err
 			}
-			if err = writeUnits(d.Stdout, g.outFormat, d, result); err != nil {
+			if err = g.sink(cmd, d).Write(func(w io.Writer, f render.Format) error {
+				return writeUnits(w, f, d, result)
+			}); err != nil {
 				return err
 			}
 			return discoveryError(result)
 		},
 	}
 	addDiscoveryFlags(cmd, &filters)
+	addOutputFlags(cmd, g, formats...)
 	return cmd
 }
 
