@@ -199,7 +199,13 @@ Decisions: [engineering ADR-0014](../engineering/adr/0014-report-outputs-and-pr-
   Evidence: `drift.yml` runs tfcensus once with `--out sarif=` and `--out md=`; `drift-pr.yml`
   runs `notify --notify github-pr-comment`; `jactionlint docs/ci/drift.yml docs/ci/drift-pr.yml`
   exits 0.
-- [ ] v0.2.0 is released.
+- [x] v0.2.0 is released.
+  Evidence (2026-11-13): release PR #24 merged; release run 43448136324 published v0.2.0 (tag on
+  cb5d0d2) with 14 assets and the `package-manifests` artifact. On
+  `tfcensus_0.2.0_darwin_arm64.tar.gz` cosign printed "Verified OK", `shasum -c` "OK" and
+  `gh attestation verify --signer-workflow sassdavid/tfcensus/.github/workflows/release.yml`
+  exited 0; `mise use github:sassdavid/tfcensus@0.2.0` installed it and `tfcensus version` prints
+  0.2.0. The tap and the bucket API still answer 409 "Git Repository is empty".
 
 ### M14: GitHub Action → `sassdavid/tfcensus-action` v1.0.0 (clone at `~/src/github/tfcensus-action`, empty) (shared with relgap-action)
 Scope: a composite action in its own repo that installs a verified release and wires M13's flags.
