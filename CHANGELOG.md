@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.0](https://github.com/sassdavid/tfcensus/compare/v0.1.0...v0.2.0) (2026-11-13)
+
+
+### Features
+
+* add --out, Markdown truncation and the GitHub PR comment (M13) ([#26](https://github.com/sassdavid/tfcensus/issues/26)) ([9f3382e](https://github.com/sassdavid/tfcensus/commit/9f3382eb8c6e7260a7e9db876b76e319e7771eda))
+* add shell completion, carapace shells and man pages (M12) ([#23](https://github.com/sassdavid/tfcensus/issues/23)) ([04b637d](https://github.com/sassdavid/tfcensus/commit/04b637dcba80fc79443585ed97575b9302410d89))
+
 ## 0.1.0 (2026-11-13)
 
 
