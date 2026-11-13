@@ -6,20 +6,28 @@ reports drift. It tells which unit manages a resource, writes import blocks for 
 manages, and moves resources between units. It is read-only by default: only `move apply`,
 `move rollback` and `move mark-applied` write.
 
-tfcensus is pre-release. Milestones M0 to M10 are in place: `units` lists units and their
-backends, `doctor` checks credentials and inventory layers, `inventory` reads each unit's state
-from S3 and prints identifiers and counts, never attribute values, and `audit backend` checks state
-buckets, lock tables and the fleet of states, with SARIF output. `scan` finds AWS resources that no
-unit manages, and `drift` runs a refresh-only plan in every unit and groups identical drift across
-units ([docs/ci/drift.yml](docs/ci/drift.yml) is an example workflow). `whois` names the units
-that manage an ARN or id, offline from a saved index too, and `codify` turns a scan report into
-import blocks for one unit. `move` runs migration files that move resources between the states of
-units, in other accounts too, verified with plans and rolled back from S3 object versions
-([docs/runbooks/move.md](docs/runbooks/move.md)). `notify` publishes saved scan, drift and audit
-reports to Slack, GitHub issues, Bitbucket pull request comments or files
-([docs/runbooks/notify.md](docs/runbooks/notify.md)), `report` renders them offline, and `mcp`
-serves them read-only to agents such as Claude Code. The plan is in
-[docs/plan](docs/plan/) and the CLI reference in [docs/cli](docs/cli/tfcensus.md).
+tfcensus is pre-release, and its commands and output can still change before 1.0. `units` lists
+units and their backends, `doctor` checks credentials and inventory layers, `inventory` reads each
+unit's state from S3 and prints identifiers and counts, never attribute values, and `audit backend`
+checks state buckets, lock tables and the fleet of states, with SARIF output. `scan` finds AWS
+resources that no unit manages, and `drift` runs a refresh-only plan in every unit and groups
+identical drift across units. `whois` names the units that manage an ARN or id, offline from a
+saved index too, and `codify` turns a scan report into import blocks for one unit. `move` runs
+migration files that move resources between the states of units, in other accounts too, verified
+with plans and rolled back from S3 object versions ([docs/runbooks/move.md](docs/runbooks/move.md)).
+`notify` publishes saved scan, drift and audit reports to Slack, GitHub issues, a GitHub or
+Bitbucket pull request comment, or files ([docs/runbooks/notify.md](docs/runbooks/notify.md)),
+`report` renders them offline, and `mcp` serves them read-only to agents such as Claude Code. The
+plan is in [docs/plan](docs/plan/) and the CLI reference in [docs/cli](docs/cli/tfcensus.md).
+
+## CI
+
+Report commands take a repeatable `--out <format>=<path>`, so one run writes JSON, SARIF, Markdown
+and GitHub annotations with the exit code of its `--fail-on` gate. Markdown is cut at a table row
+or section once it reaches `--md-max-chars` (60,000 characters, under GitHub's 65,536-character
+comment limit), with a footer that says what was cut. [docs/ci/drift.yml](docs/ci/drift.yml)
+checks drift on a schedule and uploads SARIF; [docs/ci/drift-pr.yml](docs/ci/drift-pr.yml) keeps
+one drift comment on each pull request.
 
 ## Install
 
