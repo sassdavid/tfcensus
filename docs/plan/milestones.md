@@ -91,9 +91,13 @@ package channel gets anything until M19. No new features.
   in `testing.md`.
 - [x] One `live.yml` run on main includes the move step: run 43393121759 (workflow_dispatch,
   443c526) passed `TestSpec_inventory_5` and `TestSpec_move_2`.
-- [ ] Release PR #2 is merged and v0.1.0 is a GitHub release. `cosign verify-blob` and
+- [x] Release PR #2 is merged and v0.1.0 is a GitHub release. `cosign verify-blob` and
   `gh attestation verify` pass on a downloaded archive, `mise use github:sassdavid/tfcensus` works,
-  and the tap and the bucket get no commit.
+  and the tap and the bucket get no commit. Evidence from 2026-11-13: release run 43401178209
+  published 14 assets and the `package-manifests` artifact; on `tfcensus_0.1.0_darwin_arm64.tar.gz`
+  cosign printed "Verified OK", `shasum -c` "OK" and `gh attestation verify` succeeded (signer
+  workflow `release.yml`); `mise use github:sassdavid/tfcensus` installed 0.1.0; both the tap and
+  the bucket API answer 409 "Git Repository is empty".
 - Still optional and recommended: the M6 false-positive review.
 
 ### M12: Shell completion, carapace and man pages (shared)
