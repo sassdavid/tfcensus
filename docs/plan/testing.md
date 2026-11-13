@@ -30,7 +30,7 @@ Research basis: emulator coverage was checked API by API against tfcensus's call
 - **Config items:** real-shaped items (ENIs, ASG/Karpenter instances, CloudFormation-tagged resources, default VPCs) for the ownership packs.
 - The typemap is generated from local `terraform-provider-aws` and `terraform-provider-awscc` clones. `typemap:gen` reads `TFCENSUS_PROVIDER_AWS_DIR` / `TFCENSUS_PROVIDER_AWSCC_DIR`, defaulting to `~/src/github/_reference/hashicorp/<repo>`, and records each clone's commit in the generated data header.
 
-## Gaps only real AWS can validate (tracked as `docs/validation/TODO.md`)
+## Gaps only real AWS can validate
 - Config SQL dialect, limits and aggregator authorization/lag. Real recorder setups: the Control Tower baseline recorder, periodic recording, excluded types, unrecorded regions.
 - Resource Explorer indexing lag (minutes; up to 2 h untagged; up to 36 h aggregator), unsupported types, view filters.
 - Cloud Control parent-required types, `UnsupportedActionException`, per-type property shapes.

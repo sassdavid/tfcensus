@@ -48,4 +48,5 @@ Rules:
 - Every list supports `expires` + `reason` where suppression is involved.
 
 ## Acceptance criteria
-- [ ] Schema generation and sync test; `config show --sources` golden; unknown-key error with file:line.
+- [x] Schema generation and sync test; `config show --sources` golden; unknown-key error with file:line
+  (`TestSpec_config_1` to `_3`).

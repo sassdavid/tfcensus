@@ -8,13 +8,13 @@
 | `tfcensus scan` | unmanaged detection across accounts/regions | v0.1 |
 | `tfcensus audit backend` | S3 and lock-table hygiene + fleet checks | v0.1 |
 | `tfcensus rules test <rules.yaml> [--resource file]` | evaluate ownership rules against samples | v0.1 |
-| `tfcensus drift [paths…]` | fleet drift report (refresh-only plans) | v0.2 |
-| `tfcensus whois <arn\|id>…` | which unit(s) manage it; double-managed check | v0.3 |
-| `tfcensus codify --into <unit> [--from scan.json]` | emit `import` blocks (+ `.tfquery.hcl`) for unmanaged resources | v0.3 |
-| `tfcensus move plan\|apply\|rollback\|mark-applied\|status <migration.hcl>` | state moves between units/accounts | v0.4 |
+| `tfcensus drift [paths…]` | fleet drift report (refresh-only plans) | v0.1 |
+| `tfcensus whois <arn\|id>…` | which unit(s) manage it; double-managed check | v0.1 |
+| `tfcensus codify --into <unit> [--from scan.json]` | emit `import` blocks (+ `.tfquery.hcl`) for unmanaged resources | v0.1 |
+| `tfcensus move plan\|apply\|rollback\|mark-applied\|status <migration.hcl>` | state moves between units/accounts | v0.1 |
 | `tfcensus move suggest --from <unit> --to <unit>…` | auto-detect moves from plans (tfautomv engine) → draft migration file | v0.4 |
-| `tfcensus report html` | static single-file HTML from a scan/drift/audit JSON | v0.5 |
-| `tfcensus mcp` | stdio MCP server, read-only | v0.5 |
+| `tfcensus report html` | static single-file HTML from a scan/drift/audit JSON | v0.1 |
+| `tfcensus mcp` | stdio MCP server, read-only | v0.1 |
 | `tfcensus config show\|validate\|init`, `cache info\|clear`, `completion`, `version` | standard | v0.1 |
 
 ## Selection flags (shared by most commands)
@@ -34,10 +34,14 @@
 Output and global flags follow the [engineering standards](../engineering/engineering-standards.md): `--format tty|plain|md|json|csv|sarif`, `-o`, `--fail-on`, `-v`, `--no-input`, `--yes` (move only).
 
 ## `--fail-on` values
-- `unmanaged`: any finding in the unmanaged category, with `--min-count` and `--types` scoping.
-- `double-managed`
-- `audit:<severity>` (high|medium|low)
-- `drift`, `drift:reverts`, `errors`
+
+Each command takes its own values. A match exits 3.
+
+| Command | Values |
+|---|---|
+| `scan`, `whois` | `unmanaged`, `double-managed` (repeatable), counted against `--min-count`; `scan` also scopes by `--types` |
+| `audit backend` | one severity, `info`, `low`, `medium` or `high`: any unsuppressed finding at or above it |
+| `drift` | `drift`, `drift:reverts` (needs `--mode full`), `errors` (repeatable), counted against `--min-count` |
 
 ## Examples
 
@@ -45,6 +49,6 @@ Output and global flags follow the [engineering standards](../engineering/engine
 tfcensus doctor --profile 'acme-*'
 tfcensus units ~/src/infra/acme-live --format json
 tfcensus scan --profile acme-nonprod --region eu-west-1 --types 'aws_security_group*,aws_iam_*'
-tfcensus audit backend --profile 'globex-*' --fail-on audit:high --format sarif -o audit.sarif
+tfcensus audit backend --profile 'globex-*' --fail-on high --format sarif -o audit.sarif
 tfcensus whois arn:aws:elasticloadbalancing:eu-west-1:111111111111:loadbalancer/net/public/abc
 ```

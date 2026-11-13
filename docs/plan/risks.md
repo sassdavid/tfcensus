@@ -11,5 +11,5 @@
 | R7 | State contains secrets | certain | high | Never print attributes; identifiers only; a grep test in CI; docs on IAM scoping |
 | R8 | `move` corrupts state | low | critical | Plan verification, versioning required, VersionId rollback, typed confirmation, an e2e against moto (two emulated accounts) with rollback, the native (PR-based) strategy as a safer alternative |
 | R9 | Scope creep into Atlantis, Terramate or Spacelift territory | medium | high | Explicit non-goals in [overview.md](overview.md); every feature must reuse F1–F4 |
-| R10 | Maintainer bandwidth | high | medium | relgap ships first. tfcensus v0.1 is scoped to F1–F3 + scan + audit. Contributors are attracted through the typemap/rules data |
+| R10 | Maintainer bandwidth | high | medium | relgap ships first. Releases stay GitHub-only until M19, so there are no package channels to maintain. Contributors are attracted through the typemap/rules data |
 | R11 | Using the author's employer environment as a test bed | medium | medium | Live validation is read-only, uses named profiles explicitly approved per session, and records only aggregated results in `docs/validation/` (no account IDs in the public repo) |

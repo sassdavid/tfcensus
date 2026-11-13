@@ -1,4 +1,4 @@
-# Spec: `whois` and `codify` (v0.3)
+# Spec: `whois` and `codify`
 
 ## whois
 `tfcensus whois <arn|id> [--type aws_x]…` uses the StateIndex (F3) across all discovered units:

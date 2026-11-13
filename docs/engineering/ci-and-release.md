@@ -13,18 +13,18 @@
 | `mise run test:golden -- -update` | regenerates golden files (review the diff!). Sets `GOLDEN_UPDATE=1`, which `internal/testutil.Golden` and testscript's `UpdateScripts` honour |
 | `mise run fuzz` | runs every Go fuzz target (`func FuzzXxx`) for 60 s each; `mise run fuzz -- 10s` sets another duration. Passes when a repo has no targets |
 | `mise run docs` | regenerates `docs/cli/` via cobra/doc and fails if the checked-in copy differs |
-| `mise run snapshot` | `goreleaser release --snapshot --clean --skip=sign,docker`. Keyless cosign needs CI's OIDC token, and goreleaser OSS can't make `signs:` conditional, so local snapshots skip signing. The multi-platform image needs a buildx builder with a Docker daemon, so snapshots skip it too |
+| `mise run snapshot` | `goreleaser release --snapshot --clean --skip=sign`. Keyless cosign needs CI's OIDC token, and goreleaser OSS can't make `signs:` conditional, so local snapshots skip signing. The snapshot builds the container image once per platform into the local Docker daemon, so it needs Docker |
 | `mise run sibling:diff` | compares the files shared with relgap ([.claude/rules/siblings.md](../../.claude/rules/siblings.md)) |
 
 ## GitHub Actions workflows
 
 | Workflow | Trigger | Jobs |
 |---|---|---|
-| `ci.yml` | PR, push main | lint; test matrix (ubuntu, macos, windows) on the Go minor of the `go` directive; fuzz (`mise run fuzz`); docs-up-to-date; schema tests; SARIF dry run (upload-sarif with `CODEQL_ACTION_TEST_MODE` on each SARIF golden, so nothing is uploaded); goreleaser snapshot (6 archives, checksums, SBOMs, third-party notices in every archive) |
+| `ci.yml` | PR, push main | lint; test matrix (ubuntu, macos, windows) on the Go minor of the `go` directive; fuzz (`mise run fuzz`); docs-up-to-date; schema tests; SARIF dry run (upload-sarif with `CODEQL_ACTION_TEST_MODE` on each SARIF golden, so nothing is uploaded); goreleaser snapshot (6 archives, checksums, SBOMs, third-party notices in every archive, and the container image where the repo has a `Dockerfile`) |
 | `security.yml` | PR, weekly | govulncheck (SARIF), zizmor, dependency review |
-| `live.yml` | nightly, manual | Inventory layers against moto and Floci service containers, pinned by digest (`mise run test:emulator`). **No AWS account needed.** The terraform/tofu/terragrunt e2e against moto joins it with the first e2e test. An optional real-AWS OIDC job is added only if a sandbox account ever exists |
+| `live.yml` | nightly, manual | Inventory layers against moto and Floci service containers, pinned by digest (`mise run test:emulator`), then the cross-account `move` e2e against moto (`mise run test:move-e2e`). **No AWS account needed.** An optional real-AWS OIDC job is added only if a sandbox account ever exists |
 | `release-please.yml` | push main | opens or updates the release PR (version bump + CHANGELOG.md from Conventional Commits). On merge it creates the tag and a draft release (`draft` + `force-tag-creation`) |
-| `release.yml` | called by `release-please.yml` when a release is created (tags pushed with `GITHUB_TOKEN` don't trigger workflows); also tag `v*` | goreleaser: binaries, checksums, SBOM, cosign keyless signature, attestations, Homebrew cask, Scoop, container image. Secrets: `HOMEBREW_TAP_TOKEN`, `SCOOP_BUCKET_TOKEN` |
+| `release.yml` | called by `release-please.yml` when a release is created (tags pushed with `GITHUB_TOKEN` don't trigger workflows); also tag `v*` | goreleaser: binaries, checksums, SBOM, cosign keyless signature, attestations. The Homebrew cask and the Scoop manifest are kept as the `package-manifests` workflow artifact until M19 publishes them and the container image. Secrets: `HOMEBREW_TAP_TOKEN`, `SCOOP_BUCKET_TOKEN` (unused until M19) |
 
 Rules:
 - Actions are pinned by commit SHA (Renovate updates them).
@@ -37,9 +37,9 @@ Rules:
 - `sboms:` via syft; `signs:` cosign `sign-blob --bundle` on the checksum file.
 - A `before` hook runs `scripts/licenses.sh`, and every archive carries `LICENSE`, `README.md` and `third_party_licenses/`: the license, notice and patent files of each compiled module and of Go, plus `THIRD_PARTY_NOTICES.md`, which links each module's source ([ADR-0012](adr/0012-third-party-notices.md)). The container image has the same files under `/usr/share/doc/tfcensus/`.
 - `release.use_existing_draft` finds release-please's draft by name (`{{ .Tag }}`), uploads the assets, then publishes it. `releases/latest` never points at a release without assets, and this works with immutable releases.
-- `homebrew_casks:` (replaces `brews:`) publishes to the tap `sassdavid/homebrew-tap`. Cask and Scoop uploads are skipped when their token secret is missing, and attestation runs even if a publisher fails.
+- `homebrew_casks:` (replaces `brews:`) publishes to the tap `sassdavid/homebrew-tap`. Until M19, `skip_upload: true` keeps the cask and the Scoop manifest in `dist/` (decided 2026-11-13, [roadmap research](../plan/roadmap-research.md)). Attestation runs even if a publisher fails. The cask's `generate_completions_from_executable` sets `shell_parameter_format: cobra` and no `args`, because brew already adds `completion <shell>`.
 - `scoops:` for Windows, to the bucket `sassdavid/scoop-bucket` (same as relgap). `nfpms:` (deb/rpm) is optional and comes later.
-- `dockers_v2` is for CI use: image `ghcr.io/sassdavid/tfcensus` bundles nothing else. Users mount their own terragrunt and terraform.
+- `dockers_v2` is for CI use: image `ghcr.io/sassdavid/tfcensus` bundles nothing else. Users mount their own terragrunt and terraform. `disable: "{{ not .IsSnapshot }}"` keeps it out of releases until M19, and snapshots (CI's too) still build it.
 
 ## Distribution order
 
