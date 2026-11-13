@@ -26,26 +26,30 @@ jobs:
           version: 2026.11.5
       - run: mise run lint
 
-  # The go directive is the floor (docs/engineering/version-policy.md); test that minor.
+  # Go comes from mise.toml, the version lint, local builds and releases use
+  # (docs/engineering/version-policy.md). The check name carries the OS only, so a Go bump
+  # doesn't rename it.
   test:
+    name: test (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        go: ["1.27.3"]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     permissions:
       contents: read
     env:
-      GOTOOLCHAIN: local # don't let a newer go.mod toolchain line upgrade the matrix version
+      GOTOOLCHAIN: local # don't let a newer go.mod toolchain line replace the mise.toml version
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
-          go-version: ${{ matrix.go }}
+          version: 2026.11.5
+          install_args: go
+      - run: go version
       - name: go test -race
         if: runner.os != 'Windows'
         run: go test -race -count=1 ./...
