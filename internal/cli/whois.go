@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io"
 	"slices"
 	"strings"
 
@@ -46,6 +47,13 @@ type whoisArgs struct {
 
 func newWhoisCmd(d *app.Deps, g *globals) *cobra.Command {
 	a := whoisArgs{}
+	formats := []render.Format{
+		render.FormatTTY,
+		render.FormatPlain,
+		render.FormatMD,
+		render.FormatJSON,
+		render.FormatSARIF,
+	}
 	cmd := &cobra.Command{
 		Use:   "whois <arn|id>...",
 		Short: "Show which units manage an AWS resource",
@@ -70,9 +78,7 @@ state read or a layer failed, 4 when every failure was a credential problem, and
   jq -r '.data.findings[].arn // empty' scan.json | tfcensus whois --stdin --index index.json.zst
   tfcensus whois --index index.json.zst --fail-on double-managed arn:aws:s3:::acme-assets`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := g.outFormat.Check(
-				render.FormatTTY, render.FormatPlain, render.FormatMD, render.FormatJSON, render.FormatSARIF,
-			); err != nil {
+			if err := g.checkFormats(formats...); err != nil {
 				return usageError(err)
 			}
 			if a.minCount < 1 {
@@ -93,11 +99,12 @@ state read or a layer failed, 4 when every failure was a credential problem, and
 			if err != nil {
 				return err
 			}
-			return runWhois(cmd, d, g.outFormat, &res.Config, a)
+			return runWhois(cmd, d, g.sink(cmd, d), &res.Config, a)
 		},
 	}
 	addDiscoveryFlags(cmd, &a.filters)
 	addAccountFlags(cmd, d)
+	addOutputFlags(cmd, g, formats...)
 	addRegionFlag(cmd)
 	f := cmd.Flags()
 	f.StringSliceVar(&a.types, flagType, nil, "TF resource types to look in, such as aws_security_group")
@@ -159,7 +166,7 @@ func whoisQueries(d *app.Deps, args []string, stdin bool) ([]string, error) {
 	return uniq, nil
 }
 
-func runWhois(cmd *cobra.Command, d *app.Deps, format render.Format, cfg *config.Config, a whoisArgs) error {
+func runWhois(cmd *cobra.Command, d *app.Deps, sink render.Sink, cfg *config.Config, a whoisArgs) error {
 	failOn, err := parseFailOn(a.failOn)
 	if err != nil {
 		return err
@@ -201,7 +208,9 @@ func runWhois(cmd *cobra.Command, d *app.Deps, format render.Format, cfg *config
 	for _, name := range eng.Expired() {
 		rep.Warnings = append(rep.Warnings, fmt.Sprintf("rule %q is past its expires date and no longer matches", name))
 	}
-	if err = writeWhois(d, format, rep, problems); err != nil {
+	if err = sink.Write(func(w io.Writer, f render.Format) error {
+		return writeWhois(w, d, f, rep, problems)
+	}); err != nil {
 		return err
 	}
 	return whoisGate(answers, failOn, a, problems, runs)

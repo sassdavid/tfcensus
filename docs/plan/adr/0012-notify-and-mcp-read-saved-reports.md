@@ -1,7 +1,9 @@
 # tfcensus ADR-0012: Notifiers, the HTML report and MCP read saved reports
 
 - Status: accepted (2026-11-12). Amends the [notifications spec](../specs/notifications-and-reports.md)
-  and [engineering ADR-0011](../../engineering/adr/0011-mcp-go-sdk.md).
+  and [engineering ADR-0011](../../engineering/adr/0011-mcp-go-sdk.md). Amended by
+  [engineering ADR-0014](../../engineering/adr/0014-report-outputs-and-pr-comment.md), which adds
+  the `github-pr-comment` notifier on the shared `internal/ghcomment`.
 
 ## Context
 - Discovery always runs `terragrunt find`, and the scan cache key hashes the discovered units. An

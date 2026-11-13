@@ -13,29 +13,26 @@ import (
 	"github.com/sassdavid/tfcensus/internal/sarif"
 )
 
-// mdCap is the most bytes drift --format md writes, so the report fits a PR comment or an issue.
-const mdCap = 60 * 1024
-
 // maxAnnotationMembers caps the units named in one annotation.
 const maxAnnotationMembers = 10
 
-func writeDrift(d *app.Deps, format render.Format, rep *drift.Report, problems []driftProblem) error {
+func writeDrift(w io.Writer, d *app.Deps, format render.Format, rep *drift.Report, problems []driftProblem) error {
 	switch format {
 	case render.FormatJSON:
 		env := render.NewEnvelope(buildinfo.Get().Version, d.Clock(), rep)
 		for _, n := range driftErrors(rep, problems) {
 			env.Errors = append(env.Errors, render.Error{Target: n.Target, Message: n.Message})
 		}
-		return render.JSON(d.Stdout, env)
+		return render.JSON(w, env)
 	case render.FormatSARIF:
-		return sarif.Write(d.Stdout, driftSARIF(rep, problems))
+		return sarif.Write(w, driftSARIF(rep, problems))
 	case render.FormatGitHub:
-		return writeDriftGitHub(d.Stdout, rep, problems)
+		return writeDriftGitHub(w, rep, problems)
 	case render.FormatMD:
-		return writeDriftMarkdown(d.Stdout, rep, problems)
+		return writeDriftMarkdown(w, rep, problems)
 	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatCSV:
 	}
-	return writeDriftText(d.Stdout, rep, problems)
+	return writeDriftText(w, rep, problems)
 }
 
 // driftErrors lists the failed units, then the repos that failed.
@@ -222,22 +219,12 @@ func writeDriftMarkdown(w io.Writer, rep *drift.Report, problems []driftProblem)
 	}
 	withValues := hasValues(rep)
 	protected := protectedNotes(rep)
-	body := head.String()
-	const footerRoom = 512
-	shown := 0
+	var b strings.Builder
+	b.WriteString(head.String())
 	for i := range rep.Groups {
-		section := mdGroup(&rep.Groups[i], withValues, protected)
-		if len(body)+len(section)+footerRoom > mdCap {
-			break
-		}
-		body += section
-		shown++
+		b.WriteString(mdGroup(&rep.Groups[i], withValues, protected))
 	}
-	if shown < len(rep.Groups) {
-		body += fmt.Sprintf("\nTruncated: %d of %d groups shown, to stay under %d KB. "+
-			"Run tfcensus drift --format json for the full report.\n", shown, len(rep.Groups), mdCap/1024) //nolint:mnd // KiB
-	}
-	if _, err := io.WriteString(w, body); err != nil {
+	if _, err := io.WriteString(w, b.String()); err != nil {
 		return fmt.Errorf("write drift: %w", err)
 	}
 	return nil

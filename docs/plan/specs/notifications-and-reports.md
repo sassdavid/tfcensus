@@ -13,6 +13,7 @@ type Notifier interface {
 |---|---|
 | `slack` | webhook, summary + top N findings + link to an artifact or HTML report |
 | `github-issues` | one issue per scope (unit for drift, account for scan); updates the body on re-run; closes when resolved; `max_open`, labels, summary issue (driftive-style) |
+| `github-pr-comment` | one comment per report kind on a GitHub pull request, edited in place; added in M13 by [engineering ADR-0014](../../engineering/adr/0014-report-outputs-and-pr-comment.md) through the shared `internal/ghcomment` |
 | `bitbucket-pr-comment` | one comment per report on a Bitbucket Cloud pull request, edited in place (the author's primary SCM). `bitbucket-issues` is dropped: Atlassian removed the issue tracker API on 2026-08-20 |
 | `file` | writes md/json for any other system |
 

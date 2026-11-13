@@ -417,6 +417,7 @@
             "enum": [
               "slack",
               "github-issues",
+              "github-pr-comment",
               "bitbucket-pr-comment",
               "file"
             ]
@@ -512,6 +513,32 @@
             "summary": {
               "type": "boolean",
               "description": "Keep one summary issue per report kind."
+            }
+          },
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "github_pr_comment": {
+          "properties": {
+            "repo": {
+              "type": "string",
+              "pattern": "^([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?$",
+              "description": "owner/name. Empty means GITHUB_REPOSITORY."
+            },
+            "api_url": {
+              "type": "string",
+              "pattern": "^(https?://.*)?$",
+              "description": "REST API base URL. Empty means GITHUB_API_URL, else https://api.github.com."
+            },
+            "pull_request": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Pull request number. 0 means the pull request of the GITHUB_EVENT_PATH event."
+            },
+            "token_env": {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+              "description": "Environment variable that holds the token (pull-requests: write)."
             }
           },
           "additionalProperties": false,

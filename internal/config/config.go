@@ -132,12 +132,13 @@ type Drift struct {
 // Notify configures the notifiers. Secrets never go here: each notifier names the environment
 // variable that holds its token or webhook URL.
 type Notify struct {
-	Enabled            []string        `json:"enabled"              jsonschema:"enum=slack,enum=github-issues,enum=bitbucket-pr-comment,enum=file" jsonschema_description:"Notifiers tfcensus notify runs when --notify isn't given."`
-	Categories         []string        `json:"categories"           jsonschema:"enum=double-managed,enum=unmanaged,enum=undetermined"              jsonschema_description:"Scan categories the notifiers report."`
-	MinSeverity        string          `json:"min_severity"         jsonschema:"enum=info,enum=low,enum=medium,enum=high"                          jsonschema_description:"Lowest backend audit severity the notifiers report."`
-	Top                int             `json:"top"                  jsonschema:"minimum=1,maximum=50"                                              jsonschema_description:"Findings listed in a Slack message."`
+	Enabled            []string        `json:"enabled"              jsonschema:"enum=slack,enum=github-issues,enum=github-pr-comment,enum=bitbucket-pr-comment,enum=file" jsonschema_description:"Notifiers tfcensus notify runs when --notify isn't given."`
+	Categories         []string        `json:"categories"           jsonschema:"enum=double-managed,enum=unmanaged,enum=undetermined"                                     jsonschema_description:"Scan categories the notifiers report."`
+	MinSeverity        string          `json:"min_severity"         jsonschema:"enum=info,enum=low,enum=medium,enum=high"                                                 jsonschema_description:"Lowest backend audit severity the notifiers report."`
+	Top                int             `json:"top"                  jsonschema:"minimum=1,maximum=50"                                                                     jsonschema_description:"Findings listed in a Slack message."`
 	Slack              SlackNotify     `json:"slack"`
 	GitHubIssues       GitHubNotify    `json:"github_issues"`
+	GitHubPRComment    GitHubPRNotify  `json:"github_pr_comment"`
 	BitbucketPRComment BitbucketNotify `json:"bitbucket_pr_comment"`
 	File               FileNotify      `json:"file"`
 }
@@ -158,6 +159,14 @@ type GitHubNotify struct {
 	MaxOpen       int      `json:"max_open"       jsonschema:"minimum=1"                                    jsonschema_description:"Most open issues per report kind. Further scopes are listed in the run output and the summary issue."`
 	CloseResolved bool     `json:"close_resolved"                                                           jsonschema_description:"Close an issue when a run covers its scope and finds nothing."`
 	Summary       bool     `json:"summary"                                                                  jsonschema_description:"Keep one summary issue per report kind."`
+}
+
+// GitHubPRNotify configures the GitHub pull request comment notifier.
+type GitHubPRNotify struct {
+	Repo        string `json:"repo"         jsonschema:"pattern=^([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?$" jsonschema_description:"owner/name. Empty means GITHUB_REPOSITORY."`
+	APIURL      string `json:"api_url"      jsonschema:"pattern=^(https?://.*)?$"                     jsonschema_description:"REST API base URL. Empty means GITHUB_API_URL, else https://api.github.com."`
+	PullRequest int    `json:"pull_request" jsonschema:"minimum=0"                                    jsonschema_description:"Pull request number. 0 means the pull request of the GITHUB_EVENT_PATH event."`
+	TokenEnv    string `json:"token_env"    jsonschema:"pattern=^[A-Za-z_][A-Za-z0-9_]*$"             jsonschema_description:"Environment variable that holds the token (pull-requests: write)."`
 }
 
 // BitbucketNotify configures the Bitbucket Cloud pull request comment notifier.
@@ -251,6 +260,7 @@ func Default() Config {
 			GitHubIssues: GitHubNotify{ //nolint:gosec // TokenEnv names a variable; it holds no secret
 				TokenEnv: "GITHUB_TOKEN", Labels: []string{}, MaxOpen: defaultMaxOpen, CloseResolved: true,
 			},
+			GitHubPRComment:    GitHubPRNotify{TokenEnv: "GITHUB_TOKEN"}, //nolint:gosec // TokenEnv names a variable
 			BitbucketPRComment: BitbucketNotify{APIURL: "https://api.bitbucket.org/2.0", TokenEnv: "BITBUCKET_TOKEN"},
 			File:               FileNotify{Dir: ".", Formats: []string{"md", "json"}},
 		},

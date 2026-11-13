@@ -50,8 +50,10 @@ tfcensus audit backend [paths...] [flags]
       --generate-stacks[=true|false]   run terragrunt stack generate first, so units in stacks are listed (config discovery.generate_stacks)
   -h, --help[=true|false]              help for backend
       --management-profile string      profile that lists the organization's accounts, else the default AWS credentials (config accounts.org.management_profile)
+      --md-max-chars int               cut Markdown output to this many characters at a row or section boundary; 0 means no limit (default 60000)
       --org[=true|false]               list the accounts of the AWS organization and assume --org-role in each (config accounts.org.enabled)
       --org-role string                role assumed in each member account (config accounts.org.role) (default "OrganizationAccountAccessRole")
+      --out stringArray                also write the report to a file as format=path (repeatable); format is one of plain, md, json, csv, sarif or github
       --profile stringArray            AWS profile from ~/.aws/config, or a glob such as 'acme-*' (repeatable; config accounts.profiles)
       --render string                  when to use terragrunt render: auto, always or never (config discovery.render) (default "auto")
 ```

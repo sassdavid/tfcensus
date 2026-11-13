@@ -28,6 +28,7 @@ convention, not by shared code ([integration](../plan/integration.md)). Docs ind
 | [0011](adr/0011-mcp-go-sdk.md) | `tfcensus mcp` stdio server via the official Go SDK, read-only |
 | [0012](adr/0012-third-party-notices.md) | third-party licenses and notices in every release archive |
 | [0013](adr/0013-shell-completion-and-man-pages.md) | cobra completion for 4 shells, embedded carapace for 6 more, man pages in the archives |
+| [0014](adr/0014-report-outputs-and-pr-comment.md) | `--out`, Markdown cut at `--md-max-chars`, one GitHub pull request comment per report kind |
 
 ADR format (Nygard): Status, Context, Decision, Reasons/Consequences, at most 60 lines.
 A superseded ADR stays in place with `Status: superseded by NNNN`.

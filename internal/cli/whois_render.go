@@ -22,25 +22,25 @@ type whoisReport struct {
 	Warnings []string       `json:"warnings"`
 }
 
-func writeWhois(d *app.Deps, format render.Format, rep *whoisReport, problems []scan.Problem) error {
+func writeWhois(w io.Writer, d *app.Deps, format render.Format, rep *whoisReport, problems []scan.Problem) error {
 	switch format {
 	case render.FormatJSON:
 		env := render.NewEnvelope(buildinfo.Get().Version, d.Clock(), rep)
 		for _, p := range problems {
 			env.Errors = append(env.Errors, render.Error{Target: p.Target, Message: p.Message})
 		}
-		return render.JSON(d.Stdout, env)
+		return render.JSON(w, env)
 	case render.FormatSARIF:
 		findings := make([]scan.Finding, len(rep.Answers))
 		for i := range rep.Answers {
 			findings[i] = rep.Answers[i].Finding
 		}
-		return sarif.Write(d.Stdout, scanSARIF(&scan.Report{Findings: findings}))
+		return sarif.Write(w, scanSARIF(&scan.Report{Findings: findings}))
 	case render.FormatMD:
-		return writeWhoisMarkdown(d.Stdout, rep, problems)
+		return writeWhoisMarkdown(w, rep, problems)
 	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatCSV, render.FormatGitHub:
 	}
-	return writeWhoisText(d.Stdout, rep, problems)
+	return writeWhoisText(w, rep, problems)
 }
 
 // answerHeadline is "managed by identity", "double-managed by arn" or the ownership category with

@@ -291,3 +291,73 @@ func (f *fakeBitbucket) ours() []*fakeComment {
 	}
 	return out
 }
+
+// fakeGitHubPR is the part of the GitHub REST API the pull request comment notifier uses. It pages
+// comments one at a time with a Link header.
+type fakeGitHubPR struct {
+	calls
+
+	mu       sync.Mutex
+	srv      *httptest.Server
+	comments []map[string]any
+}
+
+const ghPRComments = "/repos/acme/infra-live/issues/7/comments"
+
+func newFakeGitHubPR(t *testing.T) *fakeGitHubPR {
+	t.Helper()
+	f := &fakeGitHubPR{comments: []map[string]any{{"id": 1, "body": "Looks good to me.", "html_url": "u1"}}}
+	f.srv = httptest.NewServer(http.HandlerFunc(f.serve))
+	t.Cleanup(f.srv.Close)
+	return f
+}
+
+func (f *fakeGitHubPR) bodies() []string {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	out := make([]string, len(f.comments))
+	for i, c := range f.comments {
+		out[i], _ = c["body"].(string)
+	}
+	return out
+}
+
+func (f *fakeGitHubPR) serve(w http.ResponseWriter, r *http.Request) {
+	body := f.record(r)
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if r.Header.Get("Authorization") != "Bearer gh-test-token" {
+		http.Error(w, `{"message":"Bad credentials"}`, http.StatusUnauthorized)
+		return
+	}
+	var in struct {
+		Body string `json:"body"`
+	}
+	_ = json.Unmarshal([]byte(body), &in)
+	switch {
+	case r.Method == http.MethodGet && r.URL.Path == ghPRComments:
+		page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+		page = max(page, 1)
+		out := []any{}
+		if page <= len(f.comments) {
+			out = append(out, f.comments[page-1])
+		}
+		if page < len(f.comments) {
+			w.Header().
+				Set("Link", fmt.Sprintf(`<%s%s?per_page=100&page=%d>; rel="next"`, f.srv.URL, ghPRComments, page+1))
+		}
+		_ = json.NewEncoder(w).Encode(out)
+	case r.Method == http.MethodPost && r.URL.Path == ghPRComments:
+		id := len(f.comments) + 1
+		c := map[string]any{"id": id, "body": in.Body, "html_url": "u" + strconv.Itoa(id)}
+		f.comments = append(f.comments, c)
+		w.WriteHeader(http.StatusCreated)
+		_ = json.NewEncoder(w).Encode(c)
+	case r.Method == http.MethodPatch && strings.HasPrefix(r.URL.Path, "/repos/acme/infra-live/issues/comments/"):
+		id, _ := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/repos/acme/infra-live/issues/comments/"))
+		f.comments[id-1]["body"] = in.Body
+		_ = json.NewEncoder(w).Encode(f.comments[id-1])
+	default:
+		http.Error(w, `{"message":"Not Found"}`, http.StatusNotFound)
+	}
+}

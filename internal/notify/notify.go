@@ -19,12 +19,13 @@ import (
 const (
 	NameSlack     = "slack"
 	NameGitHub    = "github-issues"
+	NameGitHubPR  = "github-pr-comment"
 	NameBitbucket = "bitbucket-pr-comment"
 	NameFile      = "file"
 )
 
 // Names lists every notifier.
-func Names() []string { return []string{NameSlack, NameGitHub, NameBitbucket, NameFile} }
+func Names() []string { return []string{NameSlack, NameGitHub, NameGitHubPR, NameBitbucket, NameFile} }
 
 // FleetScope is the scope of audit findings that name no account.
 const FleetScope = "fleet"

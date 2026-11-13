@@ -16,6 +16,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/sassdavid/tfcensus/internal/ghcomment"
 	"github.com/sassdavid/tfcensus/internal/notify"
 	"github.com/sassdavid/tfcensus/internal/report"
 	"github.com/sassdavid/tfcensus/internal/testutil"
@@ -249,6 +250,83 @@ func TestBitbucketLifecycle(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, []string{"unchanged pull-request"}, ops(res))
 	assert.Empty(t, f.writes())
+}
+
+func newGitHubPR(t *testing.T, f *fakeGitHubPR, dry bool, env map[string]string) (*notify.GitHubPR, error) {
+	t.Helper()
+	return notify.NewGitHubPR(client(t), ghcomment.Config{
+		APIURL: f.srv.URL, Token: "gh-test-token", DryRun: dry,
+	}, func(k string) (string, bool) {
+		v, ok := env[k]
+		return v, ok
+	})
+}
+
+func TestGitHubPRLifecycle(t *testing.T) {
+	t.Parallel()
+	ctx := t.Context()
+	f := newFakeGitHubPR(t)
+	event := filepath.Join(t.TempDir(), "event.json")
+	require.NoError(t, os.WriteFile(event, []byte(`{"pull_request":{"number":7}}`), 0o600))
+	env := map[string]string{"GITHUB_REPOSITORY": "acme/infra-live", "GITHUB_EVENT_PATH": event}
+	g, err := newGitHubPR(t, f, false, env)
+	require.NoError(t, err)
+
+	res, err := g.Publish(ctx, driftReport(unit("a")))
+	require.NoError(t, err)
+	assert.Equal(t, []string{"skipped pull-request"}, ops(res), "nothing to report and no comment yet")
+	assert.Equal(t, "acme/infra-live#7", res.Target)
+
+	r := driftReport(unit("a", change("x.a")), unit("b"))
+	res, err = g.Publish(ctx, r)
+	require.NoError(t, err)
+	assert.Equal(t, []string{"create pull-request"}, ops(res))
+	assert.Equal(t, []string{"POST " + ghPRComments}, f.writes())
+
+	res, err = g.Publish(ctx, r)
+	require.NoError(t, err)
+	assert.Equal(t, []string{"unchanged pull-request"}, ops(res))
+	assert.Empty(t, f.writes())
+
+	dry, err := newGitHubPR(t, f, true, env)
+	require.NoError(t, err)
+	res, err = dry.Publish(ctx, driftReport(unit("a"), unit("b", change("x.b"))))
+	require.NoError(t, err)
+	assert.Equal(t, []string{"update pull-request"}, ops(res))
+	assert.Empty(t, f.writes())
+
+	res, err = g.Publish(ctx, driftReport(unit("a"), unit("b", change("x.b"))))
+	require.NoError(t, err)
+	assert.Equal(t, []string{"update pull-request"}, ops(res))
+	assert.Equal(t, []string{"PATCH /repos/acme/infra-live/issues/comments/2"}, f.writes())
+	assert.Contains(t, f.bodies()[1], "<!-- tfcensus:v1 {\"kind\":\"drift\",\"scope\":\"pull-request\"")
+	assert.Contains(t, f.bodies()[1], "## tfcensus drift\n\n1 of 2 scope(s) have something to report.")
+
+	res, err = g.Publish(ctx, driftReport(unit("a"), unit("b")))
+	require.NoError(t, err)
+	assert.Equal(t, []string{"close pull-request"}, ops(res))
+	assert.Contains(t, f.bodies()[1], "Nothing to report")
+	f.writes()
+
+	res, err = g.Publish(ctx, driftReport(unit("a"), unit("b")))
+	require.NoError(t, err)
+	assert.Equal(t, []string{"unchanged pull-request"}, ops(res))
+	assert.Empty(t, f.writes())
+}
+
+func TestGitHubPRErrors(t *testing.T) {
+	t.Parallel()
+	f := newFakeGitHubPR(t)
+	_, err := newGitHubPR(t, f, false, map[string]string{"GITHUB_REPOSITORY": "acme/infra-live"})
+	require.ErrorIs(t, err, notify.ErrConfig)
+	require.ErrorContains(t, err, "github-pr-comment: pull request comment not configured: GITHUB_EVENT_PATH is empty")
+
+	g, err := notify.NewGitHubPR(client(t), ghcomment.Config{
+		Repo: "acme/infra-live", PullRequest: 7, APIURL: f.srv.URL, Token: "wrong",
+	}, func(string) (string, bool) { return "", false })
+	require.NoError(t, err)
+	_, err = g.Publish(t.Context(), driftReport(unit("a", change("x.a"))))
+	require.ErrorIs(t, err, notify.ErrAuth)
 }
 
 func TestBitbucketBasicAuth(t *testing.T) {

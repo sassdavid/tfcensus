@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"runtime"
 	"slices"
@@ -53,6 +54,15 @@ type scanArgs struct {
 
 func newScanCmd(d *app.Deps, g *globals) *cobra.Command {
 	a := scanArgs{}
+	formats := []render.Format{
+		render.FormatTTY,
+		render.FormatPlain,
+		render.FormatMD,
+		render.FormatJSON,
+		render.FormatCSV,
+		render.FormatSARIF,
+		render.FormatGitHub,
+	}
 	cmd := &cobra.Command{
 		Use:   "scan [paths...]",
 		Short: "Find AWS resources that no unit manages",
@@ -87,10 +97,7 @@ read or discovery failed, 4 when every failure was a credential problem, and 0 o
   tfcensus scan --rules extra-rules.yaml --format md > scan.md
   tfcensus scan --explain arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0123456789abcdef0`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := g.outFormat.Check(
-				render.FormatTTY, render.FormatPlain, render.FormatMD, render.FormatJSON, render.FormatCSV,
-				render.FormatSARIF,
-			); err != nil {
+			if err := g.checkFormats(formats...); err != nil {
 				return usageError(err)
 			}
 			if a.minCount < 1 {
@@ -104,10 +111,11 @@ read or discovery failed, 4 when every failure was a credential problem, and 0 o
 				return err
 			}
 			a.paths = args
-			return runScan(cmd, d, g.outFormat, &res.Config, a)
+			return runScan(cmd, d, g.sink(cmd, d), &res.Config, a)
 		},
 	}
 	addDiscoveryFlags(cmd, &a.filters)
+	addOutputFlags(cmd, g, formats...)
 	addAccountFlags(cmd, d)
 	addRegionFlag(cmd)
 	f := cmd.Flags()
@@ -176,7 +184,12 @@ type scanEnv struct {
 	failOn []scan.Category
 }
 
-func runScan(cmd *cobra.Command, d *app.Deps, format render.Format, cfg *config.Config, a scanArgs) error {
+func runScan(cmd *cobra.Command, d *app.Deps, sink render.Sink, cfg *config.Config, a scanArgs) error {
+	if (a.explain != "" || a.explainCoverage) && len(sink.Outputs) > 0 {
+		return usageError(fmt.Errorf("--%s writes the scan report; it doesn't work with --explain or "+
+			"--explain-coverage", flagOut))
+	}
+	format := sink.Format
 	e, err := newScanEnv(cmd, d, cfg, a)
 	if err != nil {
 		return err
@@ -219,7 +232,9 @@ func runScan(cmd *cobra.Command, d *app.Deps, format render.Format, cfg *config.
 		rep.Warnings = append(rep.Warnings, msg)
 		d.Logger.WarnContext(cmd.Context(), "ownership rule expired", "rule", name)
 	}
-	if err = writeScan(d, format, rep, snap.Problems); err != nil {
+	if err = sink.Write(func(w io.Writer, f render.Format) error {
+		return writeScan(w, d, f, rep, snap.Problems)
+	}); err != nil {
 		return err
 	}
 	if n := scan.Gate(findings, e.failOn, e.types); len(e.failOn) > 0 && n >= a.minCount {

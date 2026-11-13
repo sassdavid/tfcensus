@@ -36,6 +36,8 @@ tfcensus units [paths...] [flags]
       --filter stringArray             terragrunt filter expression, passed to terragrunt find unchanged (repeatable)
       --generate-stacks[=true|false]   run terragrunt stack generate first, so units in stacks are listed (config discovery.generate_stacks)
   -h, --help[=true|false]              help for units
+      --md-max-chars int               cut Markdown output to this many characters at a row or section boundary; 0 means no limit (default 60000)
+      --out stringArray                also write the report to a file as format=path (repeatable); format is one of plain, md or json
       --render string                  when to use terragrunt render: auto, always or never (config discovery.render) (default "auto")
 ```
 
