@@ -10,7 +10,7 @@ CI matrices.
 
 | Tool | Hard floor | Gated features | CI test matrix | Raise the floor when |
 |---|---|---|---|---|
-| **Go** (building) | `go 1.27.0` directive (no patch pin; same as the sibling repo); builds, lint and releases use toolchain **1.27.3** | — | 1.27 | Go 1.28 ships (~Feb 2027) → `go 1.28.0`, in both repos at once |
+| **Go** (building) | `go 1.27.0` directive (no patch pin; same as the sibling repo); builds, lint, tests and releases use the `go` version in `mise.toml` | — | the `mise.toml` version on ubuntu, macos and windows; the check name carries the OS only | Go 1.28 ships (~Feb 2027) → `go 1.28.0`, in both repos at once |
 | **terragrunt** | **1.0.0** | none today. Pass `--dependency-fetch-output-from-state` explicitly so 1.0, 1.1 and 1.2 behave the same | latest patch of each 1.x minor from the last 12 months (today 1.0.x, 1.1.x, 1.2.2) | only when we need a newer feature (1.x promises no breaking changes) |
 | **terraform** | **1.5.0** for exec features. State files of any v4 format (≥0.12) are readable | `removed`/import `for_each` ≥1.7 · `use_lockfile` ≥1.10 (GA 1.11) · identity ≥1.12 · `query` ≥1.14 | 1.5.7 (last MPL release, many shops pinned there) + the latest two minors (today 1.16, 1.17) | when 1.5.x usage looks negligible (re-check yearly) |
 | **opentofu** | **1.6.0** | `removed`/import `for_each` ≥1.7 · `removed` lifecycle and `use_lockfile` ≥1.10 · identity ≥1.12 · no `query`. Encrypted state is read only via `tofu show -json` | 1.6.x + the latest two supported (today 1.12, 1.13) | same as terraform |
