@@ -15,6 +15,7 @@ import (
 
 	"github.com/sassdavid/tfcensus/internal/accounts"
 	"github.com/sassdavid/tfcensus/internal/app"
+	"github.com/sassdavid/tfcensus/internal/complete"
 	"github.com/sassdavid/tfcensus/internal/config"
 	"github.com/sassdavid/tfcensus/internal/discovery"
 	"github.com/sassdavid/tfcensus/internal/execx"
@@ -145,6 +146,12 @@ func newMoveSubCmd(d *app.Deps, g *globals, which moveCommand, short, long strin
 		f.BoolVar(&a.force, flagForce, false, "restore even when a state changed after the push")
 	case movePlan, moveMarkApplied, moveStatus:
 	}
+	registerCompletions(cmd, map[string]cobra.CompletionFunc{
+		flagBlock: complete.NoFiles,
+		flagVar:   complete.NoFiles,
+		flagRepo:  complete.Dirs(),
+	})
+	cmd.ValidArgsFunction = complete.Files("hcl")
 	return cmd
 }
 

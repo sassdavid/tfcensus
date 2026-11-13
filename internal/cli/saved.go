@@ -9,7 +9,10 @@ import (
 	"slices"
 	"time"
 
+	"github.com/spf13/cobra"
+
 	"github.com/sassdavid/tfcensus/internal/app"
+	"github.com/sassdavid/tfcensus/internal/complete"
 	"github.com/sassdavid/tfcensus/internal/config"
 	"github.com/sassdavid/tfcensus/internal/match"
 	"github.com/sassdavid/tfcensus/internal/ownership"
@@ -228,3 +231,6 @@ func (s *saved) sources() []string {
 	}
 	return slices.Clip(out)
 }
+
+// savedFiles completes the file names that report.Read and tfstate.ReadIndexFile accept.
+func savedFiles() cobra.CompletionFunc { return complete.Files("json", "gz", "zst") }

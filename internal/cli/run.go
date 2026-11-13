@@ -35,12 +35,25 @@ func Run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	if len(args) > 0 {
 		args = args[1:]
 	}
-	return Execute(ctx, d, args)
+	return Main(ctx, d, args)
+}
+
+// Main is [Execute] for a whole process. It also answers carapace's completion requests, which
+// changes package-level state, so in-process tests call [Execute] instead.
+func Main(ctx context.Context, d *app.Deps, args []string) int {
+	return execute(ctx, d, args, true)
 }
 
 // Execute runs the command line in args (without the program name) and returns the exit code.
 func Execute(ctx context.Context, d *app.Deps, args []string) int {
+	return execute(ctx, d, args, false)
+}
+
+func execute(ctx context.Context, d *app.Deps, args []string, withCarapace bool) int {
 	root, g := newRoot(d)
+	if withCarapace {
+		enableCarapace(root)
+	}
 	root.SetArgs(args)
 	cmd, err := root.ExecuteContextC(ctx)
 	g.close()

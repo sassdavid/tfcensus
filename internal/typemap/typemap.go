@@ -294,6 +294,18 @@ func (m *Map) Curated() []*Type {
 	return out
 }
 
+// TFTypes returns every TF resource type in the typemap, sorted.
+func (m *Map) TFTypes() []string { return slices.Sorted(maps.Keys(m.types)) }
+
+// CFNTypes returns every CloudFormation type and mapped native type in the typemap, sorted.
+func (m *Map) CFNTypes() []string {
+	set := maps.Clone(m.cfn)
+	for cfn := range m.byCFN {
+		set[cfn] = true
+	}
+	return slices.Sorted(maps.Keys(set))
+}
+
 // Generated returns the number of TF resource types in the generated data.
 func (m *Map) Generated() int { return len(m.types) }
 

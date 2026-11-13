@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/jdx/jactionlint/v2.5.0/schema/jactionlint-config.json
+# mise run lint:actions (docs/engineering/ci-and-release.md). The default profile runs actionlint's
+# checks plus the security and policy rules worth failing a build on.
+profile: default
+
+ignores:
+  - rule: insufficient-permissions
+    file: .github/workflows/ci.yml
+    job: sarif
+    uses: github/codeql-action/upload-sarif
+    reason: CODEQL_ACTION_TEST_MODE saves the payload instead of uploading it, so contents read is enough

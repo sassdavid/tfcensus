@@ -14,6 +14,7 @@ import (
 
 	"github.com/sassdavid/tfcensus/internal/app"
 	"github.com/sassdavid/tfcensus/internal/buildinfo"
+	"github.com/sassdavid/tfcensus/internal/complete"
 	"github.com/sassdavid/tfcensus/internal/config"
 	"github.com/sassdavid/tfcensus/internal/render"
 )
@@ -181,8 +182,9 @@ func writeFiles(d *app.Deps, files []config.File) error {
 
 func newConfigValidateCmd(d *app.Deps, g *globals) *cobra.Command {
 	return &cobra.Command{
-		Use:   "validate [file...]",
-		Short: "Validate config files against the schema",
+		Use:               "validate [file...]",
+		Short:             "Validate config files against the schema",
+		ValidArgsFunction: complete.Files("yaml", "yml"),
 		Long: `Without arguments, validates the user and project config files plus TFCENSUS_* env vars and
 flags, exactly as other commands would load them. With arguments, validates only those files.
 

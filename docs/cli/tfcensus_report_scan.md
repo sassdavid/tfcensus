@@ -27,7 +27,7 @@ tfcensus report scan [flags]
 
 ```
       --account string      AWS account ID
-      --category string     list this category (default: double-managed and unmanaged)
+      --category string     list this category: managed, double-managed, unmanaged, other-iac, aws-managed, derived, ignored or undetermined (default: double-managed and unmanaged)
       --from string         scan JSON (default: the newest scan cache snapshot)
   -h, --help[=true|false]   help for scan
       --region string       AWS region, or global

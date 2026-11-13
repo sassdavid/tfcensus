@@ -14,6 +14,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/app"
 	"github.com/sassdavid/tfcensus/internal/buildinfo"
 	"github.com/sassdavid/tfcensus/internal/codify"
+	"github.com/sassdavid/tfcensus/internal/complete"
 	"github.com/sassdavid/tfcensus/internal/config"
 	"github.com/sassdavid/tfcensus/internal/execx"
 	"github.com/sassdavid/tfcensus/internal/ownership"
@@ -101,12 +102,29 @@ input and 1 when a file can't be written.`,
 	f.StringVar(&a.selectExpr, flagSelect, "", "CEL expression over resource that picks the findings to codify")
 	f.StringVar(&a.target, flagTarget, "", "engine and version the blocks are for, such as terraform@1.12.2 or "+
 		"opentofu@1.11.0 (default: detect)")
-	f.StringVar(&a.importBy, flagImportBy, "auto", "auto (identity when the target can) or id")
+	f.StringVar(&a.importBy, flagImportBy, "auto",
+		complete.Usage("import by {values}; auto uses identity when the target can", importByChoices()))
 	f.BoolVar(&a.query, flagQuery, false, "also write a .tfquery.hcl file with list blocks for terraform query")
 	f.BoolVar(&a.force, flagForce, false, "overwrite files codify wrote before")
 	_ = cmd.MarkFlagRequired(flagFrom)
 	_ = cmd.MarkFlagRequired(flagInto)
+	registerCompletions(cmd, map[string]cobra.CompletionFunc{
+		flagFrom:     complete.Files("json"),
+		flagInto:     complete.Dirs(),
+		flagTypes:    complete.DynamicList(complete.Timeout, complete.Types()),
+		flagSelect:   complete.NoFiles,
+		flagTarget:   complete.NoFiles,
+		flagImportBy: complete.Enum(importByChoices()),
+	})
+	cmd.ValidArgsFunction = complete.NoFiles
 	return cmd
+}
+
+func importByChoices() []complete.Choice {
+	return []complete.Choice{
+		{Value: "auto", Desc: "identity when the target and the type allow it, else id"},
+		{Value: "id", Desc: "always the id from the typemap template"},
+	}
 }
 
 // codifyReport is the data of codify --format json.

@@ -47,13 +47,13 @@ tfcensus drift [paths...] [flags]
 
 ```
       --collapse string                group identical changes across units: shape, strict or none (config drift.collapse) (default "shape")
-      --fail-on strings                exit 3 when these gates match: drift, drift:reverts, errors
+      --fail-on strings                exit 3 when these gates match: drift, drift:reverts or errors
       --filter stringArray             terragrunt filter expression, passed to terragrunt find unchanged (repeatable)
       --from-json-out-dir string       read the plans of an earlier terragrunt run --json-out-dir instead of running terragrunt
       --generate-stacks[=true|false]   run terragrunt stack generate first, so units in stacks are listed (config discovery.generate_stacks)
   -h, --help[=true|false]              help for drift
       --min-count int                  count a --fail-on gate needs before it exits 3 (default 1)
-      --mode string                    refresh-only, or full to also tell reverted drift from kept drift (config drift.mode) (default "refresh-only")
+      --mode string                    plan mode: refresh-only or full; full also tells reverted drift from kept drift (config drift.mode) (default "refresh-only")
       --render string                  when to use terragrunt render: auto, always or never (config discovery.render) (default "auto")
       --report-file string             the JSON --report-file of that run
       --show-attributes[=true|false]   show before and after values; sensitive and unknown values stay masked

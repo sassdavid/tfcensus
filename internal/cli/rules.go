@@ -15,6 +15,7 @@ import (
 
 	"github.com/sassdavid/tfcensus/internal/app"
 	"github.com/sassdavid/tfcensus/internal/buildinfo"
+	"github.com/sassdavid/tfcensus/internal/complete"
 	"github.com/sassdavid/tfcensus/internal/ownership"
 	"github.com/sassdavid/tfcensus/internal/render"
 )
@@ -85,6 +86,8 @@ the config's. rules test makes no AWS calls. Expired rules show as expired.`,
 		},
 	}
 	cmd.Flags().StringVar(&resource, flagResource, "", "JSON file with a resource or an array of resources to evaluate")
+	_ = cmd.RegisterFlagCompletionFunc(flagResource, complete.Files("json"))
+	cmd.ValidArgsFunction = complete.Files("yaml", "yml")
 	return cmd
 }
 

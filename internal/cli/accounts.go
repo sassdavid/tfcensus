@@ -9,6 +9,7 @@ import (
 
 	"github.com/sassdavid/tfcensus/internal/accounts"
 	"github.com/sassdavid/tfcensus/internal/app"
+	"github.com/sassdavid/tfcensus/internal/complete"
 	"github.com/sassdavid/tfcensus/internal/config"
 	"github.com/sassdavid/tfcensus/internal/probe"
 )
@@ -23,7 +24,7 @@ const (
 
 // addAccountFlags adds the flags that select AWS accounts. Their values reach the command through
 // the config (see flagKeys).
-func addAccountFlags(cmd *cobra.Command) {
+func addAccountFlags(cmd *cobra.Command, d *app.Deps) {
 	f := cmd.Flags()
 	f.StringArray(flagProfile, nil,
 		"AWS profile from ~/.aws/config, or a glob such as 'acme-*' (repeatable; config accounts.profiles)")
@@ -34,11 +35,18 @@ func addAccountFlags(cmd *cobra.Command) {
 	f.String(flagManagementProfile, "",
 		"profile that lists the organization's accounts, else the default AWS credentials "+
 			"(config accounts.org.management_profile)")
+	profiles := complete.Dynamic(complete.Timeout, complete.Profiles(d.Env.Lookup))
+	registerCompletions(cmd, map[string]cobra.CompletionFunc{
+		flagProfile:           profiles,
+		flagManagementProfile: profiles,
+		flagOrgRole:           complete.NoFiles,
+	})
 }
 
 // addRegionFlag adds --region, which reaches the command through the config key regions.
 func addRegionFlag(cmd *cobra.Command) {
 	cmd.Flags().StringArray(flagRegion, nil, "AWS region (repeatable; config regions)")
+	_ = cmd.RegisterFlagCompletionFunc(flagRegion, complete.Enum(complete.Regions()))
 }
 
 func newLoader(d *app.Deps) *accounts.Loader {

@@ -21,9 +21,16 @@ on:
 
 permissions: {}
 
+# One release per tag at a time. A second run waits instead of cancelling an upload in progress.
+# The group differs from release-please's, which calls this workflow, so the two can't deadlock.
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     permissions:
       contents: write # upload release assets
       packages: write # push ghcr.io/sassdavid/tfcensus

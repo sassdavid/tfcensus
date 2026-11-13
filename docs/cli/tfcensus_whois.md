@@ -38,7 +38,7 @@ tfcensus whois <arn|id>... [flags]
 
 ```
       --concurrency int                states read at the same time (default 16)
-      --fail-on strings                exit 3 when answers are in these categories: unmanaged, double-managed
+      --fail-on strings                exit 3 when answers are in these categories: unmanaged or double-managed
       --filter stringArray             terragrunt filter expression, passed to terragrunt find unchanged (repeatable)
       --generate-stacks[=true|false]   run terragrunt stack generate first, so units in stacks are listed (config discovery.generate_stacks)
   -h, --help[=true|false]              help for whois
