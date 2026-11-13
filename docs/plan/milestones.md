@@ -143,13 +143,14 @@ elvish, xonsh, tcsh, oil and clink use embedded carapace, so users install nothi
   enum, dynamic, missing-file and timeout cases. They live outside the shared `completion.txtar`.
   Evidence: `testdata/script/complete.txtar`; the timeout case reads a FIFO as
   `AWS_CONFIG_FILE` (`[exec:mkfifo]`, skipped on Windows).
-- [ ] A CI job loads the scripts in real shells: bash 5 with bash-completion (ubuntu), bash 3.2
+- [x] A CI job loads the scripts in real shells: bash 5 with bash-completion (ubuntu), bash 3.2
   with brew bash-completion v1 (macos), zsh with `compinit`, fish with `complete -C`, pwsh
   `TabExpansion2` on all three OSes, Windows PowerShell 5.1, and nushell through the carapace
   snippet.
-  Open: the `completion-shells` job in `ci.yml` and `scripts/completion-shells.sh`/`.ps1` exist but
-  have not run in CI yet. Locally on macOS, zsh, nushell 0.116.1 and pwsh 7.7.0 passed
-  (`completion-shells.sh zsh|nushell`, `completion-shells.ps1`).
+  Evidence (2026-11-13): the `completion-shells` jobs of ci run 43433805686 on main (after #23)
+  passed on ubuntu, macos and windows. The logs print "bash: ok" for bash 5 and bash 3.2, "zsh: ok",
+  "fish: ok", "nushell: ok", and "powershell: ok" for pwsh 7.6 on each OS and for Windows
+  PowerShell 5.1.26100.
 - [x] A shared `scripts/completions.sh` (on the sibling-diff "identical" list) writes
   `completions/` (bash, zsh, fish, ps1) and `manpages/*.1.gz` (`GenManTree` from
   `scripts/gendocs`, dates from `SOURCE_DATE_EPOCH`, the same bytes on a second run). Every
