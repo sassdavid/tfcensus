@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://goreleaser.com/static/schema.json
 # Release pipeline (ADR-0009). Runs on tags created by release-please; locally use
-# `mise run snapshot`, which skips cosign signing (keyless signing needs CI's OIDC token) and the
-# container image (multi-platform buildx needs a builder with a Docker daemon).
+# `mise run snapshot`, which skips cosign signing (keyless signing needs CI's OIDC token) and
+# builds the container image into the local Docker daemon.
 version: 2
 
 project_name: tfcensus
@@ -77,9 +77,11 @@ signs:
     output: true
 
 # CI image with the tfcensus binary only. Users mount their own terragrunt and terraform or tofu.
+# Snapshots build one image per platform into the local daemon; releases skip it until M19.
 dockers_v2:
   - id: tfcensus
     ids: [tfcensus]
+    disable: "{{ not .IsSnapshot }}"
     images:
       - ghcr.io/sassdavid/tfcensus
     tags:
@@ -126,14 +128,14 @@ homebrew_casks:
       name: homebrew-tap
       token: '{{ envOrDefault "HOMEBREW_TAP_TOKEN" "" }}'
     directory: Casks
-    skip_upload: '{{ if eq (envOrDefault "HOMEBREW_TAP_TOKEN" "") "" }}true{{ else }}false{{ end }}'
+    # Off until M19: goreleaser renders the cask into dist/ and release.yml keeps it as an artifact.
+    skip_upload: true
     homepage: https://github.com/sassdavid/tfcensus
     description: Census of Terraform/OpenTofu and Terragrunt fleets on AWS
     license: Apache-2.0
     commit_msg_template: "chore(cask): {{ .ProjectName }} {{ .Tag }}"
     generate_completions_from_executable:
       executable: tfcensus
-      args: [completion]
       base_name: tfcensus
       shell_parameter_format: cobra
       shells: [bash, zsh, fish]
@@ -153,7 +155,8 @@ scoops:
       name: scoop-bucket
       token: '{{ envOrDefault "SCOOP_BUCKET_TOKEN" "" }}'
     directory: bucket
-    skip_upload: '{{ if eq (envOrDefault "SCOOP_BUCKET_TOKEN" "") "" }}true{{ else }}false{{ end }}'
+    # Off until M19: goreleaser renders the manifest into dist/ and release.yml keeps it as an artifact.
+    skip_upload: true
     homepage: https://github.com/sassdavid/tfcensus
     description: Census of Terraform/OpenTofu and Terragrunt fleets on AWS
     license: Apache-2.0

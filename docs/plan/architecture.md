@@ -14,15 +14,15 @@
             ┌──────────────── F3 State reader & index ─────┐
  S3 ──────▶ │ raw v4 JSON (no locks) · tofu-encrypted detect│──▶ StateIndex (ARN/ID/identity → unit,address)
             └───────────────────────────────────────────────┘
-            ┌──────────────── F4 Plan runner & parser ─────┐   (v0.2+)
+            ┌──────────────── F4 Plan runner & parser ─────┐
  tg run ──▶ │ run --all --json-out-dir · report-file · logs │──▶ []UnitPlan (terraform-json)
             └───────────────────────────────────────────────┘
 
  features:  units · inventory · audit backend   (F1–F3)          v0.1
             scan = Inventory layers + Matcher + Ownership rules   v0.1
-            drift (F4) · whois (F3 index) · codify (scan+F3)       v0.2–v0.3
-            move (F1–F4 + hclwrite)                                v0.4
-            notify / html / mcp (all)                              v0.5
+            drift (F4) · whois (F3 index) · codify (scan+F3)       v0.1
+            move (F1–F4 + hclwrite)                                v0.1
+            notify / html / mcp (all)                              v0.1
 ```
 
 ## Packages (`internal/`)

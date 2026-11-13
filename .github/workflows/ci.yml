@@ -156,3 +156,17 @@ jobs:
               grep -qx "$want" <<<"$files" || { echo "$a lacks $want"; exit 1; }
             done
           done
+      # The snapshot loads one image per platform into the runner's Docker daemon. Releases don't
+      # build it until M19, so this is the only build before then.
+      - name: the container image runs
+        if: hashFiles('Dockerfile') != ''
+        run: |
+          set -euo pipefail
+          repo=ghcr.io/sassdavid/tfcensus
+          docker image ls "$repo"
+          for arch in amd64 arm64; do
+            tag=$(docker image ls --format '{{.Tag}}' "$repo" | grep -m1 -- "-$arch\$")
+            got=$(docker image inspect --format '{{.Architecture}}' "$repo:$tag")
+            test "$got" = "$arch" || { echo "$repo:$tag is $got, want $arch"; exit 1; }
+          done
+          docker run --rm "$repo:$(docker image ls --format '{{.Tag}}' "$repo" | grep -m1 -- '-amd64$')" version

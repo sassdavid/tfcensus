@@ -75,21 +75,22 @@ message says so. Where a shared milestone has no spec yet, the session writes th
 ### M11: Release readiness → v0.1.0 on GitHub only (shared)
 Scope: fix what blocks the first release, then cut it on GitHub only (decided 2026-11-13). No
 package channel gets anything until M19. No new features.
-- [ ] Package channels are off in the committed config: the cask and Scoop `skip_upload: true`
+- [x] Package channels are off in the committed config: the cask and Scoop `skip_upload: true`
   and `dockers_v2` disabled for releases.
   goreleaser still renders the cask and the manifest into `dist/`, and `release.yml` keeps them as
   a workflow artifact so each release shows what M19 would publish.
-- [ ] The Homebrew cask installs real completion scripts. Today `args: [completion]` plus
+- [x] The Homebrew cask installs real completion scripts. Today `args: [completion]` plus
   `shell_parameter_format: cobra` makes brew run `tfcensus completion completion bash`, which
   prints help text. Drop `args` (M12 replaces the stanza) and check the rendered cask in `dist/`.
 - [ ] The container image builds once in CI before the merge (snapshots run `--skip=sign,docker`
   today).
-- [ ] Paperwork from the 2026-11-13 audit: tick inventory.md criterion 5 (nightly run
+- [x] Paperwork from the 2026-11-13 audit: tick inventory.md criterion 5 (nightly run
   43206897470) and the config.md criterion (`TestSpec_config_1` to `_3`). Correct the release
   versions in `overview.md`, `architecture.md` and `cli.md`. Change `--fail-on audit:<severity>`
   in `cli.md` to the real `--fail-on high` syntax. Drop the dead `docs/validation/TODO.md` link
   in `testing.md`.
-- [ ] One `live.yml` run on main includes the move step (`TestSpec_move_2` has never run there).
+- [x] One `live.yml` run on main includes the move step: run 43393121759 (workflow_dispatch,
+  443c526) passed `TestSpec_inventory_5` and `TestSpec_move_2`.
 - [ ] Release PR #2 is merged and v0.1.0 is a GitHub release. `cosign verify-blob` and
   `gh attestation verify` pass on a downloaded archive, `mise use github:sassdavid/tfcensus` works,
   and the tap and the bucket get no commit.

@@ -25,14 +25,15 @@
 - CI pipelines (scheduled census and drift reports) and LLM agents via MCP (read-only).
 
 ## Goals
+All eight goals ship in v0.1.0 ([milestones.md](milestones.md)).
 - **G1 Units.** Discover every unit (Terragrunt, or plain Terraform root modules) and resolve its backend, account, region and credentials.
 - **G2 Inventory.** Read all states directly from S3 (read-only, no locks): resource counts, Terraform and provider versions, last modified, lineage.
 - **G3 Scan.** Find live AWS resources not managed by any state. Classify each as unmanaged / other-IaC / AWS-managed / derived / ignored / undetermined, with a reason.
 - **G4 Audit.** Check state backends: S3 and lock-table hygiene, plus fleet checks (orphaned keys, stale locks, duplicate lineage, double-managed resources).
-- **G5 Drift (v0.2).** Fleet drift via `terragrunt run --all` refresh-only plans. Collapse identical changes across units, noise rules with expiry, PR-ready reports.
-- **G6 Whois and codify (v0.3).** Reverse lookup (ARN → unit). Generate `import` blocks for unmanaged resources into a chosen unit.
-- **G7 Move (v0.4).** tfmigrate-compatible migrations between units and accounts, with plan-verified safety, history per unit and rollback.
-- **G8 Integrations (v0.5).** Slack, GitHub and Bitbucket issue lifecycle, static HTML report, MCP.
+- **G5 Drift.** Fleet drift via `terragrunt run --all` refresh-only plans. Collapse identical changes across units, noise rules with expiry, PR-ready reports.
+- **G6 Whois and codify.** Reverse lookup (ARN → unit). Generate `import` blocks for unmanaged resources into a chosen unit.
+- **G7 Move.** tfmigrate-compatible migrations between units and accounts, with plan-verified safety, history per unit and rollback.
+- **G8 Integrations.** Slack, GitHub and Bitbucket issue lifecycle, static HTML report, MCP.
 
 ## Non-goals
 - PR plan/apply orchestration, locking, approvals (Atlantis, Digger, Terramate, Spacelift).

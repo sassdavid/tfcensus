@@ -60,5 +60,5 @@ whichever region happens to run first. Resource Explorer runs only with a defaul
 - [x] The merge test: the same SG from config + RE + native yields one CloudResource with tags from config and source list `[config, resource-explorer]`.
 - [x] The coverage matrix golden test for a 2-region stub where only one region records Config.
 - [x] A parent-graph test: ELBv2 listeners listed via Cloud Control using load balancers found by the config layer.
-- [ ] Nightly against emulators (`TestSpec_inventory_5`, `mise run test:emulator`, `.github/workflows/live.yml`;
-  passed locally against moto 5.2.5 and Floci 2.4.0 on 2026-11-11, tick after the first nightly run): fixture "ClickOps" resources created via SDK in moto (EC2/IAM/Route53/S3) and Floci (Resource Explorer, Cloud Control) are all found by at least one layer. Config `Select*` is covered by L0 fixtures (no emulator runs Config SQL).
+- [x] Nightly against emulators (`TestSpec_inventory_5`, `mise run test:emulator`, `.github/workflows/live.yml`;
+  passed locally against moto 5.2.5 and Floci 2.4.0 on 2026-11-11 and in the nightly run 43206897470 on 2026-11-12): fixture "ClickOps" resources created via SDK in moto (EC2/IAM/Route53/S3) and Floci (Resource Explorer, Cloud Control) are all found by at least one layer. Config `Select*` is covered by L0 fixtures (no emulator runs Config SQL).

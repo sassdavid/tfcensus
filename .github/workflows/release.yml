@@ -13,10 +13,10 @@ on:
         type: string
     secrets:
       HOMEBREW_TAP_TOKEN:
-        description: PAT that can push to sassdavid/homebrew-tap. Without it the cask isn't published.
+        description: PAT that can push to sassdavid/homebrew-tap. Unused while skip_upload is true (until M19).
         required: false
       SCOOP_BUCKET_TOKEN:
-        description: PAT that can push to sassdavid/scoop-bucket. Without it the manifest isn't published.
+        description: PAT that can push to sassdavid/scoop-bucket. Unused while skip_upload is true (until M19).
         required: false
 
 permissions: {}
@@ -63,3 +63,14 @@ jobs:
         if: always() && hashFiles('dist/checksums.txt') != ''
         with:
           subject-checksums: ./dist/checksums.txt
+      # The cask and the Scoop manifest that M19 would publish. skip_upload keeps them out of the
+      # tap and the bucket until then.
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always() && hashFiles('dist/homebrew/Casks/tfcensus.rb') != ''
+        with:
+          name: package-manifests
+          path: |
+            dist/homebrew/Casks/tfcensus.rb
+            dist/scoop/bucket/tfcensus.json
+          if-no-files-found: error
+          retention-days: 90

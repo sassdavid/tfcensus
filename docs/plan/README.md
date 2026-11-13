@@ -31,7 +31,7 @@ Reading order:
    [move](specs/move.md) ·
    [notifications-and-reports](specs/notifications-and-reports.md) ·
    [config](specs/config.md)
-5. [milestones.md](milestones.md): M0–M10, from v0.1 (scan + audit) to v0.5
+5. [milestones.md](milestones.md): M0-M20. v0.1.0 is M0-M11; the release mapping is at the top
 6. [testing.md](testing.md) · [risks.md](risks.md) · [open-questions.md](open-questions.md) · [research.md](research.md)
 7. Tool ADRs:
    [0001 shell out](adr/0001-shell-out-to-terragrunt.md) ·

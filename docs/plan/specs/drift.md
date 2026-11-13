@@ -1,4 +1,4 @@
-# Spec: `tfcensus drift` (v0.2)
+# Spec: `tfcensus drift`
 
 Takes tgsieve's ingestion model and driftive's issue lifecycle (via `notify`), on top of F1/F2.
 
