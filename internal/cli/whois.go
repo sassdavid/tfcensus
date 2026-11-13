@@ -11,6 +11,7 @@ import (
 
 	"github.com/sassdavid/tfcensus/internal/accounts"
 	"github.com/sassdavid/tfcensus/internal/app"
+	"github.com/sassdavid/tfcensus/internal/complete"
 	"github.com/sassdavid/tfcensus/internal/config"
 	"github.com/sassdavid/tfcensus/internal/inventory"
 	"github.com/sassdavid/tfcensus/internal/match"
@@ -96,7 +97,7 @@ state read or a layer failed, 4 when every failure was a credential problem, and
 		},
 	}
 	addDiscoveryFlags(cmd, &a.filters)
-	addAccountFlags(cmd)
+	addAccountFlags(cmd, d)
 	addRegionFlag(cmd)
 	f := cmd.Flags()
 	f.StringSliceVar(&a.types, flagType, nil, "TF resource types to look in, such as aws_security_group")
@@ -112,11 +113,21 @@ state read or a layer failed, 4 when every failure was a credential problem, and
 		&a.failOn,
 		flagFailOn,
 		nil,
-		"exit 3 when answers are in these categories: unmanaged, double-managed",
+		complete.Usage("exit 3 when answers are in these categories: {values}", findingGateChoices()),
 	)
 	f.IntVar(&a.minCount, flagMinCount, 1, "answers --fail-on needs before it exits 3")
 	f.IntVar(&a.concurrency, flagConcurrency, tfstate.DefaultConcurrency, "states read at the same time")
 	cmd.MarkFlagsMutuallyExclusive(flagIndex, flagRepo)
+	registerCompletions(cmd, map[string]cobra.CompletionFunc{
+		flagType:        complete.DynamicList(complete.Timeout, complete.TFTypes()),
+		flagIndex:       savedFiles(),
+		flagRepo:        complete.Dirs(),
+		flagRules:       complete.Files("yaml", "yml"),
+		flagFailOn:      complete.List(findingGateChoices()),
+		flagMinCount:    complete.NoFiles,
+		flagConcurrency: complete.NoFiles,
+	})
+	cmd.ValidArgsFunction = complete.NoFiles
 	return cmd
 }
 

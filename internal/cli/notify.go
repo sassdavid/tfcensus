@@ -16,6 +16,7 @@ import (
 
 	"github.com/sassdavid/tfcensus/internal/app"
 	"github.com/sassdavid/tfcensus/internal/buildinfo"
+	"github.com/sassdavid/tfcensus/internal/complete"
 	"github.com/sassdavid/tfcensus/internal/config"
 	"github.com/sassdavid/tfcensus/internal/httpx"
 	"github.com/sassdavid/tfcensus/internal/notify"
@@ -98,8 +99,12 @@ for any other failure.`,
 		&a.only,
 		flagNotify,
 		nil,
-		"notifiers to run instead of notify.enabled: "+strings.Join(notify.Names(), ", "),
+		complete.Usage("notifiers to run instead of notify.enabled: {values}", notifierChoices()),
 	)
+	registerCompletions(cmd, map[string]cobra.CompletionFunc{
+		flagFrom:   savedFiles(),
+		flagNotify: complete.List(notifierChoices()),
+	})
 	f.BoolVar(&a.dryRun, flagDryRunNotify, false, "print what would change; read with GET only and write nothing")
 	return cmd
 }
@@ -309,4 +314,18 @@ func notifyClient(d *app.Deps, secretHosts []string) (*http.Client, error) {
 		UserAgent:       fmt.Sprintf("tfcensus/%s (+https://github.com/sassdavid/tfcensus)", buildinfo.Get().Version),
 		SecretPathHosts: secretHosts,
 	}), nil
+}
+
+func notifierChoices() []complete.Choice {
+	desc := map[string]string{
+		notify.NameSlack:     "one message per report to an incoming webhook",
+		notify.NameGitHub:    "one GitHub issue per scope",
+		notify.NameBitbucket: "one comment per report on one pull request",
+		notify.NameFile:      "tfcensus-<kind>.md and .json files",
+	}
+	var out []complete.Choice
+	for _, n := range notify.Names() {
+		out = append(out, complete.Choice{Value: n, Desc: desc[n]})
+	}
+	return out
 }

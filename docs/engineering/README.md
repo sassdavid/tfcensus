@@ -26,6 +26,8 @@ convention, not by shared code ([integration](../plan/integration.md)). Docs ind
 | [0009](adr/0009-release-goreleaser.md) | release-please + goreleaser, cosign, SBOM, attestations |
 | [0010](adr/0010-license-apache2.md) | Apache-2.0; MPL dependencies imported unmodified; no BSL code |
 | [0011](adr/0011-mcp-go-sdk.md) | `tfcensus mcp` stdio server via the official Go SDK, read-only |
+| [0012](adr/0012-third-party-notices.md) | third-party licenses and notices in every release archive |
+| [0013](adr/0013-shell-completion-and-man-pages.md) | cobra completion for 4 shells, embedded carapace for 6 more, man pages in the archives |
 
 ADR format (Nygard): Status, Context, Decision, Reasons/Consequences, at most 60 lines.
 A superseded ADR stays in place with `Status: superseded by NNNN`.

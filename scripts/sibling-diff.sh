@@ -15,7 +15,7 @@ identical=(
   .claude/rules/go.md
   .claude/rules/writing.md
   .gitattributes
-  .github/zizmor.yml
+  .github/jactionlint.yaml
   .github/workflows/ci.yml
   .github/workflows/security.yml
   .golangci.yml
@@ -32,9 +32,14 @@ identical=(
   internal/app/vt_windows.go
   internal/buildinfo/buildinfo.go
   internal/buildinfo/doc.go
+  internal/cli/completion.go
+  internal/cli/completion_test.go
   internal/cli/run.go
   internal/cli/version.go
   internal/cli/version_test.go
+  internal/complete/complete.go
+  internal/complete/complete_test.go
+  internal/complete/doc.go
   internal/config/load.go
   internal/config/paths.go
   internal/config/schema_test.go
@@ -81,6 +86,9 @@ identical=(
   schemas/doc.go
   schemas/report-v1.json
   schemas/schemas.go
+  scripts/completion-shells.ps1
+  scripts/completion-shells.sh
+  scripts/completions.sh
   scripts/fuzz.sh
   scripts/gendocs/doc.go
   scripts/gendocs/main.go
@@ -102,6 +110,7 @@ similar=(
   .github/workflows/release.yml
   .github/workflows/release-please.yml
   internal/cli/config.go
+  internal/complete/sources.go
   internal/cli/root.go
   internal/cli/script_test.go
   internal/config/config.go
@@ -111,6 +120,8 @@ similar=(
   docs/engineering/stack.md
   docs/engineering/version-policy.md
   docs/engineering/adr/0008-lint-config.md
+  docs/engineering/adr/0013-shell-completion-and-man-pages.md
+  docs/install.md
 )
 
 show_all=false

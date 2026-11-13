@@ -7,6 +7,10 @@ dist/
 # scripts/licenses.sh output, added to release archives
 third_party_licenses/
 
+# scripts/completions.sh output, added to release archives
+/completions/
+/manpages/
+
 # go build output
 /tfcensus
 /tfcensus.exe

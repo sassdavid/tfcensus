@@ -14,9 +14,13 @@ import (
 
 	"github.com/sassdavid/tfcensus/internal/app"
 	"github.com/sassdavid/tfcensus/internal/buildinfo"
+	"github.com/sassdavid/tfcensus/internal/complete"
+	"github.com/sassdavid/tfcensus/internal/drift"
 	"github.com/sassdavid/tfcensus/internal/htmlreport"
 	"github.com/sassdavid/tfcensus/internal/render"
 	"github.com/sassdavid/tfcensus/internal/report"
+	"github.com/sassdavid/tfcensus/internal/scan"
+	"github.com/sassdavid/tfcensus/internal/tfstate"
 )
 
 const (
@@ -104,6 +108,10 @@ The same input files always give the same bytes.`,
 	}
 	cmd.Flags().StringArrayVar(&from, flagFrom, nil, "scan, drift or audit JSON file (repeatable; .gz and .zst work)")
 	cmd.Flags().StringVarP(&out, flagOutput, "o", "-", "file to write, or - for stdout")
+	registerCompletions(cmd, map[string]cobra.CompletionFunc{
+		flagFrom:   savedFiles(),
+		flagOutput: complete.Files("html"),
+	})
 	return cmd
 }
 
@@ -194,7 +202,12 @@ accounts and regions of their resources. It is what the units tool of tfcensus m
 	}
 	cmd.Flags().StringVar(&index, flagIndex, "", "state index from tfcensus inventory --save-index")
 	cmd.Flags().StringVar(&f.Path, flagPath, "", "unit path glob, * matches / too")
-	cmd.Flags().StringVar(&f.Status, flagStatus, "", "state status: ok, absent, encrypted, unsupported or error")
+	cmd.Flags().StringVar(&f.Status, flagStatus, "", complete.Usage("state status: {values}", stateStatusChoices()))
+	registerCompletions(cmd, map[string]cobra.CompletionFunc{
+		flagIndex:  savedFiles(),
+		flagPath:   complete.Dynamic(complete.Timeout, complete.Units(flagIndex)),
+		flagStatus: complete.Enum(stateStatusChoices()),
+	})
 	return cmd
 }
 
@@ -243,6 +256,13 @@ what the inventory tool of tfcensus mcp returns.`,
 	cmd.Flags().StringVar(&f.Account, flagAccount, "", "AWS account ID")
 	cmd.Flags().StringVar(&f.Region, flagRegion, "", "AWS region")
 	cmd.Flags().StringVar(&f.Type, flagType, "", "TF resource type glob, such as aws_iam_*")
+	registerCompletions(cmd, map[string]cobra.CompletionFunc{
+		flagIndex:   savedFiles(),
+		flagUnit:    complete.Dynamic(complete.Timeout, complete.Units(flagIndex)),
+		flagAccount: complete.NoFiles,
+		flagRegion:  complete.Enum(complete.Regions()),
+		flagType:    complete.Dynamic(complete.Timeout, complete.TFTypes()),
+	})
 	return cmd
 }
 
@@ -281,9 +301,20 @@ tool of tfcensus mcp returns.`,
 	cmd.Flags().StringVar(&from, flagFrom, "", "scan JSON (default: the newest scan cache snapshot)")
 	cmd.Flags().StringVar(&f.Account, flagAccount, "", "AWS account ID")
 	cmd.Flags().StringVar(&f.Region, flagRegion, "", "AWS region, or global")
-	cmd.Flags().StringVar(&f.Category, flagCategory, "", "list this category (default: double-managed and unmanaged)")
+	cmd.Flags().StringVar(&f.Category, flagCategory, "",
+		complete.Usage("list this category: {values} (default: double-managed and unmanaged)", categoryChoices()))
 	cmd.Flags().StringVar(&f.Type, flagType, "", "CloudFormation or layer type glob, such as AWS::EC2::*")
 	cmd.Flags().IntVar(&f.Top, flagTop, report.DefaultTop, fmt.Sprintf("findings to list, 1 to %d", report.MaxTop))
+	registerCompletions(cmd, map[string]cobra.CompletionFunc{
+		flagFrom:    savedFiles(),
+		flagAccount: complete.NoFiles,
+		flagRegion: complete.Enum(
+			append(complete.Regions(), complete.Choice{Value: "global", Desc: "global services"}),
+		),
+		flagCategory: complete.Enum(categoryChoices()),
+		flagType:     complete.Dynamic(complete.Timeout, complete.CFNTypes()),
+		flagTop:      complete.NoFiles,
+	})
 	return cmd
 }
 
@@ -358,8 +389,14 @@ first. It is what the audit_findings tool of tfcensus mcp returns.`,
 	}
 	cmd.Flags().StringVar(&from, flagFrom, "", "audit JSON from tfcensus audit --format json")
 	cmd.Flags().StringVar(&f.Rule, flagRule, "", "check ID glob, such as S3-*")
-	cmd.Flags().StringVar(&f.Severity, flagSeverity, "", "lowest severity: info, low, medium or high")
+	cmd.Flags().StringVar(&f.Severity, flagSeverity, "", complete.Usage("lowest severity: {values}", severityChoices()))
 	cmd.Flags().StringVar(&f.Account, flagAccount, "", "AWS account ID")
+	registerCompletions(cmd, map[string]cobra.CompletionFunc{
+		flagFrom:     savedFiles(),
+		flagRule:     complete.NoFiles,
+		flagSeverity: complete.Enum(severityChoices()),
+		flagAccount:  complete.NoFiles,
+	})
 	cmd.Flags().BoolVar(&f.IncludeSuppressed, flagIncludeSuppressed, false, "list suppressed findings too")
 	return cmd
 }
@@ -402,7 +439,50 @@ drift_summary tool of tfcensus mcp returns.`,
 	}
 	cmd.Flags().StringVar(&from, flagFrom, "", "drift JSON from tfcensus drift --format json")
 	cmd.Flags().StringVar(&f.Unit, flagUnit, "", "unit path glob, * matches / too")
-	cmd.Flags().
-		StringVar(&f.Status, flagStatus, "", "unit status: drifted, failed, clean, early-exit or excluded (default drifted and failed)")
+	cmd.Flags().StringVar(&f.Status, flagStatus, "",
+		complete.Usage("unit status: {values} (default drifted and failed)", driftStatusChoices()))
+	registerCompletions(cmd, map[string]cobra.CompletionFunc{
+		flagFrom:   savedFiles(),
+		flagUnit:   complete.NoFiles,
+		flagStatus: complete.Enum(driftStatusChoices()),
+	})
 	return cmd
+}
+
+func stateStatusChoices() []complete.Choice {
+	return []complete.Choice{
+		{Value: string(tfstate.StatusOK), Desc: "read"},
+		{Value: string(tfstate.StatusAbsent), Desc: "the key doesn't exist: the unit was never applied"},
+		{Value: string(tfstate.StatusEncrypted), Desc: "OpenTofu client-side encryption"},
+		{Value: string(tfstate.StatusUnsupported), Desc: "a state format other than version 4"},
+		{Value: string(tfstate.StatusError), Desc: "reading failed"},
+	}
+}
+
+func driftStatusChoices() []complete.Choice {
+	return []complete.Choice{
+		{Value: string(drift.StatusDrifted), Desc: "at least one change that no noise rule hides"},
+		{Value: string(drift.StatusFailed), Desc: "the plan failed, is missing or can't be read"},
+		{Value: string(drift.StatusClean), Desc: "no drift, or only hidden drift"},
+		{Value: string(drift.StatusEarlyExit), Desc: "a dependency failed, so terragrunt skipped it"},
+		{Value: string(drift.StatusExcluded), Desc: "an exclude block or a filter skipped it"},
+	}
+}
+
+func categoryChoices() []complete.Choice {
+	desc := map[scan.Category]string{
+		scan.CategoryManaged:       "one state manages it",
+		scan.CategoryDoubleManaged: "more than one state manages it",
+		scan.CategoryUnmanaged:     "no state manages it",
+		scan.CategoryOtherIaC:      "CloudFormation, CDK, Pulumi or a Kubernetes controller owns it",
+		scan.CategoryAWSManaged:    "AWS created it, or it is a default",
+		scan.CategoryDerived:       "a child of a managed or derived resource",
+		scan.CategoryIgnored:       "an ownership rule ignores it",
+		scan.CategoryUndetermined:  "type unmapped, or the layer data is not enough",
+	}
+	var out []complete.Choice
+	for _, c := range scan.Categories() {
+		out = append(out, complete.Choice{Value: string(c), Desc: desc[c]})
+	}
+	return out
 }

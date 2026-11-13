@@ -30,14 +30,16 @@ goreleaser, chezmoi, k9s, golangci-lint.
 | goreleaser | **v2.20.0** | cosign **v3.1.4** |
 | syft | **v1.57.1** | SBOMs for goreleaser `sboms:`, locally and in CI (installed by mise, so `anchore/sbom-action` isn't needed) |
 | mise | **v2026.11.5** | pinned as `version:` of `jdx/mise-action` in workflows; `mise.lock` pins tool checksums |
-| zizmor | **v1.32.0** | local workflow audit (`mise x zizmor@1.32.0 -- zizmor .github/workflows`); CI uses `zizmor-action`. `.github/zizmor.yml` turns off the `self-repository` audit until actionlint accepts `$/` |
-| actionlint | **v1.7.12** | `mise run lint:actions`. Doesn't parse `uses: $/...` yet (rhysd/actionlint#711), so workflows use `./` |
+| zizmor | **v1.32.0** | local workflow audit (`mise x zizmor@1.32.0 -- zizmor .github/workflows`); CI uses `zizmor-action`. Every audit is on, `self-repository` included: same-repository workflows are called with `$/` |
+| jactionlint | **v2.5.0** | `mise run lint:actions`, with `profile: default` in `.github/jactionlint.yaml`. jdx's maintained fork of actionlint (MIT); mise deprecated `actionlint` in 2026.10.3 (jdx/mise#13960). It installs through the `packslip` backend, whose lock entry records the signing workflow. rhysd/actionlint has had no release since 1.7.12 (2026-03-30) |
+| shellcheck | **v0.11.0** | pinned so jactionlint checks `run:` scripts with the same version locally and in CI (the ubuntu runner ships its own) |
 
 ## Libraries
 
 | Concern | Module | Latest | Why / alternatives rejected |
 |---|---|---|---|
 | CLI | `github.com/spf13/cobra` (+ `spf13/pflag`) | v1.10.2 (+ v1.1.0) | [ADR-0002](adr/0002-cli-cobra.md) |
+| Completion for nushell, elvish, xonsh, tcsh, oil and clink | `github.com/carapace-sh/carapace` (+ `carapace-shlex/v2` v2.1.4) | v1.18.1 | [ADR-0013](adr/0013-shell-completion-and-man-pages.md); reuses cobra's completion functions, so users install nothing else |
 | Config | `github.com/knadh/koanf/v2` + `providers/env/v2` v2.0.2, `providers/posflag` v1.0.2 | v2.4.1 | [ADR-0003](adr/0003-config-koanf.md). `providers/file` v1.2.1 is not used: files are decoded with yaml v4 (node positions for file:line errors) and handed to koanf as maps |
 | XDG paths | `github.com/adrg/xdg` | v0.5.3 | stable; used by aqua, syft, k9s |
 | Logging | `log/slog` + `github.com/lmittmann/tint` | stdlib / v1.2.1 | zap rejected ([ADR-0004](adr/0004-logging.md)) |

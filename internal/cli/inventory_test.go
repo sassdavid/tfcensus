@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -149,6 +150,20 @@ func TestInventoryAttributeValues(t *testing.T) {
 				require.NoError(t, err)
 				outputs["index "+ext] = string(decoded)
 				outputs["index raw "+ext] = string(raw)
+				// Shell completion lists units from the same index.
+				for _, line := range [][]string{
+					{"report", "inventory", "--index", filepath.Join(dir, "index"+ext), "--unit", ""},
+					{"report", "units", "--index", filepath.Join(dir, "index"+ext), "--path", ""},
+				} {
+					cd, cout, _ := newDeps(t)
+					require.Equal(
+						t,
+						cli.ExitOK,
+						cli.Execute(t.Context(), cd, append([]string{cobra.ShellCompRequestCmd}, line...)),
+					)
+					require.Contains(t, cout.String(), "tf-fleet/")
+					outputs["complete "+line[1]+ext] = cout.String()
+				}
 				args = args[:3]
 			}
 			continue

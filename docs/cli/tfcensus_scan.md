@@ -50,12 +50,12 @@ tfcensus scan [paths...] [flags]
       --concurrency int                 states read at the same time (default 16)
       --explain string                  print how the resource with this ARN or ID was categorized
       --explain-coverage[=true|false]   print which layer listed each type in each account and region
-      --fail-on strings                 exit 3 when findings are in these categories: unmanaged, double-managed
+      --fail-on strings                 exit 3 when findings are in these categories: unmanaged or double-managed
       --filter stringArray              terragrunt filter expression, passed to terragrunt find unchanged (repeatable)
       --generate-stacks[=true|false]    run terragrunt stack generate first, so units in stacks are listed (config discovery.generate_stacks)
   -h, --help[=true|false]               help for scan
       --index string                    read the state index from this file (from inventory --save-index) instead of reading states
-      --layers string                   inventory layers: auto, or a comma-separated list of config, re, cc and native (config scan.layers) (default "auto")
+      --layers string                   inventory layers: auto, or a comma-separated list of any of config, re, cc or native (config scan.layers) (default "auto")
       --management-profile string       profile that lists the organization's accounts, else the default AWS credentials (config accounts.org.management_profile)
       --min-count int                   findings --fail-on needs before it exits 3 (default 1)
       --org[=true|false]                list the accounts of the AWS organization and assume --org-role in each (config accounts.org.enabled)

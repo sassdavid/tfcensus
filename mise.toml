@@ -9,7 +9,8 @@ gofumpt = "0.12.0"
 goreleaser = "2.20.0"
 cosign = "3.1.4"
 syft = "1.57.1"
-actionlint = "1.7.12"
+jactionlint = "2.5.0"
+shellcheck = "0.11.0"
 
 [tasks.check]
 description = "Lint, race tests and govulncheck: the single verification command"
@@ -28,8 +29,8 @@ description = "Writing rules from .claude/rules/writing.md"
 run = "go run ./scripts/proselint"
 
 [tasks."lint:actions"]
-description = "actionlint on .github/workflows"
-run = "actionlint"
+description = "jactionlint on the workflows (.github/jactionlint.yaml); annotations in GitHub Actions"
+run = "jactionlint ${GITHUB_ACTIONS:+--format github}"
 
 [tasks."lint:licenses"]
 description = "Fail on forbidden, restricted or unknown licenses compiled into the release binaries"

@@ -104,7 +104,7 @@ func runTfcensus(args []string) int {
 		d.HTTPTransport = rec
 		defer func() { _ = rec.Stop() }()
 	}
-	return cli.Execute(ctx, d, args)
+	return cli.Main(ctx, d, args)
 }
 
 func scriptParams(t *testing.T, files ...string) testscript.Params {

@@ -15,6 +15,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/accounts"
 	"github.com/sassdavid/tfcensus/internal/app"
 	"github.com/sassdavid/tfcensus/internal/buildinfo"
+	"github.com/sassdavid/tfcensus/internal/complete"
 	"github.com/sassdavid/tfcensus/internal/config"
 	"github.com/sassdavid/tfcensus/internal/discovery"
 	"github.com/sassdavid/tfcensus/internal/execx"
@@ -82,8 +83,21 @@ func addDiscoveryFlags(cmd *cobra.Command, filters *[]string) {
 		"terragrunt filter expression, passed to terragrunt find unchanged (repeatable)")
 	f.Bool(flagGenerateStacks, false,
 		"run terragrunt stack generate first, so units in stacks are listed (config discovery.generate_stacks)")
-	f.String(flagRender, "auto",
-		"when to use terragrunt render: auto, always or never (config discovery.render)")
+	f.String(flagRender, string(discovery.RenderAuto),
+		complete.Usage("when to use terragrunt render: {values} (config discovery.render)", renderChoices()))
+	registerCompletions(cmd, map[string]cobra.CompletionFunc{
+		flagFilter: complete.NoFiles,
+		flagRender: complete.Enum(renderChoices()),
+	})
+	cmd.ValidArgsFunction = complete.Dirs()
+}
+
+func renderChoices() []complete.Choice {
+	return []complete.Choice{
+		{Value: string(discovery.RenderAuto), Desc: "parse terragrunt.hcl, render the units it can't resolve"},
+		{Value: string(discovery.RenderAlways), Desc: "run terragrunt render for every unit"},
+		{Value: string(discovery.RenderNever), Desc: "never run terragrunt render"},
+	}
 }
 
 // discoverUnits finds the units under args, else under discovery.roots, else under the working

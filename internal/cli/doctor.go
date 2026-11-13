@@ -70,7 +70,7 @@ warning. doctor exits 4 when every source fails.`,
 			return runDoctor(cmd, d, g.outFormat, &res.Config, refresh)
 		},
 	}
-	addAccountFlags(cmd)
+	addAccountFlags(cmd, d)
 	addRegionFlag(cmd)
 	cmd.Flags().BoolVar(&refresh, "refresh", false, "probe again even when the cached result is fresh")
 	return cmd

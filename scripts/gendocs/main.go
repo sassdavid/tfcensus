@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"compress/gzip"
 	"flag"
 	"fmt"
 	"io"
@@ -11,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 
 	"github.com/sassdavid/tfcensus/internal/app"
@@ -23,7 +25,15 @@ func main() {
 
 func run() int {
 	out := flag.String("out", filepath.Join("docs", "cli"), "output directory")
+	man := flag.String("man", "", "write gzipped man pages to this directory instead of Markdown to -out")
 	flag.Parse()
+	if *man != "" {
+		if err := generateMan(*man); err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "gendocs: %v\n", err)
+			return 1
+		}
+		return 0
+	}
 	stale, err := generate(*out)
 	switch {
 	case err != nil:
@@ -44,14 +54,7 @@ func generate(out string) (bool, error) {
 	}
 	defer func() { _ = os.RemoveAll(tmp) }()
 
-	root := cli.NewRootCmd(&app.Deps{
-		Stdin:  strings.NewReader(""),
-		Stdout: io.Discard,
-		Stderr: io.Discard,
-		Clock:  time.Now,
-		Getwd:  os.Getwd,
-	})
-	if err = doc.GenMarkdownTree(root, tmp); err != nil {
+	if err = doc.GenMarkdownTree(newRoot(), tmp); err != nil {
 		return false, fmt.Errorf("generate markdown: %w", err)
 	}
 	want, err := readDir(tmp)
@@ -77,6 +80,56 @@ func generate(out string) (bool, error) {
 		}
 	}
 	return true, nil
+}
+
+func newRoot() *cobra.Command {
+	return cli.NewRootCmd(&app.Deps{
+		Stdin:  strings.NewReader(""),
+		Stdout: io.Discard,
+		Stderr: io.Discard,
+		Clock:  time.Now,
+		Getwd:  os.Getwd,
+	})
+}
+
+// generateMan writes one gzipped man page per command to out. cobra dates the pages from
+// SOURCE_DATE_EPOCH, and the gzip header carries no name or time, so a rerun writes the same bytes.
+func generateMan(out string) error {
+	tmp, err := os.MkdirTemp("", "tfcensus-man-")
+	if err != nil {
+		return fmt.Errorf("create temp dir: %w", err)
+	}
+	defer func() { _ = os.RemoveAll(tmp) }()
+	if err = doc.GenManTree(newRoot(), &doc.GenManHeader{Section: "1"}, tmp); err != nil {
+		return fmt.Errorf("generate man pages: %w", err)
+	}
+	pages, err := readDir(tmp)
+	if err != nil {
+		return err
+	}
+	if err = os.RemoveAll(out); err != nil {
+		return fmt.Errorf("clear %s: %w", out, err)
+	}
+	if err = os.MkdirAll(out, 0o750); err != nil {
+		return fmt.Errorf("create %s: %w", out, err)
+	}
+	for name, b := range pages {
+		var buf bytes.Buffer
+		zw, zerr := gzip.NewWriterLevel(&buf, gzip.BestCompression)
+		if zerr != nil {
+			return fmt.Errorf("compress %s: %w", name, zerr)
+		}
+		if _, err = zw.Write(b); err != nil {
+			return fmt.Errorf("compress %s: %w", name, err)
+		}
+		if err = zw.Close(); err != nil {
+			return fmt.Errorf("compress %s: %w", name, err)
+		}
+		if err = os.WriteFile(filepath.Join(out, name+".gz"), buf.Bytes(), 0o600); err != nil {
+			return fmt.Errorf("write %s: %w", name, err)
+		}
+	}
+	return nil
 }
 
 func readDir(dir string) (map[string][]byte, error) {

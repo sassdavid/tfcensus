@@ -7,7 +7,7 @@ A Go CLI that takes a census of Terraform/OpenTofu + Terragrunt fleets on AWS. I
 - drift, whois/codify and cross-unit moves (later)
 
 ## Verify (run before claiming anything works)
-- `mise run check` runs the linters (golangci-lint, prose, actionlint), `go test -race ./...` and govulncheck. It must pass before every commit.
+- `mise run check` runs the linters (golangci-lint, prose, jactionlint), `go test -race ./...` and govulncheck. It must pass before every commit.
 - `mise run test:golden -- -update` regenerates goldens. Review the diff.
 - `mise run typemap:gen` regenerates `internal/typemap/data`, and must produce a deterministic diff.
 - `mise run docs` regenerates `docs/cli/`. CI fails if it's stale.

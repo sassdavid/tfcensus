@@ -48,7 +48,7 @@ tfcensus notify [flags]
       --dry-run-notify[=true|false]   print what would change; read with GET only and write nothing
       --from stringArray              scan, drift or audit JSON file (repeatable)
   -h, --help[=true|false]             help for notify
-      --notify strings                notifiers to run instead of notify.enabled: slack, github-issues, bitbucket-pr-comment, file
+      --notify strings                notifiers to run instead of notify.enabled: slack, github-issues, bitbucket-pr-comment or file
 ```
 
 ### Options inherited from parent commands

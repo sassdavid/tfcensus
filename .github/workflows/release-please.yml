@@ -13,6 +13,7 @@ concurrency:
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write # create the release PR branch, tag and GitHub release
       pull-requests: write
@@ -27,7 +28,8 @@ jobs:
           manifest-file: .release-please-manifest.json
 
   # Tags pushed with GITHUB_TOKEN don't trigger other workflows, so call the release
-  # workflow directly instead of relying on its tag trigger.
+  # workflow directly instead of relying on its tag trigger. $/ is the release workflow at the
+  # running commit, read from the repository rather than from a checkout.
   release:
     needs: release-please
     if: needs.release-please.outputs.release_created == 'true'
@@ -36,7 +38,7 @@ jobs:
       packages: write
       id-token: write
       attestations: write
-    uses: ./.github/workflows/release.yml
+    uses: $/.github/workflows/release.yml
     with:
       tag: ${{ needs.release-please.outputs.tag_name }}
     secrets:

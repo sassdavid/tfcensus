@@ -15,6 +15,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/accounts"
 	"github.com/sassdavid/tfcensus/internal/app"
 	"github.com/sassdavid/tfcensus/internal/buildinfo"
+	"github.com/sassdavid/tfcensus/internal/complete"
 	"github.com/sassdavid/tfcensus/internal/config"
 	"github.com/sassdavid/tfcensus/internal/discovery"
 	"github.com/sassdavid/tfcensus/internal/inventory"
@@ -107,19 +108,19 @@ read or discovery failed, 4 when every failure was a credential problem, and 0 o
 		},
 	}
 	addDiscoveryFlags(cmd, &a.filters)
-	addAccountFlags(cmd)
+	addAccountFlags(cmd, d)
 	addRegionFlag(cmd)
 	f := cmd.Flags()
 	f.StringSliceVar(&a.types, flagTypes, nil,
 		"resource types to scan, as CloudFormation or TF type globs such as 'AWS::IAM::*' or 'aws_security_group*'")
-	f.String(flagLayers, "auto", "inventory layers: auto, or a comma-separated list of config, re, cc and native "+
-		"(config scan.layers)")
+	f.String(flagLayers, inventory.LayersAuto, "inventory layers: auto, or a comma-separated list of any of "+
+		complete.Join(layerChoices()[1:])+" (config scan.layers)")
 	f.StringArrayVar(&a.rules, flagRules, nil, "YAML file with more ownership rules under rules: (repeatable)")
 	f.StringSliceVar(
 		&a.failOn,
 		flagFailOn,
 		nil,
-		"exit 3 when findings are in these categories: unmanaged, double-managed",
+		complete.Usage("exit 3 when findings are in these categories: {values}", findingGateChoices()),
 	)
 	f.IntVar(&a.minCount, flagMinCount, 1, "findings --fail-on needs before it exits 3")
 	f.StringVar(&a.explain, flagExplain, "", "print how the resource with this ARN or ID was categorized")
@@ -130,7 +131,35 @@ read or discovery failed, 4 when every failure was a credential problem, and 0 o
 		"instead of reading states")
 	f.IntVar(&a.concurrency, flagConcurrency, tfstate.DefaultConcurrency, "states read at the same time")
 	cmd.MarkFlagsMutuallyExclusive(flagExplain, flagExplainCoverage)
+	registerCompletions(cmd, map[string]cobra.CompletionFunc{
+		flagTypes:       complete.DynamicList(complete.Timeout, complete.Types()),
+		flagLayers:      complete.List(layerChoices()),
+		flagRules:       complete.Files("yaml", "yml"),
+		flagFailOn:      complete.List(findingGateChoices()),
+		flagMinCount:    complete.NoFiles,
+		flagExplain:     complete.NoFiles,
+		flagIndex:       savedFiles(),
+		flagConcurrency: complete.NoFiles,
+	})
 	return cmd
+}
+
+func layerChoices() []complete.Choice {
+	return []complete.Choice{
+		{Value: inventory.LayersAuto, Desc: "every layer the capability probe allows"},
+		{Value: inventory.LayerConfig, Desc: "AWS Config"},
+		{Value: "re", Desc: "Resource Explorer"},
+		{Value: "cc", Desc: "Cloud Control, for allowlisted types"},
+		{Value: inventory.LayersNative, Desc: "every native lister"},
+	}
+}
+
+// findingGateChoices are the categories scan and whois --fail-on accept.
+func findingGateChoices() []complete.Choice {
+	return []complete.Choice{
+		{Value: string(scan.CategoryUnmanaged), Desc: "no state manages it"},
+		{Value: string(scan.CategoryDoubleManaged), Desc: "more than one state manages it"},
+	}
 }
 
 // scanEnv is everything a scan run shares.

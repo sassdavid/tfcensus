@@ -8,6 +8,7 @@ import (
 
 	"github.com/sassdavid/tfcensus/internal/app"
 	"github.com/sassdavid/tfcensus/internal/buildinfo"
+	"github.com/sassdavid/tfcensus/internal/complete"
 	"github.com/sassdavid/tfcensus/internal/mcpkit"
 	"github.com/sassdavid/tfcensus/internal/mcpserver"
 	"github.com/sassdavid/tfcensus/internal/render"
@@ -74,6 +75,13 @@ and high-severity findings come first. A cursor lasts 15 minutes after its last 
 	fl.StringVar(&f.drift, flagDrift, "", "drift JSON for drift_summary")
 	fl.IntVar(&f.maxBytes, "max-result-bytes", mcpkit.MaxBytes,
 		"split results larger than this many bytes of JSON into pages; 0 never splits")
+	registerCompletions(cmd, map[string]cobra.CompletionFunc{
+		flagIndex:          savedFiles(),
+		flagScan:           savedFiles(),
+		flagAudit:          savedFiles(),
+		flagDrift:          savedFiles(),
+		"max-result-bytes": complete.NoFiles,
+	})
 	return cmd
 }
 

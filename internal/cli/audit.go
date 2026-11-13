@@ -15,6 +15,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/app"
 	"github.com/sassdavid/tfcensus/internal/audit"
 	"github.com/sassdavid/tfcensus/internal/buildinfo"
+	"github.com/sassdavid/tfcensus/internal/complete"
 	"github.com/sassdavid/tfcensus/internal/config"
 	"github.com/sassdavid/tfcensus/internal/discovery"
 	"github.com/sassdavid/tfcensus/internal/match"
@@ -111,15 +112,30 @@ run, and 4 when every failure was a credential problem.`,
 		},
 	}
 	addDiscoveryFlags(cmd, &a.filters)
-	addAccountFlags(cmd)
+	addAccountFlags(cmd, d)
 	f := cmd.Flags()
 	f.IntVar(&a.concurrency, flagConcurrency, tfstate.DefaultConcurrency, "states read at the same time")
 	f.BoolVar(&a.discover, flagDiscover, false,
 		"also audit buckets of each account that match --discover-pattern and that no unit names")
 	f.StringArray(flagDiscoverPattern, nil,
 		"bucket name glob for --discover (repeatable; config audit.discover_patterns)")
-	f.StringVar(&failOn, flagFailOn, "", "exit 3 when a finding is at least this severe: info, low, medium or high")
+	f.StringVar(&failOn, flagFailOn, "",
+		complete.Usage("exit 3 when a finding is at least this severe: {values}", severityChoices()))
+	registerCompletions(cmd, map[string]cobra.CompletionFunc{
+		flagConcurrency:     complete.NoFiles,
+		flagDiscoverPattern: complete.NoFiles,
+		flagFailOn:          complete.Enum(severityChoices()),
+	})
 	return cmd
+}
+
+func severityChoices() []complete.Choice {
+	return []complete.Choice{
+		{Value: string(audit.SeverityInfo), Desc: "worth knowing, no risk"},
+		{Value: string(audit.SeverityLow), Desc: "small risk"},
+		{Value: string(audit.SeverityMedium), Desc: "fix soon"},
+		{Value: string(audit.SeverityHigh), Desc: "fix now"},
+	}
 }
 
 func runAudit(cmd *cobra.Command, d *app.Deps, format render.Format, cfg *config.Config, a auditArgs) error {

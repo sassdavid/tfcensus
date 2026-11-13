@@ -52,7 +52,7 @@ tfcensus codify --from scan.json --into <dir> [flags]
       --force[=true|false]   overwrite files codify wrote before
       --from string          scan report from tfcensus scan --format json, or - for stdin
   -h, --help[=true|false]    help for codify
-      --import-by string     auto (identity when the target can) or id (default "auto")
+      --import-by string     import by auto or id; auto uses identity when the target can (default "auto")
       --into string          directory of the unit to write the files into; it must exist
       --query[=true|false]   also write a .tfquery.hcl file with list blocks for terraform query
       --select string        CEL expression over resource that picks the findings to codify

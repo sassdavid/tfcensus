@@ -19,6 +19,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/accounts"
 	"github.com/sassdavid/tfcensus/internal/app"
 	"github.com/sassdavid/tfcensus/internal/buildinfo"
+	"github.com/sassdavid/tfcensus/internal/complete"
 	"github.com/sassdavid/tfcensus/internal/config"
 	"github.com/sassdavid/tfcensus/internal/discovery"
 	"github.com/sassdavid/tfcensus/internal/match"
@@ -81,11 +82,15 @@ with zstd for a .zst name and gzip for .gz.`,
 		},
 	}
 	addDiscoveryFlags(cmd, &filters)
-	addAccountFlags(cmd)
+	addAccountFlags(cmd, d)
 	f := cmd.Flags()
 	f.StringVar(&saveIndex, flagSaveIndex, "",
 		"write the identifier index to this file (.zst: zstd, .gz: gzip, else plain JSON)")
 	f.IntVar(&concurrency, flagConcurrency, tfstate.DefaultConcurrency, "states read at the same time")
+	registerCompletions(cmd, map[string]cobra.CompletionFunc{
+		flagSaveIndex:   savedFiles(),
+		flagConcurrency: complete.NoFiles,
+	})
 	return cmd
 }
 

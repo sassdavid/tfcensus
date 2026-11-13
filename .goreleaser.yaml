@@ -11,6 +11,8 @@ before:
     - go mod tidy -diff
     # License and notice files of every compiled dependency, for the archives (ADR-0012).
     - bash scripts/licenses.sh
+    # Completion scripts and man pages, for the archives and the cask (engineering ADR-0013).
+    - bash scripts/completions.sh
 
 snapshot:
   version_template: "{{ incpatch .Version }}-next"
@@ -51,6 +53,8 @@ archives:
       # goreleaser's ** glob needs one directory level, so the index is listed on its own.
       - third_party_licenses/THIRD_PARTY_NOTICES.md
       - third_party_licenses/**/*
+      - completions/*
+      - manpages/*
 
 checksum:
   name_template: checksums.txt
@@ -134,11 +138,12 @@ homebrew_casks:
     description: Census of Terraform/OpenTofu and Terragrunt fleets on AWS
     license: Apache-2.0
     commit_msg_template: "chore(cask): {{ .ProjectName }} {{ .Tag }}"
-    generate_completions_from_executable:
-      executable: tfcensus
-      base_name: tfcensus
-      shell_parameter_format: cobra
-      shells: [bash, zsh, fish]
+    completions:
+      bash: completions/tfcensus.bash
+      zsh: completions/tfcensus.zsh
+      fish: completions/tfcensus.fish
+    manpages:
+      - manpages/*.1.gz
     hooks:
       post:
         # The binaries aren't notarized; without this macOS Gatekeeper blocks them.
@@ -161,3 +166,7 @@ scoops:
     description: Census of Terraform/OpenTofu and Terragrunt fleets on AWS
     license: Apache-2.0
     commit_msg_template: "chore(scoop): {{ .ProjectName }} {{ .Tag }}"
+    # Scoop has no completion stanza. $dir is the version directory; current links to the newest.
+    post_install:
+      - Write-Host 'For tab completion, add this line to your PowerShell profile ($PROFILE):'
+      - Write-Host ". '$(Join-Path (Split-Path $dir) 'current\completions\tfcensus.ps1')'"

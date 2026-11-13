@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/sassdavid/tfcensus/internal/app"
+	"github.com/sassdavid/tfcensus/internal/complete"
 	"github.com/sassdavid/tfcensus/internal/config"
 	"github.com/sassdavid/tfcensus/internal/discovery"
 	"github.com/sassdavid/tfcensus/internal/drift"
@@ -106,26 +107,53 @@ is 1 when a unit or a repo failed and no gate matched, and 0 otherwise. terrafor
 	}
 	addDiscoveryFlags(cmd, &a.filters)
 	f := cmd.Flags()
-	f.String(
-		flagMode,
-		"refresh-only",
-		"refresh-only, or full to also tell reverted drift from kept drift (config drift.mode)",
-	)
-	f.String(
-		flagCollapse,
-		"shape",
-		"group identical changes across units: shape, strict or none (config drift.collapse)",
-	)
+	f.String(flagMode, string(drift.ModeRefreshOnly),
+		complete.Usage("plan mode: {values}; full also tells reverted drift from kept drift (config drift.mode)",
+			driftModeChoices()))
+	f.String(flagCollapse, string(drift.CollapseShape),
+		complete.Usage("group identical changes across units: {values} (config drift.collapse)", collapseChoices()))
 	f.StringVar(&a.fromDir, flagFromJSONOutDir, "",
 		"read the plans of an earlier terragrunt run --json-out-dir instead of running terragrunt")
 	f.StringVar(&a.reportFile, flagReportFile, "", "the JSON --report-file of that run")
-	f.StringSliceVar(&a.failOn, flagFailOn, nil, "exit 3 when these gates match: drift, drift:reverts, errors")
+	f.StringSliceVar(&a.failOn, flagFailOn, nil,
+		complete.Usage("exit 3 when these gates match: {values}", driftGateChoices()))
 	f.IntVar(&a.minCount, flagMinCount, 1, "count a --fail-on gate needs before it exits 3")
 	f.BoolVar(&a.showAttributes, flagShowAttributes, false,
 		"show before and after values; sensitive and unknown values stay masked")
 	cmd.MarkFlagsMutuallyExclusive(flagFromJSONOutDir, flagFilter)
 	cmd.MarkFlagsMutuallyExclusive(flagFromJSONOutDir, flagGenerateStacks)
+	registerCompletions(cmd, map[string]cobra.CompletionFunc{
+		flagMode:           complete.Enum(driftModeChoices()),
+		flagCollapse:       complete.Enum(collapseChoices()),
+		flagFromJSONOutDir: complete.Dirs(),
+		flagReportFile:     complete.Files("json"),
+		flagFailOn:         complete.List(driftGateChoices()),
+		flagMinCount:       complete.NoFiles,
+	})
 	return cmd
+}
+
+func driftModeChoices() []complete.Choice {
+	return []complete.Choice{
+		{Value: string(drift.ModeRefreshOnly), Desc: "plan -refresh-only: drift only"},
+		{Value: string(drift.ModeFull), Desc: "plan: drift, and whether the plan reverts it"},
+	}
+}
+
+func collapseChoices() []complete.Choice {
+	return []complete.Choice{
+		{Value: string(drift.CollapseShape), Desc: "same type, action and attribute paths"},
+		{Value: string(drift.CollapseStrict), Desc: "shape, and the same before and after values"},
+		{Value: string(drift.CollapseNone), Desc: "one group per change"},
+	}
+}
+
+func driftGateChoices() []complete.Choice {
+	return []complete.Choice{
+		{Value: gateDrift, Desc: "any unit drifted"},
+		{Value: gateReverts, Desc: "a full plan would revert drift"},
+		{Value: gateErrors, Desc: "a unit failed"},
+	}
 }
 
 // driftSettings are the validated config and flags.

@@ -33,7 +33,13 @@ See each sub-command's help for details on how to use the generated script.
 
 * [tfcensus](tfcensus.md)	 - Take a census of Terraform/OpenTofu and Terragrunt fleets on AWS
 * [tfcensus completion bash](tfcensus_completion_bash.md)	 - Generate the autocompletion script for bash
+* [tfcensus completion clink](tfcensus_completion_clink.md)	 - Generate the autocompletion script for clink
+* [tfcensus completion elvish](tfcensus_completion_elvish.md)	 - Generate the autocompletion script for elvish
 * [tfcensus completion fish](tfcensus_completion_fish.md)	 - Generate the autocompletion script for fish
+* [tfcensus completion nushell](tfcensus_completion_nushell.md)	 - Generate the autocompletion script for nushell
+* [tfcensus completion oil](tfcensus_completion_oil.md)	 - Generate the autocompletion script for oil
 * [tfcensus completion powershell](tfcensus_completion_powershell.md)	 - Generate the autocompletion script for powershell
+* [tfcensus completion tcsh](tfcensus_completion_tcsh.md)	 - Generate the autocompletion script for tcsh
+* [tfcensus completion xonsh](tfcensus_completion_xonsh.md)	 - Generate the autocompletion script for xonsh
 * [tfcensus completion zsh](tfcensus_completion_zsh.md)	 - Generate the autocompletion script for zsh
 

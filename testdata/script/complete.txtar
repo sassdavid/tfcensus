@@ -1,0 +1,146 @@
+# Shell completion from local data: cobra's __complete and __completeNoDesc, and carapace's
+# _carapace export for the shells cobra can't generate. stdout carries results only.
+env AWS_CONFIG_FILE=$WORK/aws/config
+
+# Static: subcommands.
+exec tfcensus __complete report ''
+cmp stdout $WORK/golden/report.txt
+stderr 'ShellCompDirectiveNoFileComp'
+
+# Enum flags, with and without descriptions.
+exec tfcensus __complete --format ''
+cmp stdout $WORK/golden/format.txt
+exec tfcensus __completeNoDesc --format ''
+cmp stdout $WORK/golden/format-nodesc.txt
+exec tfcensus __complete scan --fail-on unmanaged,
+cmp stdout $WORK/golden/fail-on.txt
+exec tfcensus __complete report scan --category u
+cmp stdout $WORK/golden/category.txt
+
+# File and directory flags and arguments.
+exec tfcensus __complete --config ''
+cmp stdout $WORK/golden/config.txt
+exec tfcensus __complete scan --rules ''
+cmp stdout $WORK/golden/config.txt
+exec tfcensus __complete codify --into ''
+cmp stdout $WORK/golden/dirs.txt
+exec tfcensus __complete scan ''
+cmp stdout $WORK/golden/dirs.txt
+exec tfcensus __complete whois ''
+cmp stdout $WORK/golden/nothing.txt
+
+# Dynamic: profiles from AWS_CONFIG_FILE (never the credentials file), units from --index,
+# types from the embedded typemap.
+exec tfcensus __complete doctor --profile ''
+cmp stdout $WORK/golden/profiles.txt
+exec tfcensus __complete report inventory --index $WHOIS/index.json --unit tf-scan/
+cmp stdout $WORK/golden/units.txt
+exec tfcensus __complete scan --types AWS::IAM::R
+cmp stdout $WORK/golden/types.txt
+
+# A missing --index file: no results and the error directive.
+exec tfcensus __complete report inventory --index $WORK/missing.json --unit ''
+cmp stdout $WORK/golden/error.txt
+
+# A source that never answers (a FIFO nobody writes) gives up after 1s.
+[exec:mkfifo] exec mkfifo $WORK/fifo
+[exec:mkfifo] env AWS_CONFIG_FILE=$WORK/fifo
+[exec:mkfifo] exec tfcensus __complete doctor --profile ''
+[exec:mkfifo] cmp stdout $WORK/golden/error.txt
+env AWS_CONFIG_FILE=$WORK/aws/config
+
+# carapace answers from the same completion functions.
+exec tfcensus _carapace export tfcensus --color ''
+stdout '"values":\[\{"value":"always","display":"always","description":"always color"\},\{"value":"auto","display":"auto","description":"color on a terminal unless NO_COLOR is set"\},\{"value":"never","display":"never","description":"never color"\}\]'
+exec tfcensus _carapace export tfcensus doctor --profile ''
+stdout '"values":\[\{"value":"acme-dev","display":"acme-dev"\},\{"value":"acme-prod","display":"acme-prod"\},\{"value":"default","display":"default"\}\]'
+exec tfcensus _carapace export tfcensus report inventory --index $WHOIS/index.json --unit tf-scan/
+stdout '"value":"tf-scan/iam","display":"tf-scan/iam","description":"ok, 2 instances"'
+exec tfcensus _carapace export tfcensus report inventory --index $WORK/missing.json --unit ''
+stdout '"values":\[\]'
+
+# Shells cobra can't generate get carapace snippets.
+exec tfcensus completion nushell
+stdout 'let tfcensus_completer'
+stdout '_carapace\W+nushell'
+exec tfcensus completion elvish
+stdout '_carapace\W+elvish'
+exec tfcensus completion xonsh
+stdout '_carapace\W+xonsh'
+exec tfcensus completion tcsh
+stdout '_carapace\W+tcsh'
+exec tfcensus completion oil
+stdout '_carapace\W+oil'
+exec tfcensus completion clink
+stdout '_carapace\W+cmd-clink'
+
+-- aws/config --
+[default]
+region = eu-central-1
+
+[profile acme-dev]
+sso_session = acme
+
+[sso-session acme]
+sso_region = eu-central-1
+
+[profile acme-prod]
+-- aws/credentials --
+[from-credentials]
+-- golden/report.txt --
+audit	List the findings of a saved backend audit, highest severity first
+drift	Summarize a saved drift run: unit statuses and drifted resources
+html	Write a static HTML report from scan, drift and audit JSON
+inventory	Count the managed resources of a saved state index per unit and type
+scan	Summarize a saved scan: counts and the top unmanaged resources
+units	List the units of a saved state index
+:4
+-- golden/format.txt --
+tty	table with color for a terminal
+plain	table without color
+md	Markdown
+json	JSON envelope for scripts
+csv	comma-separated values
+sarif	SARIF 2.1.0 for code scanning
+github	GitHub Actions annotations
+:4
+-- golden/format-nodesc.txt --
+tty
+plain
+md
+json
+csv
+sarif
+github
+:4
+-- golden/fail-on.txt --
+unmanaged,double-managed	more than one state manages it
+:6
+-- golden/category.txt --
+unmanaged	no state manages it
+undetermined	type unmapped, or the layer data is not enough
+:4
+-- golden/config.txt --
+yaml
+yml
+:8
+-- golden/dirs.txt --
+:16
+-- golden/nothing.txt --
+:4
+-- golden/profiles.txt --
+acme-dev
+acme-prod
+default
+:4
+-- golden/units.txt --
+tf-scan/iam	ok, 2 instances
+tf-scan/iam-dup	ok, 1 instance
+tf-scan/network	ok, 5 instances
+:4
+-- golden/types.txt --
+AWS::IAM::Role	aws_iam_role
+AWS::IAM::RolePolicy	aws_iam_role_policy
+:6
+-- golden/error.txt --
+:1
