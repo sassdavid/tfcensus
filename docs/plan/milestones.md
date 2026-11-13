@@ -82,8 +82,8 @@ package channel gets anything until M19. No new features.
 - [x] The Homebrew cask installs real completion scripts. Today `args: [completion]` plus
   `shell_parameter_format: cobra` makes brew run `tfcensus completion completion bash`, which
   prints help text. Drop `args` (M12 replaces the stanza) and check the rendered cask in `dist/`.
-- [ ] The container image builds once in CI before the merge (snapshots run `--skip=sign,docker`
-  today).
+- [x] The container image builds once in CI before the merge: ci run 43394698104 (PR #20,
+  fa580c2) built `ghcr.io/sassdavid/tfcensus` for amd64 and arm64 and ran `version` on amd64.
 - [x] Paperwork from the 2026-11-13 audit: tick inventory.md criterion 5 (nightly run
   43206897470) and the config.md criterion (`TestSpec_config_1` to `_3`). Correct the release
   versions in `overview.md`, `architecture.md` and `cli.md`. Change `--fail-on audit:<severity>`
