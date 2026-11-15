@@ -1,0 +1,57 @@
+name: renovate-config
+
+# Self-hosted Renovate only reads renovate.json on its weekly run from main, so a broken change
+# would show up after the merge. This validates it on the pull request instead. Copied from
+# sassdavid/advent-of-code-rust.
+on:
+  push:
+    branches: [main]
+    paths:
+      - renovate.json
+      - .github/workflows/renovate-config.yml
+  pull_request:
+    branches: [main]
+    paths:
+      - renovate.json
+      - .github/workflows/renovate-config.yml
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: renovate-config-validator
+    # The action runs Renovate in a Docker container, which ubuntu-slim doesn't support.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Write validator command
+        shell: bash
+        run: |
+          cat >"${RUNNER_TEMP}/validate.sh" <<'EOF'
+          #!/bin/bash
+          set -euo pipefail
+          cd /repo
+          # --strict also fails when the config needs a migration.
+          exec renovate-config-validator --strict
+          EOF
+          chmod +x "${RUNNER_TEMP}/validate.sh"
+      # Same action and Renovate version as renovate.yml, so the validator knows every option the
+      # weekly run uses. Renovate updates both files together.
+      - name: Validate renovate.json
+        uses: renovatebot/github-action@1c0cf989c02653fba0efe7ca5772338860ca71dc # v46.3.12
+        with:
+          # Required by the action; the validator makes no API calls.
+          token: unused
+          renovate-version: 44.201.1 # Renovate updates it, see renovate.json
+          docker-cmd-file: ${{ runner.temp }}/validate.sh
+          docker-volumes: ${{ github.workspace }}:/repo:ro
