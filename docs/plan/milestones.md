@@ -218,12 +218,19 @@ Design in [roadmap-research.md](roadmap-research.md#github-action).
   and `writing.md` with its tool's repo. A copy in a directory with another name exits 2 and
   passes with `.sibling`. `.release-please-manifest.json` moved to the similar list, since the
   two tools release different versions.
-- [ ] Skeleton: `action.yml`, `scripts/install.sh`, `scripts/run.sh` and `scripts/tool.env` (the
+- [x] Skeleton: `action.yml`, `scripts/install.sh`, `scripts/run.sh` and `scripts/tool.env` (the
   only tool-specific file besides the README). Install checks sha256 and
   `gh attestation verify --signer-workflow sassdavid/tfcensus/.github/workflows/release.yml`,
   with cosign and checksum-only as options. A tampered archive fails in CI. CI runs on ubuntu,
   macos and windows, zizmor and actionlint pass, every `uses:` is pinned by SHA, and
   release-please publishes immutable releases with a moving `v1` tag.
+  Evidence (2026-11-15, tfcensus-action v1.0.0 = feb168b): `ci` run 43727583429 passed `lint`
+  (jactionlint, shellcheck, prose), `test` on ubuntu, macos and windows (`scripts/test-install.sh`
+  fails a tampered archive in every verify mode) and the action job for attestation, cosign and
+  checksum on all three. `security` run 43727583387 passed zizmor. Every `uses:` is a SHA or `$/`.
+  release-please drafted v1.0.0 from #2. After it was published, the API reports
+  `"immutable": true`, `gh release verify v1.0.0` prints "Release v1.0.0 verified!", and
+  `major-tag` run 43728339335 moved `v1` to feb168b, the commit of `v1.0.0`.
 - [x] Report mode: one run writes json, SARIF, md and annotations. SARIF shows in code scanning on
   a test repo, and `fail-on` fails the step on exit 3.
   Evidence (2026-11-15, sassdavid/action-test, tfcensus-action#3): `drift --from-json-out-dir`
@@ -238,8 +245,15 @@ Design in [roadmap-research.md](roadmap-research.md#github-action).
   of 43723751251 logged `unchanged` and added none, and later commits that changed the noise
   presets edited the same comment (new hash). `scripts/test-run.sh` runs the fork and
   Dependabot fallback with a fake event on ubuntu, macos and windows.
-- [ ] v1.0.0 is on the Marketplace under a name that doesn't collide, and `docs/ci/drift.yml`
+- [x] v1.0.0 is on the Marketplace under a name that doesn't collide, and `docs/ci/drift.yml`
   uses the action.
+  Evidence (2026-11-15): published at 15:09 UTC as
+  https://github.com/marketplace/actions/tfcensus (HTTP 200). Before that the page answered 404,
+  and GitHub has no user or org named tfcensus. v1.0.0 missed `<from>/report.json` when `from` is
+  absolute. tfcensus-action#5 fixed it, and v1.0.1 (f2cc1dc, published 15:22 UTC) is immutable,
+  passed `ci`, `gh release verify` and `major-tag` run 43729541373, and `v1` points at it.
+  `docs/ci/drift.yml` runs `sassdavid/tfcensus-action@f2cc1dc # v1.0.1` in report mode with
+  `fail-on: drift,errors`, and jactionlint passes on it.
 
 ### M15: MCP prompts and the LLM decision (shared, different per repo) → part of v0.3.0
 Scope: relgap gets an opt-in `--summarize`. tfcensus doesn't, by decision on 2026-11-13: its

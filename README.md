@@ -26,7 +26,8 @@ Report commands take a repeatable `--out <format>=<path>`, so one run writes JSO
 and GitHub annotations with the exit code of its `--fail-on` gate. Markdown is cut at a table row
 or section once it reaches `--md-max-chars` (60,000 characters, under GitHub's 65,536-character
 comment limit), with a footer that says what was cut. [docs/ci/drift.yml](docs/ci/drift.yml)
-checks drift on a schedule and uploads SARIF; [docs/ci/drift-pr.yml](docs/ci/drift-pr.yml) keeps
+checks drift on a schedule with [tfcensus-action](https://github.com/sassdavid/tfcensus-action)
+and uploads SARIF; [docs/ci/drift-pr.yml](docs/ci/drift-pr.yml) keeps
 one drift comment on each pull request.
 
 ## Install
