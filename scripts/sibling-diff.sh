@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
-# Compares the files shared by tfcensus and relgap (.claude/rules/siblings.md). Files that name
-# both tools must be byte-identical; the rest must match once the tool name is swapped. Exits 1
-# when a file that must match differs.
+# Compares the files shared by sibling repositories (.claude/rules/siblings.md): tfcensus with
+# relgap, and tfcensus-action with relgap-action. Verbatim files must be byte-identical in all
+# four repos; the identical ones must match once the tool name is swapped. An action repo also
+# compares its verbatim files and writing rules with its tool's repo (relgap-action with relgap).
+# The repo name comes from a .sibling file or the directory name. Exits 1 when a file that must
+# match differs.
 #   mise run sibling:diff             # identical files only
 #   mise run sibling:diff -- -all     # also show the expected differences in similar files
 set -euo pipefail
@@ -11,7 +14,7 @@ verbatim=(
   scripts/sibling-diff.sh
 )
 
-identical=(
+cli_identical=(
   .claude/rules/go.md
   .claude/rules/writing.md
   .gitattributes
@@ -20,7 +23,6 @@ identical=(
   .github/workflows/security.yml
   .golangci.yml
   .gitignore
-  .release-please-manifest.json
   mise.lock
   release-please-config.json
   renovate.json
@@ -111,9 +113,10 @@ identical=(
   testdata/script/version.txtar
 )
 
-similar=(
+cli_similar=(
   CLAUDE.md
   README.md
+  .release-please-manifest.json
   go.mod
   mise.toml
   .goreleaser.yaml
@@ -134,6 +137,41 @@ similar=(
   docs/install.md
 )
 
+action_identical=(
+  .claude/rules/writing.md
+  .gitattributes
+  .github/jactionlint.yaml
+  .github/workflows/ci.yml
+  .github/workflows/major-tag.yml
+  .github/workflows/release-please.yml
+  .github/workflows/security.yml
+  .gitignore
+  .shellcheckrc
+  action.yml
+  release-please-config.json
+  renovate.json
+  scripts/install.sh
+  scripts/major-tag.sh
+  scripts/run.sh
+  scripts/test-install.sh
+  scripts/test-outputs.sh
+)
+
+action_similar=(
+  CLAUDE.md
+  README.md
+  .release-please-manifest.json
+  mise.toml
+  mise.lock
+  scripts/tool.env
+)
+
+# Files an action repo shares byte for byte with its tool's repo.
+action_from_tool=(
+  "${verbatim[@]}"
+  .claude/rules/writing.md
+)
+
 show_all=false
 for arg in "$@"; do
   case "$arg" in
@@ -145,16 +183,30 @@ for arg in "$@"; do
   esac
 done
 
-self=$(basename "$(sed -n 's/^module //p' go.mod)")
+if [[ -f .sibling ]]; then
+  name=$(tr -d '[:space:]' <.sibling)
+else
+  name=$(basename "$PWD")
+fi
+self=${name%-action}
+suffix=${name#"$self"}
 case "$self" in
   tfcensus) other=relgap ;;
   relgap) other=tfcensus ;;
   *)
-    echo "sibling:diff: unknown module $self" >&2
+    echo "sibling:diff: unknown repo $name (want tfcensus, relgap or their -action repos; write the name to .sibling)" >&2
     exit 2
     ;;
 esac
-other_dir=${SIBLING_DIR:-$(dirname "$PWD")/$other}
+if [[ -z "$suffix" ]]; then
+  identical=("${cli_identical[@]}")
+  similar=("${cli_similar[@]}")
+else
+  identical=("${action_identical[@]}")
+  similar=("${action_similar[@]}")
+fi
+parent=$(dirname "$PWD")
+other_dir=${SIBLING_DIR:-$parent/$other$suffix}
 if [[ ! -d "$other_dir" ]]; then
   echo "sibling:diff: $other_dir not found (set SIBLING_DIR)" >&2
   exit 2
@@ -168,30 +220,40 @@ rename() {
 }
 
 status=0
-for f in "${verbatim[@]}"; do
-  if [[ ! -f "$f" || ! -f "$other_dir/$f" ]]; then
-    echo "missing: $f"
-    status=1
-  elif ! diff -u --label "$other/$f" --label "$self/$f" "$other_dir/$f" "$f"; then
-    status=1
+tool_dir=""
+# compare <label> <dir> <rename|cat> <file>...
+compare() {
+  local label=$1 dir=$2 filter=$3 f
+  shift 3
+  for f in "$@"; do
+    if [[ ! -f "$f" || ! -f "$dir/$f" ]]; then
+      echo "missing: $f ($label)"
+      status=1
+    elif ! diff -u --label "$label/$f" --label "$name/$f" <("$filter" "$dir/$f") "$f"; then
+      status=1
+    fi
+  done
+}
+
+compare "$other$suffix" "$other_dir" cat "${verbatim[@]}"
+compare "$other$suffix" "$other_dir" rename "${identical[@]}"
+if [[ -n "$suffix" ]]; then
+  tool_dir=${TOOL_DIR:-$parent/$self}
+  if [[ -d "$tool_dir" ]]; then
+    compare "$self" "$tool_dir" cat "${action_from_tool[@]}"
+  else
+    echo "sibling:diff: $tool_dir not found, skipped the comparison with $self (set TOOL_DIR)" >&2
+    tool_dir=""
   fi
-done
-for f in "${identical[@]}"; do
-  if [[ ! -f "$f" || ! -f "$other_dir/$f" ]]; then
-    echo "missing: $f"
-    status=1
-  elif ! diff -u --label "$other/$f" --label "$self/$f" <(rename "$other_dir/$f") "$f"; then
-    status=1
-  fi
-done
+fi
 if $show_all; then
   for f in "${similar[@]}"; do
     if [[ -f "$f" && -f "$other_dir/$f" ]]; then
-      diff -u --label "$other/$f" --label "$self/$f" <(rename "$other_dir/$f") "$f" || true
+      diff -u --label "$other$suffix/$f" --label "$name/$f" <(rename "$other_dir/$f") "$f" || true
     fi
   done
 fi
 if [[ $status -eq 0 ]]; then
-  echo "shared files match $other_dir"
+  echo "shared files match $other_dir${tool_dir:+ and $tool_dir}"
 fi
 exit "$status"

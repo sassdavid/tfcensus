@@ -211,8 +211,13 @@ Decisions: [engineering ADR-0014](../engineering/adr/0014-report-outputs-and-pr-
 Scope: a composite action in its own repo that installs a verified release and wires M13's flags.
 It never takes AWS credentials: users run `configure-aws-credentials` and terragrunt first.
 Design in [roadmap-research.md](roadmap-research.md#github-action).
-- [ ] `scripts/sibling-diff.sh` reads the tool name from a `.sibling` file or the directory name
+- [x] `scripts/sibling-diff.sh` reads the tool name from a `.sibling` file or the directory name
   instead of `go.mod`, stays verbatim in all four repos, and each action repo has its file list.
+  Evidence (2026-11-15, local): `mise run sibling:diff` prints "shared files match" in relgap,
+  tfcensus, relgap-action and tfcensus-action. An action repo also compares the verbatim files
+  and `writing.md` with its tool's repo. A copy in a directory with another name exits 2 and
+  passes with `.sibling`. `.release-please-manifest.json` moved to the similar list, since the
+  two tools release different versions.
 - [ ] Skeleton: `action.yml`, `scripts/install.sh`, `scripts/run.sh` and `scripts/tool.env` (the
   only tool-specific file besides the README). Install checks sha256 and
   `gh attestation verify --signer-workflow sassdavid/tfcensus/.github/workflows/release.yml`,
