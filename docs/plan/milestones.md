@@ -224,10 +224,20 @@ Design in [roadmap-research.md](roadmap-research.md#github-action).
   with cosign and checksum-only as options. A tampered archive fails in CI. CI runs on ubuntu,
   macos and windows, zizmor and actionlint pass, every `uses:` is pinned by SHA, and
   release-please publishes immutable releases with a moving `v1` tag.
-- [ ] Report mode: one run writes json, SARIF, md and annotations. SARIF shows in code scanning on
+- [x] Report mode: one run writes json, SARIF, md and annotations. SARIF shows in code scanning on
   a test repo, and `fail-on` fails the step on exit 3.
-- [ ] Comment mode: one sticky comment on a test repo's terragrunt PR. A re-run edits it with no
+  Evidence (2026-11-15, sassdavid/action-test, tfcensus-action#3): `drift --from-json-out-dir`
+  on recorded plans (`testdata/drift/ingest` without its failed unit, no AWS). Push run
+  43722958899 uploaded `tfcensus-drift`, and code scanning lists 8 open `drift` alerts on the
+  units' `terragrunt.hcl` files. The macOS and Windows jobs wrote all three files. The dispatched
+  `gate` job (run 43723754174) printed `--fail-on matched (drift: 6)` and failed with exit
+  code 3.
+- [x] Comment mode: one sticky comment on a test repo's terragrunt PR. A re-run edits it with no
   duplicate, and a fork PR falls back to the step summary.
+  Evidence (2026-11-15, sassdavid/action-test#2): one comment from github-actions[bot]. A re-run
+  of 43723751251 logged `unchanged` and added none, and later commits that changed the noise
+  presets edited the same comment (new hash). `scripts/test-run.sh` runs the fork and
+  Dependabot fallback with a fake event on ubuntu, macos and windows.
 - [ ] v1.0.0 is on the Marketplace under a name that doesn't collide, and `docs/ci/drift.yml`
   uses the action.
 
