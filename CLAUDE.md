@@ -53,3 +53,4 @@ A Go CLI that takes a census of Terraform/OpenTofu + Terragrunt fleets on AWS. I
 - Every finding carries `reason` and `rule`. Every suppression carries `reason` and optionally `expires`.
 - Logs go to stderr, data to stdout through an injected `io.Writer`. The logger comes from `Deps` (sloglint).
 - Use Conventional Commits. release-please owns versions.
+- Renovate runs from `.github/workflows/renovate.yml` with the rules in `renovate.json` (engineering ADR-0015, setup in `docs/engineering/ci-and-release.md#renovate`). Change both files in all repos that share them.

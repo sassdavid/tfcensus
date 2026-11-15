@@ -7,8 +7,9 @@
 
 **Re-checked on 2026-11-10 at M0** (same method): every pinned version below was still the latest,
 except three AWS modules that were one patch newer (updated in the table).
-Re-run the check right before M0 (script: [§ Refresh](#refresh)). After M0, Renovate keeps everything current,
-with a 3-day minimum release age (matching your mise `minimum_release_age` habit).
+Since 2026-11-15 Renovate keeps everything current, with a 3-day minimum release age
+([ADR-0015](adr/0015-dependency-updates-renovate.md)). The versions in the tables below are the ones chosen and
+checked by hand; `mise.toml`, `mise.lock`, `go.mod` and the workflows hold the current ones.
 
 **Updated on 2026-11-11 at M5:** every direct and indirect Go module went to its `@latest` from
 `proxy.golang.org`, queried one module at a time from the `go.mod` list. The owner waived the
@@ -103,7 +104,7 @@ goreleaser, chezmoi, k9s, golangci-lint.
 | actions/dependency-review-action | v5.0.0 |
 | zizmorcore/zizmor-action | v0.8.1 |
 | actions/create-github-app-token | v3.3.0, only in `renovate.yml` |
-| renovatebot/github-action | v46.3.12 with Renovate 44.201.1, in `renovate.yml` and `renovate-config.yml` |
+| renovatebot/github-action | v46.3.13 with Renovate 44.236.2, in `renovate.yml` and `renovate-config.yml`; Renovate updates both in one PR |
 
 Indirect modules are whatever MVS selects, except where govulncheck flags a known (even unreachable)
 vulnerability: at M0, `golang.org/x/text` went from v0.14.0 to v0.43.0 and `golang.org/x/sys` from

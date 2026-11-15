@@ -33,6 +33,49 @@ Rules:
 - `permissions:` start at `{}` and each job gets only what it needs. Release gets `id-token: write`, `attestations: write`, `contents: write` and `packages: write` (ghcr.io).
 - Release tags are created only by release-please, never by hand.
 
+## Renovate
+
+Self-hosted Renovate keeps dependencies current: `renovate.yml` runs it weekly as the
+`sassdavid-renovate` GitHub App, and `renovate.json` holds the rules. The decisions and their
+reasons are in [ADR-0015](adr/0015-dependency-updates-renovate.md).
+
+Setup for a repo, all in the GitHub UI:
+
+1. Install the app on the repo: github.com/settings/installations, `sassdavid-renovate`,
+   Configure, Repository access.
+2. The app needs the permissions that `renovate.yml` asks for: Contents, Pull requests,
+   Workflows, Issues and Commit statuses write; Checks, Administration, Dependabot alerts, Merge
+   queues and Metadata read.
+3. Settings, Environments: create `renovate` with the deployment branch `main`, the secret
+   `RENOVATE_APP_PRIVATE_KEY` (the app's `.pem`) and the variable `RENOVATE_APP_CLIENT_ID`.
+4. Turn on Issues, for the Dependency Dashboard.
+5. Settings, Advanced Security: turn on the dependency graph and Dependabot alerts. Leave
+   Dependabot security updates off, so it doesn't open the same PRs as Renovate.
+6. Run the workflow once by hand (Actions, renovate, Run workflow) and check the result.
+
+How to check a run:
+
+- The run log ends with `"result": "done"` and `"exitCode": 0`. A `WARN:` or `ERROR:` line
+  names the problem.
+- The Dependency Dashboard issue lists open PRs, updates held by the 3-day cooldown ("Pending
+  Status Checks"), updates waiting for the lock file maintenance window ("Awaiting Schedule") and
+  failed lookups. Tick a checkbox there and run the workflow to act on it before Monday.
+- A PR that touches `mise.toml` also changes `mise.lock`. If it doesn't, the
+  `RENOVATE_ALLOWED_UNSAFE_EXECUTIONS` line is missing.
+- Changes to `renovate.json` are checked by `renovate-config.yml` on the pull request. Locally:
+  `docker run --rm -v "$PWD:/repo:ro" -w /repo ghcr.io/renovatebot/renovate:<version> renovate-config-validator --strict`,
+  with the version from `renovate.yml`.
+
+`renovate.yml` and `renovate-config.yml` are the same in both tool repos, both action repos and
+`sassdavid/action-test`, and `renovate.json` matches the sibling repo (`mise run sibling:diff`).
+Renovate opens the same update in each repo on its own run. Merge the pair together:
+`mise run sibling:diff` fails on `mise.lock`, `go.mod` or a workflow while only one side has it.
+
+In tfcensus every run logs `MetadataLookupWarning: received unexpected error ... ENOTFOUND`. The
+Dockerfile's `gcr.io` image makes Renovate try Google credentials, which probes the GCP metadata
+server that a GitHub runner doesn't have. Renovate then looks the image up anonymously, so the
+warning needs no action.
+
 ## goreleaser essentials
 
 - Targets: `linux/{amd64,arm64}`, `darwin/{amd64,arm64}`, `windows/{amd64,arm64}`, built with `CGO_ENABLED=0`, `-trimpath`, `-ldflags "-s -w -X github.com/sassdavid/tfcensus/internal/buildinfo.version=..."` (`main` only calls `cli.Run`, so the ldflags variables live in `internal/buildinfo`, per ADR-0008 #2).
