@@ -30,6 +30,10 @@ checks drift on a schedule with [tfcensus-action](https://github.com/sassdavid/t
 and uploads SARIF; [docs/ci/drift-pr.yml](docs/ci/drift-pr.yml) keeps
 one drift comment on each pull request.
 
+tfcensus has no built-in LLM call. `tfcensus mcp` offers the prompts `triage_drift` and
+`explain_unmanaged` to your agent, and [docs/ci/ai-summary.md](docs/ci/ai-summary.md) shows an
+opt-in CI job that sends the drift summary to Bedrock or Copilot and lists what leaves the runner.
+
 ## Install
 
 Releases are on [GitHub](https://github.com/sassdavid/tfcensus/releases): download the archive for

@@ -63,6 +63,8 @@ cli_identical=(
   internal/mcpkit/doc.go
   internal/mcpkit/mcpkit_test.go
   internal/mcpkit/page.go
+  internal/mcpkit/prompt.go
+  internal/mcpkit/prompt_test.go
   internal/mcpkit/roots.go
   internal/mcpkit/server.go
   internal/prose/doc.go

@@ -47,6 +47,12 @@ message naming the flag. scan_summary without --scan reads the newest scan cache
 applies the config's ownership rules; a snapshot older than cache.ttl comes with a warning.
 The files are read again on every call, so a new run is picked up without a restart.
 
+Two prompts tell the agent which tools to call and to cite unit paths, addresses, rule IDs
+and ARNs: triage_drift [unit] sorts drift into revert, adopt and investigate, and
+explain_unmanaged [account] [type] explains the unmanaged resources of the last scan.
+Claude Code offers them as /mcp__tfcensus__triage_drift and /mcp__tfcensus__explain_unmanaged.
+Neither asks for attribute values. tfcensus has no built-in LLM call (docs/ci/ai-summary.md).
+
 A result over --max-result-bytes (default 50,000, Claude Code's limit for showing a result
 to the model) is split. The envelope then has a page field, and the agent passes
 page.next_cursor back to the same tool for the rest. Double-managed and unmanaged resources
