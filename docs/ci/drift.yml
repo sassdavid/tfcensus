@@ -51,11 +51,10 @@ jobs:
             --report-format json --log-format json --no-color \
             -- plan -refresh-only -lock=false -detailed-exitcode || true
       # Exit 3: drift or a failed unit. Exit 1 or 2: tfcensus couldn't read the plans. The action
-      # uploads the SARIF and writes the step summary before the step fails. args names the
-      # report because v1.0.0 finds <from>/report.json only for a relative from.
-      - uses: sassdavid/tfcensus-action@feb168b70125ff0c4c73954bd068aceb18e62109 # v1.0.0
+      # uploads the SARIF and writes the step summary before the step fails. It passes
+      # <from>/report.json as --report-file.
+      - uses: sassdavid/tfcensus-action@f2cc1dccce5a5de868ff2f3f50dbec2603d197c7 # v1.0.1
         with:
           mode: report
           from: ${{ runner.temp }}/plans
-          args: --report-file=${{ runner.temp }}/plans/report.json
           fail-on: drift,errors

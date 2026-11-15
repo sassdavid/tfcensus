@@ -99,7 +99,7 @@ goreleaser, chezmoi, k9s, golangci-lint.
 | googleapis/release-please-action | v5.0.0 |
 | github/codeql-action (SARIF upload) | v4.39.3 (bundle v2.27.4) |
 | aws-actions/configure-aws-credentials | v6.3.0 (published 2026-09-15), only in the `docs/ci/drift.yml` example |
-| sassdavid/tfcensus-action | v1.0.0 (published 2026-11-15), only in the `docs/ci/drift.yml` example |
+| sassdavid/tfcensus-action | v1.0.1 (published 2026-11-15), only in the `docs/ci/drift.yml` example |
 | actions/dependency-review-action | v5.0.0 |
 | zizmorcore/zizmor-action | v0.8.1 |
 

@@ -249,10 +249,11 @@ Design in [roadmap-research.md](roadmap-research.md#github-action).
   uses the action.
   Evidence (2026-11-15): published at 15:09 UTC as
   https://github.com/marketplace/actions/tfcensus (HTTP 200). Before that the page answered 404,
-  and GitHub has no user or org named tfcensus. `docs/ci/drift.yml` runs
-  `sassdavid/tfcensus-action@feb168b # v1.0.0` in report mode with `fail-on: drift,errors`, and
-  jactionlint passes on it. v1.0.0 misses `<from>/report.json` when `from` is absolute
-  (tfcensus-action#5 fixes it for v1.0.1), so the example names `--report-file` in `args`.
+  and GitHub has no user or org named tfcensus. v1.0.0 missed `<from>/report.json` when `from` is
+  absolute. tfcensus-action#5 fixed it, and v1.0.1 (f2cc1dc, published 15:22 UTC) is immutable,
+  passed `ci`, `gh release verify` and `major-tag` run 43729541373, and `v1` points at it.
+  `docs/ci/drift.yml` runs `sassdavid/tfcensus-action@f2cc1dc # v1.0.1` in report mode with
+  `fail-on: drift,errors`, and jactionlint passes on it.
 
 ### M15: MCP prompts and the LLM decision (shared, different per repo) → part of v0.3.0
 Scope: relgap gets an opt-in `--summarize`. tfcensus doesn't, by decision on 2026-11-13: its
