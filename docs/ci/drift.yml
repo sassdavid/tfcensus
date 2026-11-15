@@ -1,13 +1,13 @@
 # Drift detection for a Terragrunt live repository: copy this file to .github/workflows/drift.yml
-# there. The repo's mise.toml pins terragrunt, terraform and tfcensus
-# (mise use github:sassdavid/tfcensus), and its .tfcensus.yaml holds the drift.noise rules.
+# there. The repo's mise.toml pins terragrunt and terraform, and its .tfcensus.yaml holds the
+# drift.noise rules. sassdavid/tfcensus-action installs a verified tfcensus release.
 # AWS access is a read-only role assumed with OIDC; set its ARN as the DRIFT_ROLE_ARN variable.
 #
-# terragrunt plans every unit once into $RUNNER_TEMP. One tfcensus run reads those plans, prints
-# annotations, writes SARIF and Markdown with --out, and gates the job with its exit code. The
-# later steps run even when the gate fails. The plans hold state values, so they stay on the runner
-# and are never uploaded; the reports name attribute paths only. docs/ci/drift-pr.yml comments on
-# pull requests instead.
+# terragrunt plans every unit once into $RUNNER_TEMP/plans. One tfcensus run in the action reads
+# those plans, prints annotations, writes SARIF and Markdown, uploads the SARIF (category
+# tfcensus-drift), appends the Markdown to the step summary, and gates the job last. The plans
+# hold state values, so they stay on the runner and are never uploaded; the reports name attribute
+# paths only. docs/ci/drift-pr.yml comments on pull requests instead.
 name: drift
 
 on:
@@ -47,20 +47,15 @@ jobs:
         env:
           TG_TF_PATH: terraform
         run: |
-          terragrunt run --all --tf-path terraform --json-out-dir "$RUNNER_TEMP/plans" --report-file "$RUNNER_TEMP/report.json" \
+          terragrunt run --all --tf-path terraform --json-out-dir "$RUNNER_TEMP/plans" --report-file "$RUNNER_TEMP/plans/report.json" \
             --report-format json --log-format json --no-color \
             -- plan -refresh-only -lock=false -detailed-exitcode || true
-      # Exit 3: drift or a failed unit. Exit 1 or 2: tfcensus couldn't read the plans. --out writes
-      # every file before the exit code is set.
-      - name: tfcensus drift
-        run: |
-          tfcensus drift --from-json-out-dir "$RUNNER_TEMP/plans" --report-file "$RUNNER_TEMP/report.json" \
-            --format github --out sarif=drift.sarif --out md=drift.md --fail-on drift,errors
-      - name: step summary
-        if: ${{ !cancelled() && hashFiles('drift.md') != '' }}
-        run: cat drift.md >> "$GITHUB_STEP_SUMMARY"
-      - uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
-        if: ${{ !cancelled() && hashFiles('drift.sarif') != '' }}
+      # Exit 3: drift or a failed unit. Exit 1 or 2: tfcensus couldn't read the plans. The action
+      # uploads the SARIF and writes the step summary before the step fails. args names the
+      # report because v1.0.0 finds <from>/report.json only for a relative from.
+      - uses: sassdavid/tfcensus-action@feb168b70125ff0c4c73954bd068aceb18e62109 # v1.0.0
         with:
-          sarif_file: drift.sarif
-          category: drift
+          mode: report
+          from: ${{ runner.temp }}/plans
+          args: --report-file=${{ runner.temp }}/plans/report.json
+          fail-on: drift,errors
