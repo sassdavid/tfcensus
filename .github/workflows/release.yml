@@ -47,7 +47,7 @@ jobs:
       # No tool cache in the release job (cache poisoning); mise.lock pins checksums.
       - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
-          version: 2026.11.5
+          version: 2026.11.7
           cache: false
       # dockers_v2 builds linux/amd64 and linux/arm64 in one buildx call.
       - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0

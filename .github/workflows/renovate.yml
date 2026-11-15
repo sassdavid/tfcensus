@@ -48,10 +48,10 @@ jobs:
           permission-merge-queues: read # merge queue detection
           permission-metadata: read
       - name: Run Renovate
-        uses: renovatebot/github-action@1c0cf989c02653fba0efe7ca5772338860ca71dc # v46.3.12
+        uses: renovatebot/github-action@266fef21329c44765ad42f9dea1f01f5d2d91084 # v46.3.13
         with:
           token: ${{ steps.app-token.outputs.token }}
-          renovate-version: 44.201.1 # Renovate updates it, see renovate.json
+          renovate-version: 44.236.2 # Renovate updates it, see renovate.json
           additional-env-list: OSV_OFFLINE_DATABASE_FORMAT
         env:
           # osvVulnerabilityAlerts downloads the OSV database on every run; split downloads only

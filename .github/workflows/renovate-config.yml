@@ -48,10 +48,10 @@ jobs:
       # Same action and Renovate version as renovate.yml, so the validator knows every option the
       # weekly run uses. Renovate updates both files together.
       - name: Validate renovate.json
-        uses: renovatebot/github-action@1c0cf989c02653fba0efe7ca5772338860ca71dc # v46.3.12
+        uses: renovatebot/github-action@266fef21329c44765ad42f9dea1f01f5d2d91084 # v46.3.13
         with:
           # Required by the action; the validator makes no API calls.
           token: unused
-          renovate-version: 44.201.1 # Renovate updates it, see renovate.json
+          renovate-version: 44.236.2 # Renovate updates it, see renovate.json
           docker-cmd-file: ${{ runner.temp }}/validate.sh
           docker-volumes: ${{ github.workspace }}:/repo:ro
