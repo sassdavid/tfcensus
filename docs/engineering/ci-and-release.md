@@ -32,6 +32,14 @@ Rules:
 - Actions are pinned by commit SHA (Renovate updates them).
 - `permissions:` start at `{}` and each job gets only what it needs. Release gets `id-token: write`, `attestations: write`, `contents: write` and `packages: write` (ghcr.io).
 - Release tags are created only by release-please, never by hand.
+- Workflows install tools with `jdx/mise-action` from `mise.toml` and `mise.lock`, so a tool has
+  one version, a locked checksum (`mise install --locked`) and Renovate updates. `install_args` or
+  `MISE_ENABLE_TOOLS` limits a job to the tools it uses. A tool that only one job needs goes in a
+  config environment, `mise.<env>.toml` with its own `mise.<env>.lock`, loaded with
+  `MISE_ENV=<env>`, so other jobs and laptops never install it. Use a `setup-*` action, a package
+  manager or a download only for what mise can't install (OS packages such as zsh or
+  bash-completion), with the version pinned. The example workflows in `docs/ci/` follow the same
+  rule with the user's mise files.
 
 ## Renovate
 

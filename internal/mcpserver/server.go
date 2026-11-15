@@ -52,8 +52,8 @@ type Options struct {
 	Backend  Backend
 }
 
-// New returns the MCP server with every tfcensus tool. None of them is destructive or reaches
-// the network.
+// New returns the MCP server with every tfcensus tool and prompt. No tool is destructive or
+// reaches the network.
 func New(o Options) *mcpkit.Server {
 	s := mcpkit.NewServer(mcpkit.Options{
 		Name:         Name,
@@ -94,6 +94,7 @@ func New(o Options) *mcpkit.Server {
 		Description: "Lists drifted and failed units and their drifted resources with attribute paths from the saved " +
 			"drift JSON; it runs no plan.",
 	}, t.drift)
+	addPrompts(s)
 	return s
 }
 

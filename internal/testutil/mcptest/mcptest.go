@@ -77,6 +77,49 @@ func (c *Client) Tools(t testing.TB) []*mcp.Tool {
 	return out
 }
 
+// Prompts lists the server's prompts.
+func (c *Client) Prompts(t testing.TB) []*mcp.Prompt {
+	t.Helper()
+	var out []*mcp.Prompt
+	for p, err := range c.session.Prompts(t.Context(), nil) {
+		if err != nil {
+			t.Fatalf("mcptest: list prompts: %v", err)
+		}
+		out = append(out, p)
+	}
+	return out
+}
+
+// Prompt gets a prompt and returns the text of its messages, which must all come from the user.
+// An error fails the test.
+func (c *Client) Prompt(t testing.TB, name string, args map[string]string) string {
+	t.Helper()
+	res, err := c.session.GetPrompt(t.Context(), &mcp.GetPromptParams{Name: name, Arguments: args})
+	if err != nil {
+		t.Fatalf("mcptest: get prompt %s: %v", name, err)
+	}
+	var b strings.Builder
+	for _, m := range res.Messages {
+		if m.Role != "user" {
+			t.Fatalf("mcptest: prompt %s has a %s message", name, m.Role)
+		}
+		if tc, ok := m.Content.(*mcp.TextContent); ok {
+			b.WriteString(tc.Text)
+		}
+	}
+	return b.String()
+}
+
+// PromptError gets a prompt that must fail and returns the error.
+func (c *Client) PromptError(t testing.TB, name string, args map[string]string) error {
+	t.Helper()
+	_, err := c.session.GetPrompt(t.Context(), &mcp.GetPromptParams{Name: name, Arguments: args})
+	if err == nil {
+		t.Fatalf("mcptest: prompt %s: want an error", name)
+	}
+	return err
+}
+
 // Call calls a tool. A protocol error fails the test; a tool error is returned in the result.
 func (c *Client) Call(t testing.TB, tool string, args any) *mcp.CallToolResult {
 	t.Helper()

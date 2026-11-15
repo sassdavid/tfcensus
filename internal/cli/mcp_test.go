@@ -5,6 +5,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strings"
 	"testing"
@@ -151,4 +152,59 @@ func TestMCPPagesAndErrors(t *testing.T) {
 	assert.Contains(t, msg, "queries")
 	msg = mcptest.ErrorText(t, c.Call(t, "scan_summary", map[string]any{"top": 9999}))
 	assert.Contains(t, msg, "top")
+}
+
+// TestMCPPrompts lists and fetches every prompt. It is also the state-attribute grep test for
+// the prompt text: no fixture attribute value appears, every prompt forbids asking for values,
+// and every tool a prompt names exists.
+func TestMCPPrompts(t *testing.T) {
+	t.Parallel()
+	c := connectMCP(t, allFiles()...)
+	var names []string
+	for _, p := range c.Prompts(t) {
+		names = append(names, p.Name)
+		assert.NotEmpty(t, p.Description, p.Name)
+		for _, a := range p.Arguments {
+			assert.False(t, a.Required, "%s argument %s is optional", p.Name, a.Name)
+		}
+	}
+	slices.Sort(names)
+	want := mcpserver.Prompts()
+	slices.Sort(want)
+	assert.Equal(t, want, names)
+
+	tests := []struct {
+		prompt string
+		args   map[string]string
+		want   []string
+	}{
+		{"triage_drift", nil, []string{"Call drift_summary.", "whois", "unit path", "resource address"}},
+		{"triage_drift", map[string]string{"unit": "live/prod/*"}, []string{`drift_summary with unit "live/prod/*"`}},
+		{
+			"explain_unmanaged",
+			nil,
+			[]string{`scan_summary with category "unmanaged".`, "whois", "rule ID", "undetermined"},
+		},
+		{
+			"explain_unmanaged",
+			map[string]string{"account": "111111111111", "type": "AWS::EC2::*"},
+			[]string{`category "unmanaged", account "111111111111", type "AWS::EC2::*"`},
+		},
+	}
+	toolName := regexp.MustCompile(`\b[a-z]+_(summary|findings)\b|\bwhois\b|\binventory\b`)
+	for _, tc := range tests {
+		text := c.Prompt(t, tc.prompt, tc.args)
+		for _, w := range tc.want {
+			assert.Contains(t, text, w, tc.prompt)
+		}
+		assert.Contains(t, text, "Never ask the user for attribute values", tc.prompt)
+		for _, v := range driftValues() {
+			assert.NotContains(t, text, v, "%s shows a drift attribute value", tc.prompt)
+		}
+		for _, name := range toolName.FindAllString(text, -1) {
+			assert.Contains(t, mcpserver.Tools(), name, "%s names a tool that doesn't exist", tc.prompt)
+		}
+	}
+	err := c.PromptError(t, "triage_drift", map[string]string{"value": "x"})
+	assert.ErrorContains(t, err, `unknown argument "value"`)
 }

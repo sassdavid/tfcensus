@@ -259,14 +259,24 @@ Design in [roadmap-research.md](roadmap-research.md#github-action).
 Scope: relgap gets an opt-in `--summarize`. tfcensus doesn't, by decision on 2026-11-13: its
 findings are already exact, the useful questions need attribute values it must not show, and its
 identifiers map the organization. Trivy, Snyk, Steampipe and Infracost use the same split.
-- [ ] MCP prompt support in the shared `internal/mcpkit`. tfcensus ships `triage_drift` and
+- [x] MCP prompt support in the shared `internal/mcpkit`. tfcensus ships `triage_drift` and
   `explain_unmanaged`. They tell the agent to cite rule IDs and addresses and never to ask for
   attribute values. The mcptest lists and fetches them, and the grep test covers the prompt text.
-- [ ] An ADR records "no built-in LLM call, agents use MCP", and `.claude/rules/siblings.md` lists
+  Evidence: `TestPrompt_list`, `TestPrompt_get`, `TestPrompt_errors` and
+  `TestAddPrompt_duplicateArgument` (`internal/mcpkit/prompt_test.go`, identical in relgap);
+  `TestMCPPrompts` (`internal/cli/mcp_test.go`) lists and fetches both prompts, greps their text
+  for the `driftValues()` fixture values and checks that every tool they name exists.
+- [x] An ADR records "no built-in LLM call, agents use MCP", and `.claude/rules/siblings.md` lists
   it as an intended difference.
-- [ ] `docs/ci/ai-summary.md` shows an opt-in workflow step that sends
+  Evidence: [ADR-0013](adr/0013-no-built-in-llm.md); siblings.md "Intended differences", identical
+  in all four repos (`mise run sibling:diff`).
+- [x] `docs/ci/ai-summary.md` shows an opt-in workflow step that sends
   `tfcensus report --format json` to a model the organization picks (Bedrock in its own account or
   `actions/ai-inference`), and lists which identifiers leave the runner. actionlint passes.
+  Evidence: [docs/ci/ai-summary.yml](../ci/ai-summary.yml) sends `tfcensus report drift
+  --format json` to Bedrock or GitHub Copilot when `AI_SUMMARY` is set;
+  `jactionlint docs/ci/ai-summary.yml docs/ci/drift.yml docs/ci/drift-pr.yml` exits 0. The
+  Copilot job calls the Copilot CLI instead of `actions/ai-inference` (ADR-0013 says why).
 
 ### M16: Planned CLI gaps (shared where both repos lack it) → v0.3.0
 - [ ] `config init` writes a commented `.tfcensus.yaml` and refuses to overwrite without

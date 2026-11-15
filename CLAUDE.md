@@ -52,5 +52,8 @@ A Go CLI that takes a census of Terraform/OpenTofu + Terragrunt fleets on AWS. I
 - Match order is identity → arn → normalized id. Unmapped types are `undetermined`, never managed.
 - Every finding carries `reason` and `rule`. Every suppression carries `reason` and optionally `expires`.
 - Logs go to stderr, data to stdout through an injected `io.Writer`. The logger comes from `Deps` (sloglint).
+- CI workflows and the examples in `docs/ci/` install tools with mise (`jdx/mise-action`, `mise.lock`,
+  and `mise.<env>.toml` for a tool only one job needs), not `setup-*` actions, `npm install -g` or
+  downloads. Rules in `docs/engineering/ci-and-release.md#github-actions-workflows`.
 - Use Conventional Commits. release-please owns versions.
 - Renovate runs from `.github/workflows/renovate.yml` with the rules in `renovate.json` (engineering ADR-0015, setup in `docs/engineering/ci-and-release.md#renovate`). Change both files in all repos that share them.

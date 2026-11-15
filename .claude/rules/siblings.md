@@ -53,6 +53,11 @@ Keep the same in both siblings:
 
 - tfcensus only: the ghcr.io image (`dockers_v2`, Dockerfile, the docker steps in `release.yml`),
   `docs/iam/`, `--tf-path` and `--tg-path`.
-- Each repo has its own Config struct, commands, specs and `docs/plan/`.
+- relgap only: `--summarize` and its `llm` config, which send extracted release-note entries to a
+  model the user configures (relgap's `docs/plan/specs/mcp-and-llm.md`).
+- tfcensus only: no built-in LLM call. Agents use its MCP tools and the prompts `triage_drift` and
+  `explain_unmanaged`, and `docs/ci/ai-summary.md` shows an opt-in CI step (tfcensus plan ADR-0013).
+- Each repo has its own Config struct, commands, specs and `docs/plan/`, and registers its own
+  MCP tools and prompts on the shared `internal/mcpkit`.
 - Each action repo has its own `scripts/tool.env` (tool name, repository, pinned version) and
   README. The milestones for both actions are in the tool repos' `docs/plan/milestones.md` (M14).
