@@ -23,7 +23,7 @@ jobs:
           persist-credentials: false
       - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
-          version: 2026.11.5
+          version: 2026.11.7
       - run: mise run lint
 
   # Go comes from mise.toml, the version lint, local builds and releases use
@@ -47,7 +47,7 @@ jobs:
           persist-credentials: false
       - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
-          version: 2026.11.5
+          version: 2026.11.7
           install_args: go
       - run: go version
       - name: go test -race
@@ -106,7 +106,7 @@ jobs:
       - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         if: runner.os == 'Linux'
         with:
-          version: 2026.11.5
+          version: 2026.11.7
           install: false
       - name: nushell through the carapace snippet
         if: runner.os == 'Linux'
@@ -173,7 +173,7 @@ jobs:
           persist-credentials: false
       - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
-          version: 2026.11.5
+          version: 2026.11.7
       - name: fuzz targets, 60s each
         run: mise run fuzz
 
@@ -188,7 +188,7 @@ jobs:
           persist-credentials: false
       - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
-          version: 2026.11.5
+          version: 2026.11.7
       - name: docs/cli is up to date
         run: mise run docs
 
@@ -204,7 +204,7 @@ jobs:
           persist-credentials: false
       - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
-          version: 2026.11.5
+          version: 2026.11.7
       - run: goreleaser check
       - run: mise run snapshot
       - name: 6 archives, checksums and SBOMs
