@@ -20,6 +20,8 @@ cli_identical=(
   .gitattributes
   .github/jactionlint.yaml
   .github/workflows/ci.yml
+  .github/workflows/renovate-config.yml
+  .github/workflows/renovate.yml
   .github/workflows/security.yml
   .golangci.yml
   .gitignore
@@ -144,6 +146,8 @@ action_identical=(
   .github/workflows/ci.yml
   .github/workflows/major-tag.yml
   .github/workflows/release-please.yml
+  .github/workflows/renovate-config.yml
+  .github/workflows/renovate.yml
   .github/workflows/security.yml
   .gitignore
   .shellcheckrc

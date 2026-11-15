@@ -25,6 +25,8 @@
 | `live.yml` | nightly, manual | Inventory layers against moto and Floci service containers, pinned by digest (`mise run test:emulator`), then the cross-account `move` e2e against moto (`mise run test:move-e2e`). **No AWS account needed.** An optional real-AWS OIDC job is added only if a sandbox account ever exists |
 | `release-please.yml` | push main | opens or updates the release PR (version bump + CHANGELOG.md from Conventional Commits). On merge it creates the tag and a draft release (`draft` + `force-tag-creation`) |
 | `release.yml` | called by `release-please.yml` when a release is created (tags pushed with `GITHUB_TOKEN` don't trigger workflows); also tag `v*` | goreleaser: binaries, checksums, SBOM, cosign keyless signature, attestations. The Homebrew cask and the Scoop manifest are kept as the `package-manifests` workflow artifact until M19 publishes them and the container image. Secrets: `HOMEBREW_TAP_TOKEN`, `SCOOP_BUCKET_TOKEN` (unused until M19) |
+| `renovate.yml` | weekly (Mondays 04:17 UTC), manual | self-hosted Renovate as the `sassdavid-renovate` GitHub App, from the `renovate` environment (deployment branch `main`, secret `RENOVATE_APP_PRIVATE_KEY`, variable `RENOVATE_APP_CLIENT_ID`). Rules in `renovate.json`. Commits through the API, so they're signed; `mise lock` is allowed, so `mise.lock` follows `mise.toml` |
+| `renovate-config.yml` | PR and push main that change `renovate.json` | `renovate-config-validator --strict` with the Renovate version that `renovate.yml` runs |
 
 Rules:
 - Actions are pinned by commit SHA (Renovate updates them).
