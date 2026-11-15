@@ -88,20 +88,36 @@ the model.
 
 ## Copilot
 
-The job downloads the Copilot CLI release tarball, checks its sha256 and runs `copilot -p` with
-the job's `GITHUB_TOKEN` and `copilot-requests: write`, so it needs no personal access token
+The job runs `copilot -p` with the job's `GITHUB_TOKEN` and `copilot-requests: write`, so it needs
+no personal access token
 ([Copilot CLI in Actions](https://docs.github.com/en/copilot/how-tos/copilot-cli/use-copilot-cli-in-actions)).
-Requests are billed to the organization under its Copilot plan and data terms.
+Requests are billed to the organization under its Copilot plan and data terms. mise installs the
+CLI from a [config environment](https://mise.jdx.dev/configuration/environments.html), so only
+jobs with `MISE_ENV=ai` load it. The drift job and your laptop never install it.
 
 1. In the organization's Copilot policies, check that "Allow use of Copilot CLI billed to the
    organization" is on. It is on by default when the Copilot CLI is enabled.
-2. Set the repository variable `AI_SUMMARY=copilot`. `AI_MODEL_ID` is optional; without it the
+2. In the live repository, add the CLI to `mise.ai.toml` and lock it for the runner:
+
+   ```sh
+   mise use --env ai copilot@1.0.105
+   MISE_ENV=ai mise lock --platform linux-x64
+   git add mise.ai.toml mise.ai.lock
+   ```
+
+   `mise.ai.lock` records the download URL and sha256 of the release asset, and the job installs
+   with `mise install --locked`. Renovate's mise manager reads `mise.ai.toml` and updates
+   `mise.ai.lock` with it.
+3. Set the repository variable `AI_SUMMARY=copilot`. `AI_MODEL_ID` is optional; without it the
    CLI picks the model (`auto`).
+
+The job checks out only `mise.toml`, `mise.lock`, `mise.ai.toml` and `mise.ai.lock`, and sets
+`MISE_ENABLE_TOOLS=copilot`, so it installs nothing else from them.
 
 The CLI is an agent that can read files and run commands. The job turns every tool off:
 `--available-tools=ask_user` leaves one tool and `--no-ask-user` disables it. It also skips
 `AGENTS.md` and other custom instructions, disables the built-in MCP servers and runs in an empty
-directory with no checkout. `--max-ai-credits=30` caps the cost of the answer.
+directory outside the checkout. `--max-ai-credits=30` caps the cost of the answer.
 
 `actions/ai-inference` v3 calls the same CLI, but it can't turn its tools off or pass a credit cap,
 and its default model `gpt-4.1` is retired. Version 2 used GitHub Models, which GitHub retired on

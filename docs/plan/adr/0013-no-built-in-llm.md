@@ -31,10 +31,11 @@
   an opt-in workflow that sends `tfcensus report drift --format json` to a model the organization
   picks, and lists the identifiers that leave the runner. It offers Bedrock in the organization's
   own account and GitHub Copilot.
-- The Copilot job calls the Copilot CLI release binary directly, not `actions/ai-inference`. v3 of
-  that action runs the same CLI but can't turn its tools off or cap AI credits. v2 used GitHub
-  Models, which GitHub retired on 2026-07-30. The job turns every tool off, runs in an empty
-  directory and authenticates with `GITHUB_TOKEN` and `copilot-requests: write`.
+- The Copilot job runs the Copilot CLI directly, not through `actions/ai-inference`. v3 of that
+  action runs the same CLI but can't turn its tools off or cap AI credits. v2 used GitHub Models,
+  which GitHub retired on 2026-07-30. mise installs the CLI from `mise.ai.toml` with the checksum
+  in `mise.ai.lock`, as every other workflow installs its tools. The job turns every tool off,
+  runs in an empty directory and authenticates with `GITHUB_TOKEN` and `copilot-requests: write`.
 - `.claude/rules/siblings.md` lists this as an intended difference from relgap.
 
 ## Consequences
