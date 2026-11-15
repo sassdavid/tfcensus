@@ -155,6 +155,7 @@ action_identical=(
   scripts/run.sh
   scripts/test-install.sh
   scripts/test-outputs.sh
+  scripts/test-run.sh
 )
 
 action_similar=(
