@@ -6,7 +6,9 @@ name: renovate
 # both tool repos, both action repos and action-test.
 on:
   schedule:
-    - cron: "17 4 * * 1" # Mondays 04:17 UTC, off the hour to avoid the scheduler peak
+    # Mondays 01:17 UTC: inside the lock file maintenance window of config:best-practices
+    # (Mondays before 04:00 UTC), with room for a delayed start, and off the hour.
+    - cron: "17 1 * * 1"
   workflow_dispatch:
 
 permissions: {}
