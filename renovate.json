@@ -2,7 +2,12 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:best-practices", ":semanticCommits"],
   "minimumReleaseAge": "3 days",
+  "prHourlyLimit": 0,
   "osvVulnerabilityAlerts": true,
+  "vulnerabilityAlerts": {
+    "description": "A security fix ships in a release: fix(deps) also for indirect modules",
+    "semanticCommitType": "fix"
+  },
   "postUpdateOptions": ["gomodTidy"],
   "ignorePaths": ["**/node_modules/**", "**/bower_components/**", "**/vendor/**", "**/examples/**", "**/__tests__/**", "**/test/**", "**/tests/**", "**/__fixtures__/**", "**/testdata/**"],
   "github-actions": {
@@ -49,6 +54,11 @@
     {
       "description": "shellcheck releases rarely, but its repository is active",
       "matchDepNames": ["shellcheck"],
+      "abandonmentThreshold": null
+    },
+    {
+      "description": "Stable modules from active projects, not abandoned",
+      "matchPackageNames": ["github.com/google/go-cmp", "github.com/hashicorp/go-retryablehttp", "github.com/google/go-licenses/v2"],
       "abandonmentThreshold": null
     }
   ],
