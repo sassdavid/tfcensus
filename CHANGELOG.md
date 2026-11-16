@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.3.0](https://github.com/sassdavid/tfcensus/compare/v0.2.0...v0.3.0) (2026-11-16)
+
+
+### Features
+
+* **cli:** add cache info|clear, doctor versions and account filters ([#50](https://github.com/sassdavid/tfcensus/issues/50)) ([eb609a3](https://github.com/sassdavid/tfcensus/commit/eb609a3e8d81e77ff9c182fdad459c426b769958))
+* **config:** add config init and stop the config search at the git root ([#49](https://github.com/sassdavid/tfcensus/issues/49)) ([8db5196](https://github.com/sassdavid/tfcensus/commit/8db51961f6f1a11757aa1fb75fb22198491701d9))
+* **inventory:** add the Config aggregator fast path ([#51](https://github.com/sassdavid/tfcensus/issues/51)) ([89d5717](https://github.com/sassdavid/tfcensus/commit/89d571732a25f1a86d886f022b957edf021c4863))
+* **mcp:** add triage_drift and explain_unmanaged prompts ([#44](https://github.com/sassdavid/tfcensus/issues/44)) ([396a184](https://github.com/sassdavid/tfcensus/commit/396a1842ab471b18db5c7c1fa089ddbca799e573))
+* **move:** add move suggest with its own strict 1:1 engine ([#55](https://github.com/sassdavid/tfcensus/issues/55)) ([3581f18](https://github.com/sassdavid/tfcensus/commit/3581f185259ed512288ae4fb17f351a500097a82))
+* **move:** support non-default workspaces of s3 backends ([#53](https://github.com/sassdavid/tfcensus/issues/53)) ([63ffd06](https://github.com/sassdavid/tfcensus/commit/63ffd0671f1601ec4db0c95255cb32094bba68f9))
+* **scan:** read CloudFormation stacks as a second IaC source ([#52](https://github.com/sassdavid/tfcensus/issues/52)) ([d65c9e1](https://github.com/sassdavid/tfcensus/commit/d65c9e12172be9192c3bd3c0798b8459f4e88ced))
+* **tfstate:** read OpenTofu encrypted state through tofu show -json ([#54](https://github.com/sassdavid/tfcensus/issues/54)) ([80df9ff](https://github.com/sassdavid/tfcensus/commit/80df9ff3bf9d249d465e57b5f3f83af01b6f314e))
+
+
+### Bug Fixes
+
+* **aws:** follow ADR-0005 retries, SDK logging and S3 best practices ([#48](https://github.com/sassdavid/tfcensus/issues/48)) ([8bc1e85](https://github.com/sassdavid/tfcensus/commit/8bc1e85915ae460b0935584cddad7216f585ac78))
+* **deps:** update aws-sdk-go-v2 monorepo ([#41](https://github.com/sassdavid/tfcensus/issues/41)) ([7ecfe87](https://github.com/sassdavid/tfcensus/commit/7ecfe8766a38155997cd638f9edeaff3a54efd5c))
+* **deps:** update aws-sdk-go-v2 monorepo ([#47](https://github.com/sassdavid/tfcensus/issues/47)) ([c38c50b](https://github.com/sassdavid/tfcensus/commit/c38c50b9ac8e837d42d03b27a8b15df4b6a757e0))
+* **deps:** update module gopkg.in/dnaeon/go-vcr.v4 to v4.0.8 ([#39](https://github.com/sassdavid/tfcensus/issues/39)) ([4bd631a](https://github.com/sassdavid/tfcensus/commit/4bd631a53cc945a75715eed3b35c8df168adf175))
+
 ## [0.2.0](https://github.com/sassdavid/tfcensus/compare/v0.1.0...v0.2.0) (2026-11-13)
 
 
