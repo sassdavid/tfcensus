@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.4.0](https://github.com/sassdavid/tfcensus/compare/v0.3.0...v0.4.0) (2026-11-16)
+
+
+### Features
+
+* **inventory:** drop stale Resource Explorer records and skip Kubernetes objects ([#64](https://github.com/sassdavid/tfcensus/issues/64)) ([f939ffc](https://github.com/sassdavid/tfcensus/commit/f939ffc2ff0e3e4fc123b4ed5745159dda3a147b))
+* **inventory:** list VPC Lattice through Cloud Control by default ([#65](https://github.com/sassdavid/tfcensus/issues/65)) ([84a9157](https://github.com/sassdavid/tfcensus/commit/84a915749a4a072e11d51fe2785873cf7fa51a12))
+* **inventory:** read ENI owners and replace requester-managed-eni ([#62](https://github.com/sassdavid/tfcensus/issues/62)) ([b00be88](https://github.com/sassdavid/tfcensus/commit/b00be88fb5870b959331e19b9770b8078fcd33af))
+* **ownership:** add the controller, AWS default and AWS service rules ([#66](https://github.com/sassdavid/tfcensus/issues/66)) ([6e08ffe](https://github.com/sassdavid/tfcensus/commit/6e08ffe748c337fae2d3ac264b3bd0f5ebcdd74a))
+* **scan:** list the AWS Config types scan doesn't map ([#67](https://github.com/sassdavid/tfcensus/issues/67)) ([23c57e4](https://github.com/sassdavid/tfcensus/commit/23c57e447485f61618319464c21770ffc0f6fa83))
+* **scan:** pass a parent's category down to its children ([#61](https://github.com/sassdavid/tfcensus/issues/61)) ([bebf30c](https://github.com/sassdavid/tfcensus/commit/bebf30c28af2825779ea2ad7f10ea5aa2cb2609e))
+* **typemap:** curate the validation account's types and match policy attachments ([#63](https://github.com/sassdavid/tfcensus/issues/63)) ([3340277](https://github.com/sassdavid/tfcensus/commit/3340277c59f0f9756d18b70e0650980aec4368e3))
+
+
+### Bug Fixes
+
+* **inventory:** list IAM principals with their attachments ([#71](https://github.com/sassdavid/tfcensus/issues/71)) ([2a4f9c4](https://github.com/sassdavid/tfcensus/commit/2a4f9c44bfc651515ceaf44137c0048a9e633172))
+* **inventory:** list VPC Lattice VPC associations per service network ([#70](https://github.com/sassdavid/tfcensus/issues/70)) ([5179288](https://github.com/sassdavid/tfcensus/commit/5179288b55cac4a0c1594762e01ad3102bd40dd3))
+* **ownership:** treat ElastiCache's system IAM user as an AWS default ([#74](https://github.com/sassdavid/tfcensus/issues/74)) ([ddf4565](https://github.com/sassdavid/tfcensus/commit/ddf4565930bdc47818ade8b629e7b5b21f7191d1))
+* **scan:** classify the false positives accounts 2 and 3 found ([#73](https://github.com/sassdavid/tfcensus/issues/73)) ([2383fb2](https://github.com/sassdavid/tfcensus/commit/2383fb23eee9606df94b40f77a0f9d20f8bf3605))
+* **scan:** classify the false positives the v0.4.0 rerun found ([#72](https://github.com/sassdavid/tfcensus/issues/72)) ([94a1492](https://github.com/sassdavid/tfcensus/commit/94a1492538ace445012fd5974c924bb458368073))
+
 ## [0.3.0](https://github.com/sassdavid/tfcensus/compare/v0.2.0...v0.3.0) (2026-11-16)
 
 
