@@ -67,6 +67,7 @@ func (l *cloudControl) ListWith(
 	return func(yield func(CloudResource, error) bool) {
 		client := cloudcontrol.NewFromConfig(acct.Config, func(o *cloudcontrol.Options) {
 			o.Region = region
+			o.Retryer = accounts.AdaptiveRetryer(acct.Config)
 			o.APIOptions = append(o.APIOptions, l.env.Limits.APIOption(acct.ID, region, ServiceCC))
 		})
 		found := slices.Clone(known)

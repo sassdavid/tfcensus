@@ -83,6 +83,9 @@ func (b *Backends) S3(acct *Account, region string) *s3.Client {
 	c := s3.NewFromConfig(acct.Config, func(o *s3.Options) {
 		o.Region = region
 		o.UsePathStyle = b.pathStyle
+		// Objects written by older terraform versions and emulators have no checksum, and the SDK
+		// would warn on every read of one.
+		o.DisableLogOutputChecksumValidationSkipped = true
 	})
 	b.clients[key] = c
 	return c

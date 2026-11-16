@@ -234,7 +234,7 @@ func indexIn(indexes []Index, region string) string {
 
 func (p *Prober) probeAccount(ctx context.Context, cfg aws.Config) ResourceEx {
 	re := ResourceEx{ProbedAt: p.now(), Indexes: []Index{}}
-	client := resourceexplorer2.NewFromConfig(cfg)
+	client := resourceexplorer2.NewFromConfig(cfg, adaptiveRE(cfg))
 	pages := resourceexplorer2.NewListIndexesPaginator(client, &resourceexplorer2.ListIndexesInput{})
 	for pages.HasMorePages() {
 		page, err := pages.NextPage(ctx)
@@ -253,17 +253,17 @@ func (p *Prober) probeAccount(ctx context.Context, cfg aws.Config) ResourceEx {
 	}
 	re.Status = StatusAvailable
 	// The supported types are the same in every region; ask one that has an index.
-	typesCfg := cfg.Copy()
-	typesCfg.Region = re.Indexes[0].Region
+	typesRegion := re.Indexes[0].Region
 	for _, ix := range re.Indexes {
 		if ix.Type == IndexAggregator {
-			typesCfg.Region = ix.Region
+			typesRegion = ix.Region
 		}
 	}
-	tp := resourceexplorer2.NewListSupportedResourceTypesPaginator(
-		resourceexplorer2.NewFromConfig(typesCfg), &resourceexplorer2.ListSupportedResourceTypesInput{})
+	inRegion := func(o *resourceexplorer2.Options) { o.Region = typesRegion }
+	tp := resourceexplorer2.NewListSupportedResourceTypesPaginator(client,
+		&resourceexplorer2.ListSupportedResourceTypesInput{})
 	for tp.HasMorePages() {
-		page, err := tp.NextPage(ctx)
+		page, err := tp.NextPage(ctx, inRegion)
 		if err != nil {
 			_, re.Error = failure("resource-explorer-2:ListSupportedResourceTypes", err)
 			re.SupportedTypes = 0
@@ -284,11 +284,12 @@ func indexType(t retypes.IndexType) string {
 func (p *Prober) probeRegion(ctx context.Context, base aws.Config, region, index string) Region {
 	cfg := base.Copy()
 	cfg.Region = region
+	configClient := configservice.NewFromConfig(cfg, adaptiveConfig(cfg))
 	return Region{
 		Region:           region,
 		ResourceExplorer: probeViews(ctx, cfg, index),
-		Config:           probeRecorders(ctx, cfg),
-		Aggregators:      probeAggregators(ctx, cfg),
+		Config:           probeRecorders(ctx, configClient),
+		Aggregators:      probeAggregators(ctx, configClient),
 		CloudControl:     StatusAvailable,
 		ProbedAt:         p.now(),
 	}
@@ -299,7 +300,7 @@ func probeViews(ctx context.Context, cfg aws.Config, index string) RegionRE {
 	if index == "" {
 		return re
 	}
-	client := resourceexplorer2.NewFromConfig(cfg)
+	client := resourceexplorer2.NewFromConfig(cfg, adaptiveRE(cfg))
 	pages := resourceexplorer2.NewListViewsPaginator(client, &resourceexplorer2.ListViewsInput{})
 	for pages.HasMorePages() {
 		page, err := pages.NextPage(ctx)
@@ -321,9 +322,8 @@ func probeViews(ctx context.Context, cfg aws.Config, index string) RegionRE {
 	return re
 }
 
-func probeRecorders(ctx context.Context, cfg aws.Config) ConfigCheck {
+func probeRecorders(ctx context.Context, client *configservice.Client) ConfigCheck {
 	c := ConfigCheck{Status: StatusUnavailable, Recorders: []Recorder{}}
-	client := configservice.NewFromConfig(cfg)
 	recs, err := client.DescribeConfigurationRecorders(ctx, &configservice.DescribeConfigurationRecordersInput{})
 	if err != nil {
 		c.Status, c.Error = failure("config:DescribeConfigurationRecorders", err)
@@ -359,23 +359,19 @@ func probeRecorders(ctx context.Context, cfg aws.Config) ConfigCheck {
 	return c
 }
 
-func probeAggregators(ctx context.Context, cfg aws.Config) AggCheck {
+func probeAggregators(ctx context.Context, client *configservice.Client) AggCheck {
 	a := AggCheck{Status: StatusUnavailable, Names: []string{}}
-	client := configservice.NewFromConfig(cfg)
-	in := &configservice.DescribeConfigurationAggregatorsInput{}
-	for {
-		out, err := client.DescribeConfigurationAggregators(ctx, in)
+	pages := configservice.NewDescribeConfigurationAggregatorsPaginator(client,
+		&configservice.DescribeConfigurationAggregatorsInput{})
+	for pages.HasMorePages() {
+		page, err := pages.NextPage(ctx)
 		if err != nil {
 			a.Status, a.Error = failure("config:DescribeConfigurationAggregators", err)
 			return a
 		}
-		for _, agg := range out.ConfigurationAggregators {
+		for _, agg := range page.ConfigurationAggregators {
 			a.Names = append(a.Names, aws.ToString(agg.ConfigurationAggregatorName))
 		}
-		if aws.ToString(out.NextToken) == "" {
-			break
-		}
-		in.NextToken = out.NextToken
 	}
 	if len(a.Names) > 0 {
 		a.Status = StatusAvailable
@@ -389,7 +385,7 @@ func Aggregator(ctx context.Context, cfg aws.Config, region, name string) AggChe
 	c := cfg.Copy()
 	c.Region = cmp.Or(region, c.Region)
 	a := AggCheck{Status: StatusUnavailable, Names: []string{}}
-	out, err := configservice.NewFromConfig(c).DescribeConfigurationAggregators(ctx,
+	out, err := configservice.NewFromConfig(c, adaptiveConfig(c)).DescribeConfigurationAggregators(ctx,
 		&configservice.DescribeConfigurationAggregatorsInput{ConfigurationAggregatorNames: []string{name}})
 	_, missing := errors.AsType[*cstypes.NoSuchConfigurationAggregatorException](err)
 	switch {
@@ -404,6 +400,14 @@ func Aggregator(ctx context.Context, cfg aws.Config, region, name string) AggChe
 		a.Status = StatusAvailable
 	}
 	return a
+}
+
+func adaptiveRE(cfg aws.Config) func(*resourceexplorer2.Options) {
+	return func(o *resourceexplorer2.Options) { o.Retryer = accounts.AdaptiveRetryer(cfg) }
+}
+
+func adaptiveConfig(cfg aws.Config) func(*configservice.Options) {
+	return func(o *configservice.Options) { o.Retryer = accounts.AdaptiveRetryer(cfg) }
 }
 
 func failure(action string, err error) (Status, string) {

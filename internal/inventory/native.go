@@ -394,6 +394,7 @@ func (l *s3Subresources) List(
 		client := s3.NewFromConfig(acct.Config, func(o *s3.Options) {
 			o.Region = region
 			o.UsePathStyle = l.env.S3PathStyle
+			o.DisableLogOutputChecksumValidationSkipped = true
 			o.APIOptions = append(o.APIOptions, l.env.Limits.APIOption(acct.ID, region, ServiceS3))
 		})
 		pages := s3.NewListBucketsPaginator(client, &s3.ListBucketsInput{BucketRegion: aws.String(region)})

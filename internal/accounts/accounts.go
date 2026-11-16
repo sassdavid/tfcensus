@@ -1,6 +1,7 @@
 package accounts
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"fmt"
@@ -10,9 +11,12 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/aws/arn"
+	"github.com/aws/aws-sdk-go-v2/aws/retry"
+	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/aws/smithy-go/logging"
 )
 
 const (
@@ -21,6 +25,11 @@ const (
 	// SessionName is the role session name tfcensus uses, so CloudTrail shows who read what.
 	SessionName = "tfcensus"
 	appID       = "tfcensus"
+	// DefaultMaxAttempts is the SDK attempt limit per API call, the first included.
+	DefaultMaxAttempts = 8
+	// maxIdleConnsPerHost keeps a connection open for each of the 16 state reads that run at
+	// once by default, with room to spare; the SDK keeps 10.
+	maxIdleConnsPerHost = 32
 )
 
 // Kind says where an account's credentials come from.
@@ -56,7 +65,7 @@ type Options struct {
 	Lookup      func(string) (string, bool) // the environment; nil means empty
 	Transport   http.RoundTripper           // nil means the network
 	Logger      *slog.Logger
-	MaxAttempts int // per API call, the first included; 0 means the SDK default
+	MaxAttempts int // per API call, the first included; 0 means [DefaultMaxAttempts]
 	Concurrency int // accounts loaded in parallel; 0 means 8
 }
 
@@ -91,6 +100,9 @@ func New(opts Options) *Loader {
 	}
 	if opts.Concurrency <= 0 {
 		opts.Concurrency = defaultConcurrency
+	}
+	if opts.MaxAttempts <= 0 {
+		opts.MaxAttempts = DefaultMaxAttempts
 	}
 	return &Loader{
 		opts:     opts,
@@ -152,16 +164,44 @@ func (l *Loader) loadOptions() []func(*config.LoadOptions) error {
 		config.WithSharedConfigFiles([]string{l.files.Config}),
 		config.WithSharedCredentialsFiles([]string{l.files.Credentials}),
 		config.WithDefaultRegion(DefaultRegion),
-		config.WithRetryMode(aws.RetryModeAdaptive),
+		config.WithRetryMode(aws.RetryModeStandard),
+		config.WithRetryMaxAttempts(l.opts.MaxAttempts),
 		config.WithAppID(appID),
-	}
-	if l.opts.MaxAttempts > 0 {
-		opts = append(opts, config.WithRetryMaxAttempts(l.opts.MaxAttempts))
+		config.WithLogger(SDKLogger(l.opts.Logger)),
 	}
 	if l.opts.Transport != nil {
 		opts = append(opts, config.WithHTTPClient(&http.Client{Transport: l.opts.Transport}))
+	} else {
+		opts = append(opts, config.WithHTTPClient(awshttp.NewBuildableClient().WithTransportOptions(
+			func(t *http.Transport) { t.MaxIdleConnsPerHost = maxIdleConnsPerHost })))
 	}
 	return opts
+}
+
+// SDKLogger returns an SDK logger that writes to logger: SDK warnings at warn level, everything
+// else at debug level.
+func SDKLogger(logger *slog.Logger) logging.Logger {
+	return logging.LoggerFunc(func(c logging.Classification, format string, v ...any) {
+		level := slog.LevelDebug
+		if c == logging.Warn {
+			level = slog.LevelWarn
+		}
+		logger.Log(context.Background(), level, fmt.Sprintf(format, v...), "source", "aws-sdk")
+	})
+}
+
+// AdaptiveRetryer returns the retryer for clients of Cloud Control, Config and Resource Explorer,
+// whose low rate limits suit adaptive retry, with the attempt limit of cfg. A Retryer that cfg
+// sets wins, so tests keep theirs.
+func AdaptiveRetryer(cfg aws.Config) aws.Retryer {
+	if cfg.Retryer != nil {
+		return cfg.Retryer()
+	}
+	return retry.NewAdaptiveMode(func(o *retry.AdaptiveModeOptions) {
+		o.StandardOptions = append(o.StandardOptions, func(so *retry.StandardOptions) {
+			so.MaxAttempts = cmp.Or(cfg.RetryMaxAttempts, so.MaxAttempts)
+		})
+	})
 }
 
 func (l *Loader) load(ctx context.Context, profile string, kind Kind) (*Account, error) {

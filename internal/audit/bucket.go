@@ -52,6 +52,7 @@ type bucketJob struct {
 	acct   *accounts.Account
 	region string
 	s3     *s3.Client
+	kms    map[string]*kms.Client // by region
 	out    *bucketResult
 	policy *iampolicy.Document
 }
@@ -66,7 +67,9 @@ func (a *auditor) auditBucket(ctx context.Context, t *bucketTarget) bucketResult
 		return out
 	}
 	out.bucket.Account, out.bucket.Region = acct.ID, region
-	j := &bucketJob{a: a, t: t, acct: acct, region: region, s3: a.opts.S3(acct, region), out: &out}
+	j := &bucketJob{
+		a: a, t: t, acct: acct, region: region, s3: a.opts.S3(acct, region), kms: map[string]*kms.Client{}, out: &out,
+	}
 	if err = j.list(ctx); err != nil {
 		out.problems = append(out.problems, problem(t.target(), "", err))
 		if apiCode(err) == "NoSuchBucket" {
@@ -199,13 +202,22 @@ func (j *bucketJob) readSSE(ctx context.Context, client *s3.Client, bucket, regi
 	if s.keyID == "" {
 		return s, nil
 	}
-	kc := kms.NewFromConfig(j.acct.Config, func(o *kms.Options) { o.Region = keyRegion(s.keyID, region) })
-	desc, err := kc.DescribeKey(ctx, &kms.DescribeKeyInput{KeyId: aws.String(s.keyID)})
+	desc, err := j.kmsIn(keyRegion(s.keyID, region)).DescribeKey(ctx, &kms.DescribeKeyInput{KeyId: aws.String(s.keyID)})
 	if err != nil {
 		return s, fmt.Errorf("describe key: %w", err)
 	}
 	s.manager, s.keyARN = desc.KeyMetadata.KeyManager, aws.ToString(desc.KeyMetadata.Arn)
 	return s, nil
+}
+
+// kmsIn returns the job's KMS client for region, creating it once.
+func (j *bucketJob) kmsIn(region string) *kms.Client {
+	c, ok := j.kms[region]
+	if !ok {
+		c = kms.NewFromConfig(j.acct.Config, func(o *kms.Options) { o.Region = region })
+		j.kms[region] = c
+	}
+	return c
 }
 
 func keyRegion(keyID, fallback string) string {
@@ -227,8 +239,7 @@ func (j *bucketJob) encryption(ctx context.Context) error {
 	if s.manager != kmstypes.KeyManagerTypeCustomer {
 		return nil
 	}
-	kc := kms.NewFromConfig(j.acct.Config, func(o *kms.Options) { o.Region = keyRegion(s.keyARN, j.region) })
-	pol, err := kc.GetKeyPolicy(
+	pol, err := j.kmsIn(keyRegion(s.keyARN, j.region)).GetKeyPolicy(
 		ctx,
 		&kms.GetKeyPolicyInput{KeyId: aws.String(s.keyARN), PolicyName: aws.String("default")},
 	)

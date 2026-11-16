@@ -51,6 +51,7 @@ func (l *reLayer) List(
 	return func(yield func(CloudResource, error) bool) {
 		client := resourceexplorer2.NewFromConfig(acct.Config, func(o *resourceexplorer2.Options) {
 			o.Region = region
+			o.Retryer = accounts.AdaptiveRetryer(acct.Config)
 			o.APIOptions = append(o.APIOptions, l.env.Limits.APIOption(acct.ID, region, ServiceRE))
 		})
 		pages := resourceexplorer2.NewListResourcesPaginator(client, &resourceexplorer2.ListResourcesInput{
