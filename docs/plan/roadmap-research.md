@@ -60,8 +60,9 @@ Prereleases (`v0.1.0-rc.N`) were considered and rejected for this phase:
 
 goreleaser renders `repository.token` with `ApplySingleEnvOnly`
 (`_reference/goreleaser/goreleaser/internal/client/client.go:172`), which accepts only
-`{{ .Env.NAME }}`. Both repos use `{{ envOrDefault ... }}` there today. Skipped runs never read the
-token, so the first real publish would fail. M19 fixes it. The same pattern shows up in
+`{{ .Env.NAME }}`. Both repos used `{{ envOrDefault ... }}` there, and skipped runs never read the
+token, so the first real publish would have failed. The first M19 item switched to `{{ .Env.NAME }}`
+on 2026-11-16. The same pattern shows up in
 https://github.com/ModelsLab/modelslab-cli/pull/11 and https://github.com/getlantern/lantern-box/pull/425.
 
 ## Shell completion

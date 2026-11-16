@@ -69,7 +69,8 @@ func checked(f string) bool {
 		"testdata/golden/",    // so do golden outputs built from them
 		"testdata/labels/",    // and the labelled release-note entries
 	}
-	excludedFiles := []string{"docs/README.md", ".golangci.yml", "LICENSE"}
+	// release-please writes CHANGELOG.md, so the writing rules don't apply to it.
+	excludedFiles := []string{"docs/README.md", ".golangci.yml", "LICENSE", "CHANGELOG.md"}
 	for _, p := range excludedPrefixes {
 		if strings.HasPrefix(f, p) {
 			return false
