@@ -29,7 +29,7 @@ type Entry struct {
 	// IdentityAttrs are identity attribute values read from resource attributes, for states
 	// without an identity block.
 	IdentityAttrs map[string]string `json:"identity_attrs,omitempty"`
-	RuleKeys      []string          `json:"rule_keys,omitempty"` // hashed security group rule tuples
+	RuleKeys      []string          `json:"rule_keys,omitempty"` // hashed security group rule tuples and policy attachment keys
 	Account       string            `json:"account,omitempty"`   // from identity, ARN, or the unit's target
 	Region        string            `json:"region,omitempty"`    // from identity, ARN, region attribute, or the unit's target
 }

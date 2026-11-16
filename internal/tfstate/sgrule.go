@@ -70,6 +70,7 @@ const (
 // Types whose rule tuples the parser expands.
 const (
 	typeSecurityGroup     = "aws_security_group"
+	typePolicyAttachment  = "aws_iam_policy_attachment"
 	typeSecurityGroupRule = "aws_security_group_rule"
 )
 
@@ -132,6 +133,24 @@ type ruleCollector struct {
 	rule    ruleBlock
 	ingress []ruleBlock
 	egress  []ruleBlock
+	policy  policyAttachment
+}
+
+// policyAttachment is the principals and policy of aws_iam_policy_attachment, all identifiers.
+type policyAttachment struct {
+	Roles     []string `json:"roles"`
+	Users     []string `json:"users"`
+	Groups    []string `json:"groups"`
+	PolicyARN string   `json:"policy_arn"`
+}
+
+func policyAttachmentAttrs() []string { return []string{"roles", "users", "groups", "policy_arn"} }
+
+// PolicyAttachmentKey is the rule key of one principal's attachment of a managed policy: kind is
+// role, user or group. aws_iam_policy_attachment gets one per principal, and the iam-attachments
+// lister gives each live attachment its own.
+func PolicyAttachmentKey(kind, principal, policyARN string) string {
+	return kind + ":" + principal + ":" + policyARN
 }
 
 func ruleAttrs() []string {
@@ -142,6 +161,9 @@ func ruleAttrs() []string {
 }
 
 func (c *ruleCollector) wants(name string) bool {
+	if c.tfType == typePolicyAttachment {
+		return slices.Contains(policyAttachmentAttrs(), name)
+	}
 	if c.tfType == typeSecurityGroup {
 		return name == dirIngress || name == dirEgress
 	}
@@ -150,6 +172,14 @@ func (c *ruleCollector) wants(name string) bool {
 
 func (c *ruleCollector) set(name string, raw []byte) error {
 	var err error
+	if c.tfType == typePolicyAttachment {
+		// Collect the attributes into one object and decode them together, as below.
+		err = json.Unmarshal([]byte(`{"`+name+`":`+string(raw)+`}`), &c.policy)
+		if err != nil {
+			return fmt.Errorf("read %s attribute %s: %w", c.tfType, name, err)
+		}
+		return nil
+	}
 	switch name {
 	case dirIngress:
 		err = json.Unmarshal(raw, &c.ingress)
@@ -179,10 +209,29 @@ func (c *ruleCollector) keys(id string) []string {
 		}
 	case typeSecurityGroupRule:
 		rules = c.rule.expand(c.groupID, c.rule.Type == dirEgress)
+	case typePolicyAttachment:
+		return c.policy.keys()
 	}
 	out := make([]string, 0, len(rules))
 	for _, r := range rules {
 		out = append(out, r.Key())
+	}
+	slices.Sort(out)
+	return slices.Compact(out)
+}
+
+func (p *policyAttachment) keys() []string {
+	if p.PolicyARN == "" {
+		return nil
+	}
+	var out []string
+	for _, k := range []struct {
+		kind  string
+		names []string
+	}{{"role", p.Roles}, {"user", p.Users}, {"group", p.Groups}} {
+		for _, n := range k.names {
+			out = append(out, PolicyAttachmentKey(k.kind, n, p.PolicyARN))
+		}
 	}
 	slices.Sort(out)
 	return slices.Compact(out)

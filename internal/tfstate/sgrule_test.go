@@ -135,3 +135,24 @@ func TestParseWithoutOptionsKeepsNoExtras(t *testing.T) {
 		assert.Empty(t, r.Instances[0].IdentityAttrs, r.Type)
 	}
 }
+
+// TestPolicyAttachmentKeys: aws_iam_policy_attachment becomes one key per principal, and nothing
+// else of it is kept.
+func TestPolicyAttachmentKeys(t *testing.T) {
+	t.Parallel()
+
+	const state = `{"version":4,"resources":[{"mode":"managed","type":"aws_iam_policy_attachment","name":"deploy",
+"provider":"provider[\"registry.terraform.io/hashicorp/aws\"]","instances":[{"attributes":{"id":"deploy",
+"name":"deploy","policy_arn":"arn:aws:iam::111111111111:policy/deploy","roles":["ci","deploy"],
+"users":["release"],"groups":[]}}]}]}`
+	s, err := tfstate.ParseWith(strings.NewReader(state), tfstate.ParseOptions{RuleTuples: true})
+	require.NoError(t, err)
+	policy := "arn:aws:iam::111111111111:policy/deploy"
+	assert.Equal(t, []string{
+		tfstate.PolicyAttachmentKey("role", "ci", policy), tfstate.PolicyAttachmentKey("role", "deploy", policy),
+		tfstate.PolicyAttachmentKey("user", "release", policy),
+	}, s.Resources[0].Instances[0].RuleKeys)
+	plain, err := tfstate.Parse(strings.NewReader(state))
+	require.NoError(t, err)
+	assert.Empty(t, plain.Resources[0].Instances[0].RuleKeys, "only RuleTuples keeps them")
+}

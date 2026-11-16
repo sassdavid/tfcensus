@@ -214,7 +214,9 @@ func TestAggregatorChunks(t *testing.T) {
 	r.On("config", "SelectAggregateResourceConfig", "'"+ids[0]+"'", ok(configPage("", firstRows...)))
 	e := env(t)
 	res, err := inventory.NewCollector(inventory.Options{Env: e, Layers: []inventory.Layer{inventory.NewConfig(e)}}).
-		Collect(t.Context(), inventory.Request{Targets: targets, Aggregator: orgAggregator(r, euWest)})
+		Collect(t.Context(), inventory.Request{
+			Targets: targets, Aggregator: orgAggregator(r, euWest), Types: []string{"AWS::EC2::SecurityGroup"},
+		})
 	require.NoError(t, err)
 	require.NotNil(t, res.Aggregator)
 	assert.Equal(t, inventory.RunOK, res.Aggregator.Status, strings.Join(res.Aggregator.Errors, "; "))

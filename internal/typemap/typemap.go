@@ -71,6 +71,9 @@ type Curated struct {
 	RuleTuple bool              `yaml:"rule_tuple,omitempty"` // match security group rules by their tuple
 	Derived   *Derived          `yaml:"derived,omitempty"`
 	CCParent  *CCParent         `yaml:"cc_parent,omitempty"`
+	CC        bool              `yaml:"cc,omitempty"`       // list through Cloud Control by default
+	Global    bool              `yaml:"global,omitempty"`   // account-wide although the provider gives it a region
+	Unlisted  string            `yaml:"unlisted,omitempty"` // why no layer lists the type
 }
 
 // CCParent says how Cloud Control lists a type that needs a parent: one ListResources call per
@@ -118,6 +121,8 @@ type Type struct {
 	Tuple    bool
 	Derived  *Derived
 	CCParent *CCParent
+	CC       bool   // neither AWS Config nor Resource Explorer lists it, so Cloud Control does by default
+	Unlisted string // why no layer lists it, when none can
 }
 
 // Map is the loaded typemap.
@@ -198,24 +203,18 @@ func (m *Map) addCurated(c *Curated) error {
 	if t.Curated {
 		return fmt.Errorf("%w: %s is curated twice", ErrInvalid, c.TF)
 	}
-	if len(c.CFN) == 0 {
-		return fmt.Errorf("%w: %s has no cfn type", ErrInvalid, c.TF)
-	}
-	for _, cfn := range c.CFN {
-		if !m.cfn[cfn] && !strings.HasPrefix(cfn, NativePrefix) {
-			return fmt.Errorf("%w: %s: %s is not a CloudFormation type", ErrInvalid, c.TF, cfn)
-		}
-	}
-	if len(c.ID) == 0 && !c.RuleTuple && c.ARN == "" && t.Identity == "" {
-		return fmt.Errorf("%w: %s has no identity, arn, id or rule tuple to match on", ErrInvalid, c.TF)
-	}
-	if c.CCParent != nil && (c.CCParent.Property == "" || !m.cfn[c.CCParent.Type]) {
-		return fmt.Errorf("%w: %s: cc_parent needs a CloudFormation type and a property", ErrInvalid, c.TF)
+	if err := m.checkCurated(c, t); err != nil {
+		return err
 	}
 	t.Curated, t.CFN, t.Config, t.ID, t.Native, t.Tuple, t.Derived, t.CCParent =
 		true, c.CFN, c.Config, c.ID, c.Native, c.RuleTuple, c.Derived, c.CCParent
-	if len(c.RE) > 0 {
+	t.CC, t.Unlisted = c.CC, c.Unlisted
+	t.Global = t.Global || c.Global
+	switch {
+	case len(c.RE) > 0:
 		t.RE = c.RE
+	case c.CC || c.Unlisted != "":
+		t.RE = nil
 	}
 	if c.ARN != "" {
 		p, err := CompilePattern(c.ARN)
@@ -229,6 +228,29 @@ func (m *Map) addCurated(c *Curated) error {
 		for k, v := range c.Live {
 			t.Live[k] = Template(v)
 		}
+	}
+	return nil
+}
+
+// checkCurated reports an entry whose fields don't fit together or don't fit the generated data.
+func (m *Map) checkCurated(c *Curated, t *Type) error {
+	if len(c.CFN) == 0 {
+		return fmt.Errorf("%w: %s has no cfn type", ErrInvalid, c.TF)
+	}
+	for _, cfn := range c.CFN {
+		if !m.cfn[cfn] && !strings.HasPrefix(cfn, NativePrefix) && cfn != c.Config {
+			return fmt.Errorf("%w: %s: %s is not a CloudFormation type", ErrInvalid, c.TF, cfn)
+		}
+	}
+	switch {
+	case c.Unlisted != "" && (c.Config != "" || c.CC || len(c.RE) > 0):
+		return fmt.Errorf("%w: %s is unlisted but names a layer that lists it", ErrInvalid, c.TF)
+	case c.CC && (c.Config != "" || len(c.RE) > 0):
+		return fmt.Errorf("%w: %s: cc is for types that AWS Config and Resource Explorer don't list", ErrInvalid, c.TF)
+	case len(c.ID) == 0 && !c.RuleTuple && c.ARN == "" && t.Identity == "":
+		return fmt.Errorf("%w: %s has no identity, arn, id or rule tuple to match on", ErrInvalid, c.TF)
+	case c.CCParent != nil && (c.CCParent.Property == "" || !m.cfn[c.CCParent.Type]):
+		return fmt.Errorf("%w: %s: cc_parent needs a CloudFormation type and a property", ErrInvalid, c.TF)
 	}
 	return nil
 }
@@ -317,6 +339,21 @@ func (m *Map) Mapped(cfn string) bool { return len(m.byCFN[cfn]) > 0 }
 
 // IsCFN reports whether cfn is a CloudFormation type or a tfcensus native type.
 func (m *Map) IsCFN(cfn string) bool { return m.cfn[cfn] || strings.HasPrefix(cfn, NativePrefix) }
+
+// CCTypes returns the CloudFormation types of the curated entries that Cloud Control lists by
+// default, sorted.
+func (m *Map) CCTypes() []string {
+	var out []string
+	for _, t := range m.Curated() {
+		if t.CC {
+			for _, c := range t.CFN {
+				out = appendUnique(out, c)
+			}
+		}
+	}
+	slices.Sort(out)
+	return out
+}
 
 // CCParent returns how Cloud Control lists a CloudFormation type that needs a parent, or nil.
 func (m *Map) CCParent(cfn string) *CCParent {

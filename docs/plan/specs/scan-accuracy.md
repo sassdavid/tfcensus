@@ -258,9 +258,9 @@ how the next accounts show what is still missing.
    each have positive and negative fixtures (`TestSpec_ownership_1` covers the packs). The
    external-dns test covers prefix, suffix, the legacy `cname-` token on an A ALIAS record, the
    `%{record_type}` template and an encrypted value.
-4. [ ] `aws_iam_policy_attachment` with two roles and a user matches three live attachments.
+4. [x] `aws_iam_policy_attachment` with two roles and a user matches three live attachments.
    `aws_default_route_table` matches the main route table. Match tests cover both.
-5. [ ] Every Terraform type in the table above is curated or carries the reason it can't be
+5. [x] Every Terraform type in the table above is curated or carries the reason it can't be
    listed. A test fails when one is missing, and the generator's alias table gives the expected
    `cfn:` for the five renamed families.
 6. [ ] Resource Explorer: an RE-only record of a Config-listed type is dropped and counted, an RE

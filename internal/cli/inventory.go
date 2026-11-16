@@ -133,6 +133,10 @@ func runInventory(cmd *cobra.Command, d *app.Deps, sink render.Sink, cfg *config
 	if err != nil {
 		return fmt.Errorf("get working directory: %w", err)
 	}
+	m, err := typemap.Load()
+	if err != nil {
+		return err
+	}
 	reader := tfstate.NewReader(tfstate.Options{
 		Client:      stateClient(newBackends(loader, accts, cfg, d)),
 		WorkDir:     cwd,
@@ -140,14 +144,11 @@ func runInventory(cmd *cobra.Command, d *app.Deps, sink render.Sink, cfg *config
 		TFPath:      cfg.Binaries.Terraform,
 		Logger:      d.Logger,
 		Decrypt:     stateDecrypter(d, cfg),
+		Parse:       stateParseOptions(m),
 	})
 	states := reader.Read(ctx, disc.Units)
 	if states == nil {
 		states = []tfstate.UnitState{}
-	}
-	m, err := typemap.Load()
-	if err != nil {
-		return err
 	}
 	index := match.Index(m, states)
 	data := inventoryData{Units: states, DoubleManaged: index.DoubleManaged}

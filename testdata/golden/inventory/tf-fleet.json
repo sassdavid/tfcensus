@@ -253,9 +253,9 @@
     ],
     "double_managed": [
       {
-        "kind": "arn",
+        "kind": "identity",
         "type": "aws_security_group",
-        "key": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0123456789abcdef0",
+        "key": "account_id=111111111111,id=sg-0123456789abcdef0,region=eu-west-1",
         "refs": [
           {
             "unit": "tf-fleet/app",

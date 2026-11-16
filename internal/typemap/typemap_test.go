@@ -23,7 +23,7 @@ func TestCurated(t *testing.T) {
 
 	m := load(t)
 	curated := m.Curated()
-	assert.GreaterOrEqual(t, len(curated), 40)
+	assert.GreaterOrEqual(t, len(curated), 130)
 	configTypes := cstypes.ResourceType("").Values()
 	natives := []string{"ec2-sg-rules", "iam-attachments", "route53-records", "s3-subresources"}
 	for _, ty := range curated {
@@ -143,6 +143,9 @@ func TestParseErrors(t *testing.T) {
 		"twice":         "- tf: aws_vpc\n  cfn: AWS::EC2::VPC\n  id: ['{id}']\n- tf: aws_vpc\n  cfn: AWS::EC2::VPC\n  id: ['{id}']\n",
 		"unknown field": "- tf: aws_vpc\n  cfn: AWS::EC2::VPC\n  idd: ['{id}']\n",
 		"bad pattern":   "- tf: aws_vpc\n  cfn: AWS::EC2::VPC\n  arn: 'arn:{x:(}'\n",
+		"unlisted with config": "- tf: aws_vpc\n  cfn: AWS::EC2::VPC\n  config: AWS::EC2::VPC\n  id: ['{id}']\n" +
+			"  unlisted: nothing lists it\n",
+		"cc with re": "- tf: aws_vpc\n  cfn: AWS::EC2::VPC\n  re: ec2:vpc\n  cc: true\n  id: ['{id}']\n",
 	}
 	for name, cur := range tests {
 		_, err := typemap.Parse(gen, []byte(cur))
@@ -194,4 +197,153 @@ func TestPattern(t *testing.T) {
 	assert.Nil(t, p.Match("arn:aws:iam::111111111111:user/app"))
 	assert.Equal(t, "arn:aws:logs:r:a:log-group:x", typemap.NormalizeARN("arn:aws:logs:r:a:log-group:x:*"))
 	assert.Equal(t, "arn:aws:s3:::b:*", typemap.NormalizeARN("arn:aws:s3:::b:*"))
+}
+
+// validationTypes are the Terraform types the first real-account scan used, from the table in
+// docs/plan/specs/scan-accuracy.md, plus the aws_default_* types and aws_iam_policy_attachment.
+func validationTypes() []string {
+	return []string{
+		"aws_vpc_endpoint", "aws_vpc_endpoint_service", "aws_route_table_association",
+		"aws_network_acl_association", "aws_vpc_ipv4_cidr_block_association", "aws_vpc_peering_connection",
+		"aws_vpc_peering_connection_accepter", "aws_flow_log", "aws_ec2_managed_prefix_list",
+		"aws_ec2_client_vpn_endpoint", "aws_customer_gateway", "aws_vpn_gateway", "aws_vpn_connection",
+		"aws_eip_association",
+		"aws_vpclattice_resource_gateway", "aws_vpclattice_resource_configuration", "aws_vpclattice_service_network",
+		"aws_vpclattice_service_network_resource_association", "aws_vpclattice_service_network_vpc_association",
+		"aws_eks_node_group", "aws_eks_addon", "aws_eks_access_entry", "aws_eks_pod_identity_association",
+		"aws_iam_openid_connect_provider",
+		"aws_lambda_event_source_mapping", "aws_lambda_layer_version", "aws_cloudwatch_event_rule",
+		"aws_cloudwatch_event_bus", "aws_pipes_pipe", "aws_scheduler_schedule_group",
+		"aws_msk_cluster", "aws_msk_configuration", "aws_opensearch_domain", "aws_elasticache_replication_group",
+		"aws_elasticache_user", "aws_elasticache_user_group", "aws_memorydb_acl", "aws_memorydb_user",
+		"aws_memorydb_parameter_group", "aws_db_parameter_group", "aws_db_option_group", "aws_efs_file_system",
+		"aws_efs_access_point", "aws_efs_mount_target", "aws_glue_catalog_database", "aws_glue_catalog_table",
+		"aws_athena_workgroup", "aws_athena_data_catalog",
+		"aws_api_gateway_rest_api", "aws_api_gateway_resource", "aws_api_gateway_method",
+		"aws_api_gateway_deployment", "aws_api_gateway_stage", "aws_api_gateway_domain_name",
+		"aws_api_gateway_base_path_mapping",
+		"aws_ssm_parameter", "aws_ssm_association", "aws_cloudwatch_metric_alarm", "aws_cloudwatch_dashboard",
+		"aws_acm_certificate", "aws_codebuild_project", "aws_codepipeline", "aws_kinesisanalyticsv2_application",
+		"aws_backup_plan", "aws_backup_vault", "aws_backup_selection", "aws_cloudformation_stack",
+		"aws_quicksight_data_source", "aws_quicksight_vpc_connection", "aws_route53_resolver_rule",
+		"aws_route53_resolver_rule_association", "aws_xray_group", "aws_xray_sampling_rule",
+		"aws_resourceexplorer2_index", "aws_resourceexplorer2_view",
+		"aws_apprunner_auto_scaling_configuration_version",
+		"aws_default_route_table", "aws_default_security_group", "aws_default_network_acl",
+		"aws_default_vpc_dhcp_options", "aws_iam_policy_attachment",
+	}
+}
+
+// TestSpec_scan_accuracy_5: every type the validation account uses is curated, and a layer lists
+// it unless its entry says why none can.
+func TestSpec_scan_accuracy_5(t *testing.T) {
+	t.Parallel()
+
+	m := load(t)
+	for _, tf := range validationTypes() {
+		ty, ok := m.Type(tf)
+		require.True(t, ok, tf)
+		if !assert.True(t, ty.Curated, "%s is not curated", tf) {
+			continue
+		}
+		listed := ty.Config != "" || len(ty.RE) > 0 || ty.CC || ty.Native != ""
+		assert.True(t, listed || ty.Unlisted != "", "%s: no layer lists it and its entry doesn't say why", tf)
+		assert.False(t, listed && ty.Unlisted != "", "%s is listed and unlisted", tf)
+	}
+	assert.Equal(t, "AWS::OpenSearchService::Domain", m.FromConfig("AWS::OpenSearch::Domain"))
+	assert.Equal(t, "AWS::OpenSearchService::Domain", m.FromRE("es:domain"))
+	cfn, _ := m.Classify("arn:aws:es:eu-west-1:111111111111:domain/search")
+	assert.Equal(t, "AWS::OpenSearchService::Domain", cfn, "one entry for both names")
+	assert.Equal(t, []string{
+		"AWS::VpcLattice::ResourceConfiguration", "AWS::VpcLattice::ResourceGateway",
+		"AWS::VpcLattice::ServiceNetworkResourceAssociation", "AWS::VpcLattice::ServiceNetworkVpcAssociation",
+	}, m.CCTypes())
+	vpcAssoc, _ := m.Type("aws_vpclattice_service_network_vpc_association")
+	assert.Empty(t, vpcAssoc.RE, "a cc type drops its Resource Explorer types")
+}
+
+// TestClassifyCurated: the ARN patterns of the newer entries give the fields their id templates
+// read.
+func TestClassifyCurated(t *testing.T) {
+	t.Parallel()
+
+	m := load(t)
+	tests := []struct {
+		arn, cfn string
+		fields   map[string]string
+	}{
+		{
+			"arn:aws:events:eu-west-1:111111111111:rule/orders/nightly", "AWS::Events::Rule",
+			map[string]string{"bus": "orders/", "name": "nightly"},
+		},
+		{
+			"arn:aws:events:eu-west-1:111111111111:rule/nightly",
+			"AWS::Events::Rule",
+			map[string]string{"name": "nightly"},
+		},
+		{
+			"arn:aws:apigateway:eu-west-1::/restapis/a1b2c3/resources/r4s5/methods/GET", "AWS::ApiGateway::Method",
+			map[string]string{"rest_api_id": "a1b2c3", "resource_id": "r4s5", "http_method": "GET"},
+		},
+		{
+			"arn:aws:apigateway:eu-west-1::/restapis/a1b2c3",
+			"AWS::ApiGateway::RestApi",
+			map[string]string{"id": "a1b2c3"},
+		},
+		{
+			"arn:aws:ssm:eu-west-1:111111111111:parameter/app/db/host", "AWS::SSM::Parameter",
+			map[string]string{"name": "app/db/host"},
+		},
+		{
+			"arn:aws:lambda:eu-west-1:111111111111:layer:deps:7", "AWS::Lambda::LayerVersion",
+			map[string]string{"layer_name": "deps", "version": "7"},
+		},
+		{"arn:aws:lambda:eu-west-1:111111111111:function:orders:7", "", nil},
+		{
+			"arn:aws:eks:eu-west-1:111111111111:podidentityassociation/main/a-0123456789abcdef0",
+			"AWS::EKS::PodIdentityAssociation",
+			map[string]string{"association_id": "a-0123456789abcdef0"},
+		},
+		{
+			"arn:aws:cloudwatch::111111111111:dashboard/ops", "AWS::CloudWatch::Dashboard",
+			map[string]string{"dashboard_name": "ops"},
+		},
+		{
+			"arn:aws:vpc-lattice:eu-west-1:111111111111:resourceconfiguration/rcfg-0123456789abcdef0",
+			"AWS::VpcLattice::ResourceConfiguration",
+			map[string]string{"id": "rcfg-0123456789abcdef0"},
+		},
+		{"arn:aws:acm:eu-west-1:111111111111:certificate/0f1e2d3c", "AWS::ACM::Certificate", nil},
+	}
+	for _, tt := range tests {
+		cfn, fields := m.Classify(tt.arn)
+		assert.Equal(t, tt.cfn, cfn, tt.arn)
+		for k, v := range tt.fields {
+			assert.Equal(t, v, fields[k], "%s: %s", tt.arn, k)
+		}
+	}
+	dash, _ := m.Type("aws_cloudwatch_dashboard")
+	assert.True(t, dash.Global, "curated global overrides the provider's region")
+}
+
+// TestGeneratedAliases: the generator's alias table finds the CloudFormation candidate of the
+// families the aws and awscc providers name differently.
+func TestGeneratedAliases(t *testing.T) {
+	t.Parallel()
+
+	m := load(t)
+	for tf, cfn := range map[string]string{
+		"aws_cloudwatch_event_rule":   "AWS::Events::Rule",
+		"aws_cloudwatch_metric_alarm": "AWS::CloudWatch::Alarm",
+		"aws_api_gateway_rest_api":    "AWS::ApiGateway::RestApi",
+		"aws_opensearch_domain":       "AWS::OpenSearchService::Domain",
+		"aws_codepipeline":            "AWS::CodePipeline::Pipeline",
+	} {
+		ty, ok := m.Type(tf)
+		require.True(t, ok, tf)
+		assert.Equal(t, cfn, ty.GenResource.CFN, tf)
+	}
+	webhook, ok := m.Type("aws_codepipeline_webhook")
+	require.True(t, ok)
+	assert.NotEqual(t, "AWS::CodePipeline::Pipeline", webhook.GenResource.CFN, "a whole-name alias isn't a prefix")
 }

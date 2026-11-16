@@ -13,6 +13,6 @@ tf-fleet/legacy: unsupported state format version 3: tfcensus reads version 4 (T
 tf-fleet/restricted: error: access denied: s3:GetObject on s3://acme-restricted-tfstate/restricted/terraform.tfstate; the backend credentials need s3:GetObject, and kms:Decrypt when the bucket uses SSE-KMS
 tf-fleet/restricted: workspaces not listed: access denied: s3:ListBucket on s3://acme-restricted-tfstate/env:/; the backend credentials need s3:ListBucket
 tf-fleet/secure: state is encrypted with OpenTofu client-side encryption, so only serial and lineage are readable; --decrypt-with-tofu reads it with tofu show -json in the unit
-double-managed aws_security_group arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0123456789abcdef0 by tf-fleet/app (aws_security_group.legacy_web) and tf-fleet/network (aws_security_group.web) (matched on arn)
+double-managed aws_security_group account_id=111111111111,id=sg-0123456789abcdef0,region=eu-west-1 by tf-fleet/app (aws_security_group.legacy_web) and tf-fleet/network (aws_security_group.web) (matched on identity)
 
 9 states: 5 ok, 1 absent, 1 encrypted, 1 unsupported, 1 error, 0 skipped; 17 resource instances, 1 double-managed

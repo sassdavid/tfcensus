@@ -96,7 +96,7 @@ func TestSpec_inventory_3(t *testing.T) {
 	require.NotNil(t, sg, "the security group is missing")
 	assert.Equal(t, map[string]string{"Name": "web"}, sg.Tags, "tags come from config")
 	assert.Equal(t, []string{inventory.LayerConfig, inventory.LayerRE}, sg.Sources)
-	assert.Equal(t, []string{"aws_security_group"}, sg.TFTypes)
+	assert.Equal(t, []string{"aws_default_security_group", "aws_security_group"}, sg.TFTypes)
 
 	var cov bytes.Buffer
 	require.NoError(t, inventory.WriteCoverage(&cov, res.Coverage))

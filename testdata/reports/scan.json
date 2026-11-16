@@ -166,6 +166,7 @@
         "category": "managed",
         "cfn_type": "AWS::EC2::SecurityGroup",
         "tf_types": [
+          "aws_default_security_group",
           "aws_security_group"
         ],
         "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0aa11bb22cc33dd44",
@@ -291,6 +292,7 @@
         "category": "unmanaged",
         "cfn_type": "AWS::EC2::SecurityGroup",
         "tf_types": [
+          "aws_default_security_group",
           "aws_security_group"
         ],
         "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0c11c0b5000000003",
@@ -347,7 +349,11 @@
         "region": "eu-west-1",
         "category": "other-iac",
         "cfn_type": "AWS::Events::Rule",
+        "tf_types": [
+          "aws_cloudwatch_event_rule"
+        ],
         "arn": "arn:aws:events:eu-west-1:111111111111:rule/billing-nightly",
+        "name": "billing-nightly",
         "sources": [
           "resource-explorer"
         ],
@@ -410,6 +416,7 @@
         "category": "aws-managed",
         "cfn_type": "AWS::EC2::SecurityGroup",
         "tf_types": [
+          "aws_default_security_group",
           "aws_security_group"
         ],
         "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0def00000000000b2",
@@ -592,7 +599,209 @@
       ],
       "rows": [
         {
+          "cfn_type": "AWS::ACM::Certificate",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::ApiGateway::Deployment",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::ApiGateway::Method",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::ApiGateway::Resource",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::ApiGateway::RestApi",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::ApiGateway::Stage",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::AppRunner::AutoScalingConfiguration",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::Athena::DataCatalog",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::Athena::WorkGroup",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::Backup::BackupPlan",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::Backup::BackupSelection",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::Backup::BackupVault",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::CloudFormation::Stack",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::CloudWatch::Alarm",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::CloudWatch::Dashboard",
+          "global": true,
+          "cells": [
+            null,
+            null
+          ]
+        },
+        {
+          "cfn_type": "AWS::CodeBuild::Project",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::CodePipeline::Pipeline",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
           "cfn_type": "AWS::DynamoDB::Table",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EC2::ClientVpnEndpoint",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EC2::CustomerGateway",
           "global": false,
           "cells": [
             null,
@@ -615,6 +824,27 @@
         },
         {
           "cfn_type": "AWS::EC2::EIP",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EC2::EIPAssociation",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EC2::FlowLog",
           "global": false,
           "cells": [
             null,
@@ -691,6 +921,17 @@
           ]
         },
         {
+          "cfn_type": "AWS::EC2::PrefixList",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
           "cfn_type": "AWS::EC2::RouteTable",
           "global": false,
           "cells": [
@@ -744,7 +985,72 @@
           ]
         },
         {
+          "cfn_type": "AWS::EC2::SubnetRouteTableAssociation",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config"
+            ]
+          ]
+        },
+        {
           "cfn_type": "AWS::EC2::VPC",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EC2::VPCEndpoint",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EC2::VPCEndpointService",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EC2::VPCPeeringConnection",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EC2::VPNConnection",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EC2::VPNGateway",
           "global": false,
           "cells": [
             null,
@@ -777,6 +1083,39 @@
           ]
         },
         {
+          "cfn_type": "AWS::EFS::AccessPoint",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EFS::FileSystem",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::EKS::Addon",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
           "cfn_type": "AWS::EKS::Cluster",
           "global": false,
           "cells": [
@@ -788,7 +1127,37 @@
           ]
         },
         {
-          "cfn_type": "AWS::EKS::Nodegroup",
+          "cfn_type": "AWS::EKS::PodIdentityAssociation",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::ElastiCache::ReplicationGroup",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::ElastiCache::User",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::ElastiCache::UserGroup",
           "global": false,
           "cells": [
             null,
@@ -842,6 +1211,49 @@
           ]
         },
         {
+          "cfn_type": "AWS::Events::EventBus",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::Events::Rule",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::Glue::Database",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::Glue::Table",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "re"
+            ]
+          ]
+        },
+        {
           "cfn_type": "AWS::IAM::Group",
           "global": true,
           "cells": [
@@ -873,6 +1285,16 @@
         },
         {
           "cfn_type": "AWS::IAM::ManagedPolicy",
+          "global": true,
+          "cells": [
+            [
+              "config"
+            ],
+            null
+          ]
+        },
+        {
+          "cfn_type": "AWS::IAM::OIDCProvider",
           "global": true,
           "cells": [
             [
@@ -943,6 +1365,27 @@
           ]
         },
         {
+          "cfn_type": "AWS::KinesisAnalyticsV2::Application",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::Lambda::EventSourceMapping",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "re"
+            ]
+          ]
+        },
+        {
           "cfn_type": "AWS::Lambda::Function",
           "global": false,
           "cells": [
@@ -954,11 +1397,105 @@
           ]
         },
         {
+          "cfn_type": "AWS::Lambda::LayerVersion",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "re"
+            ]
+          ]
+        },
+        {
           "cfn_type": "AWS::Logs::LogGroup",
           "global": false,
           "cells": [
             null,
             [
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::MSK::Cluster",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::MSK::Configuration",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::MemoryDB::ACL",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::MemoryDB::ParameterGroup",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::MemoryDB::User",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::OpenSearchService::Domain",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::Pipes::Pipe",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::QuickSight::DataSource",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
               "re"
             ]
           ]
@@ -986,12 +1523,54 @@
           ]
         },
         {
+          "cfn_type": "AWS::RDS::DBParameterGroup",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "re"
+            ]
+          ]
+        },
+        {
           "cfn_type": "AWS::RDS::DBSubnetGroup",
           "global": false,
           "cells": [
             null,
             [
               "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::RDS::OptionGroup",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::ResourceExplorer2::Index",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::ResourceExplorer2::View",
+          "global": false,
+          "cells": [
+            null,
+            [
               "re"
             ]
           ]
@@ -1014,6 +1593,27 @@
               "native"
             ],
             null
+          ]
+        },
+        {
+          "cfn_type": "AWS::Route53Resolver::ResolverRule",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::Route53Resolver::ResolverRuleAssociation",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "config"
+            ]
           ]
         },
         {
@@ -1060,12 +1660,62 @@
           ]
         },
         {
+          "cfn_type": "AWS::SSM::Association",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::SSM::Parameter",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::Scheduler::ScheduleGroup",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "re"
+            ]
+          ]
+        },
+        {
           "cfn_type": "AWS::SecretsManager::Secret",
           "global": false,
           "cells": [
             null,
             [
               "config",
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::VpcLattice::ServiceNetwork",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::XRay::SamplingRule",
+          "global": false,
+          "cells": [
+            null,
+            [
               "re"
             ]
           ]

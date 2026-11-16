@@ -248,7 +248,10 @@ func (p principal) resources(
 		policy := aws.ToString(a.PolicyArn)
 		out = append(out, CloudResource{
 			Account: acct.ID, CFNType: p.attachment, ID: p.name + "/" + policy,
-			Attrs: map[string]string{p.kind: p.name, "policy_arn": policy}, Parents: parent,
+			Attrs: map[string]string{
+				p.kind: p.name, "policy_arn": policy, "rule_key": tfstate.PolicyAttachmentKey(p.kind, p.name, policy),
+			},
+			Parents: parent,
 			Sources: []string{LayerIAMAttachments},
 		})
 	}

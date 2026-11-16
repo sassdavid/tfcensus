@@ -182,14 +182,19 @@ resources:
     cfn: AWS::Amplify::Webhook
   - tf: aws_api_gateway_account
     service: apigateway
+    cfn: AWS::ApiGateway::Account
   - tf: aws_api_gateway_api_key
     service: apigateway
+    cfn: AWS::ApiGateway::ApiKey
   - tf: aws_api_gateway_authorizer
     service: apigateway
+    cfn: AWS::ApiGateway::Authorizer
   - tf: aws_api_gateway_base_path_mapping
     service: apigateway
+    cfn: AWS::ApiGateway::BasePathMapping
   - tf: aws_api_gateway_client_certificate
     service: apigateway
+    cfn: AWS::ApiGateway::ClientCertificate
   - tf: aws_api_gateway_deployment
     service: apigateway
     identity: regional-parameterized
@@ -201,19 +206,25 @@ resources:
     list: true
     list_required:
       - rest_api_id
+    cfn: AWS::ApiGateway::Deployment
   - tf: aws_api_gateway_documentation_part
     service: apigateway
+    cfn: AWS::ApiGateway::DocumentationPart
   - tf: aws_api_gateway_documentation_version
     service: apigateway
+    cfn: AWS::ApiGateway::DocumentationVersion
   - tf: aws_api_gateway_domain_name
     service: apigateway
+    cfn: AWS::ApiGateway::DomainName
   - tf: aws_api_gateway_domain_name_access_association
     service: apigateway
     identity: regional-arn
     identity_attrs:
       - arn
+    cfn: AWS::ApiGateway::DomainNameAccessAssociation
   - tf: aws_api_gateway_gateway_response
     service: apigateway
+    cfn: AWS::ApiGateway::GatewayResponse
   - tf: aws_api_gateway_integration
     service: apigateway
     identity: regional-parameterized
@@ -255,6 +266,7 @@ resources:
     list_required:
       - resource_id
       - rest_api_id
+    cfn: AWS::ApiGateway::Method
   - tf: aws_api_gateway_method_response
     service: apigateway
     identity: regional-parameterized
@@ -274,8 +286,10 @@ resources:
     service: apigateway
   - tf: aws_api_gateway_model
     service: apigateway
+    cfn: AWS::ApiGateway::Model
   - tf: aws_api_gateway_request_validator
     service: apigateway
+    cfn: AWS::ApiGateway::RequestValidator
   - tf: aws_api_gateway_resource
     service: apigateway
     identity: regional-parameterized
@@ -287,6 +301,7 @@ resources:
     list: true
     list_required:
       - rest_api_id
+    cfn: AWS::ApiGateway::Resource
   - tf: aws_api_gateway_rest_api
     service: apigateway
     identity: regional-single-parameter
@@ -295,18 +310,23 @@ resources:
       - region
       - id
     list: true
+    cfn: AWS::ApiGateway::RestApi
   - tf: aws_api_gateway_rest_api_policy
     service: apigateway
   - tf: aws_api_gateway_rest_api_put
     service: apigateway
   - tf: aws_api_gateway_stage
     service: apigateway
+    cfn: AWS::ApiGateway::Stage
   - tf: aws_api_gateway_usage_plan
     service: apigateway
+    cfn: AWS::ApiGateway::UsagePlan
   - tf: aws_api_gateway_usage_plan_key
     service: apigateway
+    cfn: AWS::ApiGateway::UsagePlanKey
   - tf: aws_api_gateway_vpc_link
     service: apigateway
+    cfn: AWS::ApiGateway::VpcLink
   - tf: aws_apigatewayv2_api
     service: apigatewayv2
     identity: regional-single-parameter
@@ -1414,6 +1434,7 @@ resources:
       - account_id
       - region
       - name
+    cfn: AWS::Events::ApiDestination
   - tf: aws_cloudwatch_event_archive
     service: events
     identity: regional-single-parameter
@@ -1421,6 +1442,7 @@ resources:
       - account_id
       - region
       - name
+    cfn: AWS::Events::Archive
   - tf: aws_cloudwatch_event_bus
     service: events
     identity: regional-single-parameter
@@ -1444,6 +1466,7 @@ resources:
       - account_id
       - region
       - name
+    cfn: AWS::Events::Connection
   - tf: aws_cloudwatch_event_endpoint
     service: events
     identity: regional-single-parameter
@@ -1451,6 +1474,7 @@ resources:
       - account_id
       - region
       - name
+    cfn: AWS::Events::Endpoint
   - tf: aws_cloudwatch_event_permission
     service: events
     identity: regional-single-parameter
@@ -1466,6 +1490,7 @@ resources:
       - region
       - name
     list: true
+    cfn: AWS::Events::Rule
   - tf: aws_cloudwatch_event_target
     service: events
     identity: regional-parameterized
@@ -1644,6 +1669,7 @@ resources:
     list: true
     re:
       - cloudwatch:alarm
+    cfn: AWS::CloudWatch::Alarm
   - tf: aws_cloudwatch_metric_stream
     service: cloudwatch
     identity: regional-single-parameter
@@ -1864,6 +1890,7 @@ resources:
     list: true
     re:
       - codepipeline:pipeline
+    cfn: AWS::CodePipeline::Pipeline
   - tf: aws_codepipeline_custom_action_type
     service: codepipeline
     re:
@@ -5592,6 +5619,7 @@ resources:
     service: opensearch
   - tf: aws_opensearch_domain
     service: opensearch
+    cfn: AWS::OpenSearchService::Domain
   - tf: aws_opensearch_domain_policy
     service: opensearch
   - tf: aws_opensearch_domain_saml_options
