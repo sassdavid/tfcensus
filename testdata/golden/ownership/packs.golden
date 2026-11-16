@@ -69,6 +69,9 @@ aws-defaults Athena primary workgroup                      pack/aws-defaults/acc
 aws-defaults AWS Backup Default vault                      pack/aws-defaults/account-defaults aws-managed
 aws-defaults X-Ray Default sampling rule                   pack/aws-defaults/account-defaults aws-managed
 aws-defaults ElastiCache default user                      pack/aws-defaults/account-defaults aws-managed
+aws-defaults ElastiCache system IAM user                   pack/aws-defaults/account-defaults aws-managed
+aws-defaults ElastiCache system IAM user group             pack/aws-defaults/account-defaults aws-managed
+aws-defaults ElastiCache default user a module created     rules/no-match
 aws-defaults RDS default parameter group                   pack/aws-defaults/account-defaults aws-managed
 aws-defaults AWS-managed prefix list                       pack/aws-defaults/account-defaults aws-managed
 aws-defaults event bus a team created                      rules/no-match

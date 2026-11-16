@@ -1,7 +1,7 @@
 {
-  "group": "Found by accounts 2 and 3: the default DHCP options as AWS Config records them, EFS automatic backups, QuickSight service policies on a managed role",
-  "spec_count": 20,
-  "why": "DHCP options read from CloudFormation property names, efs-automatic-backup, quicksight-policy-attachment",
+  "group": "Found by accounts 2 and 3: the default DHCP options as AWS Config records them, EFS automatic backups, QuickSight service policies on a managed role, the ElastiCache system IAM user",
+  "spec_count": 23,
+  "why": "DHCP options read from CloudFormation property names, efs-automatic-backup, quicksight-policy-attachment, account-defaults (default.iam-user)",
   "config": [
     {
       "type": "AWS::EC2::DHCPOptions",
@@ -48,6 +48,12 @@
         "arn:aws:iam::111111111111:policy/service-role/AWSQuickSightS3Policy",
         "arn:aws:iam::aws:policy/service-role/AWSQuicksightAthenaAccess"
       ]
+    }
+  ],
+  "resource_explorer": [
+    {
+      "arn": "arn:aws:elasticache:eu-west-1:111111111111:user:default.iam-user",
+      "type": "elasticache:user"
     }
   ]
 }

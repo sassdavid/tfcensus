@@ -70,6 +70,7 @@ before the rows are recorded, and the owner reruns all three accounts.
 | The default DHCP options | 1, 1, 1 | the config layer reads AWS Config's CloudFormation property names | `15-further-accounts.json` |
 | EFS automatic backup plan, vault and selection | 3, 3, 3 | `efs-automatic-backup` | `15-further-accounts.json` |
 | QuickSight service policies on a managed QuickSight role | 4, 0, 4 | `quicksight-policy-attachment` | `15-further-accounts.json` |
+| ElastiCache's system-managed `default.iam-user` (found in the review of the rerun) | 1, 1, 1 | `account-defaults` | `15-further-accounts.json` |
 
 `TestSpec_scan_accuracy_9` scans all 15 fixtures with stubbed AWS
 (`testdata/cassettes/aws/validation.yaml`) and finds no `unmanaged` resource.
