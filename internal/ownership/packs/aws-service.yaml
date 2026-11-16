@@ -67,3 +67,15 @@
   match: resource.type == "AWS::Events::Rule" && resource.name == "AutoScalingManagedRule"
   owner: autoscaling
   reason: EventBridge rule that EC2 Auto Scaling creates and manages (ManagedBy autoscaling.amazonaws.com)
+- name: efs-automatic-backup
+  match: >-
+    resource.type in ["AWS::Backup::BackupPlan", "AWS::Backup::BackupVault", "AWS::Backup::BackupSelection"] &&
+    resource.name in ["aws/efs/automatic-backup-plan", "aws/efs/automatic-backup-vault", "aws/efs/automatic-backup-selection"]
+  owner: efs
+  reason: backup plan, vault or selection that Amazon EFS creates for automatic backups
+- name: quicksight-policy-attachment
+  match: >-
+    resource.type == "Native::IAM::RolePolicyAttachment" &&
+    resource.attrs.?policy_arn.orValue("").matches(":policy/service-role/AWSQuick[Ss]ight")
+  owner: quicksight
+  reason: QuickSight service policy that QuickSight attached when its data source access changed

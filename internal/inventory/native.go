@@ -35,6 +35,7 @@ const (
 	cfnSecurityGroup   = "AWS::EC2::SecurityGroup"
 	cfnRouteTable      = "AWS::EC2::RouteTable"
 	cfnNatGateway      = "AWS::EC2::NatGateway"
+	cfnDHCPOptions     = "AWS::EC2::DHCPOptions"
 	cfnRoleAttachment  = typemap.NativePrefix + "IAM::RolePolicyAttachment"
 	cfnUserAttachment  = typemap.NativePrefix + "IAM::UserPolicyAttachment"
 	cfnGroupAttachment = typemap.NativePrefix + "IAM::GroupPolicyAttachment"

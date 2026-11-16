@@ -94,6 +94,13 @@ aws-service  bucket policy with log delivery and a team statement rules/no-match
 aws-service  bucket policy whose statement has no Sid      rules/no-match
 aws-service  rule that EC2 Auto Scaling manages            pack/aws-service/autoscaling-managed-rule aws-managed
 aws-service  rule a team named after Auto Scaling          rules/no-match
+aws-service  EFS automatic backup plan                     pack/aws-service/efs-automatic-backup aws-managed
+aws-service  EFS automatic backup vault                    pack/aws-service/efs-automatic-backup aws-managed
+aws-service  EFS automatic backup selection                pack/aws-service/efs-automatic-backup aws-managed
+aws-service  backup plan a team created for EFS            rules/no-match
+aws-service  QuickSight S3 policy attached by QuickSight   pack/aws-service/quicksight-policy-attachment aws-managed
+aws-service  QuickSight Athena access attached by QuickSight pack/aws-service/quicksight-policy-attachment aws-managed
+aws-service  policy a team attached to a QuickSight role   rules/no-match
 other-iac    AFT execution role                            pack/other-iac/aft other-iac
 other-iac    resource tagged managed_by AFT                pack/other-iac/aft other-iac
 other-iac    role named like AFT but not by it             rules/no-match

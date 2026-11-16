@@ -92,8 +92,9 @@ stack owns one. Their runs have layer `cloudformation` and stay out of the cover
 - The config layer selects `resourceCreationTime` and the configuration properties the ownership
   packs read, never a whole `configuration` document: the flags `isDefault`, `defaultForAz`,
   `keyManager`, `requesterManaged` and `interfaceType`; an ENI's `description`, `requesterId` and
-  `attachment.instanceOwnerId`; DHCP options' `dhcpConfigurations` (kept as one `key=values`
-  string); and a route table's `associations` (kept as `main`). A value a user wrote is read only
+  `attachment.instanceOwnerId`; DHCP options' `DomainName`, `DomainNameServers`, `NtpServers`,
+  `NetbiosNameServers`, `NetbiosNodeType` and `Ipv6AddressPreferredLeaseTime` (kept as one
+  `key=values` string; AWS Config records this type with CloudFormation's property names); and a route table's `associations` (kept as `main`). A value a user wrote is read only
   when a rule needs it to tell a service from a person, and is never printed
   ([ADR-0017](../adr/0017-scan-accuracy.md)).
 - Resource Explorer records get an `id` from the ARN pattern's captures (`id`, else `name`, else

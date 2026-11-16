@@ -1967,6 +1967,132 @@
       "related": []
     },
     {
+      "pack": "aws-service",
+      "name": "EFS automatic backup plan",
+      "want": "pack/aws-service/efs-automatic-backup",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::Backup::BackupPlan",
+        "sources": [
+          "config",
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:backup:eu-west-1:111111111111:backup-plan:0a1b2c3d",
+        "id": "aws/efs/automatic-backup-plan",
+        "name": "aws/efs/automatic-backup-plan"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "EFS automatic backup vault",
+      "want": "pack/aws-service/efs-automatic-backup",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::Backup::BackupVault",
+        "sources": [
+          "config",
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:backup:eu-west-1:111111111111:backup-vault:aws-efs-automatic-backup-vault",
+        "id": "aws/efs/automatic-backup-vault",
+        "name": "aws/efs/automatic-backup-vault"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "EFS automatic backup selection",
+      "want": "pack/aws-service/efs-automatic-backup",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::Backup::BackupSelection",
+        "sources": [
+          "config",
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:backup:eu-west-1:111111111111:backup-plan:0a1b2c3d/selection/5e6f",
+        "id": "aws/efs/automatic-backup-selection",
+        "name": "aws/efs/automatic-backup-selection"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "backup plan a team created for EFS",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::Backup::BackupPlan",
+        "sources": [
+          "config",
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:backup:eu-west-1:111111111111:backup-plan:0a1b2c3d",
+        "id": "efs-daily",
+        "name": "efs-daily"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "QuickSight S3 policy attached by QuickSight",
+      "want": "pack/aws-service/quicksight-policy-attachment",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "Native::IAM::RolePolicyAttachment",
+        "sources": [
+          "native:iam-attachments"
+        ],
+        "id": "aws-quicksight-service-role-v0/arn:aws:iam::111111111111:policy/service-role/AWSQuickSightS3Policy",
+        "attrs": {
+          "role": "aws-quicksight-service-role-v0",
+          "policy_arn": "arn:aws:iam::111111111111:policy/service-role/AWSQuickSightS3Policy"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "QuickSight Athena access attached by QuickSight",
+      "want": "pack/aws-service/quicksight-policy-attachment",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "Native::IAM::RolePolicyAttachment",
+        "sources": [
+          "native:iam-attachments"
+        ],
+        "id": "aws-quicksight-service-role-v0/arn:aws:iam::aws:policy/service-role/AWSQuicksightAthenaAccess",
+        "attrs": {
+          "role": "aws-quicksight-service-role-v0",
+          "policy_arn": "arn:aws:iam::aws:policy/service-role/AWSQuicksightAthenaAccess"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "policy a team attached to a QuickSight role",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "Native::IAM::RolePolicyAttachment",
+        "sources": [
+          "native:iam-attachments"
+        ],
+        "id": "aws-quicksight-service-role-v0/arn:aws:iam::111111111111:policy/quicksight-reports",
+        "attrs": {
+          "role": "aws-quicksight-service-role-v0",
+          "policy_arn": "arn:aws:iam::111111111111:policy/quicksight-reports"
+        }
+      },
+      "related": []
+    },
+    {
       "pack": "other-iac",
       "name": "AFT execution role",
       "want": "pack/other-iac/aft",

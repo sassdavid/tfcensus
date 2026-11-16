@@ -39,7 +39,9 @@ Decisions: [ADR-0017](../adr/0017-scan-accuracy.md). Aggregates only, as everywh
 The other 24 are real or for the owner to judge: security group rules added by hand, a private
 Route 53 record and two ACM validation records, ECR repositories, an S3 bucket and a log group
 created by hand, IAM roles from the account vending process, and policies an AWS service attached
-to a role a state manages (drift on a managed role, so it stays `unmanaged`).
+to a role a state manages (drift on a managed role, so it stays `unmanaged`). Accounts 2 and 3
+showed that QuickSight attaches its own service policies, so those attachments are `aws-managed`
+now (below).
 
 ### Found by the v0.4.0 rerun (6 of 52)
 
@@ -52,6 +54,21 @@ The rerun lists types that v0.3.0 left `undetermined`, and three groups of them 
 | Pod Identity associations an EKS add-on owns | 2 | Resource Explorer lists them without `ownerArn`, so `addon-pod-identity-association` never matched | `native:eks-pod-identity` reads `ownerArn` ([Resource Explorer](#resource-explorer)) |
 
 Their fixture is `testdata/validation/groups/14-rerun.json`.
+
+### Found by accounts 2 and 3
+
+Two more non-prod accounts, read-only, in `ap-southeast-1`. Checked with read-only API calls
+whose output held counts only:
+
+| Group | Count (accounts 1, 2, 3) | Cause | Fix |
+|---|---|---|---|
+| The default DHCP options | 1, 1, 1 | AWS Config records `AWS::EC2::DHCPOptions` with CloudFormation's property names (`DomainName`, `DomainNameServers`), not `dhcpConfigurations`, so `default-dhcp-options` never saw a value. The fixture had the documented EC2 shape. | The config layer reads the CloudFormation names |
+| The EFS automatic backup plan, vault and selection (`aws/efs/automatic-backup-*`) | 3, 3, 3 | Amazon EFS creates them for automatic backups, and they can't be deleted (EFS user guide, "Backing up EFS file systems") | `efs-automatic-backup` ([AWS services](#aws-services)) |
+| QuickSight service policies (`service-role/AWSQuickSight*`, `AWSQuicksightAthenaAccess`) attached to a QuickSight role a state manages | 4, 0, 4 | QuickSight attaches them when its data source access changes | `quicksight-policy-attachment` ([AWS services](#aws-services)) |
+
+Their fixture is `testdata/validation/groups/15-further-accounts.json`. The longer field list
+raises the config layer's query budget per chunk from 2,560 to 2,816 characters, still well
+under the 4,096-character limit with the aggregator's account and region lists.
 
 ### `undetermined` (650)
 
@@ -160,7 +177,7 @@ external-dns ownership:
 | Rule | Matches |
 |---|---|
 | `apex-ns-soa` | The NS and SOA records at a hosted zone's apex. Route 53 creates them with every zone. |
-| `default-dhcp-options` | DHCP options with only `domain-name` set to `<region>.compute.internal` (`ec2.internal` in us-east-1) and `domain-name-servers` set to `AmazonProvidedDNS`, and no tags. EC2 has no default flag, so the config layer adds `configuration.dhcpConfigurations`. |
+| `default-dhcp-options` | DHCP options with only `domain-name` set to `<region>.compute.internal` (`ec2.internal` in us-east-1) and `domain-name-servers` set to `AmazonProvidedDNS`, and no tags. EC2 has no default flag, so the config layer reads the DHCP option properties, which AWS Config records under CloudFormation's names (`DomainName`, `DomainNameServers` and the rest). |
 | `default-security-group-rules` | Covered by inheritance from `default-security-group`. |
 | `main-route-table` | A route table with an association `main: true`, unless a state manages it (`aws_default_route_table`). AWS creates it with every VPC. The config layer adds `configuration.associations`. |
 | `regional-nat-route-table` | The route table whose ID is a regional NAT gateway's `routeTableId`. AWS creates it with the gateway. AWS Config doesn't record the field, so the EC2 native lister reads `ec2:DescribeNatGateways`. |
@@ -178,6 +195,8 @@ Rules in `aws-service` (category `aws-managed`):
 | `apigateway-log-group` | Log groups `API-Gateway-Execution-Logs_<api>/<stage>` and `/aws/apigateway/welcome` |
 | `service-linked-secret` | Secret names `<service>!...` for the documented service IDs (`appflow`, `databrew`, `datasync`, `directconnect`, `ecs-sc`, `events`, `marketplace-deployment`, `opsworks-cm`, `pcs`, `rds`, `redshift`, `sqlworkbench`) and `s2svpn` (seen on the validation account), or tag `aws:secretsmanager:owningService`. AWS Config doesn't record `OwningService`. |
 | `log-delivery-bucket-policy` | A bucket policy whose statement IDs are all `AWSLogDeliveryWrite*` or `AWSLogDeliveryAclCheck*`. The S3 lister stores the statement IDs only, never the policy. |
+| `efs-automatic-backup` | The backup plan, vault and selection named `aws/efs/automatic-backup-plan`, `-vault` and `-selection`, which Amazon EFS creates for automatic backups |
+| `quicksight-policy-attachment` | An attachment of a `service-role/AWSQuickSight*` policy (customer or AWS managed, which covers `AWSQuicksightAthenaAccess`), which QuickSight attaches to its role |
 | `autoscaling-managed-rule` | The EventBridge rule `AutoScalingManagedRule`, which EC2 Auto Scaling creates through its service-linked role (`AutoScalingServiceRolePolicy`, condition `events:ManagedBy`) |
 | `lambda-version` (`derived`) | A Lambda version of a function a state manages. `publish = true` creates versions that no state lists. |
 | `rds-automated-snapshot` (`derived`) | RDS snapshots of type `automated` and automated backups |

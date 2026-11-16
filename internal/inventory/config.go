@@ -91,7 +91,7 @@ func configQuery(configTypes []string) string {
 
 // typeQueryBudget is the longest [configQuery] a chunk of types may give. It leaves room under
 // [maxExpression] for the account and region lists of an aggregate query.
-const typeQueryBudget = 2560
+const typeQueryBudget = 2816
 
 // chunkTypes splits the sorted configTypes into the fewest runs, in order, whose queries fit in
 // [typeQueryBudget].
@@ -129,12 +129,26 @@ func configFlags() map[string]string {
 }
 
 // configLists are the list properties that rules read in reduced form: a route table's
-// associations become main, and DHCP options become their canonical key=values string.
-func configLists() []string { return []string{"associations", "dhcpConfigurations"} }
+// associations become main.
+func configLists() []string { return []string{"associations"} }
+
+// dhcpProperties maps the properties of a DHCP options item to their DHCP option names. AWS Config
+// records the type with CloudFormation's property names, not DescribeDhcpOptions' shape.
+func dhcpProperties() map[string]string {
+	return map[string]string{
+		"DomainName":                    "domain-name",
+		"DomainNameServers":             "domain-name-servers",
+		"NtpServers":                    "ntp-servers",
+		"NetbiosNameServers":            "netbios-name-servers",
+		"NetbiosNodeType":               "netbios-node-type",
+		"Ipv6AddressPreferredLeaseTime": "ipv6-address-preferred-lease-time",
+	}
+}
 
 func configFields() []string {
 	names := slices.Collect(maps.Keys(configFlags()))
 	names = append(names, configLists()...)
+	names = append(names, slices.Collect(maps.Keys(dhcpProperties()))...)
 	slices.Sort(names)
 	out := make([]string, 0, len(names))
 	for _, k := range names {
@@ -230,8 +244,8 @@ func DecodeConfigItem(m *typemap.Map, raw []byte) (CloudResource, error) {
 			return main
 		})))
 	}
-	if dhcp, ok := row.Configuration["dhcpConfigurations"].([]any); ok {
-		r.setAttr("dhcp_options", dhcpOptions(dhcp))
+	if r.CFNType == cfnDHCPOptions {
+		r.setAttr("dhcp_options", dhcpOptions(row.Configuration))
 	}
 	for _, rel := range row.Relationships {
 		ref := Ref{CFNType: m.FromConfig(rel.ResourceType), ID: rel.ResourceID}
@@ -259,20 +273,25 @@ func configValue(conf map[string]any, path string) any {
 
 // dhcpOptions renders DHCP options as key=value,value pairs sorted by key and joined by ";", such
 // as "domain-name=eu-west-1.compute.internal;domain-name-servers=AmazonProvidedDNS".
-func dhcpOptions(confs []any) string {
+func dhcpOptions(conf map[string]any) string {
 	var parts []string
-	for _, c := range confs {
-		m, _ := c.(map[string]any)
-		key, _ := m["key"].(string)
+	for prop, key := range dhcpProperties() {
 		var values []string
-		list, _ := m["values"].([]any)
-		for _, v := range list {
-			vm, _ := v.(map[string]any)
-			if s, ok := vm["value"].(string); ok {
-				values = append(values, s)
+		switch v := conf[prop].(type) {
+		case string:
+			values = []string{v}
+		case float64:
+			values = []string{strconv.FormatFloat(v, 'f', -1, 64)}
+		case []any:
+			for _, x := range v {
+				if s, ok := x.(string); ok {
+					values = append(values, s)
+				}
 			}
 		}
-		parts = append(parts, key+"="+strings.Join(values, ","))
+		if len(values) > 0 {
+			parts = append(parts, key+"="+strings.Join(values, ","))
+		}
 	}
 	slices.Sort(parts)
 	return strings.Join(parts, ";")

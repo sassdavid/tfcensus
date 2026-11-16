@@ -111,7 +111,7 @@ func loadValidationGroups(t *testing.T) []validationGroup {
 	t.Helper()
 	files, err := filepath.Glob(filepath.Join(validationDir, "groups", "*.json"))
 	require.NoError(t, err)
-	require.Len(t, files, 14, "one fixture per false-positive group")
+	require.Len(t, files, 15, "one fixture per false-positive group")
 	groups := make([]validationGroup, 0, len(files))
 	for _, f := range files {
 		b, rerr := os.ReadFile(f)
@@ -189,7 +189,8 @@ func TestValidationCassette(t *testing.T) { //nolint:paralleltest // writes the 
 }
 
 // TestSpec_scan_accuracy_9: the anonymized fixtures of the 13 false-positive groups of the first
-// scan, and of the group the v0.4.0 rerun found, scan with no unmanaged finding.
+// scan, of the group the v0.4.0 rerun found and of the groups accounts 2 and 3 found, scan with no
+// unmanaged finding.
 func TestSpec_scan_accuracy_9(t *testing.T) {
 	t.Parallel()
 	p := scriptParams(t, filepath.Join(scriptDir, "spec_scan_accuracy_9.txtar"))

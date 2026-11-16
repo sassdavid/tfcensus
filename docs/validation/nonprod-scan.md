@@ -24,6 +24,8 @@ criterion 5).
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | 2026-11-16 | v0.3.0 | 1,803 | 171 | 147 | 86% | 650 | VPC Lattice resource gateways and resource configurations, ACM certificates, API Gateway domain names, EKS add-ons and node groups, VPC endpoint services, Route 53 Resolver rules, Backup recovery points |
 | 1 | pending | v0.4.0 | | | | | | |
+| 2 | pending | v0.4.0 | | | | | | |
+| 3 | pending | v0.4.0 | | | | | | |
 
 Account 1 is one Control Tower member account, two regions, built-in packs only. Its row for
 v0.4.0 comes from the owner's read-only rerun with the same command (M21's last box).
@@ -57,5 +59,17 @@ is recorded, and the owner reruns the scan for it.
 | `AutoScalingManagedRule` | 1 | `autoscaling-managed-rule` | `14-rerun.json` |
 | Pod Identity associations an EKS add-on owns | 2 | `native:eks-pod-identity` reads `ownerArn` | `14-rerun.json` |
 
-`TestSpec_scan_accuracy_9` scans all 14 fixtures with stubbed AWS
+## False positives found by accounts 2 and 3
+
+Accounts 2 and 3 are Control Tower member accounts in `ap-southeast-1`, built-in packs only. Their
+first scans (89 and 45 `unmanaged`) found three groups that account 1 has too. They are fixed
+before the rows are recorded, and the owner reruns all three accounts.
+
+| Group | Count (accounts 1, 2, 3) | Fixed by | Fixture |
+| --- | --- | --- | --- |
+| The default DHCP options | 1, 1, 1 | the config layer reads AWS Config's CloudFormation property names | `15-further-accounts.json` |
+| EFS automatic backup plan, vault and selection | 3, 3, 3 | `efs-automatic-backup` | `15-further-accounts.json` |
+| QuickSight service policies on a managed QuickSight role | 4, 0, 4 | `quicksight-policy-attachment` | `15-further-accounts.json` |
+
+`TestSpec_scan_accuracy_9` scans all 15 fixtures with stubbed AWS
 (`testdata/cassettes/aws/validation.yaml`) and finds no `unmanaged` resource.
