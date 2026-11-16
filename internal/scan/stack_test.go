@@ -122,7 +122,7 @@ func TestExplainStack(t *testing.T) {
 		Resource: queue("billing-events"), Category: match.CategoryUnmatched, Rule: match.RuleNotInState,
 		Reason: "no state has it",
 	}
-	ex := scan.Explain(&res, src)
+	ex := scan.Explain([]match.Result{res}, 0, src)
 	assert.Empty(t, ex.Trace)
 	var b bytes.Buffer
 	require.NoError(t, scan.WriteExplanation(&b, &ex))

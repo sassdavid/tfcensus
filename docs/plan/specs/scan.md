@@ -34,7 +34,13 @@ capability probe → discovery (F1) → state index (F3) → inventory layers �
   `source/cloudformation`, before any ownership rule. Every finding a stack lists has a `stack`
   object (`name`, `id`, `root` for a nested stack, `logical_id`). A managed or double-managed one
   keeps its category and the report warns. CSV has a `stack` column; tty and md list the stacks.
-- `--explain <arn|id>` prints one resource's match, every rule's outcome and its category;
+- Inheritance ([ADR-0017](../adr/0017-scan-accuracy.md)): a second pass gives an `unmanaged` or
+  `undetermined` child (policy attachments and inline policies, bucket subresources, security
+  group rules, apex NS and SOA records, a regional NAT gateway's route table, a `CHILD` VPC
+  Lattice resource configuration) the category of an `aws-managed`, `other-iac` or `derived`
+  parent, with rule `inherit/<category>` and a `parent` object. A child of a `managed` parent stays
+  `unmanaged`. The pass repeats up to depth 3, and `scan.never_hide` stops it at guarded resources.
+- `--explain <arn|id>` prints one resource's match, every rule's outcome, its parent chain and its category;
   `--explain-coverage` prints the layer coverage matrix. A re-run with other rules reads the cached
   inventory ([ADR-0009](../adr/0009-scan-snapshot-cache.md)).
 

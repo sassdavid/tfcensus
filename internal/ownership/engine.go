@@ -362,7 +362,7 @@ func (e *Engine) Evaluate(r *Resource, unit *Unit, trace bool) Decision {
 	if unit == nil {
 		unit = &Unit{}
 	}
-	vars := map[string]any{"resource": r, "unit": unit}
+	vars := celVars(r, unit)
 	now := e.opts.Now()
 	guarded := e.guarded(vars)
 	d := Decision{Rule: RuleNoMatch}
@@ -413,6 +413,17 @@ func (e *Engine) step(c *compiled, vars map[string]any, now time.Time, guarded s
 	}
 	return s
 }
+
+// Guarded returns the reason of the first guard that matches r, or "" when none does.
+func (e *Engine) Guarded(r *Resource) string {
+	return e.guarded(celVars(r, &Unit{}))
+}
+
+// celVars binds the variables every rule sees.
+func celVars(r *Resource, u *Unit) map[string]any { return map[string]any{"resource": r, "unit": u} }
+
+// NeverHides reports whether c is in never_hide.
+func (e *Engine) NeverHides(c Category) bool { return slices.Contains(e.opts.NeverHide, c) }
 
 // guarded returns the reason of the first guard that matches, or "".
 func (e *Engine) guarded(vars map[string]any) string {

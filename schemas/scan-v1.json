@@ -155,7 +155,7 @@
         "owner": { "type": "string" },
         "reason": { "type": "string", "minLength": 1 },
         "rule": {
-          "description": "The match rule (match/...), the CloudFormation source (source/cloudformation) or ownership rule (pack/<pack>/<name>, user/<name>, rules/no-match) that decided the category.",
+          "description": "The match rule (match/...), the CloudFormation source (source/cloudformation) or ownership rule (pack/<pack>/<name>, user/<name>, rules/no-match), or inherit/<category> for a child that took its parent's category.",
           "type": "string",
           "minLength": 1
         },
@@ -183,7 +183,22 @@
             "root": { "type": "string", "description": "The top-level stack, for a nested stack." },
             "logical_id": { "type": "string" }
           }
-        }
+        },
+        "parent": { "$ref": "#/$defs/parent" }
+      }
+    },
+    "parent": {
+      "description": "The resource a child took its category from (rule inherit/<category>), with that resource's own parent when it inherited too.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cfn_type", "key", "category", "rule"],
+      "properties": {
+        "cfn_type": { "type": "string" },
+        "key": { "type": "string", "minLength": 1 },
+        "category": { "$ref": "#/$defs/category" },
+        "owner": { "type": "string" },
+        "rule": { "type": "string", "minLength": 1 },
+        "parent": { "$ref": "#/$defs/parent" }
       }
     }
   }

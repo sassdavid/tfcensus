@@ -40,15 +40,17 @@ type MatchStep struct {
 	Rule     string         `json:"rule"`
 }
 
-// Explain evaluates one match result with a full trace. The rules aren't evaluated when the
-// match or a CloudFormation stack decided.
-func Explain(r *match.Result, src Sources) Explanation {
+// Explain evaluates results[i] with a full trace. The rules aren't evaluated when the match or a
+// CloudFormation stack decided. The other results are classified too, because a child can
+// inherit its parent's category.
+func Explain(results []match.Result, i int, src Sources) Explanation {
+	r := &results[i]
 	in := ownership.FromCloud(&r.Resource, src.Map, src.Index)
 	e := Explanation{
 		Resource: in,
 		Match:    MatchStep{Category: r.Category, Reason: r.Reason, Rule: r.Rule},
 		Trace:    []ownership.Step{},
-		Finding:  classify(r, src),
+		Finding:  Classify(results, src)[i],
 	}
 	if e.Finding.Rule != RuleCloudFormation &&
 		(r.Category == match.CategoryUnmatched || r.Category == match.CategoryUndetermined) {
@@ -99,6 +101,9 @@ func WriteExplanation(w io.Writer, e *Explanation) error {
 			}
 			_, _ = fmt.Fprintf(tw, "  %s\t%s\n", s.Rule, outcome)
 		}
+	}
+	for p, lead := e.Finding.Parent, "parent"; p != nil; p, lead = p.Parent, "  parent" {
+		_, _ = fmt.Fprintf(tw, "%s\t%s\n", lead, p.Text())
 	}
 	f := &e.Finding
 	verdict := fmt.Sprintf("%s: %s (%s)", f.Category, f.Reason, f.Rule)

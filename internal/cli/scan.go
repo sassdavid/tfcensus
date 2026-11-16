@@ -67,8 +67,11 @@ the state of the discovered units, and puts each resource in one category:
 
 The flow is: capability probe, discovery, state index, inventory layers, matching, CloudFormation
 stacks, then the ownership rules (the built-in packs, then rules from the config and --rules
-files, first match wins). scan --explain <arn> prints how one resource was categorized; --explain-coverage prints
-which layer listed each type in each account and region.
+files, first match wins). A child that is still unmanaged or undetermined, such as a policy attachment
+of a service-linked role, then takes the category of an aws-managed, other-iac or derived parent
+(rule inherit/<category>); a child of a managed parent stays unmanaged. scan --explain <arn> prints
+how one resource was categorized, with its parent chain; --explain-coverage prints which layer
+listed each type in each account and region.
 
 Coverage is (managed + double-managed) / (managed + double-managed + unmanaged) per account.
 aws-managed, derived, other-iac, ignored and undetermined resources don't count.
@@ -704,7 +707,7 @@ func (e *scanEnv) writeExplain(format render.Format, results []match.Result, src
 	for i := range results {
 		r := &results[i].Resource
 		if r.ARN == want || r.ID == want {
-			ex := scan.Explain(&results[i], src)
+			ex := scan.Explain(results, i, src)
 			if format == render.FormatJSON {
 				return render.JSON(e.d.Stdout, render.NewEnvelope(buildinfo.Get().Version, e.d.Clock(), ex))
 			}

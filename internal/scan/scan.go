@@ -56,7 +56,8 @@ type Finding struct {
 	Reason     string            `json:"reason"`
 	Rule       string            `json:"rule"`
 	ManagedBy  []tfstate.Ref     `json:"managed_by,omitempty"`
-	Stack      *Stack            `json:"stack,omitempty"` // the CloudFormation stack that lists it
+	Stack      *Stack            `json:"stack,omitempty"`  // the CloudFormation stack that lists it
+	Parent     *Parent           `json:"parent,omitempty"` // the resource it took its category from
 }
 
 // Stack is the CloudFormation stack that lists a resource.
@@ -108,12 +109,14 @@ type Sources struct {
 // Classify turns match results into findings. A state match decides first. An unmatched or
 // undetermined resource that a CloudFormation stack lists is other-iac. The others go through
 // the ownership rules; a rule that matches sets the category, else unmatched resources are
-// unmanaged and undetermined ones stay undetermined.
+// unmanaged and undetermined ones stay undetermined. A second pass gives an unmanaged or
+// undetermined child the category of an aws-managed, other-iac or derived parent.
 func Classify(results []match.Result, src Sources) []Finding {
 	out := make([]Finding, len(results))
 	for i := range results {
 		out[i] = classify(&results[i], src)
 	}
+	inherit(out, results, src)
 	return out
 }
 
