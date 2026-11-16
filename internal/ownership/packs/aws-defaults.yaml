@@ -51,7 +51,8 @@
     resource.type == "AWS::Backup::BackupVault" && resource.name == "Default" ||
     resource.type in ["AWS::XRay::Group", "AWS::XRay::SamplingRule"] &&
     [resource.name, resource.id].exists(n, n == "Default") ||
-    resource.type == "AWS::ElastiCache::User" && resource.name == "default" ||
+    resource.type in ["AWS::ElastiCache::User", "AWS::ElastiCache::UserGroup"] &&
+    (resource.name == "default" || resource.name.startsWith("default.")) ||
     resource.type == "AWS::MemoryDB::User" && resource.name == "default" ||
     resource.type == "AWS::MemoryDB::ACL" && resource.name == "open-access" ||
     resource.type in ["AWS::RDS::DBParameterGroup", "AWS::MemoryDB::ParameterGroup"] && resource.name.startsWith("default.") ||
@@ -60,5 +61,6 @@
     resource.type == "AWS::AppRunner::AutoScalingConfiguration" && resource.arn.contains(":autoscalingconfiguration/DefaultConfiguration/")
   reason: >-
     resource that every account or region has once the service is used: default deployment
-    configurations, capacity providers, buses, groups, workgroups, vaults, users, parameter groups,
-    auto-defined Resolver rules and AWS-managed prefix lists
+    configurations, capacity providers, buses, groups, workgroups, vaults, users (with ElastiCache's
+    system-managed default.iam-user and default.iam-user-group), parameter groups, auto-defined
+    Resolver rules and AWS-managed prefix lists

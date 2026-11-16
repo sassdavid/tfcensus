@@ -65,6 +65,7 @@ whose output held counts only:
 | The default DHCP options | 1, 1, 1 | AWS Config records `AWS::EC2::DHCPOptions` with CloudFormation's property names (`DomainName`, `DomainNameServers`), not `dhcpConfigurations`, so `default-dhcp-options` never saw a value. The fixture had the documented EC2 shape. | The config layer reads the CloudFormation names |
 | The EFS automatic backup plan, vault and selection (`aws/efs/automatic-backup-*`) | 3, 3, 3 | Amazon EFS creates them for automatic backups, and they can't be deleted (EFS user guide, "Backing up EFS file systems") | `efs-automatic-backup` ([AWS services](#aws-services)) |
 | QuickSight service policies (`service-role/AWSQuickSight*`, `AWSQuicksightAthenaAccess`) attached to a QuickSight role a state manages | 4, 0, 4 | QuickSight attaches them when its data source access changes | `quicksight-policy-attachment` ([AWS services](#aws-services)) |
+| ElastiCache's system-managed `default.iam-user` (found in the owner's review of the rerun) | 1, 1, 1 | `account-defaults` matched only the user named `default` | `account-defaults` ([AWS defaults](#aws-defaults)) |
 
 Their fixture is `testdata/validation/groups/15-further-accounts.json`. The longer field list
 raises the config layer's query budget per chunk from 2,560 to 2,816 characters, still well
@@ -181,7 +182,7 @@ external-dns ownership:
 | `default-security-group-rules` | Covered by inheritance from `default-security-group`. |
 | `main-route-table` | A route table with an association `main: true`, unless a state manages it (`aws_default_route_table`). AWS creates it with every VPC. The config layer adds `configuration.associations`. |
 | `regional-nat-route-table` | The route table whose ID is a regional NAT gateway's `routeTableId`. AWS creates it with the gateway. AWS Config doesn't record the field, so the EC2 native lister reads `ec2:DescribeNatGateways`. |
-| `account-defaults` | Resources every account has once the type is curated: CodeDeploy `CodeDeployDefault.*` configurations, AppConfig `AppConfig.*` deployment strategies, the Amazon Keyspaces `system*` keyspaces, the ECS `FARGATE` and `FARGATE_SPOT` capacity providers, the EventBridge Scheduler `default` group, the Route 53 Resolver auto-defined rules, and the account-level EC2 and ECR settings. Check each name on the validation account before writing it into the pack. |
+| `account-defaults` | Resources every account has once the type is curated: CodeDeploy `CodeDeployDefault.*` configurations, AppConfig `AppConfig.*` deployment strategies, the Amazon Keyspaces `system*` keyspaces, the ECS `FARGATE` and `FARGATE_SPOT` capacity providers, the EventBridge Scheduler `default` group, the Route 53 Resolver auto-defined rules, the account-level EC2 and ECR settings, and ElastiCache's system-managed `default.iam-user` and `default.iam-user-group` (AWS creates them, they can't be deleted, and a user-chosen ID can't contain a dot). Check each name on the validation account before writing it into the pack. |
 
 ## AWS services
 

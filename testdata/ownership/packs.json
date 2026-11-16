@@ -1536,6 +1536,57 @@
     },
     {
       "pack": "aws-defaults",
+      "name": "ElastiCache system IAM user",
+      "want": "pack/aws-defaults/account-defaults",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::ElastiCache::User",
+        "sources": [
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:elasticache:eu-west-1:111111111111:user:default.iam-user",
+        "id": "default.iam-user",
+        "name": "default.iam-user"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "ElastiCache system IAM user group",
+      "want": "pack/aws-defaults/account-defaults",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::ElastiCache::UserGroup",
+        "sources": [
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:elasticache:eu-west-1:111111111111:usergroup:default.iam-user-group",
+        "id": "default.iam-user-group",
+        "name": "default.iam-user-group"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "ElastiCache default user a module created",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::ElastiCache::User",
+        "sources": [
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:elasticache:eu-west-1:111111111111:user:defaultcollx",
+        "id": "defaultcollx",
+        "name": "defaultcollx"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
       "name": "RDS default parameter group",
       "want": "pack/aws-defaults/account-defaults",
       "resource": {
