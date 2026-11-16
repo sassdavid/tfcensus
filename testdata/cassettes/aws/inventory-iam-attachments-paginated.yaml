@@ -6,9 +6,9 @@ interactions:
         proto: ""
         proto_major: 0
         proto_minor: 0
-        content_length: 134
+        content_length: 169
         host: ""
-        body: Action=GetAccountAuthorizationDetails&Filter.member.1=Role&Filter.member.2=User&Filter.member.3=Group&Marker=page-2&Version=2010-05-08
+        body: Action=GetAccountAuthorizationDetails&Filter.member.1=Role&Filter.member.2=User&Filter.member.3=Group&Filter.member.4=LocalManagedPolicy&Marker=page-2&Version=2010-05-08
         form:
             Action:
                 - GetAccountAuthorizationDetails
@@ -18,6 +18,8 @@ interactions:
                 - User
             Filter.member.3:
                 - Group
+            Filter.member.4:
+                - LocalManagedPolicy
             Marker:
                 - page-2
             Version:
@@ -44,9 +46,9 @@ interactions:
         proto: ""
         proto_major: 0
         proto_minor: 0
-        content_length: 120
+        content_length: 155
         host: ""
-        body: Action=GetAccountAuthorizationDetails&Filter.member.1=Role&Filter.member.2=User&Filter.member.3=Group&Version=2010-05-08
+        body: Action=GetAccountAuthorizationDetails&Filter.member.1=Role&Filter.member.2=User&Filter.member.3=Group&Filter.member.4=LocalManagedPolicy&Version=2010-05-08
         form:
             Action:
                 - GetAccountAuthorizationDetails
@@ -56,6 +58,8 @@ interactions:
                 - User
             Filter.member.3:
                 - Group
+            Filter.member.4:
+                - LocalManagedPolicy
             Version:
                 - "2010-05-08"
         headers:

@@ -20,7 +20,7 @@ type Layer interface {
 
 Initial `native` enumerators (driftctl's expander lessons):
 - `ec2-sg-rules`: `DescribeSecurityGroupRules`, mapping to `aws_vpc_security_group_{ingress,egress}_rule` and to legacy `aws_security_group_rule` / inline rules.
-- `iam-attachments`: role, user and group policy attachments, inline policies.
+- `iam-attachments`: role, user and group policy attachments, inline policies, and the roles, users, groups and customer managed policies themselves (one `GetAccountAuthorizationDetails` listing), because AWS Config and Resource Explorer list IAM in one region only, which a scan may not cover.
 - `route53-records`: `ListResourceRecordSets` per zone (with pagination; dnsReaper's bug #207 is a warning sign).
 - `s3-subresources`: bucket policy, versioning, lifecycle, encryption, public access block. These are separate TF resources but bucket attributes in the cloud.
 

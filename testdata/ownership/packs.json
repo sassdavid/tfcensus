@@ -2515,6 +2515,28 @@
         "name": "orders-5xx"
       },
       "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "version of a managed function, typed by Resource Explorer",
+      "want": "pack/derived/lambda-version",
+      "resource": {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "cfn_type": "AWS::Lambda::Version",
+        "arn": "arn:aws:lambda:eu-west-1:111111111111:function:orders:7",
+        "id": "7",
+        "sources": [
+          "resource-explorer"
+        ]
+      },
+      "related": [],
+      "in_state": [
+        [
+          "aws_lambda_function",
+          "orders"
+        ]
+      ]
     }
   ]
 }
