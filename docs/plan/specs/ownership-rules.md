@@ -1,6 +1,7 @@
 # Spec: ownership rules (noise filtering)
 
-Every unmatched or undetermined live resource is evaluated against ordered rules
+Every unmatched or undetermined live resource that no CloudFormation stack lists is evaluated
+against ordered rules
 ([ADR-0010](../adr/0010-rules-on-undetermined-and-guards.md)). The **first match** sets
 `{category, owner, reason, rule}`. If nothing matches, an unmatched resource is `unmanaged` and an
 undetermined one stays `undetermined`. Order: the packs in the table's order, then the config's
@@ -34,7 +35,7 @@ rules:
 ```
 
 - Expressions use **CEL** (`cel.dev/cel-go`; the same as Kubernetes ValidatingAdmissionPolicy). Variables: `resource` (account, region, type, source_type, tf_types, arn, id, name, tags, attrs, layer, sources, parents, relationships, created) and `unit` (repo, path, workspace, address; empty for unmanaged resources). Each parent and relationship has type, id, arn, name, relationship, tags, attrs and found (the inventory has it). A missing map key is an error that counts as no match, so write `"owner" in resource.tags` or `resource.tags.?owner.orValue("")`. `in_state(tf_type, id)` reports whether a state of the run manages that resource. The CEL string extensions are on.
-- The packs live in `internal/ownership/packs/*.yaml` and compile like user rules. Rule IDs are `pack/<pack>/<name>` and `user/<name>`; a resource no rule matches carries `rules/no-match`.
+- The packs live in `internal/ownership/packs/*.yaml` and compile like user rules. Rule IDs are `pack/<pack>/<name>` and `user/<name>`; a resource no rule matches carries `rules/no-match`. A resource a CloudFormation stack lists carries `source/cloudformation` and never reaches the rules ([ADR-0014](../adr/0014-cloudformation-stack-source.md)); the `other-iac` tag rule covers stacks scan didn't list.
 - `scan.never_hide: [category…]` stops user rules from hiding guarded resources (guardrails borrowed from tgsieve). Guards are built in: every IAM user, since AWS Config doesn't record console access. With `never_hide: [ignored]`, no user rule can ignore an IAM user.
 - `tfcensus rules test rules.yaml --resource sample.json` evaluates the rules offline.
 

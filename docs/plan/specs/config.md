@@ -23,6 +23,7 @@ all_regions: false        # every region each account has enabled (account:ListR
 scan:
   layers: auto
   cloudcontrol_types: ["AWS::ElasticLoadBalancingV2::Listener"]
+  cloudformation: true    # list stack resources; a resource a stack lists and no state manages is other-iac
   packs: { aws-defaults: true, aws-service: true, other-iac: true, derived: true, ephemeral: true }
   never_hide: [unmanaged-iam-users]
 rules: []                 # see ownership-rules.md

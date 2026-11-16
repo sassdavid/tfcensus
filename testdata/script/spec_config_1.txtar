@@ -97,6 +97,7 @@ notify.top                                10                                    
 regions                                   ["eu-west-1","eu-central-1"]                    env TFCENSUS_REGIONS
 rules                                     []                                              default
 scan.cloudcontrol_types                   []                                              default
+scan.cloudformation                       true                                            default
 scan.layers                               auto                                            default
 scan.never_hide                           []                                              default
 scan.packs.aws-defaults                   true                                            default

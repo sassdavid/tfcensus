@@ -297,8 +297,12 @@ identifiers map the organization. Trivy, Snyk, Steampipe and Infracost use the s
 - [x] The Config aggregator fast path in `internal/inventory` (inventory.md, risk R3, open question
   Q3), with the probe result from `doctor`. Inventory criterion 6 passes on cassettes; Q3 stays
   open until a read-only run against the real org.
-- [ ] CloudFormation as a second IaC source: stack resources become `managed-by-cfn` with the
-  stack name (open question Q4).
+- [x] CloudFormation as a second IaC source: stack resources become `managed-by-cfn` with the
+  stack name (open question Q4). Done as `other-iac` with rule `source/cloudformation`, the stack
+  on the finding, and `scan.cloudformation` on by default ([ADR-0014](adr/0014-cloudformation-stack-source.md),
+  scan.md criterion 5). Evidence: `mise run check` exit 0 on cassettes, `mise run sibling:diff`
+  matches. Q4 resolved.
+- Not in M17: whois and codify still read only the CloudFormation tags (ADR-0014 follow-up).
 
 ### M18: Move and drift depth → v0.4.0 (tfcensus only)
 - [ ] `move suggest` drafts a migration file from plans (move.md, tfautomv engine).

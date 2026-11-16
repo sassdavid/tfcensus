@@ -161,6 +161,10 @@
           "type": "array",
           "description": "CloudFormation types listed through Cloud Control."
         },
+        "cloudformation": {
+          "type": "boolean",
+          "description": "List CloudFormation stack resources; a resource a stack lists and no state manages is other-iac."
+        },
         "packs": {
           "properties": {
             "aws-defaults": {

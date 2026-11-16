@@ -2,6 +2,7 @@ package scan
 
 import (
 	"cmp"
+	"fmt"
 	"path"
 	"slices"
 	"strings"
@@ -55,6 +56,38 @@ type Finding struct {
 	Reason     string            `json:"reason"`
 	Rule       string            `json:"rule"`
 	ManagedBy  []tfstate.Ref     `json:"managed_by,omitempty"`
+	Stack      *Stack            `json:"stack,omitempty"` // the CloudFormation stack that lists it
+}
+
+// Stack is the CloudFormation stack that lists a resource.
+type Stack struct {
+	Name      string `json:"name"`
+	ID        string `json:"id"`
+	Root      string `json:"root,omitempty"` // the top-level stack, for a nested stack
+	LogicalID string `json:"logical_id"`
+}
+
+// RuleCloudFormation is the rule of findings that a CloudFormation stack lists and no state
+// manages.
+const RuleCloudFormation = "source/cloudformation"
+
+// OwnerCloudFormation is the owner of those findings, the same as the other-iac tag rule's.
+const OwnerCloudFormation = "cloudformation"
+
+func stackOf(sr *inventory.StackResource) *Stack {
+	if sr == nil {
+		return nil
+	}
+	return &Stack{Name: sr.Stack, ID: sr.StackID, Root: sr.Root, LogicalID: sr.LogicalID}
+}
+
+// Text describes the stack for reasons and warnings.
+func (s *Stack) Text() string {
+	t := "CloudFormation stack " + s.Name
+	if s.Root != "" && s.Root != s.Name {
+		t += " (nested in " + s.Root + ")"
+	}
+	return t + " as " + s.LogicalID
 }
 
 // Type returns the CloudFormation type, else the layer's own type name.
@@ -63,23 +96,34 @@ func (f *Finding) Type() string { return cmp.Or(f.CFNType, f.SourceType, "unknow
 // Key returns the ARN, else the ID.
 func (f *Finding) Key() string { return cmp.Or(f.ARN, f.ID) }
 
-// Classify turns match results into findings. Unmatched and undetermined resources go through
+// Sources holds what classification reads besides the match results: the ownership rules, the
+// typemap, the inventory index for related resources, and the CloudFormation stack resources.
+type Sources struct {
+	Engine *ownership.Engine
+	Map    *typemap.Map
+	Index  *ownership.Index
+	Stacks *inventory.StackIndex // nil when the CloudFormation source is off
+}
+
+// Classify turns match results into findings. A state match decides first. An unmatched or
+// undetermined resource that a CloudFormation stack lists is other-iac. The others go through
 // the ownership rules; a rule that matches sets the category, else unmatched resources are
 // unmanaged and undetermined ones stay undetermined.
-func Classify(results []match.Result, eng *ownership.Engine, m *typemap.Map, ix *ownership.Index) []Finding {
+func Classify(results []match.Result, src Sources) []Finding {
 	out := make([]Finding, len(results))
 	for i := range results {
-		out[i] = classify(&results[i], eng, m, ix)
+		out[i] = classify(&results[i], src)
 	}
 	return out
 }
 
-func classify(r *match.Result, eng *ownership.Engine, m *typemap.Map, ix *ownership.Index) Finding {
+func classify(r *match.Result, src Sources) Finding {
 	res := &r.Resource
 	f := Finding{
 		Account: res.Account, Region: res.Region, CFNType: res.CFNType, SourceType: res.SourceType,
 		TFTypes: res.TFTypes, ARN: res.ARN, ID: res.ID, Name: res.Name, Tags: res.Tags, Created: res.Created,
 		Sources: res.Sources, Reason: r.Reason, Rule: r.Rule, ManagedBy: r.ManagedBy,
+		Stack: stackOf(src.Stacks.Find(res)),
 	}
 	switch r.Category {
 	case match.CategoryManaged:
@@ -93,9 +137,14 @@ func classify(r *match.Result, eng *ownership.Engine, m *typemap.Map, ix *owners
 		return f
 	case match.CategoryUnmatched, match.CategoryUndetermined:
 	}
-	in := ownership.FromCloud(res, m, ix)
+	in := ownership.FromCloud(res, src.Map, src.Index)
 	f.Name = in.Name
-	d := eng.Evaluate(in, nil, false)
+	if f.Stack != nil {
+		f.Category, f.Owner, f.Rule = CategoryOtherIaC, OwnerCloudFormation, RuleCloudFormation
+		f.Reason = "listed by " + f.Stack.Text()
+		return f
+	}
+	d := src.Engine.Evaluate(in, nil, false)
 	switch {
 	case d.Matched:
 		f.Category, f.Owner, f.Reason, f.Rule = Category(d.Category), d.Owner, d.Reason, d.Rule
@@ -228,6 +277,19 @@ func (tm TypeMatcher) CFNTypes(m *typemap.Map) []string {
 		}
 	}
 	slices.Sort(out)
+	return out
+}
+
+// StackOverlaps returns one warning per finding that a state manages and a CloudFormation stack
+// lists too.
+func StackOverlaps(findings []Finding) []string {
+	var out []string
+	for i := range findings {
+		f := &findings[i]
+		if f.Stack != nil && (f.Category == CategoryManaged || f.Category == CategoryDoubleManaged) {
+			out = append(out, fmt.Sprintf("%s %s is in a state and in %s", f.Type(), f.Key(), f.Stack.Text()))
+		}
+	}
 	return out
 }
 

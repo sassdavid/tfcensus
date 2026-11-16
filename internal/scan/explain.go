@@ -9,7 +9,6 @@ import (
 	"github.com/sassdavid/tfcensus/internal/inventory"
 	"github.com/sassdavid/tfcensus/internal/match"
 	"github.com/sassdavid/tfcensus/internal/ownership"
-	"github.com/sassdavid/tfcensus/internal/typemap"
 )
 
 // Report is the result of a scan.
@@ -41,17 +40,19 @@ type MatchStep struct {
 	Rule     string         `json:"rule"`
 }
 
-// Explain evaluates one match result with a full trace.
-func Explain(r *match.Result, eng *ownership.Engine, m *typemap.Map, ix *ownership.Index) Explanation {
-	in := ownership.FromCloud(&r.Resource, m, ix)
+// Explain evaluates one match result with a full trace. The rules aren't evaluated when the
+// match or a CloudFormation stack decided.
+func Explain(r *match.Result, src Sources) Explanation {
+	in := ownership.FromCloud(&r.Resource, src.Map, src.Index)
 	e := Explanation{
 		Resource: in,
 		Match:    MatchStep{Category: r.Category, Reason: r.Reason, Rule: r.Rule},
 		Trace:    []ownership.Step{},
-		Finding:  classify(r, eng, m, ix),
+		Finding:  classify(r, src),
 	}
-	if r.Category == match.CategoryUnmatched || r.Category == match.CategoryUndetermined {
-		e.Trace = eng.Evaluate(in, nil, true).Trace
+	if e.Finding.Rule != RuleCloudFormation &&
+		(r.Category == match.CategoryUnmatched || r.Category == match.CategoryUndetermined) {
+		e.Trace = src.Engine.Evaluate(in, nil, true).Trace
 	}
 	return e
 }
@@ -78,12 +79,18 @@ func WriteExplanation(w io.Writer, e *Explanation) error {
 		{"sources", strings.Join(r.Sources, ", ")},
 		{"match", fmt.Sprintf("%s: %s (%s)", e.Match.Category, e.Match.Reason, e.Match.Rule)},
 	}
+	if s := e.Finding.Stack; s != nil {
+		lines = append(lines, [2]string{"stack", s.Text()})
+	}
 	for _, l := range lines {
 		_, _ = fmt.Fprintf(tw, "%s\t%s\n", l[0], l[1])
 	}
-	if len(e.Trace) == 0 {
+	switch {
+	case e.Finding.Rule == RuleCloudFormation:
+		_, _ = fmt.Fprintf(tw, "rules\tnot evaluated: a CloudFormation stack lists it\n")
+	case len(e.Trace) == 0:
 		_, _ = fmt.Fprintf(tw, "rules\tnot evaluated: matching decided\n")
-	} else {
+	default:
 		_, _ = fmt.Fprintf(tw, "rules\tfirst match wins\n")
 		for _, s := range e.Trace {
 			outcome := string(s.Outcome)

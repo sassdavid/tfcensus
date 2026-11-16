@@ -19,7 +19,7 @@
           "double-managed": 1,
           "ignored": 2,
           "managed": 6,
-          "other-iac": 1,
+          "other-iac": 2,
           "undetermined": 1,
           "unmanaged": 5
         },
@@ -164,6 +164,7 @@
       }
     ],
     "warnings": [
+      "AWS::Lambda::Function arn:aws:lambda:eu-west-1:111111111111:function:acme-api is in a state and in CloudFormation stack billing as Api",
       "rule \"growth-trial\" is past its expires date and no longer matches"
     ]
   },

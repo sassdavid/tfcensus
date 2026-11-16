@@ -86,6 +86,12 @@
       "Resource": "*"
     },
     {
+      "Sid": "CloudFormationStacks",
+      "Effect": "Allow",
+      "Action": ["cloudformation:ListStacks", "cloudformation:ListStackResources"],
+      "Resource": "*"
+    },
+    {
       "Sid": "NativeEnumerators",
       "Effect": "Allow",
       "Action": [

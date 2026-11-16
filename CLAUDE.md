@@ -48,6 +48,7 @@ A Go CLI that takes a census of Terraform/OpenTofu + Terragrunt fleets on AWS. I
 
 ## Conventions that aren't obvious
 - AWS clients come from `accounts` (one `aws.Config` per profile/role, cached). Never call `config.LoadDefaultConfig` elsewhere.
+- AWS SDK code follows `.claude/rules/aws-sdk.md`. Check the operation's API reference and the SDK guide through the AWS MCP server first.
 - Always tell terragrunt the terraform binary, because it defaults to tofu: `TG_TF_PATH` on every call, plus `--tf-path` for `run` and `render` (`find` rejects the flag).
 - Match order is identity → arn → normalized id. Unmapped types are `undetermined`, never managed.
 - Every finding carries `reason` and `rule`. Every suppression carries `reason` and optionally `expires`.

@@ -106,7 +106,7 @@ func (rv *Resolver) answer(q *match.Query, res *match.Result, ix *ownership.Inde
 			ManagedBy: res.ManagedBy,
 		}
 	} else {
-		f = scan.Classify([]match.Result{*res}, rv.Engine, rv.Map, ix)[0]
+		f = scan.Classify([]match.Result{*res}, scan.Sources{Engine: rv.Engine, Map: rv.Map, Index: ix})[0]
 	}
 	a := Answer{Query: q.Value, Finding: f, Key: res.Key, ManagedBy: []Manager{}, Live: LiveNotNeeded}
 	for _, ref := range res.ManagedBy {

@@ -42,6 +42,8 @@ github.com/aws/aws-sdk-go-v2/service/account v1.42.11 h1:GsCdrK6oe7C7hKI9FSseOnN
 github.com/aws/aws-sdk-go-v2/service/account v1.42.11/go.mod h1:zges+EsehKcXclh2rM61uv8gUT5eSg0qD/DCsL6JsnA=
 github.com/aws/aws-sdk-go-v2/service/cloudcontrol v1.38.12 h1:yYR4Yja/z8MmF2BOys5xc/A4B7S0BDP8l8BcfHuZsck=
 github.com/aws/aws-sdk-go-v2/service/cloudcontrol v1.38.12/go.mod h1:C9ZmYvltZXzDsKv0niSaxxibSdjeVecwT9wTVZQuPbM=
+github.com/aws/aws-sdk-go-v2/service/cloudformation v1.84.0 h1:ap0xq0413jOFrQZVs318qjtnXSAVAf/RNBzPZK1aP8A=
+github.com/aws/aws-sdk-go-v2/service/cloudformation v1.84.0/go.mod h1:rLE+2UUfZLqdNwDCQDFses1yeON3u1qeJvUUkd6bUOk=
 github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.65.12 h1:2yBz7HCWfWtClZWfAGQ/mgg/Og4E7eANGSyztVPEOZA=
 github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.65.12/go.mod h1:COhJ8ZNL5xyfDjuhZ1gaG55xjbQ2v4RGL6/Vnff/Fq0=
 github.com/aws/aws-sdk-go-v2/service/configservice v1.75.0 h1:X5A8dPtvsFP2sF+B1SoT4AXbcPJUK9pbaKidxSVa/5M=

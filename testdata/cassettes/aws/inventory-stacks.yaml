@@ -1,0 +1,423 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 181
+        host: ""
+        body: Action=ListStackResources&NextToken=res-2&StackName=arn%3Aaws%3Acloudformation%3Aeu-west-1%3A111111111111%3Astack%2Fbilling%2F0b1c2d3e-0000-4000-8000-000000000001&Version=2010-05-15
+        form:
+            Action:
+                - ListStackResources
+            NextToken:
+                - res-2
+            StackName:
+                - arn:aws:cloudformation:eu-west-1:111111111111:stack/billing/0b1c2d3e-0000-4000-8000-000000000001
+            Version:
+                - "2010-05-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://cloudformation.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ListStackResourcesResponse xmlns="http://cloudformation.amazonaws.com/doc/2010-05-15/"><ListStackResourcesResult><StackResourceSummaries><member><LogicalResourceId>AlarmsStack</LogicalResourceId><PhysicalResourceId>arn:aws:cloudformation:eu-west-1:111111111111:stack/billing-AlarmsStack-1ABCDEF/0b1c2d3e-0000-4000-8000-000000000001</PhysicalResourceId><ResourceType>AWS::CloudFormation::Stack</ResourceType><LastUpdatedTimestamp>2026-06-01T08:05:00Z</LastUpdatedTimestamp><ResourceStatus>CREATE_COMPLETE</ResourceStatus></member><member><LogicalResourceId>Pending</LogicalResourceId><ResourceType>AWS::SQS::Queue</ResourceType><LastUpdatedTimestamp>2026-06-01T08:05:00Z</LastUpdatedTimestamp><ResourceStatus>CREATE_FAILED</ResourceStatus></member><member><LogicalResourceId>WorkerRole</LogicalResourceId><PhysicalResourceId>billing-worker</PhysicalResourceId><ResourceType>AWS::IAM::Role</ResourceType><LastUpdatedTimestamp>2026-06-01T08:05:00Z</LastUpdatedTimestamp><ResourceStatus>CREATE_COMPLETE</ResourceStatus></member></StackResourceSummaries></ListStackResourcesResult><ResponseMetadata><RequestId>00000000-0000-4000-8000-000000000000</RequestId></ResponseMetadata></ListStackResourcesResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 1
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 165
+        host: ""
+        body: Action=ListStackResources&StackName=arn%3Aaws%3Acloudformation%3Aeu-west-1%3A111111111111%3Astack%2Fbilling%2F0b1c2d3e-0000-4000-8000-000000000001&Version=2010-05-15
+        form:
+            Action:
+                - ListStackResources
+            StackName:
+                - arn:aws:cloudformation:eu-west-1:111111111111:stack/billing/0b1c2d3e-0000-4000-8000-000000000001
+            Version:
+                - "2010-05-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://cloudformation.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ListStackResourcesResponse xmlns="http://cloudformation.amazonaws.com/doc/2010-05-15/"><ListStackResourcesResult><StackResourceSummaries><member><LogicalResourceId>EventsQueue</LogicalResourceId><PhysicalResourceId>https://sqs.eu-west-1.amazonaws.com/111111111111/billing-events</PhysicalResourceId><ResourceType>AWS::SQS::Queue</ResourceType><LastUpdatedTimestamp>2026-06-01T08:05:00Z</LastUpdatedTimestamp><ResourceStatus>UPDATE_COMPLETE</ResourceStatus></member><member><LogicalResourceId>OldBucket</LogicalResourceId><PhysicalResourceId>acme-billing-old</PhysicalResourceId><ResourceType>AWS::S3::Bucket</ResourceType><LastUpdatedTimestamp>2026-06-01T08:05:00Z</LastUpdatedTimestamp><ResourceStatus>DELETE_SKIPPED</ResourceStatus></member></StackResourceSummaries><NextToken>res-2</NextToken></ListStackResourcesResult><ResponseMetadata><RequestId>00000000-0000-4000-8000-000000000000</RequestId></ResponseMetadata></ListStackResourcesResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 2
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 185
+        host: ""
+        body: Action=ListStackResources&StackName=arn%3Aaws%3Acloudformation%3Aeu-west-1%3A111111111111%3Astack%2Fbilling-AlarmsStack-1ABCDEF%2F0b1c2d3e-0000-4000-8000-000000000001&Version=2010-05-15
+        form:
+            Action:
+                - ListStackResources
+            StackName:
+                - arn:aws:cloudformation:eu-west-1:111111111111:stack/billing-AlarmsStack-1ABCDEF/0b1c2d3e-0000-4000-8000-000000000001
+            Version:
+                - "2010-05-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://cloudformation.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ListStackResourcesResponse xmlns="http://cloudformation.amazonaws.com/doc/2010-05-15/"><ListStackResourcesResult><StackResourceSummaries><member><LogicalResourceId>AlarmTopic</LogicalResourceId><PhysicalResourceId>arn:aws:sns:eu-west-1:111111111111:billing-alarms</PhysicalResourceId><ResourceType>AWS::SNS::Topic</ResourceType><LastUpdatedTimestamp>2026-06-01T08:05:00Z</LastUpdatedTimestamp><ResourceStatus>CREATE_COMPLETE</ResourceStatus></member><member><LogicalResourceId>Nightly</LogicalResourceId><PhysicalResourceId>billing-nightly</PhysicalResourceId><ResourceType>AWS::Events::Rule</ResourceType><LastUpdatedTimestamp>2026-06-01T08:05:00Z</LastUpdatedTimestamp><ResourceStatus>CREATE_COMPLETE</ResourceStatus></member></StackResourceSummaries></ListStackResourcesResult><ResponseMetadata><RequestId>00000000-0000-4000-8000-000000000000</RequestId></ResponseMetadata></ListStackResourcesResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 3
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 167
+        host: ""
+        body: Action=ListStackResources&StackName=arn%3Aaws%3Acloudformation%3Aeu-west-1%3A111111111111%3Astack%2Fgone-soon%2F0b1c2d3e-0000-4000-8000-000000000001&Version=2010-05-15
+        form:
+            Action:
+                - ListStackResources
+            StackName:
+                - arn:aws:cloudformation:eu-west-1:111111111111:stack/gone-soon/0b1c2d3e-0000-4000-8000-000000000001
+            Version:
+                - "2010-05-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://cloudformation.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ErrorResponse><Error><Type>Sender</Type><Code>ValidationError</Code><Message>Stack with id gone-soon does not exist</Message></Error><RequestId>00000000-0000-4000-8000-000000000000</RequestId></ErrorResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 400 Bad Request
+        code: 400
+        duration: 0s
+    - id: 4
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 1088
+        host: ""
+        body: Action=ListStacks&NextToken=stacks-2&StackStatusFilter.member.1=CREATE_COMPLETE&StackStatusFilter.member.10=IMPORT_ROLLBACK_IN_PROGRESS&StackStatusFilter.member.11=ROLLBACK_COMPLETE&StackStatusFilter.member.12=ROLLBACK_FAILED&StackStatusFilter.member.13=ROLLBACK_IN_PROGRESS&StackStatusFilter.member.14=UPDATE_COMPLETE&StackStatusFilter.member.15=UPDATE_COMPLETE_CLEANUP_IN_PROGRESS&StackStatusFilter.member.16=UPDATE_FAILED&StackStatusFilter.member.17=UPDATE_IN_PROGRESS&StackStatusFilter.member.18=UPDATE_ROLLBACK_COMPLETE&StackStatusFilter.member.19=UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS&StackStatusFilter.member.2=CREATE_FAILED&StackStatusFilter.member.20=UPDATE_ROLLBACK_FAILED&StackStatusFilter.member.21=UPDATE_ROLLBACK_IN_PROGRESS&StackStatusFilter.member.3=CREATE_IN_PROGRESS&StackStatusFilter.member.4=DELETE_FAILED&StackStatusFilter.member.5=DELETE_IN_PROGRESS&StackStatusFilter.member.6=IMPORT_COMPLETE&StackStatusFilter.member.7=IMPORT_IN_PROGRESS&StackStatusFilter.member.8=IMPORT_ROLLBACK_COMPLETE&StackStatusFilter.member.9=IMPORT_ROLLBACK_FAILED&Version=2010-05-15
+        form:
+            Action:
+                - ListStacks
+            NextToken:
+                - stacks-2
+            StackStatusFilter.member.1:
+                - CREATE_COMPLETE
+            StackStatusFilter.member.2:
+                - CREATE_FAILED
+            StackStatusFilter.member.3:
+                - CREATE_IN_PROGRESS
+            StackStatusFilter.member.4:
+                - DELETE_FAILED
+            StackStatusFilter.member.5:
+                - DELETE_IN_PROGRESS
+            StackStatusFilter.member.6:
+                - IMPORT_COMPLETE
+            StackStatusFilter.member.7:
+                - IMPORT_IN_PROGRESS
+            StackStatusFilter.member.8:
+                - IMPORT_ROLLBACK_COMPLETE
+            StackStatusFilter.member.9:
+                - IMPORT_ROLLBACK_FAILED
+            StackStatusFilter.member.10:
+                - IMPORT_ROLLBACK_IN_PROGRESS
+            StackStatusFilter.member.11:
+                - ROLLBACK_COMPLETE
+            StackStatusFilter.member.12:
+                - ROLLBACK_FAILED
+            StackStatusFilter.member.13:
+                - ROLLBACK_IN_PROGRESS
+            StackStatusFilter.member.14:
+                - UPDATE_COMPLETE
+            StackStatusFilter.member.15:
+                - UPDATE_COMPLETE_CLEANUP_IN_PROGRESS
+            StackStatusFilter.member.16:
+                - UPDATE_FAILED
+            StackStatusFilter.member.17:
+                - UPDATE_IN_PROGRESS
+            StackStatusFilter.member.18:
+                - UPDATE_ROLLBACK_COMPLETE
+            StackStatusFilter.member.19:
+                - UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS
+            StackStatusFilter.member.20:
+                - UPDATE_ROLLBACK_FAILED
+            StackStatusFilter.member.21:
+                - UPDATE_ROLLBACK_IN_PROGRESS
+            Version:
+                - "2010-05-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://cloudformation.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ListStacksResponse xmlns="http://cloudformation.amazonaws.com/doc/2010-05-15/"><ListStacksResult><StackSummaries><member><StackId>arn:aws:cloudformation:eu-west-1:111111111111:stack/billing-AlarmsStack-1ABCDEF/0b1c2d3e-0000-4000-8000-000000000001</StackId><StackName>billing-AlarmsStack-1ABCDEF</StackName><CreationTime>2026-06-01T08:00:00Z</CreationTime><StackStatus>CREATE_COMPLETE</StackStatus><ParentId>arn:aws:cloudformation:eu-west-1:111111111111:stack/billing/0b1c2d3e-0000-4000-8000-000000000001</ParentId><RootId>arn:aws:cloudformation:eu-west-1:111111111111:stack/billing/0b1c2d3e-0000-4000-8000-000000000001</RootId></member><member><StackId>arn:aws:cloudformation:eu-west-1:111111111111:stack/gone-soon/0b1c2d3e-0000-4000-8000-000000000001</StackId><StackName>gone-soon</StackName><CreationTime>2026-06-01T08:00:00Z</CreationTime><StackStatus>DELETE_FAILED</StackStatus></member></StackSummaries></ListStacksResult><ResponseMetadata><RequestId>00000000-0000-4000-8000-000000000000</RequestId></ResponseMetadata></ListStacksResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 5
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 1069
+        host: ""
+        body: Action=ListStacks&StackStatusFilter.member.1=CREATE_COMPLETE&StackStatusFilter.member.10=IMPORT_ROLLBACK_IN_PROGRESS&StackStatusFilter.member.11=ROLLBACK_COMPLETE&StackStatusFilter.member.12=ROLLBACK_FAILED&StackStatusFilter.member.13=ROLLBACK_IN_PROGRESS&StackStatusFilter.member.14=UPDATE_COMPLETE&StackStatusFilter.member.15=UPDATE_COMPLETE_CLEANUP_IN_PROGRESS&StackStatusFilter.member.16=UPDATE_FAILED&StackStatusFilter.member.17=UPDATE_IN_PROGRESS&StackStatusFilter.member.18=UPDATE_ROLLBACK_COMPLETE&StackStatusFilter.member.19=UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS&StackStatusFilter.member.2=CREATE_FAILED&StackStatusFilter.member.20=UPDATE_ROLLBACK_FAILED&StackStatusFilter.member.21=UPDATE_ROLLBACK_IN_PROGRESS&StackStatusFilter.member.3=CREATE_IN_PROGRESS&StackStatusFilter.member.4=DELETE_FAILED&StackStatusFilter.member.5=DELETE_IN_PROGRESS&StackStatusFilter.member.6=IMPORT_COMPLETE&StackStatusFilter.member.7=IMPORT_IN_PROGRESS&StackStatusFilter.member.8=IMPORT_ROLLBACK_COMPLETE&StackStatusFilter.member.9=IMPORT_ROLLBACK_FAILED&Version=2010-05-15
+        form:
+            Action:
+                - ListStacks
+            StackStatusFilter.member.1:
+                - CREATE_COMPLETE
+            StackStatusFilter.member.2:
+                - CREATE_FAILED
+            StackStatusFilter.member.3:
+                - CREATE_IN_PROGRESS
+            StackStatusFilter.member.4:
+                - DELETE_FAILED
+            StackStatusFilter.member.5:
+                - DELETE_IN_PROGRESS
+            StackStatusFilter.member.6:
+                - IMPORT_COMPLETE
+            StackStatusFilter.member.7:
+                - IMPORT_IN_PROGRESS
+            StackStatusFilter.member.8:
+                - IMPORT_ROLLBACK_COMPLETE
+            StackStatusFilter.member.9:
+                - IMPORT_ROLLBACK_FAILED
+            StackStatusFilter.member.10:
+                - IMPORT_ROLLBACK_IN_PROGRESS
+            StackStatusFilter.member.11:
+                - ROLLBACK_COMPLETE
+            StackStatusFilter.member.12:
+                - ROLLBACK_FAILED
+            StackStatusFilter.member.13:
+                - ROLLBACK_IN_PROGRESS
+            StackStatusFilter.member.14:
+                - UPDATE_COMPLETE
+            StackStatusFilter.member.15:
+                - UPDATE_COMPLETE_CLEANUP_IN_PROGRESS
+            StackStatusFilter.member.16:
+                - UPDATE_FAILED
+            StackStatusFilter.member.17:
+                - UPDATE_IN_PROGRESS
+            StackStatusFilter.member.18:
+                - UPDATE_ROLLBACK_COMPLETE
+            StackStatusFilter.member.19:
+                - UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS
+            StackStatusFilter.member.20:
+                - UPDATE_ROLLBACK_FAILED
+            StackStatusFilter.member.21:
+                - UPDATE_ROLLBACK_IN_PROGRESS
+            Version:
+                - "2010-05-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://cloudformation.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ErrorResponse><Error><Type>Sender</Type><Code>Throttling</Code><Message>Rate exceeded</Message></Error><RequestId>00000000-0000-4000-8000-000000000000</RequestId></ErrorResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 400 Bad Request
+        code: 400
+        duration: 0s
+    - id: 6
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 1069
+        host: ""
+        body: Action=ListStacks&StackStatusFilter.member.1=CREATE_COMPLETE&StackStatusFilter.member.10=IMPORT_ROLLBACK_IN_PROGRESS&StackStatusFilter.member.11=ROLLBACK_COMPLETE&StackStatusFilter.member.12=ROLLBACK_FAILED&StackStatusFilter.member.13=ROLLBACK_IN_PROGRESS&StackStatusFilter.member.14=UPDATE_COMPLETE&StackStatusFilter.member.15=UPDATE_COMPLETE_CLEANUP_IN_PROGRESS&StackStatusFilter.member.16=UPDATE_FAILED&StackStatusFilter.member.17=UPDATE_IN_PROGRESS&StackStatusFilter.member.18=UPDATE_ROLLBACK_COMPLETE&StackStatusFilter.member.19=UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS&StackStatusFilter.member.2=CREATE_FAILED&StackStatusFilter.member.20=UPDATE_ROLLBACK_FAILED&StackStatusFilter.member.21=UPDATE_ROLLBACK_IN_PROGRESS&StackStatusFilter.member.3=CREATE_IN_PROGRESS&StackStatusFilter.member.4=DELETE_FAILED&StackStatusFilter.member.5=DELETE_IN_PROGRESS&StackStatusFilter.member.6=IMPORT_COMPLETE&StackStatusFilter.member.7=IMPORT_IN_PROGRESS&StackStatusFilter.member.8=IMPORT_ROLLBACK_COMPLETE&StackStatusFilter.member.9=IMPORT_ROLLBACK_FAILED&Version=2010-05-15
+        form:
+            Action:
+                - ListStacks
+            StackStatusFilter.member.1:
+                - CREATE_COMPLETE
+            StackStatusFilter.member.2:
+                - CREATE_FAILED
+            StackStatusFilter.member.3:
+                - CREATE_IN_PROGRESS
+            StackStatusFilter.member.4:
+                - DELETE_FAILED
+            StackStatusFilter.member.5:
+                - DELETE_IN_PROGRESS
+            StackStatusFilter.member.6:
+                - IMPORT_COMPLETE
+            StackStatusFilter.member.7:
+                - IMPORT_IN_PROGRESS
+            StackStatusFilter.member.8:
+                - IMPORT_ROLLBACK_COMPLETE
+            StackStatusFilter.member.9:
+                - IMPORT_ROLLBACK_FAILED
+            StackStatusFilter.member.10:
+                - IMPORT_ROLLBACK_IN_PROGRESS
+            StackStatusFilter.member.11:
+                - ROLLBACK_COMPLETE
+            StackStatusFilter.member.12:
+                - ROLLBACK_FAILED
+            StackStatusFilter.member.13:
+                - ROLLBACK_IN_PROGRESS
+            StackStatusFilter.member.14:
+                - UPDATE_COMPLETE
+            StackStatusFilter.member.15:
+                - UPDATE_COMPLETE_CLEANUP_IN_PROGRESS
+            StackStatusFilter.member.16:
+                - UPDATE_FAILED
+            StackStatusFilter.member.17:
+                - UPDATE_IN_PROGRESS
+            StackStatusFilter.member.18:
+                - UPDATE_ROLLBACK_COMPLETE
+            StackStatusFilter.member.19:
+                - UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS
+            StackStatusFilter.member.20:
+                - UPDATE_ROLLBACK_FAILED
+            StackStatusFilter.member.21:
+                - UPDATE_ROLLBACK_IN_PROGRESS
+            Version:
+                - "2010-05-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://cloudformation.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ListStacksResponse xmlns="http://cloudformation.amazonaws.com/doc/2010-05-15/"><ListStacksResult><StackSummaries><member><StackId>arn:aws:cloudformation:eu-west-1:111111111111:stack/billing/0b1c2d3e-0000-4000-8000-000000000001</StackId><StackName>billing</StackName><CreationTime>2026-06-01T08:00:00Z</CreationTime><StackStatus>UPDATE_COMPLETE</StackStatus></member></StackSummaries><NextToken>stacks-2</NextToken></ListStacksResult><ResponseMetadata><RequestId>00000000-0000-4000-8000-000000000000</RequestId></ResponseMetadata></ListStacksResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 7
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 1069
+        host: ""
+        body: Action=ListStacks&StackStatusFilter.member.1=CREATE_COMPLETE&StackStatusFilter.member.10=IMPORT_ROLLBACK_IN_PROGRESS&StackStatusFilter.member.11=ROLLBACK_COMPLETE&StackStatusFilter.member.12=ROLLBACK_FAILED&StackStatusFilter.member.13=ROLLBACK_IN_PROGRESS&StackStatusFilter.member.14=UPDATE_COMPLETE&StackStatusFilter.member.15=UPDATE_COMPLETE_CLEANUP_IN_PROGRESS&StackStatusFilter.member.16=UPDATE_FAILED&StackStatusFilter.member.17=UPDATE_IN_PROGRESS&StackStatusFilter.member.18=UPDATE_ROLLBACK_COMPLETE&StackStatusFilter.member.19=UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS&StackStatusFilter.member.2=CREATE_FAILED&StackStatusFilter.member.20=UPDATE_ROLLBACK_FAILED&StackStatusFilter.member.21=UPDATE_ROLLBACK_IN_PROGRESS&StackStatusFilter.member.3=CREATE_IN_PROGRESS&StackStatusFilter.member.4=DELETE_FAILED&StackStatusFilter.member.5=DELETE_IN_PROGRESS&StackStatusFilter.member.6=IMPORT_COMPLETE&StackStatusFilter.member.7=IMPORT_IN_PROGRESS&StackStatusFilter.member.8=IMPORT_ROLLBACK_COMPLETE&StackStatusFilter.member.9=IMPORT_ROLLBACK_FAILED&Version=2010-05-15
+        form:
+            Action:
+                - ListStacks
+            StackStatusFilter.member.1:
+                - CREATE_COMPLETE
+            StackStatusFilter.member.2:
+                - CREATE_FAILED
+            StackStatusFilter.member.3:
+                - CREATE_IN_PROGRESS
+            StackStatusFilter.member.4:
+                - DELETE_FAILED
+            StackStatusFilter.member.5:
+                - DELETE_IN_PROGRESS
+            StackStatusFilter.member.6:
+                - IMPORT_COMPLETE
+            StackStatusFilter.member.7:
+                - IMPORT_IN_PROGRESS
+            StackStatusFilter.member.8:
+                - IMPORT_ROLLBACK_COMPLETE
+            StackStatusFilter.member.9:
+                - IMPORT_ROLLBACK_FAILED
+            StackStatusFilter.member.10:
+                - IMPORT_ROLLBACK_IN_PROGRESS
+            StackStatusFilter.member.11:
+                - ROLLBACK_COMPLETE
+            StackStatusFilter.member.12:
+                - ROLLBACK_FAILED
+            StackStatusFilter.member.13:
+                - ROLLBACK_IN_PROGRESS
+            StackStatusFilter.member.14:
+                - UPDATE_COMPLETE
+            StackStatusFilter.member.15:
+                - UPDATE_COMPLETE_CLEANUP_IN_PROGRESS
+            StackStatusFilter.member.16:
+                - UPDATE_FAILED
+            StackStatusFilter.member.17:
+                - UPDATE_IN_PROGRESS
+            StackStatusFilter.member.18:
+                - UPDATE_ROLLBACK_COMPLETE
+            StackStatusFilter.member.19:
+                - UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS
+            StackStatusFilter.member.20:
+                - UPDATE_ROLLBACK_FAILED
+            StackStatusFilter.member.21:
+                - UPDATE_ROLLBACK_IN_PROGRESS
+            Version:
+                - "2010-05-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://cloudformation.us-east-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ErrorResponse><Error><Type>Sender</Type><Code>AccessDenied</Code><Message>not authorized to perform cloudformation:ListStacks</Message></Error><RequestId>00000000-0000-4000-8000-000000000000</RequestId></ErrorResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 403 Forbidden
+        code: 403
+        duration: 0s

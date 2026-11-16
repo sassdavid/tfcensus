@@ -19,13 +19,15 @@ const (
 	ServiceRoute53 = "route53"
 	ServiceS3      = "s3"
 	ServiceCC      = "cloudcontrolapi"
+	ServiceCFN     = "cloudformation"
 )
 
 // DefaultRates returns the client-side budget per service in requests per second. Each
 // (account, region, service) gets its own budget, because AWS meters most APIs that way; IAM and
 // Route 53 are global, so their budget is per account. Resource Explorer allows 5 ListResources
 // calls per second and Route 53 5 requests per second per account; the others stay well under
-// their documented limits.
+// their documented limits. CloudFormation publishes no rate for its list calls, so its budget is
+// low and the adaptive retryer slows down further on Throttling.
 func DefaultRates() map[string]rate.Limit {
 	return map[string]rate.Limit{
 		ServiceConfig:  rateConfig,
@@ -35,6 +37,7 @@ func DefaultRates() map[string]rate.Limit {
 		ServiceRoute53: rateRoute53,
 		ServiceS3:      rateS3,
 		ServiceCC:      rateCC,
+		ServiceCFN:     rateCFN,
 	}
 }
 
@@ -47,6 +50,7 @@ const (
 	rateRoute53 rate.Limit = 5
 	rateS3      rate.Limit = 10
 	rateCC      rate.Limit = 2
+	rateCFN     rate.Limit = 4
 )
 
 func globalService(service string) bool { return service == ServiceIAM || service == ServiceRoute53 }
