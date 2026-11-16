@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"iter"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/resourceexplorer2"
@@ -80,12 +81,13 @@ func (l *reLayer) List(
 func (l *reLayer) resource(res *retypes.Resource, acct *accounts.Account) CloudResource {
 	arn := typemap.NormalizeARN(aws.ToString(res.Arn))
 	reType := aws.ToString(res.ResourceType)
-	classified, _ := l.env.Map.Classify(arn)
+	classified, fields := l.env.Map.Classify(arn)
 	r := CloudResource{
 		Account: cmp.Or(aws.ToString(res.OwningAccountId), acct.ID),
 		Region:  aws.ToString(res.Region),
 		CFNType: cmp.Or(classified, aws.ToString(res.CfnResourceType), l.env.Map.FromRE(reType)),
 		ARN:     arn,
+		ID:      cmp.Or(fields[typemap.FieldID], fields["name"], lastSegment(arn)),
 		Sources: []string{LayerRE},
 	}
 	if r.Region == globalRegion {
@@ -110,4 +112,10 @@ func (l *reLayer) resource(res *retypes.Resource, acct *accounts.Account) CloudR
 		}
 	}
 	return r
+}
+
+// lastSegment returns the part of an ARN after its last slash or colon, the resource's own name
+// or ID for most types.
+func lastSegment(arn string) string {
+	return arn[strings.LastIndexAny(arn, "/:")+1:]
 }

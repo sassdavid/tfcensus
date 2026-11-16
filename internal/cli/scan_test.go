@@ -233,9 +233,11 @@ func reResourceBody(arn, reType string) string {
 		arn, scanAcct, scanRegion, reType, svc)
 }
 
-// eventsRuleARN is an EventBridge rule that Resource Explorer lists and the typemap doesn't map,
-// so matching leaves it undetermined; a nested stack lists it.
-func eventsRuleARN() string { return "arn:aws:events:eu-west-1:" + scanAcct + ":rule/billing-nightly" }
+// nightlyARN is a Step Functions state machine that Resource Explorer lists and the typemap doesn't
+// map, so matching leaves it undetermined; a nested stack lists it.
+func nightlyARN() string {
+	return "arn:aws:states:eu-west-1:" + scanAcct + ":stateMachine:billing-nightly"
+}
 
 const cfnXMLNS = `xmlns="http://cloudformation.amazonaws.com/doc/2010-05-15/"`
 
@@ -245,7 +247,7 @@ func scanStackID(name string) string {
 
 // stackStubs serves the CloudFormation stacks of the scan account: billing lists the
 // billing-events queue (other-iac, and tagged too), the acme-api function (in a state as well)
-// and a nested stack, which lists the unmapped billing-nightly rule.
+// and a nested stack, which lists the unmapped billing-nightly state machine.
 func stackStubs(r *awstest.Router) {
 	ok := func(body string) awstest.Stub { return awstest.Stub{Body: body} }
 	nested := "billing-AlarmsStack-1ABCDEF"
@@ -272,7 +274,7 @@ func stackStubs(r *awstest.Router) {
 	r.On("cloudformation", "ListStacks", "", ok("<ListStacksResponse "+cfnXMLNS+"><ListStacksResult><StackSummaries>"+
 		summary("billing", "")+summary(nested, "billing")+"</StackSummaries></ListStacksResult></ListStacksResponse>"))
 	r.On("cloudformation", "ListStackResources", "stack%2F"+nested+"%2F", ok(resources(
-		res("Nightly", "AWS::Events::Rule", "billing-nightly"))))
+		res("Nightly", "AWS::StepFunctions::StateMachine", nightlyARN()))))
 	r.On("cloudformation", "ListStackResources", "stack%2Fbilling%2F", ok(resources(
 		res("EventsQueue", "AWS::SQS::Queue", "https://sqs.eu-west-1.amazonaws.com/"+scanAcct+"/billing-events"),
 		res("Api", "AWS::Lambda::Function", "acme-api"),
@@ -326,9 +328,9 @@ func scanStubs(r *awstest.Router, iamOnly, aggregated bool) {
 		reResourceBody("arn:aws:logs:eu-west-1:"+scanAcct+":log-group:/aws/lambda/acme-api", "logs:log-group")+","+
 		reResourceBody(arnEC2("key-pair/key-0aa00000000000f6"), "ec2:key-pair")+","+
 		strings.Replace(
-			reResourceBody(eventsRuleARN(), "events:rule"),
+			reResourceBody(nightlyARN(), "states:stateMachine"),
 			"{",
-			`{"CfnResourceType":"AWS::Events::Rule",`,
+			`{"CfnResourceType":"AWS::StepFunctions::StateMachine",`,
 			1,
 		)+
 		`]}`))

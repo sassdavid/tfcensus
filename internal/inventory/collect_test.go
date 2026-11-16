@@ -221,7 +221,7 @@ func TestCapabilities(t *testing.T) {
 	assert.Equal(t, inventory.Capabilities{ResourceExplorer: true}, inventory.CapabilitiesFrom(&r.Regions[0]))
 	assert.Equal(
 		t,
-		inventory.Capabilities{Config: true, ConfigGlobal: true, ResourceExplorer: true},
+		inventory.Capabilities{Config: true, ConfigAll: true, ConfigGlobal: true, ResourceExplorer: true},
 		inventory.CapabilitiesFrom(&r.Regions[1]),
 	)
 	r.Regions[0].ResourceExplorer.DefaultView = false

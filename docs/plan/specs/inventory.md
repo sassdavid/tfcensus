@@ -90,6 +90,12 @@ stack owns one. Their runs have layer `cloudformation` and stay out of the cover
   string); and a route table's `associations` (kept as `main`). A value a user wrote is read only
   when a rule needs it to tell a service from a person, and is never printed
   ([ADR-0017](../adr/0017-scan-accuracy.md)).
+- Resource Explorer records get an `id` from the ARN pattern's captures (`id`, else `name`, else
+  the last ARN segment). A record only Resource Explorer lists, of a type a recorder that records
+  every supported type listed in the same account and region, is dropped: Resource Explorer is
+  eventually consistent and Config is authoritative. Kubernetes objects (`eks:deployment` and the
+  other object types) are skipped. The coverage report's `notes` count both
+  ([ADR-0017](../adr/0017-scan-accuracy.md)).
 - `SelectResourceConfig` takes at most 4,096 characters of expression, so the layer splits the
   sorted Config types into runs whose query stays under 2,560 characters, leaving room for an
   aggregate query's account and region lists.

@@ -375,7 +375,7 @@ the last box.
   CloudFormation type names that differ (`AWS::OpenSearch::Domain` and
   `AWS::OpenSearchService::Domain`) map to one entry. matching.md's "about 300 types" line is
   updated with the real count. (criterion 5)
-- [ ] Resource Explorer: records get an `id`, RE-only records of a Config-listed type are dropped
+- [x] Resource Explorer: records get an `id`, RE-only records of a Config-listed type are dropped
   and counted, and the Kubernetes object types are skipped and counted. (criterion 6)
 - [ ] Cloud Control: `cc: true` types (the VPC Lattice resource gateway, resource configuration
   and service network associations) are listed by default, and the resource configuration type

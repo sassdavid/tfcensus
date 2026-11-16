@@ -94,6 +94,22 @@
                   }
                 }
               }
+            },
+            "notes": {
+              "description": "Records a run left out of the inventory, and why: Kubernetes objects that Resource Explorer indexes, and records only Resource Explorer listed of a type AWS Config records.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["account", "layer", "reason", "count"],
+                "properties": {
+                  "account": { "$ref": "#/$defs/account" },
+                  "region": { "type": "string" },
+                  "layer": { "type": "string", "minLength": 1 },
+                  "reason": { "type": "string", "minLength": 1 },
+                  "count": { "type": "integer", "minimum": 1 }
+                }
+              }
             }
           }
         },

@@ -114,16 +114,16 @@ account,region,category,cfn_type,source_type,tf_types,arn,id,name,owner,rule,rea
 111111111111,eu-west-1,unmanaged,AWS::EC2::SecurityGroup,,aws_default_security_group;aws_security_group,arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0c11c0b5000000003,sg-0c11c0b5000000003,clickops-debug,,rules/no-match,no state manages it and no rule matches,,2026-10-01T09:00:00Z,config,owner=alice,
 111111111111,eu-west-1,unmanaged,AWS::ElasticLoadBalancingV2::ListenerRule,,aws_lb_listener_rule,arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener-rule/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2/9683b2d02a6cabee,arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener-rule/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2/9683b2d02a6cabee,,,rules/no-match,no state manages it and no rule matches,,,cloudcontrol,,
 111111111111,eu-west-1,unmanaged,AWS::S3::Bucket,,aws_s3_bucket,arn:aws:s3:::acme-growth-experiments,acme-growth-experiments,acme-growth-experiments,,rules/no-match,no state manages it and no rule matches,,,config,team=growth,
-111111111111,eu-west-1,other-iac,AWS::Events::Rule,,aws_cloudwatch_event_rule,arn:aws:events:eu-west-1:111111111111:rule/billing-nightly,,billing-nightly,cloudformation,source/cloudformation,listed by CloudFormation stack billing-AlarmsStack-1ABCDEF (nested in billing) as Nightly,,,resource-explorer,,billing-AlarmsStack-1ABCDEF
 111111111111,eu-west-1,other-iac,AWS::SQS::Queue,,aws_sqs_queue,arn:aws:sqs:eu-west-1:111111111111:billing-events,https://sqs.eu-west-1.amazonaws.com/111111111111/billing-events,billing-events,cloudformation,source/cloudformation,listed by CloudFormation stack billing as EventsQueue,,,config,aws:cloudformation:stack-name=billing,billing
+111111111111,eu-west-1,other-iac,AWS::StepFunctions::StateMachine,,,arn:aws:states:eu-west-1:111111111111:stateMachine:billing-nightly,billing-nightly,,cloudformation,source/cloudformation,listed by CloudFormation stack billing-AlarmsStack-1ABCDEF (nested in billing) as Nightly,,,resource-explorer,,billing-AlarmsStack-1ABCDEF
 111111111111,eu-west-1,aws-managed,AWS::EC2::InternetGateway,,aws_internet_gateway,arn:aws:ec2:eu-west-1:111111111111:internet-gateway/igw-0def00000000000c3,igw-0def00000000000c3,,aws,pack/aws-defaults/default-vpc-children,"internet gateway, route table or DHCP options of the default VPC",,,config,,
 111111111111,eu-west-1,aws-managed,AWS::EC2::SecurityGroup,,aws_default_security_group;aws_security_group,arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0def00000000000b2,sg-0def00000000000b2,default,aws,pack/aws-defaults/default-security-group,default security group that AWS creates with every VPC,,,config,,
 111111111111,eu-west-1,aws-managed,AWS::EC2::VPC,,aws_vpc,arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0def00000000000a1,vpc-0def00000000000a1,,aws,pack/aws-defaults/default-vpc,default VPC that AWS creates in every region,,,config,,
 111111111111,eu-west-1,aws-managed,AWS::KMS::Key,,aws_kms_key,arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-aws0-4000-8000-000000000001,0b1c2d3e-aws0-4000-8000-000000000001,,aws,pack/aws-service/aws-managed-kms-key,AWS managed KMS key (KeyManager AWS),,,config,,
 111111111111,eu-west-1,derived,AWS::EC2::NetworkInterface,,aws_network_interface,arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0aa00000000000d4,eni-0aa00000000000d4,,aws,pack/derived/service-eni,"network interface that an AWS service created (requester-managed, a service interface type, an attachment owned by another account, or a Lambda or VPC CNI description)",,,config,,
 111111111111,eu-west-1,ignored,AWS::EC2::Instance,,aws_instance,arn:aws:ec2:eu-west-1:111111111111:instance/i-0aa00000000000e5,i-0aa00000000000e5,,platform,user/sandbox,Sandbox experiments are cleaned up every week,,,config,Name=try-arm;owner=sandbox,
-111111111111,eu-west-1,ignored,AWS::Logs::LogGroup,,aws_cloudwatch_log_group,arn:aws:logs:eu-west-1:111111111111:log-group:/aws/lambda/acme-api,,/aws/lambda/acme-api,,pack/ephemeral/managed-lambda-log-group,log group that Lambda created for a function a unit manages,,,resource-explorer,,
-111111111111,eu-west-1,undetermined,AWS::EC2::KeyPair,,,arn:aws:ec2:eu-west-1:111111111111:key-pair/key-0aa00000000000f6,,,,match/no-type-mapping,no type mapping for AWS::EC2::KeyPair,,,resource-explorer,,
+111111111111,eu-west-1,ignored,AWS::Logs::LogGroup,,aws_cloudwatch_log_group,arn:aws:logs:eu-west-1:111111111111:log-group:/aws/lambda/acme-api,/aws/lambda/acme-api,/aws/lambda/acme-api,,pack/ephemeral/managed-lambda-log-group,log group that Lambda created for a function a unit manages,,,resource-explorer,,
+111111111111,eu-west-1,undetermined,AWS::EC2::KeyPair,,,arn:aws:ec2:eu-west-1:111111111111:key-pair/key-0aa00000000000f6,key-0aa00000000000f6,,,match/no-type-mapping,no type mapping for AWS::EC2::KeyPair,,,resource-explorer,,
 -- golden/scan.sarif --
 {
   "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json",
@@ -639,29 +639,6 @@ account,region,category,cfn_type,source_type,tf_types,arn,id,name,owner,rule,rea
         "account": "111111111111",
         "region": "eu-west-1",
         "category": "other-iac",
-        "cfn_type": "AWS::Events::Rule",
-        "tf_types": [
-          "aws_cloudwatch_event_rule"
-        ],
-        "arn": "arn:aws:events:eu-west-1:111111111111:rule/billing-nightly",
-        "name": "billing-nightly",
-        "sources": [
-          "resource-explorer"
-        ],
-        "owner": "cloudformation",
-        "reason": "listed by CloudFormation stack billing-AlarmsStack-1ABCDEF (nested in billing) as Nightly",
-        "rule": "source/cloudformation",
-        "stack": {
-          "name": "billing-AlarmsStack-1ABCDEF",
-          "id": "arn:aws:cloudformation:eu-west-1:111111111111:stack/billing-AlarmsStack-1ABCDEF/6f1e2d3c-0000-4000-8000-000000000001",
-          "root": "billing",
-          "logical_id": "Nightly"
-        }
-      },
-      {
-        "account": "111111111111",
-        "region": "eu-west-1",
-        "category": "other-iac",
         "cfn_type": "AWS::SQS::Queue",
         "tf_types": [
           "aws_sqs_queue"
@@ -682,6 +659,26 @@ account,region,category,cfn_type,source_type,tf_types,arn,id,name,owner,rule,rea
           "name": "billing",
           "id": "arn:aws:cloudformation:eu-west-1:111111111111:stack/billing/6f1e2d3c-0000-4000-8000-000000000001",
           "logical_id": "EventsQueue"
+        }
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "category": "other-iac",
+        "cfn_type": "AWS::StepFunctions::StateMachine",
+        "arn": "arn:aws:states:eu-west-1:111111111111:stateMachine:billing-nightly",
+        "id": "billing-nightly",
+        "sources": [
+          "resource-explorer"
+        ],
+        "owner": "cloudformation",
+        "reason": "listed by CloudFormation stack billing-AlarmsStack-1ABCDEF (nested in billing) as Nightly",
+        "rule": "source/cloudformation",
+        "stack": {
+          "name": "billing-AlarmsStack-1ABCDEF",
+          "id": "arn:aws:cloudformation:eu-west-1:111111111111:stack/billing-AlarmsStack-1ABCDEF/6f1e2d3c-0000-4000-8000-000000000001",
+          "root": "billing",
+          "logical_id": "Nightly"
         }
       },
       {
@@ -801,6 +798,7 @@ account,region,category,cfn_type,source_type,tf_types,arn,id,name,owner,rule,rea
           "aws_cloudwatch_log_group"
         ],
         "arn": "arn:aws:logs:eu-west-1:111111111111:log-group:/aws/lambda/acme-api",
+        "id": "/aws/lambda/acme-api",
         "name": "/aws/lambda/acme-api",
         "sources": [
           "resource-explorer"
@@ -814,6 +812,7 @@ account,region,category,cfn_type,source_type,tf_types,arn,id,name,owner,rule,rea
         "category": "undetermined",
         "cfn_type": "AWS::EC2::KeyPair",
         "arn": "arn:aws:ec2:eu-west-1:111111111111:key-pair/key-0aa00000000000f6",
+        "id": "key-0aa00000000000f6",
         "sources": [
           "resource-explorer"
         ],

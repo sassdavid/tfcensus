@@ -1,6 +1,7 @@
 package inventory
 
 import (
+	"cmp"
 	"fmt"
 	"io"
 	"slices"
@@ -19,6 +20,7 @@ const GlobalColumn = "global"
 type Coverage struct {
 	Columns []Column      `json:"columns"`
 	Rows    []CoverageRow `json:"rows"`
+	Notes   []Note        `json:"notes,omitempty"` // records the run left out, and why
 }
 
 // Column is one account and region, or the account's [GlobalColumn].
@@ -205,6 +207,13 @@ func WriteCoverage(w io.Writer, c *Coverage) error {
 	}
 	if err := tw.Flush(); err != nil {
 		return fmt.Errorf("write coverage: %w", err)
+	}
+	if len(c.Notes) > 0 {
+		_, _ = fmt.Fprintln(w, "\nLeft out of the inventory:")
+	}
+	for _, n := range c.Notes {
+		where := n.Account + "/" + cmp.Or(n.Region, GlobalColumn)
+		_, _ = fmt.Fprintf(w, "  %s %s: %d %s\n", where, short(n.Layer), n.Count, n.Reason)
 	}
 	return nil
 }
