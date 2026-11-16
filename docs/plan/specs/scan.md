@@ -41,7 +41,9 @@ capability probe → discovery (F1) → state index (F3) → inventory layers �
   parent, with rule `inherit/<category>` and a `parent` object. A child of a `managed` parent stays
   `unmanaged`. The pass repeats up to depth 3, and `scan.never_hide` stops it at guarded resources.
 - `--explain <arn|id>` prints one resource's match, every rule's outcome, its parent chain and its category;
-  `--explain-coverage` prints the layer coverage matrix. A re-run with other rules reads the cached
+  `--explain-coverage` prints the layer coverage matrix, the records a layer left out, and the
+  AWS Config types scan doesn't map with their counts (one `config:GetDiscoveredResourceCounts`
+  per recording account and region, skipped when `--types` narrows the scan). A re-run with other rules reads the cached
   inventory ([ADR-0009](../adr/0009-scan-snapshot-cache.md)).
 
 ## Acceptance criteria

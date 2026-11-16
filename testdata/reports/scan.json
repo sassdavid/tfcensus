@@ -1837,6 +1837,14 @@
             ]
           ]
         }
+      ],
+      "unmapped": [
+        {
+          "account": "111111111111",
+          "region": "eu-west-1",
+          "type": "AWS::SSM::Document",
+          "count": 2
+        }
       ]
     },
     "warnings": [
