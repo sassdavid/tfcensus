@@ -62,6 +62,13 @@
     },
     {
       "account": "111111111111",
+      "region": "eu-west-1",
+      "layer": "native:eks-pod-identity",
+      "status": "ok",
+      "count": 0
+    },
+    {
+      "account": "111111111111",
       "region": "us-east-1",
       "layer": "config",
       "status": "unsupported",
@@ -92,6 +99,13 @@
       "account": "111111111111",
       "region": "us-east-1",
       "layer": "native:s3-subresources",
+      "status": "ok",
+      "count": 0
+    },
+    {
+      "account": "111111111111",
+      "region": "us-east-1",
+      "layer": "native:eks-pod-identity",
       "status": "ok",
       "count": 0
     }

@@ -92,6 +92,8 @@ aws-service  application secret                            rules/no-match
 aws-service  flow-log bucket policy                        pack/aws-service/log-delivery-bucket-policy aws-managed
 aws-service  bucket policy with log delivery and a team statement rules/no-match
 aws-service  bucket policy whose statement has no Sid      rules/no-match
+aws-service  rule that EC2 Auto Scaling manages            pack/aws-service/autoscaling-managed-rule aws-managed
+aws-service  rule a team named after Auto Scaling          rules/no-match
 other-iac    AFT execution role                            pack/other-iac/aft other-iac
 other-iac    resource tagged managed_by AFT                pack/other-iac/aft other-iac
 other-iac    role named like AFT but not by it             rules/no-match

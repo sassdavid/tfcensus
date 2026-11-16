@@ -46,5 +46,16 @@ v0.4.0 comes from the owner's read-only rerun with the same command (M21's last 
 | `aws_iam_policy_attachment` and `aws_default_route_table` | 3 | curated types | `12-policy-attachment-and-default-route-table.json` |
 | Deleted Elastic IPs still in Resource Explorer | 2 | stale Resource Explorer records dropped | `13-stale-resource-explorer.json` |
 
-`TestSpec_scan_accuracy_9` scans all 13 fixtures with stubbed AWS
+## False positives found by the v0.4.0 rerun, account 1
+
+The first rerun (52 `unmanaged`) found three more groups. They are fixed before the v0.4.0 row
+is recorded, and the owner reruns the scan for it.
+
+| Group | Count | Fixed by | Fixture |
+| --- | --- | --- | --- |
+| The `/` resource of REST APIs a state manages | 3 | `derived.state_attr` (`root_resource_id`) | `14-rerun.json` |
+| `AutoScalingManagedRule` | 1 | `autoscaling-managed-rule` | `14-rerun.json` |
+| Pod Identity associations an EKS add-on owns | 2 | `native:eks-pod-identity` reads `ownerArn` | `14-rerun.json` |
+
+`TestSpec_scan_accuracy_9` scans all 14 fixtures with stubbed AWS
 (`testdata/cassettes/aws/validation.yaml`) and finds no `unmanaged` resource.

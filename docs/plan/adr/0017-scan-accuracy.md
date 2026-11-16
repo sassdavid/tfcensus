@@ -59,6 +59,8 @@
   `vpc-lattice:ListResourceGateways`, `ListResourceConfigurations`,
   `ListServiceNetworkResourceAssociations` and `ListServiceNetworkVpcAssociations` (the `handlers`
   of each type's schema in the CloudFormation registry). The policy gets `vpc-lattice:List*`.
+- The v0.4.0 rerun adds one `eks:ListPodIdentityAssociations` call per EKS cluster that an earlier
+  layer found, for the `ownerArn` of add-on associations. The policy gets that action.
 - `SelectResourceConfig` and `SelectAggregateResourceConfig` take an expression of at most 4,096
   characters (Config API reference). The curated Config types no longer fit in one `IN` list, so
   the config layer splits them over as many queries as it needs, in a fixed order so cassettes

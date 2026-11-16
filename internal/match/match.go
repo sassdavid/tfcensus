@@ -63,6 +63,9 @@ type Matcher struct {
 	// inline holds the rule keys of aws_security_group inline rules, which only match when no
 	// aws_security_group_rule does.
 	inline map[string][]tfstate.Ref
+	// children holds the IDs of resources that a state resource created with no resource of
+	// their own (derived.state_attr), keyed by childKey.
+	children map[string][]tfstate.Ref
 	// byARN and byID find entries of any type by normalized ARN or raw TF id, for whois.
 	byARN   map[string][]tfstate.Ref
 	byID    map[string][]tfstate.Ref
@@ -73,7 +76,8 @@ type Matcher struct {
 func New(m *typemap.Map, ix *tfstate.Index) *Matcher {
 	mt := &Matcher{
 		m: m, index: map[key][]tfstate.Ref{}, inline: map[string][]tfstate.Ref{},
-		byARN: map[string][]tfstate.Ref{}, byID: map[string][]tfstate.Ref{},
+		children: map[string][]tfstate.Ref{},
+		byARN:    map[string][]tfstate.Ref{}, byID: map[string][]tfstate.Ref{},
 		entries: make(map[tfstate.Ref]*tfstate.Entry, len(ix.Entries)),
 	}
 	for i := range ix.Entries {
@@ -103,8 +107,31 @@ func New(m *typemap.Map, ix *tfstate.Index) *Matcher {
 				mt.index[k] = appendRef(mt.index[k], ref)
 			}
 		}
+		mt.indexChildren(e, ref)
 	}
 	return mt
+}
+
+// indexChildren records the children that entry e names in a state attribute. The account is
+// empty when the parent's ARN has none (API Gateway).
+func (mt *Matcher) indexChildren(e *tfstate.Entry, ref tfstate.Ref) {
+	account := cmp.Or(e.Identity[typemap.IdentityAccountID], e.Account)
+	for _, c := range mt.m.StateChildren(e.Type) {
+		id := e.IdentityAttrs[c.Derived.StateAttr]
+		if id == "" {
+			continue
+		}
+		k := childKey(c, account, e.Region, id)
+		mt.children[k] = appendRef(mt.children[k], ref)
+	}
+}
+
+// childKey identifies a resource of child type c by account, region and ID.
+func childKey(c *typemap.Type, account, region, id string) string {
+	if c.Global {
+		region = ""
+	}
+	return c.TF + "/" + account + "/" + region + "/" + id
 }
 
 func appendRef(refs []tfstate.Ref, r tfstate.Ref) []tfstate.Ref {
@@ -128,6 +155,9 @@ func IdentityParseAttrs(m *typemap.Map) func(string) map[string]string {
 				continue
 			}
 			out[a] = cmp.Or(t.IdentityFrom[a], a)
+		}
+		for _, c := range m.StateChildren(tf) {
+			out[c.Derived.StateAttr] = c.Derived.StateAttr
 		}
 		return out
 	}
@@ -438,10 +468,21 @@ func stateType(address string) string {
 }
 
 // managedParent returns the parent's type and the state refs that manage it, when r's type is a
-// derived child, r meets the type's conditions, and its parent is in state.
+// derived child, r meets the type's conditions, and its parent is in state. A child that its
+// parent names in a state attribute matches by its ID.
 func (mt *Matcher) managedParent(r *inventory.CloudResource) (string, []tfstate.Ref) {
 	for _, t := range mt.m.ForCFN(r.CFNType) {
 		if t.Derived == nil || !meets(t.Derived.When, r.Attrs) {
+			continue
+		}
+		if t.Derived.StateAttr != "" {
+			refs := mt.children[childKey(t, r.Account, r.Region, r.ID)]
+			if len(refs) == 0 {
+				refs = mt.children[childKey(t, "", r.Region, r.ID)]
+			}
+			if len(refs) > 0 {
+				return t.Derived.Parent, refs
+			}
 			continue
 		}
 		for _, p := range r.Parents {

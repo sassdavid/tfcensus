@@ -112,6 +112,10 @@ func Operation(req *http.Request, body []byte) (string, string) {
 				return service, op
 			}
 		}
+	case "eks":
+		if strings.HasSuffix(req.URL.Path, "/pod-identity-associations") {
+			return service, "ListPodIdentityAssociations"
+		}
 	case "route53":
 		if strings.HasSuffix(req.URL.Path, "/rrset") {
 			return service, "ListResourceRecordSets"
@@ -127,7 +131,7 @@ func contentType(service string) string {
 	switch service {
 	case "config":
 		return "application/x-amz-json-1.1"
-	case "resource-explorer-2":
+	case "resource-explorer-2", "eks":
 		return "application/json"
 	case "cloudcontrolapi":
 		return "application/x-amz-json-1.0"

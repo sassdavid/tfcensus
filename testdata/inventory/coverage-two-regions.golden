@@ -48,7 +48,7 @@ AWS::EFS::AccessPoint                          -                    config+re   
 AWS::EFS::FileSystem                           -                    config+re               re
 AWS::EKS::Addon                                -                    config+re               re
 AWS::EKS::Cluster                              -                    config+re               re
-AWS::EKS::PodIdentityAssociation               -                    re                      re
+AWS::EKS::PodIdentityAssociation               -                    re+native               re+native
 AWS::ElastiCache::ReplicationGroup             -                    re                      re
 AWS::ElastiCache::User                         -                    re                      re
 AWS::ElastiCache::UserGroup                    -                    re                      re

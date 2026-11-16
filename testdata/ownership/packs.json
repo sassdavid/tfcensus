@@ -1931,6 +1931,42 @@
       "related": []
     },
     {
+      "pack": "aws-service",
+      "name": "rule that EC2 Auto Scaling manages",
+      "want": "pack/aws-service/autoscaling-managed-rule",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::Events::Rule",
+        "sources": [
+          "config",
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:events:eu-west-1:111111111111:rule/AutoScalingManagedRule",
+        "id": "AutoScalingManagedRule",
+        "name": "AutoScalingManagedRule"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "rule a team named after Auto Scaling",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::Events::Rule",
+        "sources": [
+          "config",
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:events:eu-west-1:111111111111:rule/AutoScalingManagedRule-copy",
+        "id": "AutoScalingManagedRule-copy",
+        "name": "AutoScalingManagedRule-copy"
+      },
+      "related": []
+    },
+    {
       "pack": "other-iac",
       "name": "AFT execution role",
       "want": "pack/other-iac/aft",

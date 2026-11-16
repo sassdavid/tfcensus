@@ -1,0 +1,129 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            maxResults:
+                - "100"
+        url: https://eks.eu-west-1.amazonaws.com/clusters/gone/pod-identity-associations?maxResults=100
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"__type":"ResourceNotFoundException","message":"No cluster found"}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 404 Not Found
+        code: 404
+        duration: 0s
+    - id: 1
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            maxResults:
+                - "100"
+        url: https://eks.eu-west-1.amazonaws.com/clusters/main/pod-identity-associations?maxResults=100
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"associations":[{"associationArn":"arn:aws:eks:eu-west-1:111111111111:podidentityassociation/main/a-0addon","associationId":"a-0addon","clusterName":"main","namespace":"kube-system","serviceAccount":"sa","ownerArn":"arn:aws:eks:eu-west-1:111111111111:addon/main/vpc-cni/0a1b"}],"nextToken":"page-2"}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 2
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            maxResults:
+                - "100"
+            nextToken:
+                - page-2
+        url: https://eks.eu-west-1.amazonaws.com/clusters/main/pod-identity-associations?maxResults=100&nextToken=page-2
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"associations":[{"associationArn":"arn:aws:eks:eu-west-1:111111111111:podidentityassociation/main/a-0team","associationId":"a-0team","clusterName":"main","namespace":"kube-system","serviceAccount":"sa"}]}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 3
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 486
+        host: ""
+        body: '{"Expression":"SELECT resourceId, resourceName, resourceType, arn, awsRegion, accountId, resourceCreationTime, tags, relationships, configuration.associations, configuration.attachment.instanceOwnerId, configuration.defaultForAz, configuration.description, configuration.dhcpConfigurations, configuration.interfaceType, configuration.isDefault, configuration.keyManager, configuration.requesterId, configuration.requesterManaged WHERE resourceType IN (''AWS::EKS::Cluster'')","Limit":100}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - StarlingDoveService.SelectResourceConfig
+        url: https://config.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Results":["{\"resourceId\":\"gone\",\"resourceName\":\"gone\",\"resourceType\":\"AWS::EKS::Cluster\",\"arn\":\"arn:aws:eks:eu-west-1:111111111111:cluster/gone\",\"awsRegion\":\"eu-west-1\",\"accountId\":\"111111111111\",\"tags\":[],\"relationships\":[]}","{\"resourceId\":\"main\",\"resourceName\":\"main\",\"resourceType\":\"AWS::EKS::Cluster\",\"arn\":\"arn:aws:eks:eu-west-1:111111111111:cluster/main\",\"awsRegion\":\"eu-west-1\",\"accountId\":\"111111111111\",\"tags\":[],\"relationships\":[]}"]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 4
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 64
+        host: ""
+        body: '{"Filters":{"FilterString":"region:eu-west-1"},"MaxResults":500}'
+        headers:
+            Content-Type:
+                - application/json
+        url: https://resource-explorer-2.eu-west-1.amazonaws.com/ListResources
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Resources":[{"Arn":"arn:aws:eks:eu-west-1:111111111111:podidentityassociation/main/a-0addon","OwningAccountId":"111111111111","Region":"eu-west-1","ResourceType":"eks:podidentityassociation","Service":"eks"}]}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 0s

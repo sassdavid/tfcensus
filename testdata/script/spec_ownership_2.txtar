@@ -48,6 +48,7 @@ resource 1: AWS::S3::Bucket arn:aws:s3:::acme-growth-experiments
   pack/aws-service/apigateway-log-group             no match
   pack/aws-service/service-linked-secret            no match
   pack/aws-service/log-delivery-bucket-policy       no match
+  pack/aws-service/autoscaling-managed-rule         no match
   pack/other-iac/cloudformation                     no match
   pack/other-iac/pulumi                             no match
   pack/other-iac/crossplane                         no match
@@ -101,6 +102,7 @@ resource 1: AWS::S3::Bucket arn:aws:s3:::acme-growth-experiments
   pack/aws-service/apigateway-log-group             no match
   pack/aws-service/service-linked-secret            no match
   pack/aws-service/log-delivery-bucket-policy       no match
+  pack/aws-service/autoscaling-managed-rule         no match
   pack/other-iac/cloudformation                     no match
   pack/other-iac/pulumi                             no match
   pack/other-iac/crossplane                         no match
