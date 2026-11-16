@@ -1,0 +1,60 @@
+{
+  "schema_version": "1",
+  "tool": "tfcensus",
+  "version": "test",
+  "generated_at": "2026-11-12T09:00:00Z",
+  "data": {
+    "file": "workspaces.hcl",
+    "command": "plan",
+    "blocks": [
+      {
+        "name": "split_workspace",
+        "strategy": "surgery",
+        "from": "live/network:blue",
+        "status": "pending",
+        "result": "verified",
+        "units": [
+          {
+            "path": "live/network-endpoints",
+            "workspace": "blue",
+            "role": "destination",
+            "moved": [
+              "module.endpoints.aws_vpc_endpoint.s3",
+              "aws_route53_record.api[0]",
+              "aws_route53_record.api[1]"
+            ],
+            "skipped": [
+              "module.endpoints.data.aws_iam_policy_document.s3"
+            ],
+            "serial": {
+              "before": 4,
+              "after": 5
+            }
+          },
+          {
+            "path": "live/network",
+            "workspace": "blue",
+            "role": "source",
+            "moved": [
+              "module.endpoints.aws_vpc_endpoint.s3",
+              "aws_route53_record.api[0]",
+              "aws_route53_record.api[1]"
+            ],
+            "skipped": [
+              "module.endpoints.data.aws_iam_policy_document.s3"
+            ],
+            "serial": {
+              "before": 12,
+              "after": 13
+            }
+          }
+        ],
+        "findings": [],
+        "notes": [
+          "live/network-endpoints:blue: provider provider[\"registry.terraform.io/hashicorp/aws\"].dns -> provider[\"registry.terraform.io/hashicorp/aws\"]"
+        ]
+      }
+    ]
+  },
+  "errors": []
+}

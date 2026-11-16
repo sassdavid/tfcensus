@@ -67,15 +67,15 @@ type Unit struct {
 
 // Backend is a unit's state backend. Only the fields tfcensus uses are kept.
 type Backend struct {
-	Type               string `json:"type"`
-	Bucket             string `json:"bucket,omitempty"`
-	Key                string `json:"key,omitempty"`
-	Region             string `json:"region,omitempty"`
-	WorkspaceKeyPrefix string `json:"workspace_key_prefix,omitempty"`
-	DynamoDBTable      string `json:"dynamodb_table,omitempty"`
-	UseLockfile        bool   `json:"use_lockfile,omitempty"`
-	RoleARN            string `json:"role_arn,omitempty"`
-	Profile            string `json:"profile,omitempty"`
+	Type               string  `json:"type"`
+	Bucket             string  `json:"bucket,omitempty"`
+	Key                string  `json:"key,omitempty"`
+	Region             string  `json:"region,omitempty"`
+	WorkspaceKeyPrefix *string `json:"workspace_key_prefix,omitempty"` // nil when unset; "" is a set, empty prefix
+	DynamoDBTable      string  `json:"dynamodb_table,omitempty"`
+	UseLockfile        bool    `json:"use_lockfile,omitempty"`
+	RoleARN            string  `json:"role_arn,omitempty"`
+	Profile            string  `json:"profile,omitempty"`
 }
 
 // Target is the AWS account and region a unit's resources live in.

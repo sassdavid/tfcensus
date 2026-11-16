@@ -19,9 +19,10 @@ const (
 
 // History is the migration history of one unit, stored next to its state.
 type History struct {
-	Version int      `json:"version"`
-	Unit    string   `json:"unit"`
-	Records []Record `json:"records"`
+	Version   int      `json:"version"`
+	Unit      string   `json:"unit"`
+	Workspace string   `json:"workspace,omitempty"` // empty for the default workspace
+	Records   []Record `json:"records"`
 }
 
 // Record is one applied block in one unit.

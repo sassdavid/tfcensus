@@ -3,6 +3,7 @@ package migrate
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -14,6 +15,8 @@ import (
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/convert"
 	"github.com/zclconf/go-cty/cty/gocty"
+
+	"github.com/sassdavid/tfcensus/internal/tfstate"
 )
 
 // Strategies.
@@ -162,7 +165,20 @@ func parseBlock(hb *hcl.Block, ctx *hcl.EvalContext) (*Block, error) {
 	default:
 		err = b.parseActions(actAttr, ctx)
 	}
-	return b, err
+	if err != nil {
+		return nil, err
+	}
+	if b.Strategy == StrategyNative {
+		for _, ref := range b.Units() {
+			// The files native writes are part of the unit's configuration, which every workspace
+			// of the directory applies.
+			if _, ws := SplitRef(ref); ws != tfstate.DefaultWorkspace {
+				return nil, fmt.Errorf("unit %s: the native strategy writes files that every workspace of the "+
+					"unit would apply; use surgery for a workspace other than default", ref)
+			}
+		}
+	}
+	return b, nil
 }
 
 func (b *Block) parseTo(attr *hcl.Attribute, ctx *hcl.EvalContext) error {
@@ -267,16 +283,48 @@ func evalInto(attr *hcl.Attribute, ctx *hcl.EvalContext, dst any) error {
 	return nil
 }
 
-// cleanUnit checks that p is a relative unit path inside the repository and returns it with
-// forward slashes and no trailing slash.
-func cleanUnit(p string) (string, error) {
-	s := strings.ReplaceAll(p, `\`, "/")
-	if s == "" || strings.HasPrefix(s, "/") || filepath.IsAbs(p) || (len(s) > 1 && s[1] == ':') {
-		return "", fmt.Errorf("unit path %q must be relative to the repository root", p)
+// cleanUnit checks a unit reference, a path or path:workspace, and returns it in canonical form:
+// the path relative to the repository with forward slashes and no trailing slash, then
+// :workspace unless the workspace is default.
+func cleanUnit(ref string) (string, error) {
+	s := strings.ReplaceAll(ref, `\`, "/")
+	if s == "" || strings.HasPrefix(s, "/") || filepath.IsAbs(ref) || (len(s) > 2 && s[1] == ':' && s[2] == '/') {
+		return "", fmt.Errorf("unit path %q must be relative to the repository root", ref)
 	}
-	c := path.Clean(s)
+	p, ws, hasWS := strings.Cut(s, ":")
+	if hasWS && !validWorkspace(ws) {
+		return "", fmt.Errorf("unit %q: workspace %q must be a non-empty, URL-safe name, and not . or .. either",
+			ref, ws)
+	}
+	if p == "" {
+		return "", fmt.Errorf("unit %q has no path", ref)
+	}
+	c := path.Clean(p)
 	if c == "." || c == ".." || strings.HasPrefix(c, "../") {
-		return "", fmt.Errorf("unit path %q must stay inside the repository", p)
+		return "", fmt.Errorf("unit path %q must stay inside the repository", ref)
 	}
-	return c, nil
+	return unitRef(c, ws), nil
+}
+
+// validWorkspace reports whether ws is a workspace name terraform accepts and that stays one key
+// segment: "." and ".." are URL-safe, but [path.Join] would fold them into another workspace's key.
+func validWorkspace(ws string) bool {
+	return ws != "" && ws != "." && ws != ".." && url.PathEscape(ws) == ws
+}
+
+// unitRef joins a unit path and workspace into a unit reference.
+func unitRef(unitPath, workspace string) string {
+	if workspace == "" || workspace == tfstate.DefaultWorkspace {
+		return unitPath
+	}
+	return unitPath + ":" + workspace
+}
+
+// SplitRef splits a unit reference from a migration file into the unit path and the workspace,
+// which is default when the reference names none.
+func SplitRef(ref string) (string, string) {
+	if p, ws, ok := strings.Cut(ref, ":"); ok {
+		return p, ws
+	}
+	return ref, tfstate.DefaultWorkspace
 }

@@ -13,13 +13,17 @@ import (
 	"strings"
 
 	"github.com/sassdavid/tfcensus/internal/execx"
+	"github.com/sassdavid/tfcensus/internal/tfstate"
 )
 
 // OverrideFile is the file verify writes into a unit to point it at a local state copy. Terraform
 // merges *_override.tf files over the unit's backend block.
 const OverrideFile = "_tfcensus_override.tf"
 
-const lockFileName = ".terraform.lock.hcl"
+const (
+	lockFileName   = ".terraform.lock.hcl"
+	localStateFile = "terraform.tfstate"
+)
 
 // ErrLeftover is returned when a unit still has an override file from an interrupted run.
 var ErrLeftover = errors.New("override file left from an earlier run")
@@ -47,42 +51,45 @@ type Terragrunt struct {
 	Logger    *slog.Logger
 }
 
-// session is one isolated set of directories for terragrunt calls in one unit.
+// session is one isolated set of directories for terragrunt calls in one workspace of a unit.
 type session struct {
-	t   *Terragrunt
-	dir string
-	tmp string
+	t         *Terragrunt
+	dir       string
+	workspace string
+	tmp       string
 }
 
-func (t *Terragrunt) open(dir string) (*session, error) {
+func (t *Terragrunt) open(dir, workspace string) (*session, error) {
 	tmp, err := os.MkdirTemp("", "tfcensus-tg-*")
 	if err != nil {
 		return nil, fmt.Errorf("create temp dir: %w", err)
 	}
-	return &session{t: t, dir: dir, tmp: tmp}, nil
+	return &session{t: t, dir: dir, workspace: workspace, tmp: tmp}, nil
+}
+
+func (s *session) nonDefault() bool {
+	return s.workspace != "" && s.workspace != tfstate.DefaultWorkspace
 }
 
 func (s *session) close() { _ = os.RemoveAll(s.tmp) }
 
 func (s *session) run(ctx context.Context, tfArgs ...string) (*execx.Result, error) {
 	args := append([]string{"run", "--tf-path", s.t.Terraform, "--"}, tfArgs...)
-	res, err := s.t.Runner.Run(ctx, execx.Cmd{
-		Name: s.t.Bin,
-		Args: args,
-		Dir:  s.dir,
-		Env: []string{
-			"TG_TF_PATH=" + s.t.Terraform,
-			"TG_NON_INTERACTIVE=true",
-			"TG_NO_COLOR=true",
-			"TG_LOG_LEVEL=error",
-			"TG_NO_AUTO_INIT=true",
-			"TG_DOWNLOAD_DIR=" + filepath.Join(s.tmp, "cache"),
-			"TF_DATA_DIR=" + filepath.Join(s.tmp, "data"),
-			"TF_IN_AUTOMATION=1",
-			"TF_INPUT=0",
-		},
-		Timeout: -1,
-	})
+	env := []string{
+		"TG_TF_PATH=" + s.t.Terraform,
+		"TG_NON_INTERACTIVE=true",
+		"TG_NO_COLOR=true",
+		"TG_LOG_LEVEL=error",
+		"TG_NO_AUTO_INIT=true",
+		"TG_DOWNLOAD_DIR=" + filepath.Join(s.tmp, "cache"),
+		"TF_DATA_DIR=" + filepath.Join(s.tmp, "data"),
+		"TF_IN_AUTOMATION=1",
+		"TF_INPUT=0",
+	}
+	if s.nonDefault() {
+		env = append(env, "TF_WORKSPACE="+s.workspace)
+	}
+	res, err := s.t.Runner.Run(ctx, execx.Cmd{Name: s.t.Bin, Args: args, Dir: s.dir, Env: env, Timeout: -1})
 	if err != nil {
 		return res, fmt.Errorf("terragrunt %s in %s: %w", tfArgs[0], s.dir, err)
 	}
@@ -99,23 +106,23 @@ func (s *session) init(ctx context.Context) error {
 	return errors.Join(err, restoreLock())
 }
 
-// Plan plans the unit and returns its resource changes. With a state file, the unit reads that
-// local copy through an override file instead of its backend; without one, it reads its backend.
-// Plans never take the state lock. Errors carry no terraform output, which can hold attribute
-// values.
-func (t *Terragrunt) Plan(ctx context.Context, dir, stateFile string) ([]ResourceChange, error) {
-	if stateFile != "" {
-		remove, err := writeOverride(dir, stateFile)
-		if err != nil {
-			return nil, err
-		}
-		defer remove()
-	}
-	s, err := t.open(dir)
+// Plan plans a workspace of the unit and returns its resource changes. With a state file, the unit
+// reads that local copy through an override file instead of its backend; without one, it reads its
+// backend. Plans never take the state lock. Errors carry no terraform output, which can hold
+// attribute values.
+func (t *Terragrunt) Plan(ctx context.Context, dir, workspace, stateFile string) ([]ResourceChange, error) {
+	s, err := t.open(dir, workspace)
 	if err != nil {
 		return nil, err
 	}
 	defer s.close()
+	if stateFile != "" {
+		remove, overrideErr := s.writeOverride(stateFile)
+		if overrideErr != nil {
+			return nil, overrideErr
+		}
+		defer remove()
+	}
 	if err = s.init(ctx); err != nil {
 		return nil, quiet(err, "init", stateFile != "")
 	}
@@ -130,10 +137,10 @@ func (t *Terragrunt) Plan(ctx context.Context, dir, stateFile string) ([]Resourc
 	return ParsePlan(res.Stdout)
 }
 
-// Push runs terraform state push with file. Terraform takes the backend lock, refuses a different
-// lineage or an older serial, and updates the DynamoDB digest.
-func (t *Terragrunt) Push(ctx context.Context, dir, stateFile string) error {
-	s, err := t.open(dir)
+// Push runs terraform state push with file in a workspace of the unit. Terraform takes the backend
+// lock, refuses a different lineage or an older serial, and updates the DynamoDB digest.
+func (t *Terragrunt) Push(ctx context.Context, dir, workspace, stateFile string) error {
+	s, err := t.open(dir, workspace)
 	if err != nil {
 		return err
 	}
@@ -166,23 +173,49 @@ func quiet(err error, step string, override bool) error {
 	)
 }
 
-func writeOverride(dir, stateFile string) (func(), error) {
-	p := filepath.Join(dir, OverrideFile)
+// writeOverride points the unit at stateFile through a local backend. The local backend reads path
+// only in the default workspace; another workspace reads <workspace_dir>/<name>/terraform.tfstate,
+// so the state is copied there inside the session's temp directory.
+func (s *session) writeOverride(stateFile string) (func(), error) {
+	p := filepath.Join(s.dir, OverrideFile)
 	if _, err := os.Lstat(p); err == nil {
 		return nil, fmt.Errorf("%w: %s; delete it once no tfcensus move runs in this unit", ErrLeftover, p)
 	}
-	abs, err := filepath.Abs(stateFile)
+	attr, target := "path", stateFile
+	if s.nonDefault() {
+		attr, target = "workspace_dir", filepath.Join(s.tmp, "workspaces")
+		if err := copyState(stateFile, filepath.Join(target, s.workspace, localStateFile)); err != nil {
+			return nil, err
+		}
+	}
+	abs, err := filepath.Abs(target)
 	if err != nil {
 		return nil, fmt.Errorf("resolve state file: %w", err)
 	}
 	// Terraform reads forward slashes on Windows too, and they need no escaping in HCL.
 	path, _ := json.Marshal(filepath.ToSlash(abs)) //nolint:errchkjson // a string always marshals
 	content := "# Written by tfcensus move for a plan against a local state copy. Delete it if it is still here.\n" +
-		"terraform {\n  backend \"local\" {\n    path = " + string(path) + "\n  }\n}\n"
+		"terraform {\n  backend \"local\" {\n    " + attr + " = " + string(path) + "\n  }\n}\n"
 	if err = os.WriteFile(p, []byte(content), 0o600); err != nil {
 		return nil, fmt.Errorf("write %s: %w", p, err)
 	}
 	return func() { _ = os.Remove(p) }, nil
+}
+
+// copyState copies a state file to dst with 0600, creating its directories.
+func copyState(src, dst string) error {
+	b, err := os.ReadFile(src)
+	if err != nil {
+		return fmt.Errorf("read state copy: %w", err)
+	}
+	if err = os.MkdirAll(filepath.Dir(dst), 0o700); err != nil {
+		return fmt.Errorf("create workspace dir: %w", err)
+	}
+	//nolint:gosec // G703: dst is in tfcensus's temp dir; validWorkspace keeps the workspace one segment.
+	if err = os.WriteFile(dst, b, 0o600); err != nil {
+		return fmt.Errorf("write state copy: %w", err)
+	}
+	return nil
 }
 
 // keepFile saves path and returns the function that puts it back as it was, or removes it when it

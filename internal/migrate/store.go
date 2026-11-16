@@ -11,6 +11,7 @@ import (
 	"io"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -22,6 +23,7 @@ import (
 
 	"github.com/sassdavid/tfcensus/internal/buildinfo"
 	"github.com/sassdavid/tfcensus/internal/discovery"
+	"github.com/sassdavid/tfcensus/internal/tfstate"
 )
 
 // Errors from the backend.
@@ -77,19 +79,23 @@ type Clients struct {
 	By     string       // who writes, for history records
 }
 
-// Unit is a unit the engine reads and writes. Only the default workspace is supported.
+// Unit is one workspace of a unit that the engine reads and writes.
 type Unit struct {
-	Path    string // relative to the repository, with forward slashes
-	Dir     string
-	Bucket  string
-	Key     string
-	Region  string
-	Table   string
-	Lock    discovery.Lock
-	Account string // the account the unit deploys to, when discovery knows it
+	Path      string // relative to the repository, with forward slashes
+	Workspace string // tfstate.DefaultWorkspace or another workspace of the backend
+	Dir       string
+	Bucket    string
+	Key       string // the workspace's state key
+	Region    string
+	Table     string
+	Lock      discovery.Lock
+	Account   string // the account the unit deploys to, when discovery knows it
 }
 
 func (u *Unit) location() string { return "s3://" + u.Bucket + "/" + u.Key }
+
+// Ref returns the unit reference: the path, with :workspace for a workspace other than default.
+func (u *Unit) Ref() string { return unitRef(u.Path, u.Workspace) }
 
 // snapshot is a state object as read, with the version it was read at.
 type snapshot struct {
@@ -182,7 +188,11 @@ func readHistory(ctx context.Context, c ObjectReader, u *Unit) (*History, string
 	key := u.Key + HistorySuffix
 	out, err := c.GetObject(ctx, &s3.GetObjectInput{Bucket: aws.String(u.Bucket), Key: aws.String(key)})
 	if notFound(err) {
-		return &History{Version: historyVersion, Unit: u.Path, Records: []Record{}}, "", nil
+		h := &History{Version: historyVersion, Unit: u.Path, Records: []Record{}}
+		if u.Workspace != tfstate.DefaultWorkspace {
+			h.Workspace = u.Workspace
+		}
+		return h, "", nil
 	}
 	if err != nil {
 		return nil, "", fmt.Errorf("read history s3://%s/%s: %w", u.Bucket, key, err)
@@ -355,9 +365,19 @@ func restore(ctx context.Context, c *Clients, u *Unit, version string) error {
 	return setDigest(ctx, c, u, old.body)
 }
 
+// escapeKey percent-encodes a key for x-amz-copy-source, which S3 wants URL-encoded. Slashes stay;
+// the ':' of workspace keys under env:/ is encoded.
 func escapeKey(key string) string {
-	u := url.URL{Path: key}
-	return u.EscapedPath()
+	var sb strings.Builder
+	for _, c := range []byte(key) {
+		switch {
+		case c >= 'a' && c <= 'z', c >= 'A' && c <= 'Z', c >= '0' && c <= '9', strings.IndexByte("-._~/", c) >= 0:
+			sb.WriteByte(c)
+		default:
+			fmt.Fprintf(&sb, "%%%02X", c)
+		}
+	}
+	return sb.String()
 }
 
 // setDigest writes the MD5 digest terraform checks state reads against, or deletes it when body

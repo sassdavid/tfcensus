@@ -445,6 +445,31 @@ migration "units" "x" {
   actions = ["rm x.y"]
 }`, "Unsupported attribute"},
 		{"empty", ``, "has no migration"},
+		{"empty workspace", `migration "units" "x" {
+  from = "a:"
+  actions = ["rm x.y"]
+}`, `workspace "" must be a non-empty, URL-safe name`},
+		{"workspace with a slash", `migration "units" "x" {
+  from = "a:blue/green"
+  actions = ["rm x.y"]
+}`, `workspace "blue/green" must be a non-empty, URL-safe name`},
+		{"dot-dot workspace", `migration "units" "x" {
+  from = "a:.."
+  actions = ["rm x.y"]
+}`, `workspace ".." must be a non-empty, URL-safe name, and not . or .. either`},
+		{"no path", `migration "units" "x" {
+  from = ":blue"
+  actions = ["rm x.y"]
+}`, "has no path"},
+		{"default workspace written out", `migration "units" "x" {
+  from = "a"
+  to = { "a:default" = ["x.y"] }
+}`, "is the source or listed twice"},
+		{"native in a workspace", `migration "units" "x" {
+  from = "a:blue"
+  to = { "b:blue" = ["x.y"] }
+  strategy = "native"
+}`, "use surgery for a workspace other than default"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -472,6 +497,36 @@ migration "units" "a" {
 
 	_, err = migrate.Select(f, []string{"missing"})
 	require.ErrorIs(t, err, migrate.ErrFile)
+
+	f, err = migrate.Parse([]byte(`
+migration "units" "ws" {
+  from = "live/app:${var.ws}"
+  to = {
+    "live/app:green"     = ["aws_s3_bucket.x"]
+    "live/app-sg:default" = ["aws_s3_bucket.y"]
+  }
+}
+`), "f.hcl", nil, map[string]string{"ws": "blue"})
+	require.NoError(t, err)
+	assert.Equal(t, []string{"live/app:green", "live/app-sg", "live/app:blue"}, f.Blocks[0].Units(),
+		"another workspace of the same unit is a different state; default is written as the bare path")
+}
+
+func TestSplitRef(t *testing.T) {
+	t.Parallel()
+	tests := []struct{ ref, path, ws string }{
+		{"live/app", "live/app", "default"},
+		{"live/app:blue", "live/app", "blue"},
+		{"live/app:a:b", "live/app", "a:b"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.ref, func(t *testing.T) {
+			t.Parallel()
+			p, ws := migrate.SplitRef(tt.ref)
+			assert.Equal(t, tt.path, p)
+			assert.Equal(t, tt.ws, ws)
+		})
+	}
 }
 
 type failingPusher struct {
@@ -480,9 +535,9 @@ type failingPusher struct {
 	fail string
 }
 
-func (p *failingPusher) Push(ctx context.Context, dir, file string) error {
+func (p *failingPusher) Push(ctx context.Context, dir, ws, file string) error {
 	if dir == p.fail {
 		return errors.New("push failed")
 	}
-	return p.fakePusher.Push(ctx, dir, file)
+	return p.fakePusher.Push(ctx, dir, ws, file)
 }

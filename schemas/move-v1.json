@@ -43,7 +43,7 @@
       "properties": {
         "name": {"type": "string"},
         "strategy": {"enum": ["surgery", "native"]},
-        "from": {"type": "string"},
+        "from": {"description": "The source unit path, with :workspace for a workspace other than default.", "type": "string"},
         "status": {
           "description": "From the units' histories: applied in every unit, in none, or in some.",
           "enum": ["pending", "applied", "partial"]
@@ -62,6 +62,7 @@
       "required": ["path", "role"],
       "properties": {
         "path": {"type": "string"},
+        "workspace": {"description": "The workspace of the unit's s3 backend: default, or the name after path: in the migration file.", "type": "string", "minLength": 1},
         "role": {"enum": ["source", "destination", "in-place"]},
         "status": {"enum": ["pending", "applied"]},
         "moved": {
@@ -95,7 +96,7 @@
       "required": ["rule", "unit", "reason"],
       "properties": {
         "rule": {"enum": ["MV-VERIFY", "MV-PLAN", "MV-ACCOUNT", "MV-VERSIONING"]},
-        "unit": {"type": "string"},
+        "unit": {"description": "The unit path, with :workspace for a workspace other than default.", "type": "string"},
         "address": {"type": "string"},
         "reason": {"type": "string", "minLength": 1}
       }

@@ -89,10 +89,45 @@ Made with the owner before coding. State I/O, rollback and confirmation are in
 - Exit codes: 3 when verification rejects a block, 2 for usage errors and a refused confirmation,
   4 when credentials fail.
 - Scope: `move suggest` (tfautomv) is deferred to a later milestone, so M9 adds no tfautomv
-  dependency. Only the default workspace of s3 backends is supported.
+  dependency. M9 supports only the default workspace of s3 backends; M18 adds the others (below).
+
+## Decisions (M18 workspaces, 2026-11-16)
+Made with the owner before coding. ADR-0006 and ADR-0011 still hold; this section adds how a
+workspace is named and where its objects are.
+- File syntax: a unit reference is `path` or `path:workspace`, in `from` and in `to` keys, and
+  `${var.NAME}` works in both. The path ends at the first `:`. `path:default` is `path`. The
+  workspace must be a name terraform accepts (non-empty and URL-safe).
+- Two workspaces of one unit are two states: a block may move from `live/app:blue` to
+  `live/app:green`. Plans still run one at a time, so the shared directory's override file
+  doesn't collide.
+- Key layout: the state is at `path.Join(workspace_key_prefix, workspace, key)`, the layout of
+  terraform's and OpenTofu's s3 backend. An unset prefix is `env:`; an explicitly empty prefix puts
+  the state at `<workspace>/<key>`. Discovery keeps an empty prefix apart from an unset one, and
+  the state reader's workspace listing uses the same rule. The `.tflock` object, the DynamoDB lock
+  item, the `-md5` digest and `<key>.tfcensus-migrations.json` all use the workspace's key.
+- Terraform: every terragrunt call for a non-default workspace gets `TF_WORKSPACE`. Verify's
+  `_tfcensus_override.tf` sets the local backend's `workspace_dir` to a temp directory and copies
+  the state to `<workspace_dir>/<workspace>/terraform.tfstate` (0600, deleted afterwards), because
+  the local backend reads `path` only in the default workspace.
+- A workspace without a state stops the run before planning with exit 2 and asks for
+  `terraform workspace new`. terraform init fails for a missing workspace, and `workspace new`
+  writes a state with its own lineage, which the push would then be refused for.
+- Native: a native block may only name default workspaces, because its files are configuration
+  that every workspace of the unit applies.
+- Report and history: each unit in `move-v1.json` gets `workspace` (`default` too). `from`,
+  finding units and the text output use `path:workspace` for a non-default workspace. The history
+  object gets an optional `workspace`; its version stays 1.
+- Rollback's `x-amz-copy-source` is percent-encoded except for `/`, so the `:` of `env:` keys is
+  sent as `%3A`, as the CopyObject reference asks.
 
 ## Acceptance criteria
 - [x] Unit tests for state surgery on fixture states (provider rewrite, serial, lineage, module paths, count/for_each keys). `TestSpec_move_1`, `TestSurgeryActions`, `TestSurgeryErrors`.
 - [x] An e2e against moto (nightly, two emulated accounts via AssumeRole, versioned buckets): split a unit into two across two accounts with surgery, verify, apply, then roll back. States are byte-compared with the originals after rollback. `TestSpec_move_2` (`mise run test:move-e2e`, nightly in `live.yml`).
 - [x] The verify step rejects a move whose destination provider targets the wrong account (fixture). `TestSpec_move_3`, `TestMoveRejected`.
 - [x] A per-unit history allows the same migration file to apply to env1 and env2 independently (tfmigrate #200 scenario). `TestSpec_move_4`.
+- [x] Non-default workspaces of s3 backends move with surgery: `path:workspace` references, states,
+  locks, digests and histories at the workspace's key (unset, custom and empty
+  `workspace_key_prefix`), `TF_WORKSPACE` on every terragrunt call, apply and byte-exact rollback,
+  a refused missing workspace and a refused native block. `TestSpec_move_5`,
+  `TestWorkspaceMustExist`, `TestWorkspaceToWorkspace`, `TestTerragruntPlanWorkspace`,
+  `TestMoveWorkspace`, `TestReadWorkspacePrefix`, `TestWorkspaceKeyPrefix`.
