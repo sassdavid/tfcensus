@@ -347,7 +347,7 @@ Earlier versions stay GitHub only; the tap and the bucket start at that version.
 Scope: fix everything the first real-account scan got wrong, in one release, and measure it.
 The v0.3.0 scan of one non-prod account gave 147 false `unmanaged` findings out of 171 (86%),
 650 `undetermined` findings that were all "no type mapping", and missed VPC Lattice resources and
-ACM certificates. Decisions: [ADR-0017](adr/0017-scan-accuracy.md) (proposed; accept it first).
+ACM certificates. Decisions: [ADR-0017](adr/0017-scan-accuracy.md) (accepted 2026-11-16).
 The read-only rerun in the last box needs a prompt that names the profile, as the header says.
 If one session can't finish, the open boxes carry over to the next session, and v0.4.0 waits for
 the last box.
