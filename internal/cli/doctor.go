@@ -43,6 +43,7 @@ func newDoctorCmd(d *app.Deps, g *globals) *cobra.Command {
 		Long: `doctor runs terragrunt --version and the --tf-path binary's version command, and compares
 them with the minimums: terragrunt 1.0.0, terraform 1.5.0 and tofu 1.6.0. It lists the features
 a found version is too old for. A tool that isn't installed is reported but doesn't fail the run.
+With --decrypt-with-tofu (config state.decrypt_with_tofu), it also checks the --tofu-path binary.
 
 doctor then loads the credentials of every selected account source and probes each account and
 region for the inventory layers a scan can use:
@@ -85,6 +86,7 @@ warning. doctor exits 4 when every source fails, and 1 when a tool is older than
 		},
 	}
 	addAccountFlags(cmd, d)
+	addStateFlags(cmd)
 	addAccountFilterFlags(cmd)
 	addAllRegionsFlags(cmd)
 	cmd.Flags().BoolVar(&refresh, "refresh", false, "probe again even when the cached result is fresh")
@@ -172,11 +174,15 @@ func runDoctor(cmd *cobra.Command, d *app.Deps, format render.Format, cfg *confi
 	return tooOldError(data.Tools)
 }
 
-// checkTools finds the terragrunt and terraform or tofu versions. A missing binary is reported,
-// not an error: plain Terraform repos don't need terragrunt.
+// checkTools finds the terragrunt and terraform or tofu versions, and the binaries.tofu version
+// when state.decrypt_with_tofu is on. A missing binary is reported, not an error: plain Terraform
+// repos don't need terragrunt.
 func checkTools(cmd *cobra.Command, d *app.Deps, cfg *config.Config) []toolcheck.Tool {
 	runner := execx.NewRunner(d.Logger, execx.WithEnviron(func() []string { return d.Env }))
 	tools := toolcheck.Check(cmd.Context(), runner, cfg.Binaries.Terragrunt, cfg.Binaries.Terraform)
+	if cfg.State.DecryptWithTofu && cfg.Binaries.Tofu != cfg.Binaries.Terraform {
+		tools = append(tools, toolcheck.CheckTofu(cmd.Context(), runner, cfg.Binaries.Tofu))
+	}
 	for _, t := range tools {
 		if t.Status == toolcheck.StatusError {
 			d.Logger.WarnContext(

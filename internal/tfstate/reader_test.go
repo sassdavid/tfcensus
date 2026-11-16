@@ -350,3 +350,80 @@ func TestReadWorkspacePrefix(t *testing.T) {
 		"empty:default": "empty/terraform.tfstate", "empty:red": "red/empty/terraform.tfstate",
 	}, got)
 }
+
+// stubDecrypter returns out or err for every encrypted state, as tofu show -json would.
+type stubDecrypter struct {
+	out   []byte
+	err   error
+	units []string
+}
+
+func (s *stubDecrypter) Decrypt(_ context.Context, u *discovery.Unit, dir, workspace string) ([]byte, error) {
+	s.units = append(s.units, u.Path+":"+workspace+":"+filepath.Base(dir))
+	return s.out, s.err
+}
+
+// TestReadDecrypt reads the encrypted secure unit through a decrypter: its resources are counted
+// and indexed from the show -json output, with the serial and lineage of the encrypted envelope.
+// A failure keeps the unit encrypted and gives it a fixed error.
+func TestReadDecrypt(t *testing.T) {
+	t.Parallel()
+
+	read := func(d tfstate.Decrypter) tfstate.UnitState {
+		r := tfstate.NewReader(tfstate.Options{Client: fakeClients(fleetFake(t)), WorkDir: reposDir, Decrypt: d})
+		return byLabel(r.Read(t.Context(), fleetUnits()))["secure:default"]
+	}
+
+	stub := &stubDecrypter{out: readTofu(t, "show.json")}
+	r := tfstate.NewReader(tfstate.Options{Client: fakeClients(fleetFake(t)), WorkDir: reposDir, Decrypt: stub})
+	states := r.Read(t.Context(), fleetUnits())
+	assert.Equal(t, []string{"secure:default:secure"}, stub.units, "only the encrypted state is decrypted")
+	secure := byLabel(states)["secure:default"]
+	assert.Equal(t, tfstate.StatusOK, secure.Status)
+	assert.True(t, secure.Encrypted)
+	assert.Equal(t, uint64(12), *secure.Serial, "the serial comes from the encrypted envelope")
+	assert.Equal(t, "e6f70819-2a3b-4c4d-9e5f-607182930415", secure.Lineage)
+	assert.Equal(t, "1.13.9", secure.TerraformVersion)
+	assert.Equal(t, 3, secure.Instances)
+	assert.Equal(t, 1, secure.DataSources)
+	assert.Equal(t, map[string]int{"aws_db_instance": 1, "aws_sqs_queue": 1, "aws_vpc": 1}, secure.ResourceTypes)
+	assert.Equal(t, []tfstate.ProviderVersion{{Source: "hashicorp/aws"}}, secure.Providers)
+	assert.Equal(t, "state encryption", secure.EngineFrom)
+	assert.Equal(t, []string{
+		"state is encrypted with OpenTofu client-side encryption and was read with tofu show -json",
+	}, secure.Warnings)
+	require.NoError(t, secure.Err)
+
+	ix := fleetIndex(t, states)
+	addrs := map[string]bool{}
+	for _, e := range ix.Entries {
+		if e.Unit == "tf-fleet/secure" {
+			addrs[e.Address] = true
+		}
+	}
+	assert.Equal(t, map[string]bool{
+		"aws_db_instance.db": true, "aws_vpc.main": true, `module.queue.aws_sqs_queue.this["orders"]`: true,
+	}, addrs)
+	for _, out := range [][]byte{marshal(t, states), marshal(t, ix)} {
+		assertNoSecrets(t, "decrypted", out)
+		for _, v := range tofuSecrets() {
+			assert.NotContains(t, string(out), v)
+		}
+	}
+
+	for name, d := range map[string]*stubDecrypter{
+		"tofu fails": {err: fmt.Errorf("%w: tofu show -json exited with code 1", tfstate.ErrDecrypt)},
+		"bad output": {out: []byte(`{"values":{"root_module":{"resources":[{"index":"FIXTURE-SECRET-x"` + "\x00")},
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			u := read(d)
+			assert.Equal(t, tfstate.StatusEncrypted, u.Status)
+			assert.True(t, u.Encrypted)
+			require.ErrorIs(t, u.Err, tfstate.ErrDecrypt)
+			assert.Equal(t, u.Err.Error(), u.Error)
+			assert.NotContains(t, u.Error, "FIXTURE-SECRET")
+			assert.Zero(t, u.Instances)
+		})
+	}
+}

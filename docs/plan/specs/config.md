@@ -6,7 +6,9 @@ provenance follow the [engineering standards](../../engineering/engineering-stan
 
 ```yaml
 schema_version: 1
-binaries: { terragrunt: terragrunt, terraform: terraform }   # or tofu
+binaries: { terragrunt: terragrunt, terraform: terraform, tofu: tofu }   # terraform may be tofu
+state:
+  decrypt_with_tofu: false   # read OpenTofu encrypted state with tofu show -json (ADR-0015)
 discovery:
   roots: [~/src/infra]
   generate_stacks: false

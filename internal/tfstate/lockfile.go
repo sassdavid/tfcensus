@@ -1,6 +1,7 @@
 package tfstate
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -80,4 +81,29 @@ func ReadLockProviders(dir string) (map[string]LockedProvider, error) {
 		out[source] = LockedProvider{Version: v.AsString(), Host: host}
 	}
 	return out, nil
+}
+
+// KeepLockFile saves dir's lock file and returns the function that puts it back as it was, or
+// removes it when init created it.
+func KeepLockFile(dir string) (func() error, error) {
+	path := filepath.Join(dir, LockFileName)
+	orig, err := os.ReadFile(path)
+	existed := err == nil
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return nil, fmt.Errorf("read %s: %w", path, err)
+	}
+	return func() error {
+		now, readErr := os.ReadFile(path)
+		switch {
+		case existed && (readErr != nil || !bytes.Equal(now, orig)):
+			if werr := os.WriteFile(path, orig, 0o644); werr != nil { //nolint:gosec // G306: a lock file is committed.
+				return fmt.Errorf("restore %s: %w", path, werr)
+			}
+		case !existed && readErr == nil:
+			if rerr := os.Remove(path); rerr != nil {
+				return fmt.Errorf("remove %s: %w", path, rerr)
+			}
+		}
+		return nil
+	}, nil
 }

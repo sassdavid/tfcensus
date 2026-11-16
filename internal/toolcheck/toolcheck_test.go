@@ -65,14 +65,14 @@ func TestCheck(t *testing.T) {
 			tfPath: "terraform",
 			bins:   stub{"terragrunt": "terragrunt version v1.2.1", "terraform": "OpenTofu v1.10.0\non linux_amd64\n"},
 			tg:     toolcheck.StatusOK, tf: toolcheck.StatusOK, tfKind: toolcheck.KindTofu, tfVer: "1.10.0",
-			features: []bool{true, true, false, false},
+			features: []bool{true, true, true, false, false},
 		},
 		{
 			name:   "old tofu",
 			tfPath: "/opt/bin/tofu",
 			bins:   stub{"terragrunt": "terragrunt version v1.2.1", "/opt/bin/tofu": "OpenTofu v1.5.0\n"},
 			tg:     toolcheck.StatusOK, tf: toolcheck.StatusTooOld, tfKind: toolcheck.KindTofu, tfVer: "1.5.0",
-			features: []bool{false, false, false, false},
+			features: []bool{false, false, false, false, false},
 		},
 		{
 			name:   "prerelease counts as its release",
@@ -112,6 +112,35 @@ func TestCheck(t *testing.T) {
 			} else {
 				assert.Equal(t, tt.features, available)
 			}
+		})
+	}
+}
+
+// TestCheckTofu checks the binary that reads encrypted state, which must be tofu.
+func TestCheckTofu(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name   string
+		bins   stub
+		status toolcheck.Status
+		err    string
+	}{
+		{name: "tofu", bins: stub{"tofu": "OpenTofu v1.13.9\n"}, status: toolcheck.StatusOK},
+		{name: "before state encryption", bins: stub{"tofu": "OpenTofu v1.6.2\n"}, status: toolcheck.StatusOK},
+		{
+			name: "terraform", bins: stub{"tofu": "Terraform v1.17.1\n"}, status: toolcheck.StatusError,
+			err: "tofu is terraform, not tofu",
+		},
+		{name: "missing", bins: stub{}, status: toolcheck.StatusNotFound},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got := toolcheck.CheckTofu(t.Context(), tt.bins, "tofu")
+			assert.Equal(t, toolcheck.KindTofu, got.Tool)
+			assert.Equal(t, tt.status, got.Status)
+			assert.Equal(t, tt.err, got.Error)
 		})
 	}
 }

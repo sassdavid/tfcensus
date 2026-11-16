@@ -42,20 +42,21 @@ tfcensus audit backend [paths...] [flags]
 ### Options
 
 ```
-      --concurrency int                states read at the same time (default 16)
-      --discover[=true|false]          also audit buckets of each account that match --discover-pattern and that no unit names
-      --discover-pattern stringArray   bucket name glob for --discover (repeatable; config audit.discover_patterns)
-      --fail-on string                 exit 3 when a finding is at least this severe: info, low, medium or high
-      --filter stringArray             terragrunt filter expression, passed to terragrunt find unchanged (repeatable)
-      --generate-stacks[=true|false]   run terragrunt stack generate first, so units in stacks are listed (config discovery.generate_stacks)
-  -h, --help[=true|false]              help for backend
-      --management-profile string      profile that lists the organization's accounts, else the default AWS credentials (config accounts.org.management_profile)
-      --md-max-chars int               cut Markdown output to this many characters at a row or section boundary; 0 means no limit (default 60000)
-      --org[=true|false]               list the accounts of the AWS organization and assume --org-role in each (config accounts.org.enabled)
-      --org-role string                role assumed in each member account (config accounts.org.role) (default "OrganizationAccountAccessRole")
-      --out stringArray                also write the report to a file as format=path (repeatable); format is one of plain, md, json, csv, sarif or github
-      --profile stringArray            AWS profile from ~/.aws/config, or a glob such as 'acme-*' (repeatable; config accounts.profiles)
-      --render string                  when to use terragrunt render: auto, always or never (config discovery.render) (default "auto")
+      --concurrency int                  states read at the same time (default 16)
+      --decrypt-with-tofu[=true|false]   read OpenTofu encrypted state with tofu init and tofu show -json in the unit, which downloads and runs its providers (config state.decrypt_with_tofu)
+      --discover[=true|false]            also audit buckets of each account that match --discover-pattern and that no unit names
+      --discover-pattern stringArray     bucket name glob for --discover (repeatable; config audit.discover_patterns)
+      --fail-on string                   exit 3 when a finding is at least this severe: info, low, medium or high
+      --filter stringArray               terragrunt filter expression, passed to terragrunt find unchanged (repeatable)
+      --generate-stacks[=true|false]     run terragrunt stack generate first, so units in stacks are listed (config discovery.generate_stacks)
+  -h, --help[=true|false]                help for backend
+      --management-profile string        profile that lists the organization's accounts, else the default AWS credentials (config accounts.org.management_profile)
+      --md-max-chars int                 cut Markdown output to this many characters at a row or section boundary; 0 means no limit (default 60000)
+      --org[=true|false]                 list the accounts of the AWS organization and assume --org-role in each (config accounts.org.enabled)
+      --org-role string                  role assumed in each member account (config accounts.org.role) (default "OrganizationAccountAccessRole")
+      --out stringArray                  also write the report to a file as format=path (repeatable); format is one of plain, md, json, csv, sarif or github
+      --profile stringArray              AWS profile from ~/.aws/config, or a glob such as 'acme-*' (repeatable; config accounts.profiles)
+      --render string                    when to use terragrunt render: auto, always or never (config discovery.render) (default "auto")
 ```
 
 ### Options inherited from parent commands
@@ -70,6 +71,7 @@ tfcensus audit backend [paths...] [flags]
   -q, --quiet[=true|false]      log errors only
       --tf-path string          terraform or tofu binary, passed to terragrunt as --tf-path (config binaries.terraform) (default "terraform")
       --tg-path string          terragrunt binary (config binaries.terragrunt) (default "terragrunt")
+      --tofu-path string        tofu binary that --decrypt-with-tofu runs (config binaries.tofu) (default "tofu")
   -v, --verbose count           more logging: -v info, -vv debug, -vvv trace
 ```
 

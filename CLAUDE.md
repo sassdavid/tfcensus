@@ -41,6 +41,7 @@ A Go CLI that takes a census of Terraform/OpenTofu + Terragrunt fleets on AWS. I
   - `testdata/states/`
   - `testdata/cassettes/aws/` (go-vcr cassettes written from AWS API shapes, replayed with `awstest.Replay` or `TEST_CASSETTE` in scripts)
   - `internal/testutil/fakebin` (fake terragrunt), replaying `testdata/terragrunt/` recordings made by `scripts/record-terragrunt.sh`
+  - `testdata/tofu/` (an encrypted state and its `tofu show -json` output), recorded by `scripts/record-tofu.sh` and replayed by a fake tofu
 
 ## Reference sources (read-only, for inspiration)
 - Local clones live in `~/src/github/_reference/<owner>/<repo>` (list and license notes: `docs/plan/reference-repos.md`). Read them to verify formats and behaviour. **Never copy code** from BSL (terraform), AGPL (renovate) or Prosperity (dependabot) repos.

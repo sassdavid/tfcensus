@@ -17,6 +17,7 @@ type Config struct {
 	Binaries      Binaries  `json:"binaries"`
 	Discovery     Discovery `json:"discovery"`
 	Accounts      Accounts  `json:"accounts"`
+	State         State     `json:"state"`
 	Regions       []string  `json:"regions"                            jsonschema_description:"Regions to scan. Empty means the regions found in the units' backends and providers."`
 	AllRegions    bool      `json:"all_regions"                        jsonschema_description:"Use every region each account has enabled (account:ListRegions) instead of regions."`
 	Scan          Scan      `json:"scan"`
@@ -31,6 +32,12 @@ type Config struct {
 type Binaries struct {
 	Terragrunt string `json:"terragrunt" jsonschema:"minLength=1" jsonschema_description:"terragrunt binary, a name on PATH or a path."`
 	Terraform  string `json:"terraform"  jsonschema:"minLength=1" jsonschema_description:"terraform or tofu binary, passed to terragrunt as --tf-path."`
+	Tofu       string `json:"tofu"       jsonschema:"minLength=1" jsonschema_description:"tofu binary that reads OpenTofu encrypted state when state.decrypt_with_tofu is on."`
+}
+
+// State configures how state is read.
+type State struct {
+	DecryptWithTofu bool `json:"decrypt_with_tofu" jsonschema_description:"Read OpenTofu encrypted state with tofu init and tofu show -json in the unit, which downloads and runs its providers. The key configuration comes from the unit or TF_ENCRYPTION."`
 }
 
 // Discovery configures unit discovery.
@@ -220,7 +227,7 @@ const (
 func Default() Config {
 	return Config{
 		SchemaVersion: SchemaVersion,
-		Binaries:      Binaries{Terragrunt: "terragrunt", Terraform: "terraform"},
+		Binaries:      Binaries{Terragrunt: "terragrunt", Terraform: "terraform", Tofu: "tofu"},
 		Discovery:     Discovery{Roots: []string{}, GenerateStacks: false, Render: "auto"},
 		Accounts: Accounts{
 			Profiles: []string{},

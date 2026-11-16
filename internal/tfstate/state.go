@@ -346,6 +346,7 @@ func (p *parser) instance(tfType string) (Instance, error) {
 type extras struct {
 	identity map[string]string // resource attribute to identity attribute
 	rules    *ruleCollector
+	present  map[string]bool // when not nil, gets the names of attributes that aren't null
 }
 
 func (p *parser) extras(tfType string) extras {
@@ -388,6 +389,9 @@ func (p *parser) attributes(inst *Instance, x extras) error {
 		return p.d.SkipValue() //nolint:wrapcheck // Parse adds the byte offset
 	}
 	return p.object(func(name string) error {
+		if x.present != nil && p.d.PeekKind() != 'n' {
+			x.present[name] = true
+		}
 		if SensitiveName(name) {
 			return p.sensitiveValue(inst, name)
 		}

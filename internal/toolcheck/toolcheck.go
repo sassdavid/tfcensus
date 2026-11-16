@@ -60,6 +60,10 @@ type Runner interface {
 
 const timeout = 30 * time.Second
 
+// release17 is the terraform and tofu release that added removed and import for_each, and tofu's
+// state encryption.
+const release17 = "1.7.0"
+
 func minimum(k Kind) string {
 	return map[Kind]string{KindTerragrunt: "1.0.0", KindTerraform: "1.5.0", KindTofu: "1.6.0"}[k]
 }
@@ -69,14 +73,15 @@ func gated(k Kind) []Feature {
 	switch k {
 	case KindTerraform:
 		return []Feature{
-			{Name: "removed and import for_each", Needs: "1.7.0"},
+			{Name: "removed and import for_each", Needs: release17},
 			{Name: "use_lockfile", Needs: "1.10.0"},
 			{Name: "resource identity", Needs: "1.12.0"},
 			{Name: "query", Needs: "1.14.0"},
 		}
 	case KindTofu:
 		return []Feature{
-			{Name: "removed and import for_each", Needs: "1.7.0"},
+			{Name: "removed and import for_each", Needs: release17},
+			{Name: "state encryption", Needs: release17},
 			{Name: "removed lifecycle and use_lockfile", Needs: "1.10.0"},
 			{Name: "resource identity", Needs: "1.12.0"},
 			{Name: "query"},
@@ -90,6 +95,19 @@ func gated(k Kind) []Feature {
 // version output tells them apart. It never fails: problems are in each Tool's Status.
 func Check(ctx context.Context, r Runner, tgPath, tfPath string) []Tool {
 	return []Tool{terragrunt(ctx, r, tgPath), terraform(ctx, r, tfPath)}
+}
+
+// CheckTofu runs path, the binary that reads encrypted state, to find its version. A binary that
+// turns out to be terraform gets [StatusError].
+func CheckTofu(ctx context.Context, r Runner, path string) Tool {
+	t := terraform(ctx, r, path)
+	if t.Version != "" && t.Tool != KindTofu {
+		return Tool{
+			Tool: KindTofu, Path: path, Version: t.Version, Minimum: minimum(KindTofu), Status: StatusError,
+			Error: path + " is " + string(t.Tool) + ", not tofu",
+		}
+	}
+	return t
 }
 
 var (

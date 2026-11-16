@@ -1,12 +1,10 @@
 package migrate
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/fs"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -21,7 +19,6 @@ import (
 const OverrideFile = "_tfcensus_override.tf"
 
 const (
-	lockFileName   = ".terraform.lock.hcl"
 	localStateFile = "terraform.tfstate"
 )
 
@@ -98,7 +95,7 @@ func (s *session) run(ctx context.Context, tfArgs ...string) (*execx.Result, err
 
 // init runs terraform init, keeping the unit's lock file as it was.
 func (s *session) init(ctx context.Context) error {
-	restoreLock, err := keepFile(filepath.Join(s.dir, lockFileName))
+	restoreLock, err := tfstate.KeepLockFile(s.dir)
 	if err != nil {
 		return err
 	}
@@ -216,30 +213,6 @@ func copyState(src, dst string) error {
 		return fmt.Errorf("write state copy: %w", err)
 	}
 	return nil
-}
-
-// keepFile saves path and returns the function that puts it back as it was, or removes it when it
-// didn't exist.
-func keepFile(path string) (func() error, error) {
-	orig, err := os.ReadFile(path)
-	existed := err == nil
-	if err != nil && !errors.Is(err, fs.ErrNotExist) {
-		return nil, fmt.Errorf("read %s: %w", path, err)
-	}
-	return func() error {
-		now, readErr := os.ReadFile(path)
-		switch {
-		case existed && (readErr != nil || !bytes.Equal(now, orig)):
-			if werr := os.WriteFile(path, orig, 0o644); werr != nil { //nolint:gosec // G306: a lock file is committed.
-				return fmt.Errorf("restore %s: %w", path, werr)
-			}
-		case !existed && readErr == nil:
-			if rerr := os.Remove(path); rerr != nil {
-				return fmt.Errorf("remove %s: %w", path, rerr)
-			}
-		}
-		return nil
-	}, nil
 }
 
 // ParsePlan reads the resource changes of terraform show -json output.
