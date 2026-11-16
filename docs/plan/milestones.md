@@ -45,7 +45,7 @@ Scope: config + resource-explorer + native (sg-rules, iam-attachments, route53, 
 ### M6: Ownership rules and scan report → v0.1.0 ([ownership](specs/ownership-rules.md), [scan](specs/scan.md))
 - [x] All ownership-rules.md and scan.md criteria (emulator and fixture based). The manual
   false-positive measure (ownership criterion 5) is the optional item below.
-- [ ] *(Optional, manual, strongly recommended before announcing v0.1)* A false-positive review on one real non-prod account, under 5% (recorded, aggregated only).
+- [x] *(Optional, manual, strongly recommended before announcing v0.1)* A false-positive review on one real non-prod account, under 5% (recorded, aggregated only). Done at v0.4.0 on three accounts (M21, `docs/validation/nonprod-scan.md`).
 - [x] Cloud Control layer for allowlisted types with the parent graph (inventory criterion 4).
   The emulator nightly (inventory criterion 5) runs in `live.yml` and is ticked after its first pass.
 - Moved to M11: the v0.1.0 release and its install checks.
@@ -99,7 +99,7 @@ package channel gets anything until M19. No new features.
   cosign printed "Verified OK", `shasum -c` "OK" and `gh attestation verify` succeeded (signer
   workflow `release.yml`); `mise use github:sassdavid/tfcensus` installed 0.1.0; both the tap and
   the bucket API answer 409 "Git Repository is empty".
-- Still optional and recommended: the M6 false-positive review.
+- The M6 false-positive review is done at v0.4.0 (M21).
 
 ### M12: Shell completion, carapace and man pages (shared)
 Scope: every flag and argument completes from local data in every common shell, and every channel
@@ -386,12 +386,12 @@ the last box.
   groups, and a testscript scans them with no `unmanaged` finding. `TestSpec_accounts_4` passes,
   so the read-only policy needs no new action. `mise run validation:stats` prints a reviewed CSV's
   aggregate row. (criterion 9)
-- [ ] The read-only rerun on validation account 1 with the v0.3.0 command: under 5% false
+- [x] The read-only rerun on validation account 1 with the v0.3.0 command: under 5% false
   positives among `unmanaged` findings, no `undetermined` finding of a curated type, and the VPC
   Lattice resources and ACM certificates are listed. `docs/validation/nonprod-scan.md` has the
   before and after rows (aggregates only), and ownership-rules.md criterion 5 and the M6 optional
   box are ticked. (criterion 10)
-- [ ] Every further account the owner supplies gets a row in `docs/validation/nonprod-scan.md`.
+- [x] Every further account the owner supplies gets a row in `docs/validation/nonprod-scan.md`.
   Its false-positive groups get a rule and a fixture in this milestone, or an issue when the fix
   needs a design of its own.
 - Not in M21: the Config aggregator (open question Q3), the external-dns DynamoDB and AWS Cloud

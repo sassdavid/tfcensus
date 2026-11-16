@@ -23,12 +23,23 @@ criterion 5).
 | Account | Date | Version | Resources | Unmanaged | False positives | FP rate | Undetermined | False negatives found |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | 2026-11-16 | v0.3.0 | 1,803 | 171 | 147 | 86% | 650 | VPC Lattice resource gateways and resource configurations, ACM certificates, API Gateway domain names, EKS add-ons and node groups, VPC endpoint services, Route 53 Resolver rules, Backup recovery points |
-| 1 | pending | v0.4.0 | | | | | | |
-| 2 | pending | v0.4.0 | | | | | | |
-| 3 | pending | v0.4.0 | | | | | | |
+| 1 | 2026-11-16 | v0.4.0 (main `2383fb2`) | 1,504 | 38 | 1 | 2.6% | 26 | none |
+| 2 | 2026-11-16 | v0.4.0 (main `2383fb2`) | 1,544 | 85 | 1 | 1.2% | 54 | none |
+| 3 | 2026-11-16 | v0.4.0 (main `2383fb2`) | 1,453 | 37 | 1 | 2.7% | 26 | none |
 
-Account 1 is one Control Tower member account, two regions, built-in packs only. Its row for
-v0.4.0 comes from the owner's read-only rerun with the same command (M21's last box).
+Account 1 is one Control Tower member account, built-in packs only. Its v0.4.0 row comes from the
+owner's read-only rerun with the v0.3.0 command plus `--region eu-west-1`, which lists the same
+1,504 resources as the run without it. Accounts 2 and 3 are Control Tower member accounts in
+`ap-southeast-1`, built-in packs only.
+
+The owner reviewed every `unmanaged` row of the three v0.4.0 runs. The one false positive in each
+account is ElastiCache's system-managed `default.iam-user`, which `account-defaults` covers after
+these rows (PR #74). Account 2 has 4 rows marked `unsure`: the Glue `default` database, an SNS
+topic and an SQS queue that Databricks file events likely created, and one ENI with no owner
+shown. The true positives are resources made by hand, at account creation, by a Terraform unit
+whose state is missing, or by another tool: VPN and Client VPN, ACM certificates, SSM parameters,
+older API Gateway deployments, prefix lists, Route 53 records in a second hosted zone, an MSK
+Connect setup, QuickSight and analytics resources, and Resource Explorer.
 
 ## False positives by group, account 1, v0.3.0
 

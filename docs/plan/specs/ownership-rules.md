@@ -44,4 +44,4 @@ rules:
 - [x] Expired rules stop matching and produce a warning (injected clock).
 - [x] `--explain` trace golden output.
 - [x] The rules schema in `schemas/config-v1.json`; CEL compile errors report rule name and column.
-- [ ] Measured: a non-prod account scan with built-in packs only yields under 5% false positives (manual review recorded in `docs/validation/nonprod-scan.md`, aggregated only).
+- [x] Measured: a non-prod account scan with built-in packs only yields under 5% false positives (manual review recorded in `docs/validation/nonprod-scan.md`, aggregated only). Three accounts at v0.4.0: 2.6%, 1.2% and 2.7%.
