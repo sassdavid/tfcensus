@@ -51,7 +51,7 @@ jobs:
         uses: renovatebot/github-action@266fef21329c44765ad42f9dea1f01f5d2d91084 # v46.3.13
         with:
           token: ${{ steps.app-token.outputs.token }}
-          renovate-version: 44.236.2 # Renovate updates it, see renovate.json
+          renovate-version: 44.237.3 # Renovate updates it, see renovate.json
           additional-env-list: OSV_OFFLINE_DATABASE_FORMAT
         env:
           # osvVulnerabilityAlerts downloads the OSV database on every run; split downloads only
