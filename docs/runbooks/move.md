@@ -20,8 +20,9 @@ the source.
   source with `terragrunt run -- state push`. It records the S3 version of each state from before
   the push in a history object next to the state.
 - `move rollback` copies those versions back, byte for byte.
+- `move suggest` drafts the file for you from plans, after you've moved the code.
 
-`plan` and `status` only read. `apply`, `rollback` and `mark-applied` are the only tfcensus
+`suggest`, `plan` and `status` only read. `apply`, `rollback` and `mark-applied` are the only tfcensus
 commands that write to a backend, and none of them is available over MCP.
 
 ## Before you start
@@ -42,6 +43,7 @@ Your credentials need, for every involved backend:
 
 | Command | Permissions |
 |---|---|
+| `suggest` | what `terragrunt plan` needs in each unit |
 | `plan`, `status` | `s3:GetObject`, `s3:GetBucketVersioning`, plus what `terragrunt plan` needs in the unit |
 | `apply` | the above, `s3:GetObjectVersion`, and what `terraform state push` needs: `s3:PutObject` on the state key, plus the lock (`s3:PutObject` and `s3:DeleteObject` on `<key>.tflock`, or `dynamodb:PutItem`, `dynamodb:GetItem` and `dynamodb:DeleteItem`) and `s3:PutObject` on `<key>.tfcensus-migrations.json` |
 | `rollback` | the `apply` set, plus `s3:DeleteObject` on the state key |
@@ -54,6 +56,52 @@ two accounts' credentials.
 
 Set the terraform binary once, because terragrunt defaults to `tofu`: pass `--tf-path terraform`
 or set `binaries.terraform` in `.tfcensus.yaml`.
+
+## Draft the file with move suggest
+
+Move the resource blocks in the code first: delete them from the source unit and add them to the
+destinations (or rename them). Every plan then shows a delete in the source and a create in a
+destination. `move suggest` pairs them and writes the migration file:
+
+```sh
+tfcensus move suggest --from live/prod/network \
+  --to live/prod/network-sg --to live/prod/network-endpoints \
+  --draft migrations/2026-11-split-network.hcl
+```
+
+It plans each unit in turn through terragrunt, against its backend and without the state lock.
+To reuse plans you already have, pass `--plan-dir` with the directory that
+`terragrunt run --all --json-out-dir` wrote. suggest then reads `<dir>/<unit>/tfplan.json` and
+runs nothing.
+
+A delete and a create are one move when their type is the same, every attribute known before
+apply is equal, and neither matches any other resource. Name a unit in both `--from` and `--to` to
+find renames inside it. A replaced resource never counts. The summary on stderr lists every move,
+then every delete and create it left out, with the reason:
+
+```text
+not moved:
+  delete live/prod/network aws_vpc_endpoint.s3: closest is live/prod/network-endpoints module.endpoints.aws_vpc_endpoint.this["s3"], which differs in policy
+  delete live/prod/network aws_vpc_endpoint_route_table_association.s3: 2 matches (...)
+```
+
+When a provider rewrites a value, so that your code never matches the state, let that attribute
+differ with `--ignore`. The syntax is tfautomv's, so its rules work here too:
+
+| Rule | Counts as equal |
+|---|---|
+| `everything:TYPE:ATTR` | any two values |
+| `whitespace:TYPE:ATTR` | values that differ only in whitespace |
+| `prefix:TYPE:ATTR:PREFIX` | values that are equal once PREFIX is removed |
+| `json:TYPE:ATTR` | JSON strings with the same value, such as a policy in another key order |
+
+TYPE may be `*`. ATTR is a flat key (`tags.Name`, `ingress.0.cidr_blocks.#`); a rule covers the
+keys below it, so `everything:aws_instance:tags` ignores every tag, and a `*` segment matches any
+one segment. Use `--ignore` for provider quirks only. A difference you made on purpose belongs in a
+separate change after the move.
+
+The draft has one block per source unit, then one block of `mv` actions per unit whose addresses
+change. Read it, rename the blocks if you like, then verify it with `move plan` as below.
 
 ## Write the migration file
 

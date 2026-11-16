@@ -82,7 +82,7 @@ goreleaser, chezmoi, k9s, golangci-lint.
 | HCL read/write | `github.com/hashicorp/hcl/v2` (+ `hclwrite`) | v2.25.0 |
 | cty | `github.com/zclconf/go-cty` | v1.20.0 |
 | Rules | `cel.dev/cel-go` | v0.33.2 (published 2026-10-30). The project moved from `github.com/google/cel-go` at v0.32.0. Added at M6 for the ownership rules (Apache-2.0) |
-| Move auto-detect | `github.com/busser/tfautomv` (`pkg/engine`) | v0.7.0 (latest; low activity, so vendor-or-import is decided at M9) |
+| Move auto-detect | own engine in `internal/suggest` | no dependency: tfautomv v0.7.0 is a behaviour reference only (tfcensus plan ADR-0016) |
 
 **Never import:** `hashicorp/terraform` (BSL 1.1), terragrunt `internal/...`, or OpenTofu `internal/` ([tfcensus ADR-0001](../plan/adr/0001-shell-out-to-terragrunt.md)).
 

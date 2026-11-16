@@ -1,0 +1,235 @@
+{
+  "applyable": true,
+  "complete": true,
+  "configuration": {
+    "provider_config": {
+      "aws": {
+        "full_name": "registry.terraform.io/hashicorp/aws",
+        "name": "aws"
+      }
+    },
+    "root_module": {}
+  },
+  "errored": false,
+  "format_version": "1.2",
+  "planned_values": {
+    "root_module": {}
+  },
+  "resource_changes": [
+    {
+      "address": "aws_security_group.app",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "after": {
+          "description": "app traffic",
+          "egress": [
+            {
+              "cidr_blocks": [
+                "0.0.0.0/0"
+              ],
+              "description": "",
+              "from_port": 0,
+              "ipv6_cidr_blocks": [],
+              "prefix_list_ids": [],
+              "protocol": "-1",
+              "security_groups": [],
+              "self": false,
+              "to_port": 0
+            }
+          ],
+          "ingress": [],
+          "name": "app",
+          "name_prefix": "",
+          "revoke_rules_on_delete": false,
+          "tags": {
+            "Name": "app"
+          },
+          "vpc_id": "vpc-0f1e2d3c4b5a69788"
+        },
+        "after_sensitive": {},
+        "after_unknown": {
+          "arn": true,
+          "egress": [
+            {
+              "cidr_blocks": [
+                false
+              ],
+              "ipv6_cidr_blocks": [],
+              "prefix_list_ids": [],
+              "security_groups": []
+            }
+          ],
+          "id": true,
+          "ingress": [],
+          "owner_id": true,
+          "tags": {},
+          "tags_all": true
+        },
+        "before": null,
+        "before_sensitive": false
+      },
+      "mode": "managed",
+      "name": "app",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "type": "aws_security_group"
+    },
+    {
+      "address": "aws_security_group.extra",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "after": {
+          "description": "app traffic",
+          "egress": [
+            {
+              "cidr_blocks": [
+                "0.0.0.0/0"
+              ],
+              "description": "",
+              "from_port": 0,
+              "ipv6_cidr_blocks": [],
+              "prefix_list_ids": [],
+              "protocol": "-1",
+              "security_groups": [],
+              "self": false,
+              "to_port": 0
+            }
+          ],
+          "ingress": [],
+          "name": "extra",
+          "name_prefix": "",
+          "revoke_rules_on_delete": false,
+          "tags": {
+            "Name": "extra"
+          },
+          "vpc_id": "vpc-0f1e2d3c4b5a69788"
+        },
+        "after_sensitive": {},
+        "after_unknown": {
+          "arn": true,
+          "egress": [
+            {
+              "cidr_blocks": [
+                false
+              ],
+              "ipv6_cidr_blocks": [],
+              "prefix_list_ids": [],
+              "security_groups": []
+            }
+          ],
+          "id": true,
+          "ingress": [],
+          "owner_id": true,
+          "tags": {},
+          "tags_all": true
+        },
+        "before": null,
+        "before_sensitive": false
+      },
+      "mode": "managed",
+      "name": "extra",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "type": "aws_security_group"
+    },
+    {
+      "address": "aws_vpc_security_group_ingress_rule.app[\"http\"]",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "after": {
+          "cidr_ipv4": "10.20.0.0/16",
+          "description": "port 80",
+          "from_port": 80,
+          "ip_protocol": "tcp",
+          "tags": null,
+          "to_port": 80
+        },
+        "after_sensitive": {},
+        "after_unknown": {
+          "arn": true,
+          "id": true,
+          "security_group_id": true,
+          "security_group_rule_id": true,
+          "tags_all": true
+        },
+        "before": null,
+        "before_sensitive": false
+      },
+      "index": "http",
+      "mode": "managed",
+      "name": "app",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "type": "aws_vpc_security_group_ingress_rule"
+    },
+    {
+      "address": "aws_vpc_security_group_ingress_rule.app[\"https\"]",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "after": {
+          "cidr_ipv4": "10.20.0.0/16",
+          "description": "port 443",
+          "from_port": 443,
+          "ip_protocol": "tcp",
+          "tags": null,
+          "to_port": 443
+        },
+        "after_sensitive": {},
+        "after_unknown": {
+          "arn": true,
+          "id": true,
+          "security_group_id": true,
+          "security_group_rule_id": true,
+          "tags_all": true
+        },
+        "before": null,
+        "before_sensitive": false
+      },
+      "index": "https",
+      "mode": "managed",
+      "name": "app",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "type": "aws_vpc_security_group_ingress_rule"
+    },
+    {
+      "address": "aws_ssm_parameter.db_password",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "after": {
+          "data_type": "text",
+          "description": "",
+          "name": "/app/db/password",
+          "overwrite": null,
+          "tags": null,
+          "tier": "Standard",
+          "type": "SecureString",
+          "value": "FIXTURE-SECRET-db-password"
+        },
+        "after_sensitive": {
+          "value": true
+        },
+        "after_unknown": {
+          "arn": true,
+          "id": true,
+          "key_id": true,
+          "tags_all": true,
+          "version": true
+        },
+        "before": null,
+        "before_sensitive": false
+      },
+      "mode": "managed",
+      "name": "db_password",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "type": "aws_ssm_parameter"
+    }
+  ],
+  "terraform_version": "1.12.2"
+}

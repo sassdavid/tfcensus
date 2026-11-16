@@ -15,7 +15,7 @@ Demand: env0 "8 drift tools 2026", Scalr "find unmanaged resources" guide, a Med
 
 ## Prior art: fleet features
 - tfmigrate (MIT, v0.4.6 2026-10): migration HCL, multi_state, S3 history; issues #200, #220, #221, #217, #167, #202, #159, #161.
-- tfautomv (Apache-2.0, v0.7.0 2025-06): importable `pkg/engine`, strict 1:1 delete/create matching.
+- tfautomv (Apache-2.0, v0.7.0 2025-06): importable `pkg/engine`, strict 1:1 delete/create matching. Not imported: no release since, see [ADR-0016](adr/0016-own-move-suggest-engine.md).
 - tgsieve (MIT, v0.13 2026-08): json-out-dir ingestion, cross-unit collapsing, noise rules with expiry/never_hide, md/json/github output.
 - driftive (Apache-2.0, v0.34 2026-10): per-unit GitHub issues lifecycle, Slack, regex over text plans.
 - Terragrunt v1.2.1 (2026-10-23): `find --json`, `--filter` syntax, run report schema, `--json-out-dir`, dependency outputs from state by default; `backend migrate` moves whole states only (#6350).

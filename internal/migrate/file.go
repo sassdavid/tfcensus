@@ -283,6 +283,10 @@ func evalInto(attr *hcl.Attribute, ctx *hcl.EvalContext, dst any) error {
 	return nil
 }
 
+// CleanRef checks a unit reference the way a migration file's from and to do and returns its
+// canonical form.
+func CleanRef(ref string) (string, error) { return cleanUnit(ref) }
+
 // cleanUnit checks a unit reference, a path or path:workspace, and returns it in canonical form:
 // the path relative to the repository with forward slashes and no trailing slash, then
 // :workspace unless the workspace is default.

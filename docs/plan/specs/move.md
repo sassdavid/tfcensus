@@ -45,7 +45,7 @@ Multiple blocks per file run in order. Glob/`xmv` semantics follow tfmigrate.
 - History lives **per unit**, next to its state: `<key>.tfcensus-migrations.json`. It holds `{file, block, applied_at, by, version_ids}`.
 - `move status <file>` shows applied or pending per unit. `move mark-applied` is for migrations done by hand.
 - `move apply` requires an interactive "type the destination unit path" confirmation or `--yes` ([engineering ADR-0007](../../engineering/adr/0007-interactive-prompts.md)). It never runs over MCP.
-- `move suggest` runs plans in the involved units, then uses the tfautomv engine (strict 1:1 attribute match, `--ignore` rules) to draft a migration file for review.
+- `move suggest` runs plans in the involved units, then uses its own strict 1:1 engine ([ADR-0016](../adr/0016-own-move-suggest-engine.md), tfautomv's matching with `--ignore` rules) to draft a migration file for review.
 
 ## Decisions (M9, 2026-11-12)
 Made with the owner before coding. State I/O, rollback and confirmation are in
@@ -120,6 +120,32 @@ workspace is named and where its objects are.
 - Rollback's `x-amz-copy-source` is percent-encoded except for `/`, so the `:` of `env:` keys is
   sent as `%3A`, as the CopyObject reference asks.
 
+## Decisions (M18 suggest, 2026-11-16)
+Made with the owner before coding. ADR-0016 records why the engine is tfcensus's own.
+- Command: `move suggest --from <unit>... --to <unit>...`, each a `path` or `path:workspace`.
+  Deletes come only from `--from` units and creates only from `--to` units; a unit in both gets
+  renames inside it. It writes no state, S3 object or history, and has no MCP tool.
+- Plans: each unit is planned in turn through `terragrunt run --tf-path <tf> --` with
+  `TG_TF_PATH`, its own `TF_DATA_DIR` and `TG_DOWNLOAD_DIR`, `-lock=false`, the lock file put
+  back, and `TF_WORKSPACE` for a non-default workspace; the plan reads the unit's backend.
+  `--plan-dir <dir>` reads `<dir>/<unit>/tfplan.json` instead (the `--json-out-dir` layout of
+  terragrunt run --all) and then accepts default workspaces only.
+- Matching: pure deletes against pure creates of the same type. Known values must be equal on
+  both sides; keys unknown in the create are skipped; null equals empty. A pair is a move when
+  each side has exactly one full match. Replaced resources and data sources never take part.
+- `--ignore`: tfautomv's `everything:TYPE:ATTR`, `whitespace:TYPE:ATTR` and
+  `prefix:TYPE:ATTR:PREFIX`, plus `json:TYPE:ATTR`. TYPE may be `*`, ATTR may hold `*` segments,
+  and a rule covers the keys below its ATTR. No config key.
+- Draft: one `migration "units"` block per source unit with `to` listing source addresses, then
+  one in-place block of `mv` actions per unit whose addresses change, so a resource moved to
+  another unit is renamed there afterwards. Blocks are `suggest_1`, `suggest_2` and so on, in unit
+  order. The draft goes to stdout or to `--draft <file>`, which isn't overwritten without
+  `--force`. No moves, no draft.
+- Output: the text formats print the draft on stdout and a summary on stderr: every move, and
+  every unmatched delete or create with its full matches, or the closest candidate and the
+  top-level attribute names that differ. `--format json` prints `move-suggest-v1.json` with the
+  draft inside. Neither shows attribute values. The exit code is 0 whether or not moves were found.
+
 ## Acceptance criteria
 - [x] Unit tests for state surgery on fixture states (provider rewrite, serial, lineage, module paths, count/for_each keys). `TestSpec_move_1`, `TestSurgeryActions`, `TestSurgeryErrors`.
 - [x] An e2e against moto (nightly, two emulated accounts via AssumeRole, versioned buckets): split a unit into two across two accounts with surgery, verify, apply, then roll back. States are byte-compared with the originals after rollback. `TestSpec_move_2` (`mise run test:move-e2e`, nightly in `live.yml`).
@@ -131,3 +157,9 @@ workspace is named and where its objects are.
   a refused missing workspace and a refused native block. `TestSpec_move_5`,
   `TestWorkspaceMustExist`, `TestWorkspaceToWorkspace`, `TestTerragruntPlanWorkspace`,
   `TestMoveWorkspace`, `TestReadWorkspacePrefix`, `TestWorkspaceKeyPrefix`.
+- [x] `move suggest` drafts a migration file from recorded plan JSON (`--plan-dir`) and from plans
+  through the fake terragrunt: moves between units and renames inside one, replaced resources left
+  out, ambiguous and unmatched resources reported with a reason, `--ignore` rules, `TF_WORKSPACE`
+  for a workspace, no state call, no attribute value in any output, and a draft that
+  `migrate.Parse` reads back. `TestMatchFixture`, `TestMatchUnmatched`, `TestMatchCompare`,
+  `TestDraft`, `TestMoveSuggestGolden`, `TestMoveSuggestTerragrunt`, `TestMoveSuggestWorkspace`.

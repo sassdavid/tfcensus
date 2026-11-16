@@ -63,7 +63,7 @@ func newMoveCmd(d *app.Deps, g *globals) *cobra.Command {
 to others, or run tfmigrate-style mv, xmv and rm actions inside one state. See
 docs/runbooks/move.md for the file format and a full walkthrough.
 
-plan and status only read. apply, rollback and mark-applied are the only tfcensus commands that
+suggest drafts a migration file from plans. plan and status only read. apply, rollback and mark-applied are the only tfcensus commands that
 write to a backend; each asks you to type the block's destination unit path first, or takes
 --yes. Without a terminal and without --yes they exit 2 and change nothing.
 
@@ -74,6 +74,7 @@ the backend sets no prefix), and terragrunt runs with TF_WORKSPACE. The workspac
 The native strategy works on the default workspace only.`,
 	}
 	cmd.AddCommand(
+		newMoveSuggestCmd(d, g),
 		newMoveSubCmd(d, g, movePlan, "Verify a migration file with plans, without writing anything",
 			`plan reads each involved unit's state from S3, applies the block in memory and plans every
 unit against its new state through a local backend override (_tfcensus_override.tf), with its

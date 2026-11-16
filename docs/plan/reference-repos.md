@@ -30,7 +30,7 @@ They're never a dependency or a copy source:
 | opentofu/opentofu | MPL-2.0 | state encryption envelope (`encrypted_data`), differences in JSON output, S3 backend | M3, should |
 | snyk/driftctl | Apache-2.0 | middleware catalogue (expanders, defaults), `.driftignore`, known false positives | M5, must |
 | minamijoyo/tfmigrate | MIT | migration file grammar, multi_state flow, history, the override-backend trick | M9, must |
-| busser/tfautomv | Apache-2.0 | `pkg/engine` move detection (possible import) | M9, should |
+| busser/tfautomv | Apache-2.0 | `pkg/engine` move detection, its rules and open issues: the behaviour reference for `move suggest`, not imported ([ADR-0016](adr/0016-own-move-suggest-engine.md)) | M18, should |
 | imcitius/tgsieve | MIT | json-out-dir ingestion, collapse, noise rules with expiry/never_hide | M7, must |
 | driftive/driftive | Apache-2.0 | issue lifecycle (create/update/close), Slack | M10, should |
 | turbot/steampipe-plugin-aws | Apache-2.0 | aws-sdk-go-v2 multi-account/region fan-out, Config/Resource Explorer/Cloud Control usage, retry config | M2/M5, should |

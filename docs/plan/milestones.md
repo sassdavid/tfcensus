@@ -305,7 +305,8 @@ identifiers map the organization. Trivy, Snyk, Steampipe and Infracost use the s
 - Not in M17: whois and codify still read only the CloudFormation tags (ADR-0014 follow-up).
 
 ### M18: Move and drift depth → v0.4.0 (tfcensus only)
-- [ ] `move suggest` drafts a migration file from plans (move.md, tfautomv engine).
+- [x] `move suggest` drafts a migration file from plans (move.md, own strict 1:1 engine,
+  [ADR-0016](adr/0016-own-move-suggest-engine.md)).
 - [x] `move` supports non-default workspaces of s3 backends (move.md).
 - [x] OpenTofu encrypted state is read through `tofu show -json` (risk R6, [ADR-0015](adr/0015-read-encrypted-state-with-tofu.md)).
 - [ ] An L3 drift e2e runs real terraform and terragrunt against moto, and a nightly terragrunt

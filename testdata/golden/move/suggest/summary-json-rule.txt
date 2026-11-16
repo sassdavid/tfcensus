@@ -1,0 +1,13 @@
+move suggest: 11 comparison(s), 6 move(s)
+  live/network aws_security_group.app -> live/network-sg aws_security_group.app
+  live/network aws_ssm_parameter.db_password -> live/network-sg aws_ssm_parameter.db_password
+  live/network aws_vpc.main -> live/network aws_vpc.this
+  live/network aws_vpc_endpoint.s3 -> live/network-endpoints module.endpoints.aws_vpc_endpoint.this["s3"]
+  live/network aws_vpc_security_group_ingress_rule.app["http"] -> live/network-sg aws_vpc_security_group_ingress_rule.app["http"]
+  live/network aws_vpc_security_group_ingress_rule.app["https"] -> live/network-sg aws_vpc_security_group_ingress_rule.app["https"]
+not moved:
+  delete live/network aws_iam_role.legacy: no resource of the same type
+  delete live/network aws_vpc_endpoint_route_table_association.s3: 2 matches (live/network-endpoints module.endpoints.aws_vpc_endpoint_route_table_association.this["a"], live/network-endpoints module.endpoints.aws_vpc_endpoint_route_table_association.this["b"])
+  create live/network-endpoints module.endpoints.aws_vpc_endpoint_route_table_association.this["a"]: its match live/network aws_vpc_endpoint_route_table_association.s3 also matches another resource
+  create live/network-endpoints module.endpoints.aws_vpc_endpoint_route_table_association.this["b"]: its match live/network aws_vpc_endpoint_route_table_association.s3 also matches another resource
+  create live/network-sg aws_security_group.extra: closest is live/network aws_security_group.app, which differs in name, tags
