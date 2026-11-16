@@ -1,0 +1,45 @@
+{
+  "group": "Found by the v0.4.0 rerun: API Gateway root resources, the Auto Scaling managed rule, add-on Pod Identity associations",
+  "spec_count": 6,
+  "why": "root_resource_id in state, autoscaling-managed-rule, ownerArn from eks:ListPodIdentityAssociations",
+  "config": [
+    {
+      "type": "AWS::ApiGateway::RestApi",
+      "arn": "arn:aws:apigateway:eu-west-1::/restapis/a0valid001",
+      "id": "a0valid001",
+      "name": "collect",
+      "region": "eu-west-1"
+    },
+    {
+      "type": "AWS::EKS::Cluster",
+      "arn": "arn:aws:eks:eu-west-1:111111111111:cluster/main",
+      "id": "main",
+      "name": "main",
+      "region": "eu-west-1"
+    },
+    {
+      "type": "AWS::Events::Rule",
+      "arn": "arn:aws:events:eu-west-1:111111111111:rule/AutoScalingManagedRule",
+      "id": "AutoScalingManagedRule",
+      "name": "AutoScalingManagedRule",
+      "region": "eu-west-1"
+    }
+  ],
+  "resource_explorer": [
+    {
+      "arn": "arn:aws:apigateway:eu-west-1::/restapis/a0valid001/resources/r00t0a1",
+      "type": "apigateway:restapis/resources"
+    },
+    {
+      "arn": "arn:aws:eks:eu-west-1:111111111111:podidentityassociation/main/a-0valaddon",
+      "type": "eks:podidentityassociation"
+    }
+  ],
+  "pod_identity": [
+    {
+      "cluster": "main",
+      "id": "a-0valaddon",
+      "owner": "arn:aws:eks:eu-west-1:111111111111:addon/main/vpc-cni/0a1b2c3d"
+    }
+  ]
+}

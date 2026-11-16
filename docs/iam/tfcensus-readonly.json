@@ -106,7 +106,8 @@
         "iam:List*",
         "route53:Get*",
         "route53:List*",
-        "elasticloadbalancing:Describe*"
+        "elasticloadbalancing:Describe*",
+        "eks:ListPodIdentityAssociations"
       ],
       "Resource": "*"
     }

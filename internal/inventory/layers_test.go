@@ -842,3 +842,91 @@ func TestSGRuleController(t *testing.T) {
 	assert.Equal(t, "sg-0lb", got["sgr-lbc"].Relationships[0].ID)
 	assert.NotContains(t, fmt.Sprint(res.Resources), policyDoc)
 }
+
+// TestEKSPodIdentity: the EKS lister reads the Pod Identity associations of the clusters AWS
+// Config found, pages through them, skips a cluster deleted since, and adds the owning add-on to
+// the association Resource Explorer listed. A denied call fails only its own run.
+func TestEKSPodIdentity(t *testing.T) {
+	t.Parallel()
+
+	cluster := func(name string) string {
+		return configRow("AWS::EKS::Cluster", "arn:aws:eks:eu-west-1:"+acct+":cluster/"+name, name, euWest)
+	}
+	assoc := func(cluster, id, owner string) string {
+		ownerJSON := ""
+		if owner != "" {
+			ownerJSON = fmt.Sprintf(`,"ownerArn":%q`, owner)
+		}
+		return fmt.Sprintf(`{"associationArn":"arn:aws:eks:eu-west-1:%s:podidentityassociation/%s/%s",`+
+			`"associationId":%q,"clusterName":%q,"namespace":"kube-system","serviceAccount":"sa"%s}`,
+			acct, cluster, id, id, cluster, ownerJSON)
+	}
+	page := func(next string, items ...string) string {
+		tok := ""
+		if next != "" {
+			tok = fmt.Sprintf(`,"nextToken":%q`, next)
+		}
+		return `{"associations":[` + strings.Join(items, ",") + `]` + tok + `}`
+	}
+	addon := "arn:aws:eks:eu-west-1:" + acct + ":addon/main/vpc-cni/0a1b"
+	run := func(t *testing.T, name string, eksStubs func(*awstest.Router)) *inventory.Result {
+		t.Helper()
+		rt := transport(t, name, func(r *awstest.Router) {
+			r.On("config", "SelectResourceConfig", "", ok(configPage("", cluster("gone"), cluster("main"))))
+			r.On("resource-explorer-2", "ListResources", "", ok(rePage("", reResource(
+				"arn:aws:eks:eu-west-1:"+acct+":podidentityassociation/main/a-0addon",
+				"eks:podidentityassociation",
+				euWest,
+			))))
+			eksStubs(r)
+		})
+		e := env(t)
+		layers := []inventory.Layer{inventory.NewConfig(e), inventory.NewResourceExplorer(e)}
+		for _, l := range inventory.NativeLayers(e) {
+			if l.Name() == inventory.LayerEKSPodIdentity {
+				layers = append(layers, l)
+			}
+		}
+		res, err := inventory.NewCollector(inventory.Options{Env: e, Layers: layers}).
+			Collect(t.Context(), inventory.Request{
+				Targets: []inventory.Target{{Account: account(rt), Report: oneRegion()}},
+				Types:   []string{"AWS::EKS::Cluster", "AWS::EKS::PodIdentityAssociation"},
+			})
+		require.NoError(t, err)
+		return res
+	}
+
+	t.Run("paginated", func(t *testing.T) {
+		t.Parallel()
+		res := run(t, "inventory-eks-pod-identity", func(r *awstest.Router) {
+			r.On("eks", "ListPodIdentityAssociations", "/clusters/gone/",
+				fail(http.StatusNotFound, awstest.JSONError("ResourceNotFoundException", "No cluster found")))
+			r.On("eks", "ListPodIdentityAssociations", "nextToken=page-2", ok(page("", assoc("main", "a-0team", ""))))
+			r.On("eks", "ListPodIdentityAssociations", "/clusters/main/",
+				ok(page("page-2", assoc("main", "a-0addon", addon))))
+		})
+		owners := map[string]string{}
+		for _, r := range res.Resources {
+			if r.CFNType == "AWS::EKS::PodIdentityAssociation" {
+				owners[r.ID] = r.Attrs["owner_arn"]
+			}
+		}
+		assert.Equal(t, map[string]string{"a-0addon": addon, "a-0team": ""}, owners)
+		for _, r := range res.Runs {
+			assert.Equal(t, inventory.RunOK, r.Status, r.Layer)
+		}
+	})
+	t.Run("denied", func(t *testing.T) {
+		t.Parallel()
+		res := run(t, "inventory-eks-pod-identity-denied", func(r *awstest.Router) {
+			r.On("eks", "ListPodIdentityAssociations", "", fail(http.StatusForbidden,
+				awstest.JSONError("AccessDeniedException", "not authorized")))
+		})
+		statuses := map[string]inventory.RunStatus{}
+		for _, r := range res.Runs {
+			statuses[r.Layer] = r.Status
+		}
+		assert.Equal(t, inventory.RunDenied, statuses[inventory.LayerEKSPodIdentity])
+		assert.Equal(t, inventory.RunOK, statuses[inventory.LayerRE])
+	})
+}

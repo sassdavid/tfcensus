@@ -87,6 +87,10 @@ type CCParent struct {
 type Derived struct {
 	Parent string              `yaml:"parent"`         // the parent's CloudFormation type
 	When   map[string][]string `yaml:"when,omitempty"` // field values that make a resource derived
+	// StateAttr is the attribute of the parent's state resource that holds the child's ID, for a
+	// child that the parent creates with no resource of its own. Such a child needs no parent link
+	// from the cloud side.
+	StateAttr string `yaml:"state_attr,omitempty"`
 }
 
 // Strings is a YAML scalar or sequence of strings.
@@ -251,6 +255,8 @@ func (m *Map) checkCurated(c *Curated, t *Type) error {
 		return fmt.Errorf("%w: %s has no identity, arn, id or rule tuple to match on", ErrInvalid, c.TF)
 	case c.CCParent != nil && (c.CCParent.Property == "" || !m.cfn[c.CCParent.Type]):
 		return fmt.Errorf("%w: %s: cc_parent needs a CloudFormation type and a property", ErrInvalid, c.TF)
+	case c.Derived != nil && c.Derived.StateAttr != "" && len(c.Derived.When) > 0:
+		return fmt.Errorf("%w: %s: derived takes state_attr or when, not both", ErrInvalid, c.TF)
 	}
 	return nil
 }
@@ -363,6 +369,22 @@ func (m *Map) CCParent(cfn string) *CCParent {
 		}
 	}
 	return nil
+}
+
+// StateChildren returns the curated types whose resources a resource of TF type tf creates and
+// names in a state attribute (derived.state_attr), sorted by TF type.
+func (m *Map) StateChildren(tf string) []*Type {
+	t, ok := m.types[tf]
+	if !ok || !t.Curated {
+		return nil
+	}
+	var out []*Type
+	for _, c := range m.Curated() {
+		if c.Derived != nil && c.Derived.StateAttr != "" && slices.Contains(t.CFN, c.Derived.Parent) {
+			out = append(out, c)
+		}
+	}
+	return out
 }
 
 // FromConfig returns the CloudFormation type for an AWS Config type. Most are the same.

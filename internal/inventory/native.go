@@ -58,7 +58,10 @@ const (
 // NativeLayers returns the hand-written listers for types that the other layers miss or report
 // as attributes of a parent.
 func NativeLayers(env *Env) []Layer {
-	return []Layer{&sgRules{env}, &natGateways{env}, &iamAttachments{env}, &route53Records{env}, &s3Subresources{env}}
+	return []Layer{
+		&sgRules{env}, &natGateways{env}, &iamAttachments{env}, &route53Records{env}, &s3Subresources{env},
+		&eksPodIdentity{env},
+	}
 }
 
 // Layers returns every layer in precedence order.

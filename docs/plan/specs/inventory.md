@@ -23,9 +23,11 @@ Initial `native` enumerators (driftctl's expander lessons):
 - `iam-attachments`: role, user and group policy attachments, inline policies, and the roles, users, groups and customer managed policies themselves (one `GetAccountAuthorizationDetails` listing), because AWS Config and Resource Explorer list IAM in one region only, which a scan may not cover.
 - `route53-records`: `ListResourceRecordSets` per zone (with pagination; dnsReaper's bug #207 is a warning sign).
 - `s3-subresources`: bucket policy, versioning, lifecycle, encryption, public access block. These are separate TF resources but bucket attributes in the cloud.
+- `eks-pod-identity`: `ListPodIdentityAssociations` per EKS cluster that an earlier layer found, for the `ownerArn` that Resource Explorer leaves out. It runs after the other layers, like Cloud Control, but even when Resource Explorer lists the type, because it adds an attribute instead of finding resources.
 
 Layer names in a resource's source list: `config`, `resource-explorer`, `native:ec2-sg-rules`,
-`native:iam-attachments`, `native:route53-records`, `native:s3-subresources`, `cloudcontrol`. IAM and Route 53
+`native:iam-attachments`, `native:route53-records`, `native:s3-subresources`,
+`native:eks-pod-identity`, `cloudcontrol`. IAM and Route 53
 listers run once per account in the partition's global region (`us-east-1` for `aws`), never in
 whichever region happens to run first. Resource Explorer runs only with a default view.
 

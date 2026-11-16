@@ -208,6 +208,15 @@ func isDependent(l Layer) bool {
 	return ok
 }
 
+// enricher is a [Dependent] layer that reads attributes of resources other layers list, so it
+// runs even when an earlier layer covers its types.
+type enricher interface{ enriches() }
+
+func isEnricher(l Layer) bool {
+	_, ok := l.(enricher)
+	return ok
+}
+
 func found(tasks []*task) []CloudResource {
 	var all []CloudResource
 	for _, t := range tasks {
@@ -253,7 +262,7 @@ func (c *Collector) runAll(
 func dependentTypes(t *task, earlier []*task, want []string, auto bool) []string {
 	var out []string
 	for _, cfn := range t.layer.Types() {
-		if !wanted(want, cfn) || (auto && coveredBy(earlier, t, cfn)) {
+		if !wanted(want, cfn) || (auto && !isEnricher(t.layer) && coveredBy(earlier, t, cfn)) {
 			continue
 		}
 		out = append(out, cfn)

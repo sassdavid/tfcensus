@@ -22,6 +22,8 @@ Narrow it before use:
   Cloud Control by default, because neither AWS Config nor Resource Explorer lists them. It reads a resource
   configuration with `GetResource` when the list leaves out its type. Types you add to `scan.cloudcontrol_types`
   need their own handler permissions (the `handlers` of the type's schema in the CloudFormation registry).
+- `NativeEnumerators`: `eks:ListPodIdentityAssociations` runs once per EKS cluster that AWS Config or Resource
+  Explorer found. It reads which add-on owns an association (`ownerArn`), so scan reports that association as derived.
 - `StateAccessLogging`: `audit backend` reads trail event selectors to see whether CloudTrail logs S3 data events
   for a state bucket that has no server access logging (S3-LOG).
 

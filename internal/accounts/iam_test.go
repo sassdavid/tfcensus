@@ -102,6 +102,8 @@ func iamAction(t *testing.T, r *cassette.Request) string {
 		return "s3:" + s3Operation(u.Query().Get("x-id"))
 	case service == "route53":
 		return "route53:" + route53Action(t, u.Path)
+	case service == "eks" && strings.HasSuffix(u.Path, "/pod-identity-associations"):
+		return "eks:ListPodIdentityAssociations"
 	case target != "":
 		_, op, _ := strings.Cut(target, ".")
 		return service + ":" + op

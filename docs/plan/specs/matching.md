@@ -58,7 +58,7 @@ that way.
   - One match: managed.
   - More than one match from different units: double-managed (also reported by audit and whois).
   - No match: hand the resource to ownership rules ([ownership-rules.md](ownership-rules.md)).
-- **Parent-in-state inheritance:** if a resource's parent (relationship from Config, or an ARN prefix) is managed, and the type is a known derived child, the category is `derived` with the reason "child of managed <parent address>".
+- **Parent-in-state inheritance:** if a resource's parent (relationship from Config, or an ARN prefix) is managed, and the type is a known derived child, the category is `derived` with the reason "child of managed <parent address>". A child that its parent's Terraform resource creates with no resource of its own matches by the ID in the parent's state attribute that the typemap names (`derived.state_attr`): a REST API's `/` resource by `root_resource_id`.
 - Never claim a resource is managed when its type has no mapping. It goes to `undetermined` with the reason, and those counts show in the summary.
 
 ## Acceptance criteria

@@ -10,7 +10,8 @@
 #   live        fields rendered from other fields of the live resource
 #   native      the native lister that lists the type
 #   rule_tuple  match security group rules by protocol, ports, source and direction
-#   derived     AWS creates the resource as a child of a parent; when lists field values
+#   derived     AWS creates the resource as a child of a parent; when lists field values;
+#               state_attr names the parent's state attribute that holds the child's ID
 #   cc_parent   Cloud Control lists the type only per parent: the parent's type and the
 #               resource model property that takes the parent's ARN
 #   cc          neither AWS Config nor Resource Explorer lists the type, so Cloud Control lists
@@ -614,6 +615,7 @@
   re: apigateway:restapis/resources
   arn: "arn:{partition}:apigateway:{region}::/restapis/{rest_api_id}/resources/{id}"
   id: ["{id}"]
+  derived: {parent: AWS::ApiGateway::RestApi, state_attr: root_resource_id}
 - tf: aws_api_gateway_method
   cfn: AWS::ApiGateway::Method
   config: AWS::ApiGateway::Method

@@ -580,6 +580,13 @@
       {
         "account": "111111111111",
         "region": "eu-west-1",
+        "layer": "native:eks-pod-identity",
+        "status": "ok",
+        "count": 0
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
         "layer": "cloudcontrol",
         "status": "ok",
         "count": 1
@@ -1139,7 +1146,8 @@
           "cells": [
             null,
             [
-              "re"
+              "re",
+              "native"
             ]
           ]
         },

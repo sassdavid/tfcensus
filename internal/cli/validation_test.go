@@ -71,8 +71,13 @@ type validationGroup struct {
 			Alias bool   `json:"alias"`
 		} `json:"records"`
 	} `json:"zones"`
-	Buckets []validationBucket `json:"buckets"`
-	Stacks  []struct {
+	Buckets     []validationBucket `json:"buckets"`
+	PodIdentity []struct {
+		Cluster string `json:"cluster"`
+		ID      string `json:"id"`
+		Owner   string `json:"owner"`
+	} `json:"pod_identity"`
+	Stacks []struct {
 		Name      string `json:"name"`
 		Resources []struct {
 			Logical  string `json:"logical"`
@@ -106,7 +111,7 @@ func loadValidationGroups(t *testing.T) []validationGroup {
 	t.Helper()
 	files, err := filepath.Glob(filepath.Join(validationDir, "groups", "*.json"))
 	require.NoError(t, err)
-	require.Len(t, files, 13, "one fixture per false-positive group")
+	require.Len(t, files, 14, "one fixture per false-positive group")
 	groups := make([]validationGroup, 0, len(files))
 	for _, f := range files {
 		b, rerr := os.ReadFile(f)
@@ -183,8 +188,8 @@ func TestValidationCassette(t *testing.T) { //nolint:paralleltest // writes the 
 	require.Equal(t, cli.ExitOK, code, stderr.String())
 }
 
-// TestSpec_scan_accuracy_9: the anonymized fixtures of all 13 false-positive groups scan with no
-// unmanaged finding.
+// TestSpec_scan_accuracy_9: the anonymized fixtures of the 13 false-positive groups of the first
+// scan, and of the group the v0.4.0 rerun found, scan with no unmanaged finding.
 func TestSpec_scan_accuracy_9(t *testing.T) {
 	t.Parallel()
 	p := scriptParams(t, filepath.Join(scriptDir, "spec_scan_accuracy_9.txtar"))
@@ -239,6 +244,10 @@ func validationStubs(r *awstest.Router, groups []validationGroup) []string {
 			"><ListStackResourcesResult><StackResourceSummaries>"+strings.Join(members, "")+
 			"</StackResourceSummaries></ListStackResourcesResult></ListStackResourcesResponse>"))
 	}
+	for _, c := range slices.Sorted(maps.Keys(f.podIdentity)) {
+		r.On("eks", "ListPodIdentityAssociations", "/clusters/"+c+"/",
+			ok(`{"associations":[`+strings.Join(f.podIdentity[c], ",")+`]}`))
+	}
 	none := ok(`{"ResourceDescriptions":[]}`)
 	// VPC associations are listed per service network, and there is none.
 	r.On("cloudcontrolapi", "ListResources", "AWS::VpcLattice::", none, none, none)
@@ -250,11 +259,11 @@ type fragments struct {
 	items                                 []item
 	re, roles, rules, nats, zones, stacks []string
 	buckets                               []validationBucket
-	records, stackRes                     map[string][]string
+	records, stackRes, podIdentity        map[string][]string
 }
 
 func collectFragments(groups []validationGroup) fragments {
-	f := fragments{records: map[string][]string{}, stackRes: map[string][]string{}}
+	f := fragments{records: map[string][]string{}, stackRes: map[string][]string{}, podIdentity: map[string][]string{}}
 	for i := range groups {
 		g := &groups[i]
 		for _, it := range g.Config {
@@ -282,6 +291,11 @@ func collectFragments(groups []validationGroup) fragments {
 		f.addZones(g)
 		f.buckets = append(f.buckets, g.Buckets...)
 		f.addStacks(g)
+		for _, x := range g.PodIdentity {
+			f.podIdentity[x.Cluster] = append(f.podIdentity[x.Cluster], fmt.Sprintf(
+				`{"associationArn":"arn:aws:eks:%s:%s:podidentityassociation/%s/%s","associationId":%q,`+
+					`"clusterName":%q,"ownerArn":%q}`, scanRegion, scanAcct, x.Cluster, x.ID, x.ID, x.Cluster, x.Owner))
+		}
 	}
 	return f
 }

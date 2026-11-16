@@ -41,6 +41,18 @@ Route 53 record and two ACM validation records, ECR repositories, an S3 bucket a
 created by hand, IAM roles from the account vending process, and policies an AWS service attached
 to a role a state manages (drift on a managed role, so it stays `unmanaged`).
 
+### Found by the v0.4.0 rerun (6 of 52)
+
+The rerun lists types that v0.3.0 left `undetermined`, and three groups of them were false:
+
+| Group | Count | Cause | Fix |
+|---|---|---|---|
+| The `/` resource of each REST API a state manages | 3 | `aws_api_gateway_rest_api` creates it and keeps its ID in `root_resource_id`, with no resource of its own | `derived.state_attr` ([Matching](#matching)) |
+| `AutoScalingManagedRule`, the EventBridge rule EC2 Auto Scaling creates (`ManagedBy` `autoscaling.amazonaws.com`) | 1 | No rule | `autoscaling-managed-rule` ([AWS services](#aws-services)) |
+| Pod Identity associations an EKS add-on owns | 2 | Resource Explorer lists them without `ownerArn`, so `addon-pod-identity-association` never matched | `native:eks-pod-identity` reads `ownerArn` ([Resource Explorer](#resource-explorer)) |
+
+Their fixture is `testdata/validation/groups/14-rerun.json`.
+
 ### `undetermined` (650)
 
 Every one is "no type mapping". Only the 56 curated types are matched ([matching.md](matching.md)),
@@ -166,10 +178,11 @@ Rules in `aws-service` (category `aws-managed`):
 | `apigateway-log-group` | Log groups `API-Gateway-Execution-Logs_<api>/<stage>` and `/aws/apigateway/welcome` |
 | `service-linked-secret` | Secret names `<service>!...` for the documented service IDs (`appflow`, `databrew`, `datasync`, `directconnect`, `ecs-sc`, `events`, `marketplace-deployment`, `opsworks-cm`, `pcs`, `rds`, `redshift`, `sqlworkbench`) and `s2svpn` (seen on the validation account), or tag `aws:secretsmanager:owningService`. AWS Config doesn't record `OwningService`. |
 | `log-delivery-bucket-policy` | A bucket policy whose statement IDs are all `AWSLogDeliveryWrite*` or `AWSLogDeliveryAclCheck*`. The S3 lister stores the statement IDs only, never the policy. |
+| `autoscaling-managed-rule` | The EventBridge rule `AutoScalingManagedRule`, which EC2 Auto Scaling creates through its service-linked role (`AutoScalingServiceRolePolicy`, condition `events:ManagedBy`) |
 | `lambda-version` (`derived`) | A Lambda version of a function a state manages. `publish = true` creates versions that no state lists. |
 | `rds-automated-snapshot` (`derived`) | RDS snapshots of type `automated` and automated backups |
 | `backup-recovery-point` (`derived`) | Backup recovery points of a vault a state manages |
-| `addon-pod-identity-association` (`derived`) | An EKS Pod Identity association with `ownerArn` set (an add-on owns it) |
+| `addon-pod-identity-association` (`derived`) | An EKS Pod Identity association with `ownerArn` set (an add-on owns it). `native:eks-pod-identity` reads `ownerArn` with `eks:ListPodIdentityAssociations`, once per cluster that an earlier layer found, because Resource Explorer leaves it out. |
 
 ## Matching
 
@@ -179,6 +192,10 @@ Rules in `aws-service` (category `aws-managed`):
   `aws_security_group_rule`.
 - `aws_default_route_table`, `aws_default_security_group`, `aws_default_network_acl` and
   `aws_default_vpc_dhcp_options` get curated entries next to their non-default types.
+- A child that its parent's Terraform resource creates with no resource of its own is `derived`
+  through `derived.state_attr`: the parent's state attribute that holds the child's ID. The REST
+  API's `/` resource is the one case (`root_resource_id`). The state reader keeps that ID with the
+  identity attributes.
 - The curated typemap covers every Terraform type in the table below. The generator's
   `guessCFN` gets an alias table for names that differ between the two providers
   (`aws_cloudwatch_event_*` and `aws_events_*`, `aws_cloudwatch_metric_alarm` and
@@ -269,7 +286,8 @@ how the next accounts show what is still missing.
    and an `ARN` resource configuration with its `CHILD`, and the child is `derived`.
 8. [x] `--explain-coverage` lists unmapped Config types with counts (cassette and golden).
 9. [x] The validation fixtures for all 13 false-positive groups scan with no `unmanaged`
-   finding, and `TestSpec_accounts_4` still passes, so no new IAM action is needed.
+   finding, and `TestSpec_accounts_4` still passes, so no new IAM action is needed. Group 14,
+   from the v0.4.0 rerun, scans clean too and adds `eks:ListPodIdentityAssociations`.
 10. [ ] A read-only rerun on the validation account with the same command gives under 5%
     false positives among `unmanaged` findings, no `undetermined` finding of a curated type, and
     lists the VPC Lattice resources and ACM certificates that v0.3.0 missed.

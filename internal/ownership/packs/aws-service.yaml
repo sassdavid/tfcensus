@@ -63,3 +63,7 @@
     s.startsWith("AWSLogDeliveryAclCheck"))
   owner: log-delivery
   reason: bucket policy that log delivery added (only AWSLogDeliveryWrite and AWSLogDeliveryAclCheck statements)
+- name: autoscaling-managed-rule
+  match: resource.type == "AWS::Events::Rule" && resource.name == "AutoScalingManagedRule"
+  owner: autoscaling
+  reason: EventBridge rule that EC2 Auto Scaling creates and manages (ManagedBy autoscaling.amazonaws.com)

@@ -22,6 +22,7 @@ const (
 	LayerIAMAttachments = "native:iam-attachments"
 	LayerRoute53Records = "native:route53-records"
 	LayerS3Subresources = "native:s3-subresources"
+	LayerEKSPodIdentity = "native:eks-pod-identity"
 	LayerCC             = "cloudcontrol"
 )
 
@@ -35,6 +36,7 @@ func LayerOrder() []string {
 		LayerIAMAttachments,
 		LayerRoute53Records,
 		LayerS3Subresources,
+		LayerEKSPodIdentity,
 		LayerCC,
 	}
 }

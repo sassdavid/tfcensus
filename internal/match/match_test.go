@@ -797,6 +797,28 @@ func TestIdentityParseAttrs(t *testing.T) {
 		f("aws_iam_group_policy_attachment"),
 	)
 	assert.Nil(t, f("aws_glue_job"))
+	assert.Equal(t, "root_resource_id", f("aws_api_gateway_rest_api")["root_resource_id"])
+}
+
+// TestDerivedStateAttr: the root resource of a REST API in state is derived from the API, which
+// names it in root_resource_id. Another resource of the API that no state has stays unmatched.
+func TestDerivedStateAttr(t *testing.T) {
+	t.Parallel()
+
+	api := "arn:aws:apigateway:" + region + "::/restapis/a1b2c3"
+	ix := tfstate.BuildIndex([]tfstate.UnitState{unitState("api", "aws_api_gateway_rest_api", tfstate.Instance{
+		ID: "a1b2c3", ARN: api, Region: region, IdentityAttrs: map[string]string{"root_resource_id": "r00t01"},
+	})})
+	resource := func(id string) inventory.CloudResource {
+		return live("AWS::ApiGateway::Resource", func(r *inventory.CloudResource) {
+			r.ID, r.ARN, r.Sources = id, api+"/resources/"+id, []string{inventory.LayerRE}
+		})
+	}
+	got := match.New(loadMap(t), ix).Match([]inventory.CloudResource{resource("r00t01"), resource("x9y8z7")})
+	assert.Equal(t, match.CategoryDerived, got[0].Category, got[0].Reason)
+	assert.Equal(t, match.RuleParent, got[0].Rule)
+	assert.Equal(t, "child of managed aws_api_gateway_rest_api.this (AWS::ApiGateway::RestApi)", got[0].Reason)
+	assert.Equal(t, match.CategoryUnmatched, got[1].Category, got[1].Reason)
 }
 
 // TestSpec_scan_accuracy_4: aws_iam_policy_attachment with two roles and a user matches the three

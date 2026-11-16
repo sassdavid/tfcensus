@@ -60,7 +60,9 @@ type Instance struct {
 	Sensitive []string
 	// IdentityAttrs holds the values of the type's identity attributes read from its resource
 	// attributes, keyed by identity attribute name, when [ParseOptions.IdentityAttrs] names them.
-	// It stands in for Identity in states written before Terraform 1.12.
+	// It stands in for Identity in states written before Terraform 1.12. It also holds the IDs of
+	// children the resource created with no resource of their own, such as a REST API's
+	// root_resource_id, under the attribute's name.
 	IdentityAttrs map[string]string
 	// RuleKeys are the [SGRule.Key] hashes of a security group rule's expanded tuples, or of a
 	// security group's inline rules, or the [PolicyAttachmentKey] of each principal of
