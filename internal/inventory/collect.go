@@ -38,6 +38,9 @@ type Request struct {
 	// Aggregator, when set and available, serves the config layer in every account and region
 	// whose aggregator sources are current.
 	Aggregator *Aggregator
+	// CountUnmapped asks AWS Config in every recording region which types it records that the
+	// typemap doesn't map, for the coverage report.
+	CountUnmapped bool
 }
 
 // RunStatus is the outcome of one layer in one account and region.
@@ -177,6 +180,9 @@ func (c *Collector) Collect(ctx context.Context, req Request) (*Result, error) {
 	res.Resources, notes = dropStale(Merge(found(tasks), c.opts.Env), first, notes)
 	res.Coverage = coverage(targets, tasks, layers, c.opts.Env, req.Types)
 	res.Coverage.Notes = sortNotes(notes)
+	if req.CountUnmapped {
+		res.Coverage.Unmapped, res.Coverage.Errors = c.countUnmapped(ctx, targets)
+	}
 	return res, nil
 }
 

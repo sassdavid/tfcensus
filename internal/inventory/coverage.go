@@ -21,6 +21,10 @@ type Coverage struct {
 	Columns []Column      `json:"columns"`
 	Rows    []CoverageRow `json:"rows"`
 	Notes   []Note        `json:"notes,omitempty"` // records the run left out, and why
+	// Unmapped are the types AWS Config records that the typemap doesn't map, per account and
+	// region, most resources first.
+	Unmapped []UnmappedType `json:"unmapped,omitempty"`
+	Errors   []string       `json:"errors,omitempty"` // regions whose Config counts failed
 }
 
 // Column is one account and region, or the account's [GlobalColumn].
@@ -214,6 +218,25 @@ func WriteCoverage(w io.Writer, c *Coverage) error {
 	for _, n := range c.Notes {
 		where := n.Account + "/" + cmp.Or(n.Region, GlobalColumn)
 		_, _ = fmt.Fprintf(w, "  %s %s: %d %s\n", where, short(n.Layer), n.Count, n.Reason)
+	}
+	return writeUnmapped(w, c)
+}
+
+// writeUnmapped prints the AWS Config types scan doesn't map, one table per run.
+func writeUnmapped(w io.Writer, c *Coverage) error {
+	if len(c.Unmapped) == 0 && len(c.Errors) == 0 {
+		return nil
+	}
+	_, _ = fmt.Fprintln(w, "\nAWS Config types scan doesn't map:")
+	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0) //nolint:mnd // two spaces between columns
+	for _, u := range c.Unmapped {
+		_, _ = fmt.Fprintf(tw, "  %s/%s\t%s\t%d\n", u.Account, u.Region, u.Type, u.Count)
+	}
+	if err := tw.Flush(); err != nil {
+		return fmt.Errorf("write coverage: %w", err)
+	}
+	for _, e := range c.Errors {
+		_, _ = fmt.Fprintf(w, "  not counted: %s\n", e)
 	}
 	return nil
 }

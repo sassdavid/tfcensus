@@ -71,7 +71,8 @@ files, first match wins). A child that is still unmanaged or undetermined, such 
 of a service-linked role, then takes the category of an aws-managed, other-iac or derived parent
 (rule inherit/<category>); a child of a managed parent stays unmanaged. scan --explain <arn> prints
 how one resource was categorized, with its parent chain; --explain-coverage prints which layer
-listed each type in each account and region.
+listed each type in each account and region, the records a layer left out, and the AWS Config
+types scan doesn't map, with counts (config:GetDiscoveredResourceCounts).
 
 Coverage is (managed + double-managed) / (managed + double-managed + unmanaged) per account.
 aws-managed, derived, other-iac, ignored and undetermined resources don't count.
@@ -159,7 +160,7 @@ func newScanCmd(d *app.Deps, g *globals) *cobra.Command {
 	f.IntVar(&a.minCount, flagMinCount, 1, "findings --fail-on needs before it exits 3")
 	f.StringVar(&a.explain, flagExplain, "", "print how the resource with this ARN or ID was categorized")
 	f.BoolVar(&a.explainCoverage, flagExplainCoverage, false,
-		"print which layer listed each type in each account and region")
+		"print which layer listed each type in each account and region, and the AWS Config types scan doesn't map")
 	f.BoolVar(&a.refresh, flagRefresh, false, "list and read states again even when the cache is fresh")
 	f.StringVar(&a.index, flagIndex, "", "read the state index from this file (from inventory --save-index) "+
 		"instead of reading states")
@@ -480,7 +481,7 @@ func (e *scanEnv) collect(loader *accounts.Loader, disc discovery.Result) (*scan
 		},
 		layers: e.layers, types: e.cfn, cc: e.cc, refresh: e.a.refresh,
 		loader: loader, aggregator: e.cfg.Accounts.Aggregator, stacks: e.cfg.Scan.CloudFormation,
-		externalDNS: e.cfg.Scan.ExternalDNS,
+		externalDNS: e.cfg.Scan.ExternalDNS, countUnmapped: len(e.cfn) == 0,
 	})
 	if err != nil {
 		return nil, err
@@ -503,6 +504,9 @@ type liveRequest struct {
 	stacks     bool // also list CloudFormation stack resources
 	// externalDNS is how external-dns names its TXT ownership records.
 	externalDNS config.ExternalDNS
+	// countUnmapped lists the AWS Config types the typemap doesn't map, for --explain-coverage, when
+	// --types doesn't narrow the scan.
+	countUnmapped bool
 }
 
 // collectLive probes each account and runs the inventory layers, as scan and whois do.
@@ -527,7 +531,7 @@ func collectLive(cmd *cobra.Command, d *app.Deps, m *typemap.Map, req liveReques
 	col := inventory.NewCollector(inventory.Options{Env: env})
 	res, err := col.Collect(ctx, inventory.Request{
 		Targets: targets, Layers: req.layers, Types: req.types,
-		Aggregator: liveAggregator(cmd, d, prober, req),
+		Aggregator: liveAggregator(cmd, d, prober, req), CountUnmapped: req.countUnmapped,
 	})
 	if errors.Is(err, inventory.ErrUnknownLayer) {
 		return nil, usageError(err)

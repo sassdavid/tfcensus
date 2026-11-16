@@ -110,6 +110,26 @@
                   "count": { "type": "integer", "minimum": 1 }
                 }
               }
+            },
+            "unmapped": {
+              "description": "AWS Config types recorded in an account and region that scan doesn't map, most resources first (config:GetDiscoveredResourceCounts).",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["account", "region", "type", "count"],
+                "properties": {
+                  "account": { "$ref": "#/$defs/account" },
+                  "region": { "type": "string", "minLength": 1 },
+                  "type": { "type": "string", "minLength": 1 },
+                  "count": { "type": "integer", "minimum": 0 }
+                }
+              }
+            },
+            "errors": {
+              "description": "Account and region pairs whose AWS Config resource counts failed.",
+              "type": "array",
+              "items": { "type": "string" }
             }
           }
         },

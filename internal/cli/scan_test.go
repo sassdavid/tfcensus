@@ -334,6 +334,9 @@ func scanStubs(r *awstest.Router, iamOnly, aggregated bool) {
 			1,
 		)+
 		`]}`))
+	r.On("config", "GetDiscoveredResourceCounts", "", ok(`{"resourceCounts":[`+
+		`{"resourceType":"AWS::EC2::SecurityGroup","count":3},{"resourceType":"AWS::SSM::Document","count":2}],`+
+		`"totalDiscoveredResources":5}`))
 	// Cloud Control lists the VPC Lattice types by default; the account has none.
 	none := ok(`{"ResourceDescriptions":[]}`)
 	r.On("cloudcontrolapi", "ListResources", "AWS::VpcLattice::", none, none, none, none)

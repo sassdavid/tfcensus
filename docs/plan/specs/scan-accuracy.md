@@ -267,7 +267,7 @@ how the next accounts show what is still missing.
    record has an `id`, the Kubernetes object types are skipped and counted.
 7. [x] Cloud Control lists the `cc: true` types by default. A cassette lists a resource gateway
    and an `ARN` resource configuration with its `CHILD`, and the child is `derived`.
-8. [ ] `--explain-coverage` lists unmapped Config types with counts (cassette and golden).
+8. [x] `--explain-coverage` lists unmapped Config types with counts (cassette and golden).
 9. [ ] The validation fixtures for all 13 false-positive groups scan with no `unmanaged`
    finding, and `TestSpec_accounts_4` still passes, so no new IAM action is needed.
 10. [ ] A read-only rerun on the validation account with the same command gives under 5%

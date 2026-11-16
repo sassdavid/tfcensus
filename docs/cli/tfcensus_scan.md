@@ -22,7 +22,8 @@ files, first match wins). A child that is still unmanaged or undetermined, such 
 of a service-linked role, then takes the category of an aws-managed, other-iac or derived parent
 (rule inherit/<category>); a child of a managed parent stays unmanaged. scan --explain <arn> prints
 how one resource was categorized, with its parent chain; --explain-coverage prints which layer
-listed each type in each account and region.
+listed each type in each account and region, the records a layer left out, and the AWS Config
+types scan doesn't map, with counts (config:GetDiscoveredResourceCounts).
 
 Coverage is (managed + double-managed) / (managed + double-managed + unmanaged) per account.
 aws-managed, derived, other-iac, ignored and undetermined resources don't count.
@@ -71,7 +72,7 @@ tfcensus scan [paths...] [flags]
       --decrypt-with-tofu[=true|false]   read OpenTofu encrypted state with tofu init and tofu show -json in the unit, which downloads and runs its providers (config state.decrypt_with_tofu)
       --exclude-account stringArray      drop this account ID (repeatable; config accounts.exclude)
       --explain string                   print how the resource with this ARN or ID was categorized
-      --explain-coverage[=true|false]    print which layer listed each type in each account and region
+      --explain-coverage[=true|false]    print which layer listed each type in each account and region, and the AWS Config types scan doesn't map
       --fail-on strings                  exit 3 when findings are in these categories: unmanaged or double-managed
       --filter stringArray               terragrunt filter expression, passed to terragrunt find unchanged (repeatable)
       --generate-stacks[=true|false]     run terragrunt stack generate first, so units in stacks are listed (config discovery.generate_stacks)

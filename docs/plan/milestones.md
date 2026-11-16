@@ -380,7 +380,7 @@ the last box.
 - [x] Cloud Control: `cc: true` types (the VPC Lattice resource gateway, resource configuration
   and service network associations) are listed by default, and the resource configuration type
   is read. (criterion 7)
-- [ ] `--explain-coverage` lists the AWS Config types scan doesn't map, with counts per account
+- [x] `--explain-coverage` lists the AWS Config types scan doesn't map, with counts per account
   and region. (criterion 8)
 - [ ] `testdata/validation/` holds an anonymized fixture for each of the 13 false-positive
   groups, and a testscript scans them with no `unmanaged` finding. `TestSpec_accounts_4` passes,
