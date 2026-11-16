@@ -81,6 +81,7 @@ type Ref struct {
 // Capabilities says which inventory sources work in one account and region.
 type Capabilities struct {
 	Config           bool // a recorder is recording
+	ConfigAll        bool // and it records every supported type
 	ConfigGlobal     bool // and it records global types (IAM)
 	ResourceExplorer bool // an index and a default view exist
 }
@@ -94,6 +95,9 @@ func CapabilitiesFrom(r *probe.Region) Capabilities {
 	for _, rec := range r.Config.Recorders {
 		if rec.Recording && (rec.IncludeGlobal || rec.AllSupported) {
 			c.ConfigGlobal = c.Config
+		}
+		if rec.Recording && rec.AllSupported {
+			c.ConfigAll = c.Config
 		}
 	}
 	return c

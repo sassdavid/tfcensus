@@ -263,7 +263,7 @@ how the next accounts show what is still missing.
 5. [x] Every Terraform type in the table above is curated or carries the reason it can't be
    listed. A test fails when one is missing, and the generator's alias table gives the expected
    `cfn:` for the five renamed families.
-6. [ ] Resource Explorer: an RE-only record of a Config-listed type is dropped and counted, an RE
+6. [x] Resource Explorer: an RE-only record of a Config-listed type is dropped and counted, an RE
    record has an `id`, the Kubernetes object types are skipped and counted.
 7. [ ] Cloud Control lists the `cc: true` types by default. A cassette lists a resource gateway
    and an `ARN` resource configuration with its `CHILD`, and the child is `derived`.

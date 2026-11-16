@@ -173,8 +173,10 @@ func (c *Collector) Collect(ctx context.Context, req Request) (*Result, error) {
 	for _, t := range tasks {
 		res.Runs = append(res.Runs, t.run)
 	}
-	res.Resources = Merge(found(tasks), c.opts.Env)
+	notes := skipKubernetes(tasks)
+	res.Resources, notes = dropStale(Merge(found(tasks), c.opts.Env), first, notes)
 	res.Coverage = coverage(targets, tasks, layers, c.opts.Env, req.Types)
+	res.Coverage.Notes = sortNotes(notes)
 	return res, nil
 }
 

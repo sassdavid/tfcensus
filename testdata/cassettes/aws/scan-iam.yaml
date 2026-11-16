@@ -461,7 +461,7 @@ interactions:
         proto_major: 1
         proto_minor: 1
         content_length: -1
-        body: <ListStackResourcesResponse xmlns="http://cloudformation.amazonaws.com/doc/2010-05-15/"><ListStackResourcesResult><StackResourceSummaries><member><LogicalResourceId>Nightly</LogicalResourceId><PhysicalResourceId>billing-nightly</PhysicalResourceId><ResourceType>AWS::Events::Rule</ResourceType><LastUpdatedTimestamp>2026-06-01T08:05:00Z</LastUpdatedTimestamp><ResourceStatus>CREATE_COMPLETE</ResourceStatus></member></StackResourceSummaries></ListStackResourcesResult></ListStackResourcesResponse>
+        body: <ListStackResourcesResponse xmlns="http://cloudformation.amazonaws.com/doc/2010-05-15/"><ListStackResourcesResult><StackResourceSummaries><member><LogicalResourceId>Nightly</LogicalResourceId><PhysicalResourceId>arn:aws:states:eu-west-1:111111111111:stateMachine:billing-nightly</PhysicalResourceId><ResourceType>AWS::StepFunctions::StateMachine</ResourceType><LastUpdatedTimestamp>2026-06-01T08:05:00Z</LastUpdatedTimestamp><ResourceStatus>CREATE_COMPLETE</ResourceStatus></member></StackResourceSummaries></ListStackResourcesResult></ListStackResourcesResponse>
         headers:
             Content-Type:
                 - text/xml

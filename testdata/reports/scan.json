@@ -348,29 +348,6 @@
         "account": "111111111111",
         "region": "eu-west-1",
         "category": "other-iac",
-        "cfn_type": "AWS::Events::Rule",
-        "tf_types": [
-          "aws_cloudwatch_event_rule"
-        ],
-        "arn": "arn:aws:events:eu-west-1:111111111111:rule/billing-nightly",
-        "name": "billing-nightly",
-        "sources": [
-          "resource-explorer"
-        ],
-        "owner": "cloudformation",
-        "reason": "listed by CloudFormation stack billing-AlarmsStack-1ABCDEF (nested in billing) as Nightly",
-        "rule": "source/cloudformation",
-        "stack": {
-          "name": "billing-AlarmsStack-1ABCDEF",
-          "id": "arn:aws:cloudformation:eu-west-1:111111111111:stack/billing-AlarmsStack-1ABCDEF/6f1e2d3c-0000-4000-8000-000000000001",
-          "root": "billing",
-          "logical_id": "Nightly"
-        }
-      },
-      {
-        "account": "111111111111",
-        "region": "eu-west-1",
-        "category": "other-iac",
         "cfn_type": "AWS::SQS::Queue",
         "tf_types": [
           "aws_sqs_queue"
@@ -391,6 +368,26 @@
           "name": "billing",
           "id": "arn:aws:cloudformation:eu-west-1:111111111111:stack/billing/6f1e2d3c-0000-4000-8000-000000000001",
           "logical_id": "EventsQueue"
+        }
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "category": "other-iac",
+        "cfn_type": "AWS::StepFunctions::StateMachine",
+        "arn": "arn:aws:states:eu-west-1:111111111111:stateMachine:billing-nightly",
+        "id": "billing-nightly",
+        "sources": [
+          "resource-explorer"
+        ],
+        "owner": "cloudformation",
+        "reason": "listed by CloudFormation stack billing-AlarmsStack-1ABCDEF (nested in billing) as Nightly",
+        "rule": "source/cloudformation",
+        "stack": {
+          "name": "billing-AlarmsStack-1ABCDEF",
+          "id": "arn:aws:cloudformation:eu-west-1:111111111111:stack/billing-AlarmsStack-1ABCDEF/6f1e2d3c-0000-4000-8000-000000000001",
+          "root": "billing",
+          "logical_id": "Nightly"
         }
       },
       {
@@ -510,6 +507,7 @@
           "aws_cloudwatch_log_group"
         ],
         "arn": "arn:aws:logs:eu-west-1:111111111111:log-group:/aws/lambda/acme-api",
+        "id": "/aws/lambda/acme-api",
         "name": "/aws/lambda/acme-api",
         "sources": [
           "resource-explorer"
@@ -523,6 +521,7 @@
         "category": "undetermined",
         "cfn_type": "AWS::EC2::KeyPair",
         "arn": "arn:aws:ec2:eu-west-1:111111111111:key-pair/key-0aa00000000000f6",
+        "id": "key-0aa00000000000f6",
         "sources": [
           "resource-explorer"
         ],

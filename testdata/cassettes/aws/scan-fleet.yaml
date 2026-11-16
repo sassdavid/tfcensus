@@ -540,7 +540,7 @@ interactions:
         proto_major: 1
         proto_minor: 1
         content_length: -1
-        body: <ListStackResourcesResponse xmlns="http://cloudformation.amazonaws.com/doc/2010-05-15/"><ListStackResourcesResult><StackResourceSummaries><member><LogicalResourceId>Nightly</LogicalResourceId><PhysicalResourceId>billing-nightly</PhysicalResourceId><ResourceType>AWS::Events::Rule</ResourceType><LastUpdatedTimestamp>2026-06-01T08:05:00Z</LastUpdatedTimestamp><ResourceStatus>CREATE_COMPLETE</ResourceStatus></member></StackResourceSummaries></ListStackResourcesResult></ListStackResourcesResponse>
+        body: <ListStackResourcesResponse xmlns="http://cloudformation.amazonaws.com/doc/2010-05-15/"><ListStackResourcesResult><StackResourceSummaries><member><LogicalResourceId>Nightly</LogicalResourceId><PhysicalResourceId>arn:aws:states:eu-west-1:111111111111:stateMachine:billing-nightly</PhysicalResourceId><ResourceType>AWS::StepFunctions::StateMachine</ResourceType><LastUpdatedTimestamp>2026-06-01T08:05:00Z</LastUpdatedTimestamp><ResourceStatus>CREATE_COMPLETE</ResourceStatus></member></StackResourceSummaries></ListStackResourcesResult></ListStackResourcesResponse>
         headers:
             Content-Type:
                 - text/xml
@@ -859,7 +859,7 @@ interactions:
         proto_major: 1
         proto_minor: 1
         content_length: -1
-        body: '{"Resources":[{"Arn":"arn:aws:logs:eu-west-1:111111111111:log-group:/aws/lambda/acme-api","OwningAccountId":"111111111111","Region":"eu-west-1","ResourceType":"logs:log-group","Service":"logs"},{"Arn":"arn:aws:ec2:eu-west-1:111111111111:key-pair/key-0aa00000000000f6","OwningAccountId":"111111111111","Region":"eu-west-1","ResourceType":"ec2:key-pair","Service":"ec2"},{"CfnResourceType":"AWS::Events::Rule","Arn":"arn:aws:events:eu-west-1:111111111111:rule/billing-nightly","OwningAccountId":"111111111111","Region":"eu-west-1","ResourceType":"events:rule","Service":"events"}]}'
+        body: '{"Resources":[{"Arn":"arn:aws:logs:eu-west-1:111111111111:log-group:/aws/lambda/acme-api","OwningAccountId":"111111111111","Region":"eu-west-1","ResourceType":"logs:log-group","Service":"logs"},{"Arn":"arn:aws:ec2:eu-west-1:111111111111:key-pair/key-0aa00000000000f6","OwningAccountId":"111111111111","Region":"eu-west-1","ResourceType":"ec2:key-pair","Service":"ec2"},{"CfnResourceType":"AWS::StepFunctions::StateMachine","Arn":"arn:aws:states:eu-west-1:111111111111:stateMachine:billing-nightly","OwningAccountId":"111111111111","Region":"eu-west-1","ResourceType":"states:stateMachine","Service":"states"}]}'
         headers:
             Content-Type:
                 - application/json
