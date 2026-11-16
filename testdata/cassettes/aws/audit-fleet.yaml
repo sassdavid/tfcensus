@@ -1202,35 +1202,6 @@ interactions:
         content_length: 0
         host: ""
         form:
-            location:
-                - ""
-        headers:
-            Accept-Encoding:
-                - identity
-            X-Amz-Content-Sha256:
-                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-        url: https://acme-audit-legacy-replica.s3.eu-west-1.amazonaws.com/?location=
-        method: GET
-      response:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        content_length: -1
-        body: <LocationConstraint xmlns="http://s3.amazonaws.com/doc/2006-03-01/">eu-west-1</LocationConstraint>
-        headers:
-            Content-Type:
-                - application/xml
-        status: 200 OK
-        code: 200
-        duration: 0s
-    - id: 29
-      request:
-        proto: ""
-        proto_major: 0
-        proto_minor: 0
-        content_length: 0
-        host: ""
-        form:
             versioning:
                 - ""
         headers:
@@ -1254,7 +1225,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 30
+    - id: 29
       request:
         proto: ""
         proto_major: 0
@@ -1285,7 +1256,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 31
+    - id: 30
       request:
         proto: ""
         proto_major: 0
@@ -1316,7 +1287,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 32
+    - id: 31
       request:
         proto: ""
         proto_major: 0
@@ -1367,7 +1338,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 33
+    - id: 32
       request:
         proto: ""
         proto_major: 0
@@ -1413,7 +1384,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 34
+    - id: 33
       request:
         proto: ""
         proto_major: 0
@@ -1442,7 +1413,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 35
+    - id: 34
       request:
         proto: ""
         proto_major: 0
@@ -1473,7 +1444,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 36
+    - id: 35
       request:
         proto: ""
         proto_major: 0
@@ -1502,7 +1473,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 37
+    - id: 36
       request:
         proto: ""
         proto_major: 0
@@ -1533,7 +1504,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 38
+    - id: 37
       request:
         proto: ""
         proto_major: 0
@@ -1564,7 +1535,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 39
+    - id: 38
       request:
         proto: ""
         proto_major: 0
@@ -1595,7 +1566,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 40
+    - id: 39
       request:
         proto: ""
         proto_major: 0
@@ -1730,6 +1701,37 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
+    - id: 40
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            encryption:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-good-replica.s3.eu-central-1.amazonaws.com/?encryption=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <ServerSideEncryptionConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Rule><ApplyServerSideEncryptionByDefault><SSEAlgorithm>aws:kms</SSEAlgorithm><KMSMasterKeyID>arn:aws:kms:eu-central-1:111111111111:key/0b1c2d3e-repl-4000-8000-000000000002</KMSMasterKeyID></ApplyServerSideEncryptionByDefault><BucketKeyEnabled>true</BucketKeyEnabled></Rule></ServerSideEncryptionConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
     - id: 41
       request:
         proto: ""
@@ -1800,37 +1802,6 @@ interactions:
         content_length: 0
         host: ""
         form:
-            encryption:
-                - ""
-        headers:
-            Accept-Encoding:
-                - identity
-            X-Amz-Content-Sha256:
-                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-        url: https://acme-tfstate-good-replica.s3.eu-central-1.amazonaws.com/?encryption=
-        method: GET
-      response:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        content_length: -1
-        body: |-
-            <?xml version="1.0" encoding="UTF-8"?>
-            <ServerSideEncryptionConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Rule><ApplyServerSideEncryptionByDefault><SSEAlgorithm>aws:kms</SSEAlgorithm><KMSMasterKeyID>arn:aws:kms:eu-central-1:111111111111:key/0b1c2d3e-repl-4000-8000-000000000002</KMSMasterKeyID></ApplyServerSideEncryptionByDefault><BucketKeyEnabled>true</BucketKeyEnabled></Rule></ServerSideEncryptionConfiguration>
-        headers:
-            Content-Type:
-                - application/xml
-        status: 200 OK
-        code: 200
-        duration: 0s
-    - id: 44
-      request:
-        proto: ""
-        proto_major: 0
-        proto_minor: 0
-        content_length: 0
-        host: ""
-        form:
             lifecycle:
                 - ""
         headers:
@@ -1854,7 +1825,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 45
+    - id: 44
       request:
         proto: ""
         proto_major: 0
@@ -1923,7 +1894,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 46
+    - id: 45
       request:
         proto: ""
         proto_major: 0
@@ -1954,7 +1925,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 47
+    - id: 46
       request:
         proto: ""
         proto_major: 0
@@ -1985,7 +1956,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 48
+    - id: 47
       request:
         proto: ""
         proto_major: 0
@@ -2014,7 +1985,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 49
+    - id: 48
       request:
         proto: ""
         proto_major: 0
@@ -2045,7 +2016,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 50
+    - id: 49
       request:
         proto: ""
         proto_major: 0
@@ -2075,6 +2046,37 @@ interactions:
                 - application/xml
         status: 404 Not Found
         code: 404
+        duration: 0s
+    - id: 50
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            versioning:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-good-replica.s3.eu-central-1.amazonaws.com/?versioning=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <VersioningConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Status>Enabled</Status><MfaDelete>Enabled</MfaDelete></VersioningConfiguration>
+        headers:
+            Content-Type:
+                - application/xml
+        status: 200 OK
+        code: 200
         duration: 0s
     - id: 51
       request:
@@ -2146,95 +2148,6 @@ interactions:
         content_length: 0
         host: ""
         form:
-            versioning:
-                - ""
-        headers:
-            Accept-Encoding:
-                - identity
-            X-Amz-Content-Sha256:
-                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-        url: https://acme-tfstate-good-replica.s3.eu-central-1.amazonaws.com/?versioning=
-        method: GET
-      response:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        content_length: -1
-        body: |-
-            <?xml version="1.0" encoding="UTF-8"?>
-            <VersioningConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Status>Enabled</Status><MfaDelete>Enabled</MfaDelete></VersioningConfiguration>
-        headers:
-            Content-Type:
-                - application/xml
-        status: 200 OK
-        code: 200
-        duration: 0s
-    - id: 54
-      request:
-        proto: ""
-        proto_major: 0
-        proto_minor: 0
-        content_length: 0
-        host: ""
-        form:
-            location:
-                - ""
-        headers:
-            Accept-Encoding:
-                - identity
-            X-Amz-Content-Sha256:
-                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-        url: https://acme-tfstate-good-replica.s3.eu-west-1.amazonaws.com/?location=
-        method: GET
-      response:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        content_length: -1
-        body: <LocationConstraint xmlns="http://s3.amazonaws.com/doc/2006-03-01/">eu-central-1</LocationConstraint>
-        headers:
-            Content-Type:
-                - application/xml
-        status: 200 OK
-        code: 200
-        duration: 0s
-    - id: 55
-      request:
-        proto: ""
-        proto_major: 0
-        proto_minor: 0
-        content_length: 0
-        host: ""
-        form:
-            location:
-                - ""
-        headers:
-            Accept-Encoding:
-                - identity
-            X-Amz-Content-Sha256:
-                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-        url: https://acme-tfstate-good-replica.s3.eu-west-1.amazonaws.com/?location=
-        method: GET
-      response:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        content_length: -1
-        body: <LocationConstraint xmlns="http://s3.amazonaws.com/doc/2006-03-01/">eu-central-1</LocationConstraint>
-        headers:
-            Content-Type:
-                - application/xml
-        status: 200 OK
-        code: 200
-        duration: 0s
-    - id: 56
-      request:
-        proto: ""
-        proto_major: 0
-        proto_minor: 0
-        content_length: 0
-        host: ""
-        form:
             encryption:
                 - ""
         headers:
@@ -2258,7 +2171,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 57
+    - id: 54
       request:
         proto: ""
         proto_major: 0
@@ -2289,7 +2202,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 58
+    - id: 55
       request:
         proto: ""
         proto_major: 0
@@ -2340,7 +2253,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 59
+    - id: 56
       request:
         proto: ""
         proto_major: 0
@@ -2371,7 +2284,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 60
+    - id: 57
       request:
         proto: ""
         proto_major: 0
@@ -2402,7 +2315,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 61
+    - id: 58
       request:
         proto: ""
         proto_major: 0
@@ -2431,7 +2344,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 62
+    - id: 59
       request:
         proto: ""
         proto_major: 0
@@ -2462,7 +2375,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 63
+    - id: 60
       request:
         proto: ""
         proto_major: 0
@@ -2493,7 +2406,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 64
+    - id: 61
       request:
         proto: ""
         proto_major: 0
@@ -2524,7 +2437,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 65
+    - id: 62
       request:
         proto: ""
         proto_major: 0
@@ -2552,6 +2465,84 @@ interactions:
                 - application/xml
         status: 200 OK
         code: 200
+        duration: 0s
+    - id: 63
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-audit-legacy-replica.s3.eu-west-1.amazonaws.com/
+        method: HEAD
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: ""
+        headers:
+            X-Amz-Bucket-Region:
+                - eu-west-1
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 64
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-good-replica.s3.eu-west-1.amazonaws.com/
+        method: HEAD
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: ""
+        headers:
+            X-Amz-Bucket-Region:
+                - eu-central-1
+        status: 301 Moved Permanently
+        code: 301
+        duration: 0s
+    - id: 65
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-tfstate-good-replica.s3.eu-west-1.amazonaws.com/
+        method: HEAD
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: ""
+        headers:
+            X-Amz-Bucket-Region:
+                - eu-central-1
+        status: 301 Moved Permanently
+        code: 301
         duration: 0s
     - id: 66
       request:
