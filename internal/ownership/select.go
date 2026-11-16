@@ -23,5 +23,5 @@ func NewSelector(expr string) (*Selector, error) {
 
 // Match reports whether the expression is true for r.
 func (s *Selector) Match(r *Resource) (bool, error) {
-	return eval(s.c, map[string]any{"resource": r, "unit": &Unit{}})
+	return eval(s.c, celVars(r, &Unit{}))
 }
