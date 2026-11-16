@@ -279,15 +279,16 @@ identifiers map the organization. Trivy, Snyk, Steampipe and Infracost use the s
   Copilot job calls the Copilot CLI instead of `actions/ai-inference` (ADR-0013 says why).
 
 ### M16: Planned CLI gaps (shared where both repos lack it) → v0.3.0
-- [ ] `config init` writes a commented `.tfcensus.yaml` and refuses to overwrite without
+- [x] `config init` writes a commented `.tfcensus.yaml` and refuses to overwrite without
   `--force`. The same shape as relgap's.
 - [ ] `cache info|clear` for the probe and scan caches (plan ADR-0009), modeled on relgap's
   `cache` command.
 - [ ] `doctor` reports the terragrunt and terraform or tofu versions and fails below the minimums
   in `docs/engineering/version-policy.md` (risk R5).
 - [ ] `--account`, `--exclude-account` and `--all-regions` from `cli.md`.
-- [ ] The config search stops at the git root, through an option in the shared
-  `internal/config/load.go`.
+- [x] The config search stops at the git root, through an option in the shared
+  `internal/config/load.go` (`config.Options.StopDir`). Outside a repository only the working
+  directory counts.
 
 ### M17: Scan coverage → v0.4.0 (tfcensus only)
 - [ ] The Config aggregator fast path in `internal/inventory` (inventory.md, risk R3, open question

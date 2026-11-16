@@ -1,0 +1,104 @@
+# tfcensus configuration, written by 'tfcensus config init'.
+# Each key below is commented out and shows its default. Uncomment a key to change it.
+# Later layers win: defaults < user file < project file < env (TFCENSUS_*) < flags.
+# 'tfcensus config show --sources' prints every effective value and where it came from, and
+# 'tfcensus config validate' checks this file. Unknown keys are errors. Credentials never go here.
+schema_version: 1
+#
+# binaries:
+#   terragrunt: terragrunt         # a name on PATH or a path
+#   terraform: terraform           # terraform or tofu, passed to terragrunt as --tf-path
+#
+# discovery:
+#   roots: []                      # directories to discover units in
+#   generate_stacks: false         # run terragrunt stack generate before discovery
+#   render: auto                   # auto, always or never
+#
+# accounts:
+#   profiles: []                   # AWS profile globs from ~/.aws/config, for example ["acme-*"]
+#   org:
+#     enabled: false               # list the organization's accounts and assume a role in each
+#     management_profile: ""       # profile that lists the accounts; empty means the default credentials
+#     role: OrganizationAccountAccessRole
+#     ou_roles: {}                 # OU or root ID to the role used for the accounts directly under it
+#   map: {}                        # account ID to profile and name, for example {"111111111111": {profile: acme-nonprod, name: acme-nonprod}}
+#   aggregator:                    # AWS Config aggregator
+#     profile: ""
+#     name: ""
+#     region: ""
+#
+# regions: []                      # empty means the regions in the units' backends and providers
+#
+# scan:
+#   layers: auto                   # auto, or a comma-separated list of re, config, cc and native
+#   cloudcontrol_types: []         # CloudFormation types listed through Cloud Control
+#   packs:                         # built-in ownership rule packs
+#     aws-defaults: true
+#     aws-service: true
+#     other-iac: true
+#     derived: true
+#     ephemeral: true
+#   never_hide: []                 # categories user rules can't give to IAM users
+#
+# rules: []                        # ownership rules, see docs/plan/specs/ownership-rules.md
+#
+# audit:
+#   policy:
+#     min_terraform_version: "1.10"  # FL-TFVER
+#     min_provider_versions: {}    # FL-PROV, for example {hashicorp/aws: "5.0.0"}
+#     noncurrent_days: 30          # S3-LC
+#     stale_lock_hours: 24         # LK-STALE
+#     max_state_mb: 20             # FL-SIZE
+#   discover_patterns:             # bucket globs for audit backend --discover
+#     - '*tfstate*'
+#     - '*terraform-state*'
+#     - '*tf-state*'
+#   suppress: []                   # accepted findings, each with reason and an optional expires date
+#
+# drift:
+#   mode: refresh-only             # refresh-only or full
+#   collapse: shape                # shape, strict or none
+#   never_hide:                    # drift actions no noise rule can hide
+#     - delete
+#     - replace
+#   noise: []                      # noise rules or presets, for example [{preset: aws-tags-all}]
+#
+# notify:
+#   enabled: []                    # slack, github-issues, github-pr-comment, bitbucket-pr-comment, file
+#   categories:
+#     - double-managed
+#     - unmanaged
+#   min_severity: low              # info, low, medium or high
+#   top: 10                        # findings listed in a Slack message, 1 to 50
+#   slack:
+#     webhook_env: SLACK_WEBHOOK_URL
+#     when: findings               # findings or always
+#     link: ""                     # URL of the full report, shown in the message
+#   github_issues:
+#     repo: ""                     # owner/name; empty means GITHUB_REPOSITORY
+#     api_url: ""                  # empty means GITHUB_API_URL, else https://api.github.com
+#     token_env: GITHUB_TOKEN
+#     labels: []
+#     max_open: 10                 # open issues per report kind
+#     close_resolved: true
+#     summary: false               # keep one summary issue per report kind
+#   github_pr_comment:
+#     repo: ""                     # owner/name; empty means GITHUB_REPOSITORY
+#     api_url: ""
+#     pull_request: 0              # 0 means the pull request of the GITHUB_EVENT_PATH event
+#     token_env: GITHUB_TOKEN
+#   bitbucket_pr_comment:
+#     workspace: ""                # empty means BITBUCKET_WORKSPACE
+#     repo: ""                     # empty means BITBUCKET_REPO_SLUG
+#     pull_request: 0              # 0 means BITBUCKET_PR_ID
+#     api_url: https://api.bitbucket.org/2.0
+#     token_env: BITBUCKET_TOKEN
+#     email_env: ""                # set it to send an API token with basic auth
+#   file:
+#     dir: .
+#     formats:
+#       - md
+#       - json
+#
+# cache:
+#   ttl: 1h                        # how long cached inventory stays fresh

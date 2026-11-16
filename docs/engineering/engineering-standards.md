@@ -57,10 +57,13 @@ cobra/POSIX usage-error code. Docs explain the mapping.
 
 Precedence: **flags > env (`TFCENSUS_*`) > project file > user file > defaults**.
 - User file: `$XDG_CONFIG_HOME/tfcensus/config.yaml` (adrg/xdg; XDG layout on macOS too).
-- Project file: `.tfcensus.yaml` found by walking up to the git root.
+- Project file: `.tfcensus.yaml` found by walking up to the git root. Outside a git repository only
+  the working directory counts. A caller can stop the walk earlier (`config.Options.StopDir`).
 - Cache: `$XDG_CACHE_HOME/tfcensus/`.
 - `tfcensus config show --sources` prints the effective value of every key and where it came from.
 - `tfcensus config validate` checks the file against the JSON Schema in `schemas/`.
+- `tfcensus config init` writes a template with every key commented out at its default. `--user`
+  writes the user file, and `--force` replaces an existing file.
 - Unknown keys are an error, not silently ignored. A known pain with Claude Code settings motivated this rule.
 
 ## Logging

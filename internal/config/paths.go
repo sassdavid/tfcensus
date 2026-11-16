@@ -57,24 +57,39 @@ func baseDir(lookup LookupFunc, goos, envVar, homeRel, windowsDefault string) (s
 	return filepath.Join(home, homeRel), nil
 }
 
-// FindProjectFile walks up from dir to the git root looking for .tfcensus.yaml.
-// It returns "" when there is none.
-func FindProjectFile(dir string) (string, error) {
+// FindProjectFile walks up from dir to the git root, or to stopDir when that comes first,
+// looking for .tfcensus.yaml. Outside a git repository and stopDir it reads only dir. It returns
+// "" when there is none.
+func FindProjectFile(dir, stopDir string) (string, error) {
 	dir = filepath.Clean(dir)
+	if stopDir != "" {
+		stopDir = filepath.Clean(stopDir)
+	}
+	start, found := dir, ""
 	for {
-		candidate := filepath.Join(dir, ProjectFileName)
-		ok, err := isFile(candidate)
-		if err != nil {
-			return "", err
+		if found == "" {
+			candidate := filepath.Join(dir, ProjectFileName)
+			ok, err := isFile(candidate)
+			if err != nil {
+				return "", err
+			}
+			if ok && dir == start {
+				return candidate, nil
+			}
+			if ok {
+				found = candidate
+			}
 		}
-		if ok {
-			return candidate, nil
+		if dir == stopDir {
+			return found, nil
 		}
-		if _, err = os.Stat(filepath.Join(dir, ".git")); err == nil {
-			return "", nil
+		if _, err := os.Stat(filepath.Join(dir, ".git")); err == nil {
+			return found, nil
 		}
 		parent := filepath.Dir(dir)
 		if parent == dir {
+			// No git root above dir: a file in a parent might belong to an unrelated tree,
+			// such as the home directory.
 			return "", nil
 		}
 		dir = parent
