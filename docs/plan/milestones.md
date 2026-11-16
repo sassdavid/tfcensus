@@ -7,10 +7,10 @@ Never run anything against real AWS accounts in a session unless the prompt expl
 
 Release mapping (revised 2026-11-13): every release goes to GitHub only (archives, checksums,
 SBOMs, the cosign bundle and attestations) until M19 turns the package channels on.
-**v0.1.0 = M0-M11**, v0.2.0 = M12-M13, v0.3.0 = M15-M16, v0.4.0 = M17-M18, and M14 releases the
-separate action repo. M19 has no fixed version or place in the order: the owner runs it when the
-GitHub releases look right. M20 waits for external users. The research and decisions behind
-M11-M20 are in [roadmap-research.md](roadmap-research.md).
+**v0.1.0 = M0-M11**, v0.2.0 = M12-M13, v0.3.0 = M15-M18, and M14 releases the separate action
+repo (revised 2026-11-16: M17-M18 ship in v0.3.0, with no v0.4.0). M19 has no fixed version or
+place in the order: the owner runs it when the GitHub releases look right. M20 waits for external
+users. The research and decisions behind M11-M20 are in [roadmap-research.md](roadmap-research.md).
 
 ---
 
@@ -293,7 +293,7 @@ identifiers map the organization. Trivy, Snyk, Steampipe and Infracost use the s
   `internal/config/load.go` (`config.Options.StopDir`). Outside a repository only the working
   directory counts.
 
-### M17: Scan coverage → v0.4.0 (tfcensus only)
+### M17: Scan coverage → v0.3.0 (tfcensus only)
 - [x] The Config aggregator fast path in `internal/inventory` (inventory.md, risk R3, open question
   Q3), with the probe result from `doctor`. Inventory criterion 6 passes on cassettes; Q3 stays
   open until a read-only run against the real org.
@@ -304,7 +304,7 @@ identifiers map the organization. Trivy, Snyk, Steampipe and Infracost use the s
   matches. Q4 resolved.
 - Not in M17: whois and codify still read only the CloudFormation tags (ADR-0014 follow-up).
 
-### M18: Move and drift depth → v0.4.0 (tfcensus only)
+### M18: Move and drift depth → v0.3.0 (tfcensus only)
 - [x] `move suggest` drafts a migration file from plans (move.md, own strict 1:1 engine,
   [ADR-0016](adr/0016-own-move-suggest-engine.md)).
 - [x] `move` supports non-default workspaces of s3 backends (move.md).
