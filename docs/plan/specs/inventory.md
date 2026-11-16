@@ -34,8 +34,12 @@ whichever region happens to run first. Resource Explorer runs only with a defaul
 - Cloud Control runs after the other layers. In auto mode it skips an allowlisted type that another
   layer listed in the same account and region. A type with `cc_parent` in the typemap
   (`AWS::ElasticLoadBalancingV2::Listener` per load balancer, `ListenerRule` per listener) is listed
-  once per parent found by an earlier layer or by Cloud Control itself, parents first. The default
-  allowlist (`scan.cloudcontrol_types`) is empty.
+  once per parent found by an earlier layer or by Cloud Control itself, parents first. The
+  allowlist (`scan.cloudcontrol_types`) is empty by default, and the curated `cc: true` types (the
+  four VPC Lattice types) join it in every run. A resource configuration's
+  `ResourceConfigurationType`, `ResourceConfigurationGroupId` and `AmazonManaged` are read, with
+  `GetResource` when the list leaves them out, and a `CHILD` configuration gets its group as
+  parent ([ADR-0017](../adr/0017-scan-accuracy.md)).
 - `--layers` with names (`config`, `re`, `native`, `cc`, or full layer names) runs exactly those
   layers, without the probe's checks. Naming `cc` lists the whole allowlist; with an empty
   allowlist it lists the `--types`.

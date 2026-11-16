@@ -38,7 +38,7 @@ schema_version: 1
 #
 # scan:
 #   layers: auto                   # auto, or a comma-separated list of re, config, cc and native
-#   cloudcontrol_types: []         # CloudFormation types listed through Cloud Control
+#   cloudcontrol_types: []         # more types listed through Cloud Control (VPC Lattice is always)
 #   cloudformation: true           # list stack resources; what a stack lists and no state manages is other-iac
 #   packs:                         # built-in ownership rule packs
 #     aws-defaults: true

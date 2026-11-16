@@ -17,6 +17,11 @@ Narrow it before use:
   use that flag.
 - `CloudFormationStacks`: `scan` lists stack resources to find what CloudFormation owns. It reads stack and resource
   identifiers only, never templates or outputs. Drop it if you set `scan.cloudformation: false`.
+- `CloudControlHandlers`: Cloud Control runs each type's list and read handlers with the caller's permissions.
+  `scan` lists the VPC Lattice resource gateways, resource configurations and service network associations through
+  Cloud Control by default, because neither AWS Config nor Resource Explorer lists them. It reads a resource
+  configuration with `GetResource` when the list leaves out its type. Types you add to `scan.cloudcontrol_types`
+  need their own handler permissions (the `handlers` of the type's schema in the CloudFormation registry).
 - `StateAccessLogging`: `audit backend` reads trail event selectors to see whether CloudTrail logs S3 data events
   for a state bucket that has no server access logging (S3-LOG).
 

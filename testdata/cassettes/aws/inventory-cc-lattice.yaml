@@ -1,0 +1,138 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 142
+        host: ""
+        body: '{"Identifier":"arn:aws:vpc-lattice:eu-west-1:111111111111:resourceconfiguration/rcfg-0a3","TypeName":"AWS::VpcLattice::ResourceConfiguration"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+            X-Amz-Target:
+                - CloudApiService.GetResource
+        url: https://cloudcontrolapi.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"TypeName":"AWS::VpcLattice::ResourceConfiguration","ResourceDescription":{"Identifier":"arn:aws:vpc-lattice:eu-west-1:111111111111:resourceconfiguration/rcfg-0a3","Properties":"{\"Arn\":\"arn:aws:vpc-lattice:eu-west-1:111111111111:resourceconfiguration/rcfg-0a3\",\"ResourceConfigurationType\":\"CHILD\",\"ResourceConfigurationGroupId\":\"rcfg-0a2\",\"AmazonManaged\":true,\"Name\":\"FIXTURE-SECRET\"}"}}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 1
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 70
+        host: ""
+        body: '{"MaxResults":100,"TypeName":"AWS::VpcLattice::ResourceConfiguration"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+            X-Amz-Target:
+                - CloudApiService.ListResources
+        url: https://cloudcontrolapi.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"ResourceDescriptions":[{"Identifier":"arn:aws:vpc-lattice:eu-west-1:111111111111:resourceconfiguration/rcfg-0a2","Properties":"{\"Arn\":\"arn:aws:vpc-lattice:eu-west-1:111111111111:resourceconfiguration/rcfg-0a2\",\"ResourceConfigurationType\":\"ARN\"}"},{"Identifier":"arn:aws:vpc-lattice:eu-west-1:111111111111:resourceconfiguration/rcfg-0a3","Properties":"{\"Arn\":\"arn:aws:vpc-lattice:eu-west-1:111111111111:resourceconfiguration/rcfg-0a3\"}"}]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 2
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 64
+        host: ""
+        body: '{"MaxResults":100,"TypeName":"AWS::VpcLattice::ResourceGateway"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+            X-Amz-Target:
+                - CloudApiService.ListResources
+        url: https://cloudcontrolapi.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"ResourceDescriptions":[{"Identifier":"arn:aws:vpc-lattice:eu-west-1:111111111111:resourcegateway/rgw-0a1","Properties":"{\"Arn\":\"arn:aws:vpc-lattice:eu-west-1:111111111111:resourcegateway/rgw-0a1\"}"}]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 3
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 82
+        host: ""
+        body: '{"MaxResults":100,"TypeName":"AWS::VpcLattice::ServiceNetworkResourceAssociation"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+            X-Amz-Target:
+                - CloudApiService.ListResources
+        url: https://cloudcontrolapi.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"ResourceDescriptions":[]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 4
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 77
+        host: ""
+        body: '{"MaxResults":100,"TypeName":"AWS::VpcLattice::ServiceNetworkVpcAssociation"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+            X-Amz-Target:
+                - CloudApiService.ListResources
+        url: https://cloudcontrolapi.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"ResourceDescriptions":[]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+        status: 200 OK
+        code: 200
+        duration: 0s

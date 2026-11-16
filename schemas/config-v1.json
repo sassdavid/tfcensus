@@ -174,7 +174,7 @@
             "type": "string"
           },
           "type": "array",
-          "description": "CloudFormation types listed through Cloud Control."
+          "description": "CloudFormation types listed through Cloud Control, on top of the types only Cloud Control lists (the VPC Lattice resource gateways, resource configurations and service network associations)."
         },
         "cloudformation": {
           "type": "boolean",

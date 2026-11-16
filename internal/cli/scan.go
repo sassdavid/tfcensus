@@ -183,7 +183,7 @@ func layerChoices() []complete.Choice {
 		{Value: inventory.LayersAuto, Desc: "every layer the capability probe allows"},
 		{Value: inventory.LayerConfig, Desc: "AWS Config"},
 		{Value: "re", Desc: "Resource Explorer"},
-		{Value: "cc", Desc: "Cloud Control, for allowlisted types"},
+		{Value: "cc", Desc: "Cloud Control, for allowlisted types and the types only it lists"},
 		{Value: inventory.LayersNative, Desc: "every native lister"},
 	}
 }
@@ -285,7 +285,7 @@ func newScanEnv(cmd *cobra.Command, d *app.Deps, cfg *config.Config, a scanArgs)
 		}
 	}
 	e.layers = scanLayers(cfg)
-	e.cc = ccTypes(cfg, e.layers, e.cfn)
+	e.cc = ccTypes(cfg, m, e.layers, e.cfn)
 	if e.failOn, err = parseFailOn(a.failOn); err != nil {
 		return nil, err
 	}
@@ -304,11 +304,17 @@ func scanLayers(cfg *config.Config) []string {
 }
 
 // ccTypes returns the types the Cloud Control layer lists: the allowlist, else the selected types
-// when the cc layer is named.
-func ccTypes(cfg *config.Config, layers, types []string) []string {
+// when the cc layer is named, plus the curated types that only Cloud Control lists (limited to
+// the selected types, when there are any).
+func ccTypes(cfg *config.Config, m *typemap.Map, layers, types []string) []string {
 	cc := slices.Clone(cfg.Scan.CloudControlTypes)
 	if len(cc) == 0 && slices.ContainsFunc(layers, func(l string) bool { return l == "cc" || l == inventory.LayerCC }) {
 		cc = slices.Clone(types)
+	}
+	for _, t := range m.CCTypes() {
+		if len(types) == 0 || slices.Contains(types, t) {
+			cc = append(cc, t)
+		}
 	}
 	slices.Sort(cc)
 	return slices.Compact(cc)

@@ -1991,12 +1991,52 @@ account,region,category,cfn_type,source_type,tf_types,arn,id,name,owner,rule,rea
           ]
         },
         {
+          "cfn_type": "AWS::VpcLattice::ResourceConfiguration",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "cc"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::VpcLattice::ResourceGateway",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "cc"
+            ]
+          ]
+        },
+        {
           "cfn_type": "AWS::VpcLattice::ServiceNetwork",
           "global": false,
           "cells": [
             null,
             [
               "re"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::VpcLattice::ServiceNetworkResourceAssociation",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "cc"
+            ]
+          ]
+        },
+        {
+          "cfn_type": "AWS::VpcLattice::ServiceNetworkVpcAssociation",
+          "global": false,
+          "cells": [
+            null,
+            [
+              "cc"
             ]
           ]
         },

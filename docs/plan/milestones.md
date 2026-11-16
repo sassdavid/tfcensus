@@ -377,7 +377,7 @@ the last box.
   updated with the real count. (criterion 5)
 - [x] Resource Explorer: records get an `id`, RE-only records of a Config-listed type are dropped
   and counted, and the Kubernetes object types are skipped and counted. (criterion 6)
-- [ ] Cloud Control: `cc: true` types (the VPC Lattice resource gateway, resource configuration
+- [x] Cloud Control: `cc: true` types (the VPC Lattice resource gateway, resource configuration
   and service network associations) are listed by default, and the resource configuration type
   is read. (criterion 7)
 - [ ] `--explain-coverage` lists the AWS Config types scan doesn't map, with counts per account
