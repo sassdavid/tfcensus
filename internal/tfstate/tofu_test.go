@@ -84,9 +84,12 @@ func TestTofuDecrypt(t *testing.T) {
 			want := []string{"init", "show"}
 			for i, c := range calls {
 				assert.Contains(t, c.Args, want[i])
-				realDir, evalErr := filepath.EvalSymlinks(dir)
+				// Both sides resolve: macOS links the temp dir, and Windows can report its 8.3 short name.
+				wantDir, evalErr := filepath.EvalSymlinks(dir)
 				require.NoError(t, evalErr)
-				assert.Equal(t, realDir, c.Dir)
+				gotDir, evalErr := filepath.EvalSymlinks(c.Dir)
+				require.NoError(t, evalErr)
+				assert.Equal(t, wantDir, gotDir)
 				assert.Equal(t, tofuKeys, c.Env["TF_ENCRYPTION"], "the key configuration passes through")
 				assert.NotEmpty(t, c.Env["TF_DATA_DIR"])
 				assert.NotContains(t, c.Env["TF_DATA_DIR"], dir, "the unit's .terraform stays as it was")
