@@ -60,6 +60,7 @@ audit.policy.stale_lock_hours             24                                    
 audit.suppress                            []                                              default
 binaries.terraform                        /opt/bin/tofu                                   flag --tf-path
 binaries.terragrunt                       terragrunt                                      default
+binaries.tofu                             tofu                                            default
 cache.ttl                                 2h                                              user file $WORK/.config/tfcensus/config.yaml
 discovery.generate_stacks                 true                                            env TFCENSUS_DISCOVERY__GENERATE_STACKS
 discovery.render                          never                                           project file $WORK/.tfcensus.yaml
@@ -106,3 +107,4 @@ scan.packs.derived                        true                                  
 scan.packs.ephemeral                      true                                            default
 scan.packs.other-iac                      true                                            default
 schema_version                            1                                               project file $WORK/.tfcensus.yaml
+state.decrypt_with_tofu                   false                                           default

@@ -11,7 +11,7 @@
 ## Edge cases
 | Case | Behaviour |
 |---|---|
-| **OpenTofu client-side encryption** (1.7+; payload has `encrypted_data`/`encryption_version`) | report `encrypted: true` and skip with a hint. Optional `--decrypt-with-tofu` runs `tofu show -json` in the unit (needs its key config). The code is in OpenTofu `internal/`, so it can't be imported |
+| **OpenTofu client-side encryption** (1.7+; payload has `encrypted_data`/`encryption_version`) | report `encrypted: true` and skip with a hint. Opt-in `--decrypt-with-tofu` (`state.decrypt_with_tofu`) runs `tofu init` and `tofu show -json` in the unit with `binaries.tofu`, through terragrunt for terragrunt units. The key config is the unit's or `TF_ENCRYPTION`. A decrypted state is `ok` with `encrypted: true`; a failure stays `encrypted` with a fixed error and exits 1 ([ADR-0015](../adr/0015-read-encrypted-state-with-tofu.md)). The code is in OpenTofu `internal/`, so it can't be imported |
 | Empty state (0 resources) | indexed, flagged by audit |
 | State v3 or older | unsupported: warn with the version |
 | Key missing (unit never applied) | `state: absent` |

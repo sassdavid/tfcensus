@@ -307,7 +307,7 @@ identifiers map the organization. Trivy, Snyk, Steampipe and Infracost use the s
 ### M18: Move and drift depth → v0.4.0 (tfcensus only)
 - [ ] `move suggest` drafts a migration file from plans (move.md, tfautomv engine).
 - [x] `move` supports non-default workspaces of s3 backends (move.md).
-- [ ] OpenTofu encrypted state is read through `tofu show -json` (risk R6).
+- [x] OpenTofu encrypted state is read through `tofu show -json` (risk R6, [ADR-0015](adr/0015-read-encrypted-state-with-tofu.md)).
 - [ ] An L3 drift e2e runs real terraform and terragrunt against moto, and a nightly terragrunt
   contract test runs in `live.yml` (testing.md, risk R5).
 

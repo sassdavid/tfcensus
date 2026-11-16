@@ -234,7 +234,7 @@
     "data_sources": 0,
     "resource_types": {},
     "warnings": [
-      "state is encrypted with OpenTofu client-side encryption, so only serial and lineage are readable; tofu show -json in the unit reads it with the unit's key configuration"
+      "state is encrypted with OpenTofu client-side encryption, so only serial and lineage are readable; --decrypt-with-tofu reads it with tofu show -json in the unit"
     ]
   },
   {

@@ -138,6 +138,7 @@ func newScanCmd(d *app.Deps, g *globals) *cobra.Command {
 	addDiscoveryFlags(cmd, &a.filters)
 	addOutputFlags(cmd, g, formats...)
 	addAccountFlags(cmd, d)
+	addStateFlags(cmd)
 	addAccountFilterFlags(cmd)
 	addAllRegionsFlags(cmd)
 	f := cmd.Flags()
@@ -640,11 +641,12 @@ func readStates(cmd *cobra.Command, d *app.Deps, cfg *config.Config, m *typemap.
 		Concurrency: req.concurrency,
 		TFPath:      cfg.Binaries.Terraform,
 		Logger:      d.Logger,
+		Decrypt:     stateDecrypter(d, cfg),
 	})
 	states := reader.Read(cmd.Context(), req.disc.Units)
 	var problems []scan.Problem
 	for i := range states {
-		if u := &states[i]; u.Status == tfstate.StatusError {
+		if u := &states[i]; u.Err != nil {
 			problems = append(problems, scan.Problem{
 				Target: stateLabel(u), Message: u.Error, Auth: errors.Is(u.Err, accounts.ErrAuth),
 			})

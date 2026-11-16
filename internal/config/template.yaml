@@ -8,6 +8,7 @@ schema_version: 1
 # binaries:
 #   terragrunt: terragrunt         # a name on PATH or a path
 #   terraform: terraform           # terraform or tofu, passed to terragrunt as --tf-path
+#   tofu: tofu                     # reads OpenTofu encrypted state when state.decrypt_with_tofu is on
 #
 # discovery:
 #   roots: []                      # directories to discover units in
@@ -28,6 +29,9 @@ schema_version: 1
 #     profile: ""
 #     name: ""
 #     region: ""
+#
+# state:
+#   decrypt_with_tofu: false       # run tofu init and tofu show -json in units whose state is encrypted
 #
 # regions: []                      # empty means the regions in the units' backends and providers
 # all_regions: false               # every region each account has enabled, instead of regions

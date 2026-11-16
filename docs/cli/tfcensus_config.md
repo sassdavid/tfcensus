@@ -35,6 +35,7 @@ Unknown keys and wrong types are errors (exit 2), reported with file:line:column
   -q, --quiet[=true|false]      log errors only
       --tf-path string          terraform or tofu binary, passed to terragrunt as --tf-path (config binaries.terraform) (default "terraform")
       --tg-path string          terragrunt binary (config binaries.terragrunt) (default "terragrunt")
+      --tofu-path string        tofu binary that --decrypt-with-tofu runs (config binaries.tofu) (default "tofu")
   -v, --verbose count           more logging: -v info, -vv debug, -vvv trace
 ```
 

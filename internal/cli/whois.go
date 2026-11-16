@@ -105,6 +105,7 @@ state read or a layer failed, 4 when every failure was a credential problem, and
 	}
 	addDiscoveryFlags(cmd, &a.filters)
 	addAccountFlags(cmd, d)
+	addStateFlags(cmd)
 	addAccountFilterFlags(cmd)
 	addOutputFlags(cmd, g, formats...)
 	addRegionFlag(cmd)

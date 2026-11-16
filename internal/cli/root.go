@@ -16,14 +16,17 @@ import (
 )
 
 const (
-	flagTFPath = "tf-path"
-	flagTGPath = "tg-path"
+	flagTFPath   = "tf-path"
+	flagTGPath   = "tg-path"
+	flagTofuPath = "tofu-path"
 )
 
 func flagKeys() map[string]string {
 	return map[string]string{
 		flagTFPath:            "binaries.terraform",
 		flagTGPath:            "binaries.terragrunt",
+		flagTofuPath:          "binaries.tofu",
+		flagDecryptWithTofu:   "state.decrypt_with_tofu",
 		flagGenerateStacks:    "discovery.generate_stacks",
 		flagRender:            "discovery.render",
 		flagProfile:           "accounts.profiles",
@@ -53,6 +56,7 @@ type globals struct {
 	noInput    bool
 	tfPath     string
 	tgPath     string
+	tofuPath   string
 
 	outSpecs   []string // --out, on commands that write a report
 	mdMaxChars int
@@ -117,6 +121,8 @@ stdout carries data, stderr carries logs. Use --format json for scripting.`,
 		"terraform or tofu binary, passed to terragrunt as --tf-path (config binaries.terraform)")
 	pf.StringVar(&g.tgPath, flagTGPath, def.Binaries.Terragrunt,
 		"terragrunt binary (config binaries.terragrunt)")
+	pf.StringVar(&g.tofuPath, flagTofuPath, def.Binaries.Tofu,
+		"tofu binary that --decrypt-with-tofu runs (config binaries.tofu)")
 	registerCompletions(root, map[string]cobra.CompletionFunc{
 		"format":     complete.Enum(formatChoices()),
 		"config":     complete.Files("yaml", "yml"),
@@ -125,6 +131,7 @@ stdout carries data, stderr carries logs. Use --format json for scripting.`,
 		"color":      complete.Enum(colorChoices()),
 		flagTFPath:   complete.Files(),
 		flagTGPath:   complete.Files(),
+		flagTofuPath: complete.Files(),
 	})
 	root.MarkFlagsMutuallyExclusive("verbose", "quiet")
 

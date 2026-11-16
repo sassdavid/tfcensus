@@ -38,28 +38,29 @@ tfcensus whois <arn|id>... [flags]
 ### Options
 
 ```
-      --account stringArray            keep only this account ID (repeatable; config accounts.include)
-      --concurrency int                states read at the same time (default 16)
-      --exclude-account stringArray    drop this account ID (repeatable; config accounts.exclude)
-      --fail-on strings                exit 3 when answers are in these categories: unmanaged or double-managed
-      --filter stringArray             terragrunt filter expression, passed to terragrunt find unchanged (repeatable)
-      --generate-stacks[=true|false]   run terragrunt stack generate first, so units in stacks are listed (config discovery.generate_stacks)
-  -h, --help[=true|false]              help for whois
-      --index string                   read the state index from this file (from inventory --save-index) instead of reading states
-      --live[=true|false]              list an unmanaged resource's type live so the rules see its tags (default true, false with --index) (default true)
-      --management-profile string      profile that lists the organization's accounts, else the default AWS credentials (config accounts.org.management_profile)
-      --md-max-chars int               cut Markdown output to this many characters at a row or section boundary; 0 means no limit (default 60000)
-      --min-count int                  answers --fail-on needs before it exits 3 (default 1)
-      --org[=true|false]               list the accounts of the AWS organization and assume --org-role in each (config accounts.org.enabled)
-      --org-role string                role assumed in each member account (config accounts.org.role) (default "OrganizationAccountAccessRole")
-      --out stringArray                also write the report to a file as format=path (repeatable); format is one of plain, md, json or sarif
-      --profile stringArray            AWS profile from ~/.aws/config, or a glob such as 'acme-*' (repeatable; config accounts.profiles)
-      --region stringArray             AWS region (repeatable; config regions)
-      --render string                  when to use terragrunt render: auto, always or never (config discovery.render) (default "auto")
-      --repo stringArray               repository to discover units in (repeatable; config discovery.roots, else the working directory)
-      --rules stringArray              YAML file with more ownership rules under rules: (repeatable)
-      --stdin[=true|false]             read more ARNs or ids from stdin, one per line
-      --type strings                   TF resource types to look in, such as aws_security_group
+      --account stringArray              keep only this account ID (repeatable; config accounts.include)
+      --concurrency int                  states read at the same time (default 16)
+      --decrypt-with-tofu[=true|false]   read OpenTofu encrypted state with tofu init and tofu show -json in the unit, which downloads and runs its providers (config state.decrypt_with_tofu)
+      --exclude-account stringArray      drop this account ID (repeatable; config accounts.exclude)
+      --fail-on strings                  exit 3 when answers are in these categories: unmanaged or double-managed
+      --filter stringArray               terragrunt filter expression, passed to terragrunt find unchanged (repeatable)
+      --generate-stacks[=true|false]     run terragrunt stack generate first, so units in stacks are listed (config discovery.generate_stacks)
+  -h, --help[=true|false]                help for whois
+      --index string                     read the state index from this file (from inventory --save-index) instead of reading states
+      --live[=true|false]                list an unmanaged resource's type live so the rules see its tags (default true, false with --index) (default true)
+      --management-profile string        profile that lists the organization's accounts, else the default AWS credentials (config accounts.org.management_profile)
+      --md-max-chars int                 cut Markdown output to this many characters at a row or section boundary; 0 means no limit (default 60000)
+      --min-count int                    answers --fail-on needs before it exits 3 (default 1)
+      --org[=true|false]                 list the accounts of the AWS organization and assume --org-role in each (config accounts.org.enabled)
+      --org-role string                  role assumed in each member account (config accounts.org.role) (default "OrganizationAccountAccessRole")
+      --out stringArray                  also write the report to a file as format=path (repeatable); format is one of plain, md, json or sarif
+      --profile stringArray              AWS profile from ~/.aws/config, or a glob such as 'acme-*' (repeatable; config accounts.profiles)
+      --region stringArray               AWS region (repeatable; config regions)
+      --render string                    when to use terragrunt render: auto, always or never (config discovery.render) (default "auto")
+      --repo stringArray                 repository to discover units in (repeatable; config discovery.roots, else the working directory)
+      --rules stringArray                YAML file with more ownership rules under rules: (repeatable)
+      --stdin[=true|false]               read more ARNs or ids from stdin, one per line
+      --type strings                     TF resource types to look in, such as aws_security_group
 ```
 
 ### Options inherited from parent commands
@@ -74,6 +75,7 @@ tfcensus whois <arn|id>... [flags]
   -q, --quiet[=true|false]      log errors only
       --tf-path string          terraform or tofu binary, passed to terragrunt as --tf-path (config binaries.terraform) (default "terraform")
       --tg-path string          terragrunt binary (config binaries.terragrunt) (default "terragrunt")
+      --tofu-path string        tofu binary that --decrypt-with-tofu runs (config binaries.tofu) (default "tofu")
   -v, --verbose count           more logging: -v info, -vv debug, -vvv trace
 ```
 

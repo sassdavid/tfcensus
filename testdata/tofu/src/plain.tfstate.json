@@ -1,0 +1,109 @@
+{
+  "version": 4,
+  "terraform_version": "1.13.9",
+  "serial": 12,
+  "lineage": "e6f70819-2a3b-4c4d-9e5f-607182930415",
+  "outputs": {
+    "db_password": {"value": "FIXTURE-SECRET-output", "type": "string", "sensitive": true}
+  },
+  "resources": [
+    {
+      "mode": "data",
+      "type": "aws_caller_identity",
+      "name": "current",
+      "provider": "provider[\"registry.opentofu.org/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "account_id": "111111111111",
+            "arn": "arn:aws:sts::111111111111:assumed-role/acme-ci/session",
+            "id": "111111111111",
+            "user_id": "AROAFIXTURE:session"
+          },
+          "sensitive_attributes": []
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_db_instance",
+      "name": "db",
+      "provider": "provider[\"registry.opentofu.org/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:rds:eu-west-1:111111111111:db:secure-db",
+            "id": "db-FIXTURESECUREDB0001",
+            "identifier": "secure-db",
+            "instance_class": "db.t4g.small",
+            "password": "FIXTURE-SECRET-db-password",
+            "region": "eu-west-1",
+            "username": "acme_admin"
+          },
+          "sensitive_attributes": [[{"type": "get_attr", "value": "password"}]]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_ssm_parameter",
+      "name": "drop",
+      "provider": "provider[\"registry.opentofu.org/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ssm:eu-west-1:111111111111:parameter/secure/drop",
+            "id": "/secure/drop",
+            "name": "/secure/drop",
+            "region": "eu-west-1",
+            "type": "SecureString",
+            "value": "FIXTURE-SECRET-ssm"
+          },
+          "sensitive_attributes": [[{"type": "get_attr", "value": "value"}]]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_vpc",
+      "name": "main",
+      "provider": "provider[\"registry.opentofu.org/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0f1e2d3c4b5a69788",
+            "cidr_block": "10.77.0.0/16",
+            "id": "vpc-0f1e2d3c4b5a69788",
+            "region": "eu-west-1",
+            "tags": {"Name": "secure"}
+          },
+          "sensitive_attributes": []
+        }
+      ]
+    },
+    {
+      "module": "module.queue",
+      "mode": "managed",
+      "type": "aws_sqs_queue",
+      "name": "this",
+      "provider": "provider[\"registry.opentofu.org/hashicorp/aws\"]",
+      "instances": [
+        {
+          "index_key": "orders",
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:sqs:eu-west-1:111111111111:secure-orders",
+            "id": "https://sqs.eu-west-1.amazonaws.com/111111111111/secure-orders",
+            "name": "secure-orders",
+            "region": "eu-west-1"
+          },
+          "sensitive_attributes": []
+        }
+      ]
+    }
+  ]
+}

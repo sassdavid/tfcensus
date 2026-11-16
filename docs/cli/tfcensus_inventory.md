@@ -20,7 +20,9 @@ the role's account, or the unit's target account when there is no role.
 
 A state that can't be read (access denied, a parse error) is reported for its unit and the run
 continues; inventory then exits 1. An OpenTofu state with client-side encryption shows only its
-serial and lineage. --save-index writes the identifier index that whois and scan read, compressed
+serial and lineage, unless --decrypt-with-tofu is set: then tofu init and tofu show -json run in
+the unit with the unit's key configuration or TF_ENCRYPTION, and a state they can't read fails
+its unit. --save-index writes the identifier index that whois and scan read, compressed
 with zstd for a .zst name and gzip for .gz.
 
 ```
@@ -38,18 +40,19 @@ tfcensus inventory [paths...] [flags]
 ### Options
 
 ```
-      --concurrency int                states read at the same time (default 16)
-      --filter stringArray             terragrunt filter expression, passed to terragrunt find unchanged (repeatable)
-      --generate-stacks[=true|false]   run terragrunt stack generate first, so units in stacks are listed (config discovery.generate_stacks)
-  -h, --help[=true|false]              help for inventory
-      --management-profile string      profile that lists the organization's accounts, else the default AWS credentials (config accounts.org.management_profile)
-      --md-max-chars int               cut Markdown output to this many characters at a row or section boundary; 0 means no limit (default 60000)
-      --org[=true|false]               list the accounts of the AWS organization and assume --org-role in each (config accounts.org.enabled)
-      --org-role string                role assumed in each member account (config accounts.org.role) (default "OrganizationAccountAccessRole")
-      --out stringArray                also write the report to a file as format=path (repeatable); format is one of plain, md, json or csv
-      --profile stringArray            AWS profile from ~/.aws/config, or a glob such as 'acme-*' (repeatable; config accounts.profiles)
-      --render string                  when to use terragrunt render: auto, always or never (config discovery.render) (default "auto")
-      --save-index string              write the identifier index to this file (.zst: zstd, .gz: gzip, else plain JSON)
+      --concurrency int                  states read at the same time (default 16)
+      --decrypt-with-tofu[=true|false]   read OpenTofu encrypted state with tofu init and tofu show -json in the unit, which downloads and runs its providers (config state.decrypt_with_tofu)
+      --filter stringArray               terragrunt filter expression, passed to terragrunt find unchanged (repeatable)
+      --generate-stacks[=true|false]     run terragrunt stack generate first, so units in stacks are listed (config discovery.generate_stacks)
+  -h, --help[=true|false]                help for inventory
+      --management-profile string        profile that lists the organization's accounts, else the default AWS credentials (config accounts.org.management_profile)
+      --md-max-chars int                 cut Markdown output to this many characters at a row or section boundary; 0 means no limit (default 60000)
+      --org[=true|false]                 list the accounts of the AWS organization and assume --org-role in each (config accounts.org.enabled)
+      --org-role string                  role assumed in each member account (config accounts.org.role) (default "OrganizationAccountAccessRole")
+      --out stringArray                  also write the report to a file as format=path (repeatable); format is one of plain, md, json or csv
+      --profile stringArray              AWS profile from ~/.aws/config, or a glob such as 'acme-*' (repeatable; config accounts.profiles)
+      --render string                    when to use terragrunt render: auto, always or never (config discovery.render) (default "auto")
+      --save-index string                write the identifier index to this file (.zst: zstd, .gz: gzip, else plain JSON)
 ```
 
 ### Options inherited from parent commands
@@ -64,6 +67,7 @@ tfcensus inventory [paths...] [flags]
   -q, --quiet[=true|false]      log errors only
       --tf-path string          terraform or tofu binary, passed to terragrunt as --tf-path (config binaries.terraform) (default "terraform")
       --tg-path string          terragrunt binary (config binaries.terragrunt) (default "terragrunt")
+      --tofu-path string        tofu binary that --decrypt-with-tofu runs (config binaries.tofu) (default "tofu")
   -v, --verbose count           more logging: -v info, -vv debug, -vvv trace
 ```
 

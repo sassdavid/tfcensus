@@ -22,6 +22,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/complete"
 	"github.com/sassdavid/tfcensus/internal/config"
 	"github.com/sassdavid/tfcensus/internal/discovery"
+	"github.com/sassdavid/tfcensus/internal/execx"
 	"github.com/sassdavid/tfcensus/internal/match"
 	"github.com/sassdavid/tfcensus/internal/render"
 	"github.com/sassdavid/tfcensus/internal/tfstate"
@@ -29,8 +30,9 @@ import (
 )
 
 const (
-	flagSaveIndex   = "save-index"
-	flagConcurrency = "concurrency"
+	flagSaveIndex       = "save-index"
+	flagConcurrency     = "concurrency"
+	flagDecryptWithTofu = "decrypt-with-tofu"
 )
 
 func newInventoryCmd(d *app.Deps, g *globals) *cobra.Command {
@@ -65,7 +67,9 @@ the role's account, or the unit's target account when there is no role.
 
 A state that can't be read (access denied, a parse error) is reported for its unit and the run
 continues; inventory then exits 1. An OpenTofu state with client-side encryption shows only its
-serial and lineage. --save-index writes the identifier index that whois and scan read, compressed
+serial and lineage, unless --decrypt-with-tofu is set: then tofu init and tofu show -json run in
+the unit with the unit's key configuration or TF_ENCRYPTION, and a state they can't read fails
+its unit. --save-index writes the identifier index that whois and scan read, compressed
 with zstd for a .zst name and gzip for .gz.`,
 		Example: `  tfcensus inventory ~/src/infra/acme-live
   tfcensus inventory --profile 'acme-*' --format json > inventory.json
@@ -88,6 +92,7 @@ with zstd for a .zst name and gzip for .gz.`,
 	}
 	addDiscoveryFlags(cmd, &filters)
 	addAccountFlags(cmd, d)
+	addStateFlags(cmd)
 	addOutputFlags(cmd, g, formats...)
 	f := cmd.Flags()
 	f.StringVar(&saveIndex, flagSaveIndex, "",
@@ -134,6 +139,7 @@ func runInventory(cmd *cobra.Command, d *app.Deps, sink render.Sink, cfg *config
 		Concurrency: a.concurrency,
 		TFPath:      cfg.Binaries.Terraform,
 		Logger:      d.Logger,
+		Decrypt:     stateDecrypter(d, cfg),
 	})
 	states := reader.Read(ctx, disc.Units)
 	if states == nil {
@@ -165,17 +171,17 @@ func runInventory(cmd *cobra.Command, d *app.Deps, sink render.Sink, cfg *config
 func inventoryError(states []tfstate.UnitState) error {
 	failed, auth, read := 0, 0, 0
 	for i := range states {
-		switch states[i].Status {
-		case tfstate.StatusSkipped:
+		if states[i].Status == tfstate.StatusSkipped {
 			continue
-		case tfstate.StatusError:
-			failed++
-			if errors.Is(states[i].Err, accounts.ErrAuth) {
-				auth++
-			}
-		case tfstate.StatusOK, tfstate.StatusAbsent, tfstate.StatusEncrypted, tfstate.StatusUnsupported:
 		}
 		read++
+		if states[i].Err == nil {
+			continue
+		}
+		failed++
+		if errors.Is(states[i].Err, accounts.ErrAuth) {
+			auth++
+		}
 	}
 	if failed == 0 {
 		return nil
@@ -185,6 +191,25 @@ func inventoryError(states []tfstate.UnitState) error {
 		return &exitError{code: ExitAuth, err: err}
 	}
 	return err
+}
+
+// addStateFlags adds the flags that change how state is read.
+func addStateFlags(cmd *cobra.Command) {
+	cmd.Flags().Bool(flagDecryptWithTofu, false,
+		"read OpenTofu encrypted state with tofu init and tofu show -json in the unit, which downloads "+
+			"and runs its providers (config state.decrypt_with_tofu)")
+}
+
+// stateDecrypter returns the tofu runner for encrypted states, or nil when decryption is off.
+func stateDecrypter(d *app.Deps, cfg *config.Config) tfstate.Decrypter {
+	if !cfg.State.DecryptWithTofu {
+		return nil
+	}
+	return &tfstate.Tofu{
+		Runner:     execx.NewRunner(d.Logger, execx.WithEnviron(func() []string { return d.Env })),
+		Bin:        cfg.Binaries.Tofu,
+		Terragrunt: cfg.Binaries.Terragrunt,
+	}
 }
 
 // newBackends returns the backend credentials for cfg's accounts.map and the resolved accounts.

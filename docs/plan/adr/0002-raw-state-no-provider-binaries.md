@@ -1,6 +1,7 @@
 # tfcensus ADR-0002: Read raw state JSON; never execute provider binaries for scanning
 
-- Status: accepted (2026-11-09)
+- Status: accepted (2026-11-09). [ADR-0015](0015-read-encrypted-state-with-tofu.md) makes an
+  opt-in exception for OpenTofu encrypted state.
 
 ## Context
 driftctl downloaded `terraform-provider-aws` (default 3.19.0) and decoded state through provider schemas over

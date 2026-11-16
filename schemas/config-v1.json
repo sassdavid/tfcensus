@@ -20,6 +20,11 @@
           "type": "string",
           "minLength": 1,
           "description": "terraform or tofu binary, passed to terragrunt as --tf-path."
+        },
+        "tofu": {
+          "type": "string",
+          "minLength": 1,
+          "description": "tofu binary that reads OpenTofu encrypted state when state.decrypt_with_tofu is on."
         }
       },
       "additionalProperties": false,
@@ -132,6 +137,16 @@
           },
           "additionalProperties": false,
           "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "state": {
+      "properties": {
+        "decrypt_with_tofu": {
+          "type": "boolean",
+          "description": "Read OpenTofu encrypted state with tofu init and tofu show -json in the unit, which downloads and runs its providers. The key configuration comes from the unit or TF_ENCRYPTION."
         }
       },
       "additionalProperties": false,

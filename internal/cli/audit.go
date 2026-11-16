@@ -119,6 +119,7 @@ run, and 4 when every failure was a credential problem.`,
 	}
 	addDiscoveryFlags(cmd, &a.filters)
 	addAccountFlags(cmd, d)
+	addStateFlags(cmd)
 	addOutputFlags(cmd, g, formats...)
 	f := cmd.Flags()
 	f.IntVar(&a.concurrency, flagConcurrency, tfstate.DefaultConcurrency, "states read at the same time")
@@ -169,7 +170,7 @@ func runAudit(cmd *cobra.Command, d *app.Deps, sink render.Sink, cfg *config.Con
 	backends := newBackends(loader, accts, cfg, d)
 	reader := tfstate.NewReader(tfstate.Options{
 		Client: stateClient(backends), WorkDir: cwd, Concurrency: a.concurrency,
-		TFPath: cfg.Binaries.Terraform, Logger: d.Logger,
+		TFPath: cfg.Binaries.Terraform, Logger: d.Logger, Decrypt: stateDecrypter(d, cfg),
 	})
 	states := reader.Read(ctx, disc.Units)
 	opts := audit.Options{

@@ -1,9 +1,11 @@
 package tfstate
 
 import (
+	"bytes"
 	"cmp"
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"maps"
 	"os"
@@ -17,6 +19,10 @@ import (
 
 	"github.com/sassdavid/tfcensus/internal/discovery"
 )
+
+// encryptedWarning is the note on a state that stays encrypted.
+const encryptedWarning = "state is encrypted with OpenTofu client-side encryption, so only serial and lineage " +
+	"are readable; --decrypt-with-tofu reads it with tofu show -json in the unit"
 
 // DefaultConcurrency is how many states [Reader] reads at once.
 const DefaultConcurrency = 16
@@ -96,6 +102,12 @@ type Options struct {
 	TFPath      string // the terraform binary terragrunt runs; a tofu binary marks terragrunt units as OpenTofu
 	Logger      *slog.Logger
 	Parse       ParseOptions // what to keep beyond identifiers, for matching
+	Decrypt     Decrypter    // reads OpenTofu encrypted states; nil reports them as encrypted
+}
+
+// Decrypter returns the tofu show -json output of an encrypted state; [*Tofu] is one.
+type Decrypter interface {
+	Decrypt(ctx context.Context, u *discovery.Unit, dir, workspace string) ([]byte, error)
 }
 
 // Reader reads the state of many units concurrently.
@@ -205,7 +217,10 @@ func (r *Reader) unit(ctx context.Context, u *discovery.Unit) []UnitState {
 			us.Warnings = append(us.Warnings, lockErr.Error())
 		}
 		r.read(ctx, client, &us, versions)
-		us.Engine, us.EngineFrom = r.engine(u, dir, us.State)
+		if us.Status == StatusEncrypted && r.opts.Decrypt != nil {
+			r.decrypt(ctx, u, dir, &us, versions)
+		}
+		us.Engine, us.EngineFrom = r.engine(u, dir, &us)
 		r.opts.Logger.DebugContext(ctx, "read state", "unit", us.Unit(), "workspace", ws, "status", string(us.Status))
 		out = append(out, us)
 	}
@@ -237,14 +252,35 @@ func (r *Reader) read(ctx context.Context, c Client, us *UnitState, versions map
 	us.Serial = &s.Serial
 	if s.Encrypted {
 		us.Status, us.Encrypted = StatusEncrypted, true
-		us.Warnings = append(
-			us.Warnings,
-			"state is encrypted with OpenTofu client-side encryption, so only serial and lineage "+
-				"are readable; tofu show -json in the unit reads it with the unit's key configuration",
-		)
+		us.Warnings = append(us.Warnings, encryptedWarning)
 		return
 	}
 	us.Status = StatusOK
+	us.summarize(s, versions)
+}
+
+// decrypt reads an encrypted state through [Options.Decrypt]. On failure the unit keeps
+// [StatusEncrypted] and gets the error.
+func (r *Reader) decrypt(
+	ctx context.Context, u *discovery.Unit, dir string, us *UnitState, versions map[string]string,
+) {
+	out, err := r.opts.Decrypt.Decrypt(ctx, u, dir, us.Workspace)
+	var s *State
+	if err == nil {
+		if s, err = ParseShow(bytes.NewReader(out), r.opts.Parse); err != nil {
+			// The parse error can quote the output, so it is left out.
+			err = fmt.Errorf("%w: tofu show -json printed output tfcensus can't read", ErrDecrypt)
+		}
+	}
+	if err != nil {
+		us.Error, us.Err = err.Error(), err
+		return
+	}
+	s.Serial, s.Lineage = us.State.Serial, us.State.Lineage
+	us.State, us.Status, us.TerraformVersion = s, StatusOK, s.TerraformVersion
+	us.Warnings = slices.DeleteFunc(us.Warnings, func(w string) bool { return w == encryptedWarning })
+	us.Warnings = append(us.Warnings,
+		"state is encrypted with OpenTofu client-side encryption and was read with tofu show -json")
 	us.summarize(s, versions)
 }
 
@@ -308,11 +344,11 @@ func (r *Reader) workspaces(ctx context.Context, c Client, b *discovery.Backend)
 }
 
 // engine says which tool applied the state, when the state or the unit shows it.
-func (r *Reader) engine(u *discovery.Unit, dir string, s *State) (string, string) {
-	if s != nil {
-		if s.Encrypted {
-			return EngineOpenTofu, "state encryption"
-		}
+func (r *Reader) engine(u *discovery.Unit, dir string, us *UnitState) (string, string) {
+	if us.Encrypted {
+		return EngineOpenTofu, "state encryption"
+	}
+	if s := us.State; s != nil {
 		for _, res := range s.Resources {
 			if res.Provider.OpenTofu() {
 				return EngineOpenTofu, "state provider registry"

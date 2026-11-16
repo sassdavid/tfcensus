@@ -97,6 +97,7 @@ audit:
 binaries:
   terraform: terraform
   terragrunt: terragrunt
+  tofu: tofu
 cache:
   ttl: 1h
 discovery:
@@ -160,3 +161,5 @@ scan:
     ephemeral: true
     other-iac: true
 schema_version: 1
+state:
+  decrypt_with_tofu: false
