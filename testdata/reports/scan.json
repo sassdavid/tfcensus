@@ -470,8 +470,8 @@
           "config"
         ],
         "owner": "aws",
-        "reason": "network interface that a service manages (requester-managed or a service interface type)",
-        "rule": "pack/derived/requester-managed-eni"
+        "reason": "network interface that an AWS service created (requester-managed, a service interface type, an attachment owned by another account, or a Lambda or VPC CNI description)",
+        "rule": "pack/derived/service-eni"
       },
       {
         "account": "111111111111",

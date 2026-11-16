@@ -20,7 +20,7 @@ rules                                        first match wins
   pack/other-iac/pulumi                      no match
   pack/other-iac/crossplane                  no match
   pack/other-iac/kubernetes                  no match
-  pack/derived/requester-managed-eni         no match
+  pack/derived/service-eni                   no match
   pack/derived/autoscaled-instance           no match
   pack/derived/node-launch-template          no match
   pack/derived/ecs-task                      no match

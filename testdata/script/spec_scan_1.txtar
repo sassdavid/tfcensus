@@ -120,7 +120,7 @@ account,region,category,cfn_type,source_type,tf_types,arn,id,name,owner,rule,rea
 111111111111,eu-west-1,aws-managed,AWS::EC2::SecurityGroup,,aws_security_group,arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0def00000000000b2,sg-0def00000000000b2,default,aws,pack/aws-defaults/default-security-group,default security group that AWS creates with every VPC,,,config,,
 111111111111,eu-west-1,aws-managed,AWS::EC2::VPC,,aws_vpc,arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0def00000000000a1,vpc-0def00000000000a1,,aws,pack/aws-defaults/default-vpc,default VPC that AWS creates in every region,,,config,,
 111111111111,eu-west-1,aws-managed,AWS::KMS::Key,,aws_kms_key,arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-aws0-4000-8000-000000000001,0b1c2d3e-aws0-4000-8000-000000000001,,aws,pack/aws-service/aws-managed-kms-key,AWS managed KMS key (KeyManager AWS),,,config,,
-111111111111,eu-west-1,derived,AWS::EC2::NetworkInterface,,aws_network_interface,arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0aa00000000000d4,eni-0aa00000000000d4,,aws,pack/derived/requester-managed-eni,network interface that a service manages (requester-managed or a service interface type),,,config,,
+111111111111,eu-west-1,derived,AWS::EC2::NetworkInterface,,aws_network_interface,arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0aa00000000000d4,eni-0aa00000000000d4,,aws,pack/derived/service-eni,"network interface that an AWS service created (requester-managed, a service interface type, an attachment owned by another account, or a Lambda or VPC CNI description)",,,config,,
 111111111111,eu-west-1,ignored,AWS::EC2::Instance,,aws_instance,arn:aws:ec2:eu-west-1:111111111111:instance/i-0aa00000000000e5,i-0aa00000000000e5,,platform,user/sandbox,Sandbox experiments are cleaned up every week,,,config,Name=try-arm;owner=sandbox,
 111111111111,eu-west-1,ignored,AWS::Logs::LogGroup,,aws_cloudwatch_log_group,arn:aws:logs:eu-west-1:111111111111:log-group:/aws/lambda/acme-api,,/aws/lambda/acme-api,,pack/ephemeral/managed-lambda-log-group,log group that Lambda created for a function a unit manages,,,resource-explorer,,
 111111111111,eu-west-1,undetermined,AWS::EC2::KeyPair,,,arn:aws:ec2:eu-west-1:111111111111:key-pair/key-0aa00000000000f6,,,,match/no-type-mapping,no type mapping for AWS::EC2::KeyPair,,,resource-explorer,,
@@ -761,8 +761,8 @@ account,region,category,cfn_type,source_type,tf_types,arn,id,name,owner,rule,rea
           "config"
         ],
         "owner": "aws",
-        "reason": "network interface that a service manages (requester-managed or a service interface type)",
-        "rule": "pack/derived/requester-managed-eni"
+        "reason": "network interface that an AWS service created (requester-managed, a service interface type, an attachment owned by another account, or a Lambda or VPC CNI description)",
+        "rule": "pack/derived/service-eni"
       },
       {
         "account": "111111111111",

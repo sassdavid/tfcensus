@@ -552,7 +552,7 @@
     {
       "pack": "derived",
       "name": "NAT gateway network interface",
-      "want": "pack/derived/requester-managed-eni",
+      "want": "pack/derived/service-eni",
       "item": {
         "resourceId": "eni-0aa1000000000001",
         "resourceName": "",
@@ -573,7 +573,7 @@
     {
       "pack": "derived",
       "name": "Lambda network interface",
-      "want": "pack/derived/requester-managed-eni",
+      "want": "pack/derived/service-eni",
       "item": {
         "resourceId": "eni-0aa2000000000002",
         "resourceName": "",
@@ -608,6 +608,192 @@
         "configuration": {
           "requesterManaged": false,
           "interfaceType": "interface"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "MSK broker network interface",
+      "want": "pack/derived/service-eni",
+      "item": {
+        "resourceId": "eni-0ab0000000000001",
+        "resourceName": "",
+        "resourceType": "AWS::EC2::NetworkInterface",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0ab0000000000001",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": [],
+        "configuration": {
+          "requesterManaged": false,
+          "interfaceType": "interface",
+          "description": "[DO NOT DELETE] ENI managed by MSK",
+          "attachment": {
+            "instanceOwnerId": "999999999999"
+          }
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "network interface attached by amazon-aws",
+      "want": "pack/derived/service-eni",
+      "item": {
+        "resourceId": "eni-0ab0000000000002",
+        "resourceName": "",
+        "resourceType": "AWS::EC2::NetworkInterface",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0ab0000000000002",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": [],
+        "configuration": {
+          "requesterManaged": false,
+          "interfaceType": "interface",
+          "attachment": {
+            "instanceOwnerId": "amazon-aws"
+          }
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "QuickSight network interface",
+      "want": "pack/derived/service-eni",
+      "item": {
+        "resourceId": "eni-0ab0000000000003",
+        "resourceName": "",
+        "resourceType": "AWS::EC2::NetworkInterface",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0ab0000000000003",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": [],
+        "configuration": {
+          "requesterManaged": false,
+          "interfaceType": "quicksight"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "unattached Lambda network interface",
+      "want": "pack/derived/service-eni",
+      "item": {
+        "resourceId": "eni-0ab0000000000004",
+        "resourceName": "",
+        "resourceType": "AWS::EC2::NetworkInterface",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0ab0000000000004",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": [],
+        "configuration": {
+          "requesterManaged": false,
+          "interfaceType": "interface",
+          "description": "AWS Lambda VPC ENI-orders-1a2b3c4d"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "VPC CNI network interface",
+      "want": "pack/derived/service-eni",
+      "item": {
+        "resourceId": "eni-0ab0000000000005",
+        "resourceName": "",
+        "resourceType": "AWS::EC2::NetworkInterface",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0ab0000000000005",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": [],
+        "configuration": {
+          "requesterManaged": false,
+          "interfaceType": "interface",
+          "description": "aws-K8S-i-0abc000000000001",
+          "attachment": {
+            "instanceOwnerId": "111111111111"
+          }
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "VPC CNI trunk network interface",
+      "want": "pack/derived/service-eni",
+      "item": {
+        "resourceId": "eni-0ab0000000000006",
+        "resourceName": "",
+        "resourceType": "AWS::EC2::NetworkInterface",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0ab0000000000006",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": [],
+        "configuration": {
+          "requesterManaged": false,
+          "interfaceType": "trunk",
+          "description": "aws-k8s-trunk-eni"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "unattached network interface someone created",
+      "want": "",
+      "item": {
+        "resourceId": "eni-0ab0000000000007",
+        "resourceName": "",
+        "resourceType": "AWS::EC2::NetworkInterface",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0ab0000000000007",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": [],
+        "configuration": {
+          "requesterManaged": false,
+          "interfaceType": "interface",
+          "description": "debug"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "primary network interface of an instance",
+      "want": "",
+      "item": {
+        "resourceId": "eni-0ab0000000000008",
+        "resourceName": "",
+        "resourceType": "AWS::EC2::NetworkInterface",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0ab0000000000008",
+        "awsRegion": "eu-west-1",
+        "accountId": "111111111111",
+        "resourceCreationTime": "2026-05-04T10:00:00.000Z",
+        "tags": [],
+        "relationships": [],
+        "configuration": {
+          "requesterManaged": false,
+          "interfaceType": "interface",
+          "description": "Primary network interface",
+          "attachment": {
+            "instanceOwnerId": "111111111111"
+          }
         }
       },
       "related": []

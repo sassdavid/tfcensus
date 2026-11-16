@@ -84,11 +84,20 @@ func (c *Collector) aggregate(ctx context.Context, agg *Aggregator, tasks []*tas
 	rep := agg.Report
 	run := &AggregatorRun{Name: rep.Name, Account: agg.Account.ID, Region: rep.Region, Status: RunOK}
 	plan := newAggPlan(tasks)
-	configTypes := c.opts.Env.Map.ConfigTypes(types)
-	chunks, err := chunkAccounts(configTypes, plan.accts, plan.regions)
-	if err != nil {
-		run.Status, run.Errors = RunError, []string{err.Error()}
-		return run, tasks
+	type query struct {
+		text  string
+		accts []string
+	}
+	var queries []query
+	for _, typeChunk := range chunkTypes(c.opts.Env.Map.ConfigTypes(types)) {
+		chunks, err := chunkAccounts(typeChunk, plan.accts, plan.regions)
+		if err != nil {
+			run.Status, run.Errors = RunError, []string{err.Error()}
+			return run, tasks
+		}
+		for _, chunk := range chunks {
+			queries = append(queries, query{aggregateQuery(typeChunk, chunk, plan.regions), chunk})
+		}
 	}
 	client := configservice.NewFromConfig(agg.Account.Config, func(o *configservice.Options) {
 		o.Region = rep.Region
@@ -97,15 +106,15 @@ func (c *Collector) aggregate(ctx context.Context, agg *Aggregator, tasks []*tas
 	})
 	failed := map[string]bool{}
 	failedQueries, denied := 0, 0
-	for _, chunk := range chunks {
-		rows, qerr := c.selectAggregate(ctx, client, rep.Name, aggregateQuery(configTypes, chunk, plan.regions))
+	for _, query := range queries {
+		rows, qerr := c.selectAggregate(ctx, client, rep.Name, query.text)
 		if qerr != nil {
 			run.Errors = append(run.Errors, qerr.Error())
 			failedQueries++
 			if Denied(qerr) {
 				denied++
 			}
-			for _, a := range chunk {
+			for _, a := range query.accts {
 				failed[a] = true
 			}
 			continue
@@ -121,7 +130,7 @@ func (c *Collector) aggregate(ctx context.Context, agg *Aggregator, tasks []*tas
 		}
 	}
 	fallback := settle(run, tasks, failed)
-	run.Status = aggStatus(len(chunks), failedQueries, denied, run.Errors)
+	run.Status = aggStatus(len(queries), failedQueries, denied, run.Errors)
 	if run.Status != RunOK {
 		c.opts.Env.logger().WarnContext(ctx, "config aggregator query failed; listing those accounts one by one",
 			"aggregator", rep.Name, "status", string(run.Status), "errors", len(run.Errors))

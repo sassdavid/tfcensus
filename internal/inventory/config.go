@@ -65,7 +65,8 @@ type configRow struct {
 	AWSRegion    string `json:"awsRegion"`
 	AccountID    string `json:"accountId"`
 	Created      string `json:"resourceCreationTime"`
-	// Configuration holds only the flags the ownership rules read; the query selects nothing else.
+	// Configuration holds only the properties the ownership rules read; the query selects nothing
+	// else.
 	Configuration map[string]any `json:"configuration"`
 	Tags          []struct {
 		Key   string `json:"key"`
@@ -81,30 +82,60 @@ type configRow struct {
 // configQuery builds the query for configTypes, which must be sorted so the request is the same
 // on every run.
 func configQuery(configTypes []string) string {
-	quoted := make([]string, len(configTypes))
-	for i, t := range configTypes {
-		quoted[i] = "'" + t + "'"
-	}
 	return "SELECT resourceId, resourceName, resourceType, arn, awsRegion, accountId, resourceCreationTime, tags," +
-		" relationships, " + strings.Join(configFlagFields(), ", ") +
-		" WHERE resourceType IN (" + strings.Join(quoted, ", ") + ")"
+		" relationships, " + strings.Join(configFields(), ", ") +
+		" WHERE resourceType IN (" + quoteList(configTypes) + ")"
 }
 
-// configFlags maps the configuration properties the ownership rules read to the attribute names
-// they get. All are booleans or enums, never values a user wrote.
+// typeQueryBudget is the longest [configQuery] a chunk of types may give. It leaves room under
+// [maxExpression] for the account and region lists of an aggregate query.
+const typeQueryBudget = 2560
+
+// chunkTypes splits the sorted configTypes into the fewest runs, in order, whose queries fit in
+// [typeQueryBudget].
+func chunkTypes(configTypes []string) [][]string {
+	var chunks [][]string
+	var cur []string
+	for _, t := range configTypes {
+		if len(cur) > 0 && len(configQuery(append(slices.Clone(cur), t))) > typeQueryBudget {
+			chunks = append(chunks, cur)
+			cur = nil
+		}
+		cur = append(cur, t)
+	}
+	if len(cur) > 0 {
+		chunks = append(chunks, cur)
+	}
+	return chunks
+}
+
+// configFlags maps the scalar configuration properties the ownership rules read to the attribute
+// names they get. Most are booleans or enums. The ADR on scan accuracy allows a value a user wrote
+// when a rule needs it to tell a service from a person: an ENI's description is kept as is,
+// because its prefix is the signal. requesterId is collected for review; no rule reads it yet.
 func configFlags() map[string]string {
 	return map[string]string{
-		"isDefault":        "is_default",
-		"defaultForAz":     "default_for_az",
-		"keyManager":       "key_manager",
-		"requesterManaged": "requester_managed",
-		"interfaceType":    "interface_type",
+		"isDefault":                  "is_default",
+		"defaultForAz":               "default_for_az",
+		"keyManager":                 "key_manager",
+		"requesterManaged":           "requester_managed",
+		"interfaceType":              "interface_type",
+		"description":                "description",
+		"requesterId":                "requester_id",
+		"attachment.instanceOwnerId": "instance_owner_id",
 	}
 }
 
-func configFlagFields() []string {
-	out := make([]string, 0, len(configFlags()))
-	for _, k := range slices.Sorted(maps.Keys(configFlags())) {
+// configLists are the list properties that rules read in reduced form: a route table's
+// associations become main, and DHCP options become their canonical key=values string.
+func configLists() []string { return []string{"associations", "dhcpConfigurations"} }
+
+func configFields() []string {
+	names := slices.Collect(maps.Keys(configFlags()))
+	names = append(names, configLists()...)
+	slices.Sort(names)
+	out := make([]string, 0, len(names))
+	for _, k := range names {
 		out = append(out, "configuration."+k)
 	}
 	return out
@@ -126,18 +157,20 @@ func (l *configLayer) List(
 			o.Retryer = accounts.AdaptiveRetryer(acct.Config)
 			o.APIOptions = append(o.APIOptions, l.env.Limits.APIOption(acct.ID, region, ServiceConfig))
 		})
-		pages := configservice.NewSelectResourceConfigPaginator(client, &configservice.SelectResourceConfigInput{
-			Expression: aws.String(configQuery(configTypes)),
-			Limit:      configPageSize,
-		})
-		for pages.HasMorePages() {
-			page, err := pages.NextPage(ctx)
-			if err != nil {
-				yield(CloudResource{}, fmt.Errorf("config:SelectResourceConfig: %w", err))
-				return
-			}
-			if !l.yieldRows(page.Results, yield) {
-				return
+		for _, chunk := range chunkTypes(configTypes) {
+			pages := configservice.NewSelectResourceConfigPaginator(client, &configservice.SelectResourceConfigInput{
+				Expression: aws.String(configQuery(chunk)),
+				Limit:      configPageSize,
+			})
+			for pages.HasMorePages() {
+				page, err := pages.NextPage(ctx)
+				if err != nil {
+					yield(CloudResource{}, fmt.Errorf("config:SelectResourceConfig: %w", err))
+					return
+				}
+				if !l.yieldRows(page.Results, yield) {
+					return
+				}
 			}
 		}
 	}
@@ -181,12 +214,22 @@ func DecodeConfigItem(m *typemap.Map, raw []byte) (CloudResource, error) {
 		r.Created = t.UTC().Format(time.RFC3339)
 	}
 	for k, attr := range configFlags() {
-		switch v := row.Configuration[k].(type) {
+		switch v := configValue(row.Configuration, k).(type) {
 		case bool:
 			r.setAttr(attr, strconv.FormatBool(v))
 		case string:
 			r.setAttr(attr, v)
 		}
+	}
+	if assoc, ok := row.Configuration["associations"].([]any); ok {
+		r.setAttr("main", strconv.FormatBool(slices.ContainsFunc(assoc, func(a any) bool {
+			m, _ := a.(map[string]any)
+			main, _ := m["main"].(bool)
+			return main
+		})))
+	}
+	if dhcp, ok := row.Configuration["dhcpConfigurations"].([]any); ok {
+		r.setAttr("dhcp_options", dhcpOptions(dhcp))
 	}
 	for _, rel := range row.Relationships {
 		ref := Ref{CFNType: m.FromConfig(rel.ResourceType), ID: rel.ResourceID}
@@ -197,4 +240,38 @@ func DecodeConfigItem(m *typemap.Map, raw []byte) (CloudResource, error) {
 		r.Relationships = append(r.Relationships, ref)
 	}
 	return r, nil
+}
+
+// configValue returns the value at a dotted path such as attachment.instanceOwnerId.
+func configValue(conf map[string]any, path string) any {
+	var cur any = conf
+	for part := range strings.SplitSeq(path, ".") {
+		m, ok := cur.(map[string]any)
+		if !ok {
+			return nil
+		}
+		cur = m[part]
+	}
+	return cur
+}
+
+// dhcpOptions renders DHCP options as key=value,value pairs sorted by key and joined by ";", such
+// as "domain-name=eu-west-1.compute.internal;domain-name-servers=AmazonProvidedDNS".
+func dhcpOptions(confs []any) string {
+	var parts []string
+	for _, c := range confs {
+		m, _ := c.(map[string]any)
+		key, _ := m["key"].(string)
+		var values []string
+		list, _ := m["values"].([]any)
+		for _, v := range list {
+			vm, _ := v.(map[string]any)
+			if s, ok := vm["value"].(string); ok {
+				values = append(values, s)
+			}
+		}
+		parts = append(parts, key+"="+strings.Join(values, ","))
+	}
+	slices.Sort(parts)
+	return strings.Join(parts, ";")
 }

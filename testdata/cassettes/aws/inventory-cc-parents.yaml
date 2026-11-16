@@ -60,9 +60,9 @@ interactions:
         proto: ""
         proto_major: 0
         proto_minor: 0
-        content_length: 393
+        content_length: 551
         host: ""
-        body: '{"Expression":"SELECT resourceId, resourceName, resourceType, arn, awsRegion, accountId, resourceCreationTime, tags, relationships, configuration.defaultForAz, configuration.interfaceType, configuration.isDefault, configuration.keyManager, configuration.requesterManaged WHERE resourceType IN (''AWS::ElasticLoadBalancingV2::Listener'', ''AWS::ElasticLoadBalancingV2::LoadBalancer'')","Limit":100}'
+        body: '{"Expression":"SELECT resourceId, resourceName, resourceType, arn, awsRegion, accountId, resourceCreationTime, tags, relationships, configuration.associations, configuration.attachment.instanceOwnerId, configuration.defaultForAz, configuration.description, configuration.dhcpConfigurations, configuration.interfaceType, configuration.isDefault, configuration.keyManager, configuration.requesterId, configuration.requesterManaged WHERE resourceType IN (''AWS::ElasticLoadBalancingV2::Listener'', ''AWS::ElasticLoadBalancingV2::LoadBalancer'')","Limit":100}'
         headers:
             Content-Type:
                 - application/x-amz-json-1.1

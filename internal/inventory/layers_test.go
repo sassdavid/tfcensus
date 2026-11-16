@@ -685,3 +685,50 @@ func TestSpec_inventory_1(t *testing.T) {
 		}
 	}
 }
+
+// TestDecodeConfigItem: the config layer keeps an ENI's description and attachment owner, a
+// route table's main association, and DHCP options as one canonical string.
+func TestDecodeConfigItem(t *testing.T) {
+	t.Parallel()
+	m := env(t).Map
+	tests := []struct {
+		row  string
+		want map[string]string
+	}{
+		{
+			`{"resourceType":"AWS::EC2::NetworkInterface","resourceId":"eni-1","accountId":"111111111111",` +
+				`"awsRegion":"eu-west-1","configuration":{"interfaceType":"interface","requesterManaged":false,` +
+				`"description":"AWS Lambda VPC ENI-fn","requesterId":"AROAEXAMPLE:fn",` +
+				`"attachment":{"instanceOwnerId":"amazon-aws"}}}`,
+			map[string]string{
+				"interface_type": "interface", "requester_managed": "false", "description": "AWS Lambda VPC ENI-fn",
+				"requester_id": "AROAEXAMPLE:fn", "instance_owner_id": "amazon-aws",
+			},
+		},
+		{
+			`{"resourceType":"AWS::EC2::RouteTable","resourceId":"rtb-1","accountId":"111111111111",` +
+				`"awsRegion":"eu-west-1","configuration":{"associations":[{"main":false,"subnetId":"subnet-1"},` +
+				`{"main":true}]}}`,
+			map[string]string{"main": "true"},
+		},
+		{
+			`{"resourceType":"AWS::EC2::RouteTable","resourceId":"rtb-2","accountId":"111111111111",` +
+				`"awsRegion":"eu-west-1","configuration":{"associations":[]}}`,
+			map[string]string{"main": "false"},
+		},
+		{
+			`{"resourceType":"AWS::EC2::DHCPOptions","resourceId":"dopt-1","accountId":"111111111111",` +
+				`"awsRegion":"eu-west-1","configuration":{"dhcpConfigurations":[` +
+				`{"key":"domain-name-servers","values":[{"value":"AmazonProvidedDNS"}]},` +
+				`{"key":"domain-name","values":[{"value":"eu-west-1.compute.internal"}]}]}}`,
+			map[string]string{
+				"dhcp_options": "domain-name-servers=AmazonProvidedDNS;domain-name=eu-west-1.compute.internal",
+			},
+		},
+	}
+	for _, tt := range tests {
+		r, err := inventory.DecodeConfigItem(m, []byte(tt.row))
+		require.NoError(t, err)
+		assert.Equal(t, tt.want, r.Attrs, tt.row)
+	}
+}

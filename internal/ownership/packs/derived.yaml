@@ -1,12 +1,19 @@
 # Resources that AWS creates as children of another resource.
-- name: requester-managed-eni
+- name: service-eni
   match: >-
     resource.type == "AWS::EC2::NetworkInterface" &&
     (resource.attrs.?requester_managed.orValue("") == "true" ||
-    resource.attrs.?interface_type.orValue("") in ["lambda", "nat_gateway", "vpc_endpoint",
-    "network_load_balancer", "gateway_load_balancer", "gateway_load_balancer_endpoint", "load_balancer"] ||
+    resource.attrs.?interface_type.orValue("") in ["api_gateway_managed", "aws_codestar_connections_managed",
+    "branch", "ec2_instance_connect_endpoint", "efs", "gateway_load_balancer", "gateway_load_balancer_endpoint",
+    "global_accelerator_managed", "iot_rules_managed", "lambda", "load_balancer", "nat_gateway",
+    "network_load_balancer", "quicksight", "transit_gateway", "trunk", "vpc_endpoint"] ||
+    resource.attrs.?instance_owner_id.orValue(resource.account) != resource.account ||
+    ["AWS Lambda VPC ENI-", "aws-K8S-", "aws-k8s-branch-eni", "aws-k8s-trunk-eni"].exists(p,
+    resource.attrs.?description.orValue("").startsWith(p)) ||
     "eks:eni:owner" in resource.tags)
-  reason: network interface that a service manages (requester-managed or a service interface type)
+  reason: >-
+    network interface that an AWS service created (requester-managed, a service interface type, an
+    attachment owned by another account, or a Lambda or VPC CNI description)
 - name: autoscaled-instance
   match: >-
     resource.type == "AWS::EC2::Instance" &&

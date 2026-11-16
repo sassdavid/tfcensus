@@ -24,7 +24,7 @@ Decisions: [ADR-0017](../adr/0017-scan-accuracy.md). Aggregates only, as everywh
 |---|---|---|---|
 | Policy attachments and inline policies of service-linked and `AWSReservedSSO_*` roles | 60 | The role is `aws-managed`, its children don't inherit that | [Inheritance](#inheritance) |
 | Children of CloudFormation resources: attachments and inline policy of `aws-controltower-*` roles, the subresources of a state bucket and the inline policy of its replication role (both from a stack) | 8 | Same | [Inheritance](#inheritance) |
-| ENIs that MSK, Lambda, QuickSight, Client VPN and Managed Service for Apache Flink created, all with `RequesterManaged=false` | 27 | `requester-managed-eni` reads two flags only | [ENIs](#enis-created-by-aws-services) |
+| ENIs that MSK, Lambda, QuickSight, Client VPN and Managed Service for Apache Flink created, all with `RequesterManaged=false` | 27 | `service-eni` reads two flags only | [ENIs](#enis-created-by-aws-services) |
 | Route 53 records that external-dns owns (4 TXT, 4 A ALIAS) | 8 | No rule | [Kubernetes controllers](#kubernetes-controllers) |
 | Security group rules of the EKS cluster security group and of AWS Load Balancer Controller groups, and its rules on node groups | 8 | No rule, and no parent inheritance | [Kubernetes controllers](#kubernetes-controllers) |
 | AWS defaults: apex NS and SOA (4), default DHCP options (2), rules of default security groups (4), the main route table of a VPC from a stack (1), the route table of a regional NAT gateway (1) | 12 | Missing or too narrow `aws-defaults` rules | [AWS defaults](#aws-defaults) |
@@ -92,7 +92,7 @@ Rules:
 
 ## ENIs created by AWS services
 
-`requester-managed-eni` becomes `service-eni` (category `derived`). It matches when any of these
+`service-eni` becomes `service-eni` (category `derived`). It matches when any of these
 holds:
 
 - `requesterManaged` is true;
@@ -251,7 +251,7 @@ how the next accounts show what is still missing.
 1. [ ] Inheritance: a table test covers every child kind above, the three inheriting parent
    categories, a `managed` parent (child stays `unmanaged`), depth 3, an ignored child and a
    `never_hide` guard. `--explain` prints the parent chain (golden).
-2. [ ] `service-eni` has positive fixtures for each condition and negatives for an unattached
+2. [x] `service-eni` has positive fixtures for each condition and negatives for an unattached
    user-created ENI and an EC2 instance's primary ENI. The config query cassettes include the
    three new properties.
 3. [ ] The Kubernetes controller rules, the AWS default rules and the AWS service rules above

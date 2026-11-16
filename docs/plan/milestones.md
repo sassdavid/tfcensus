@@ -356,7 +356,7 @@ the last box.
   children of `managed` parents `unmanaged`, honours `never_hide`, and `--explain` prints the
   parent chain. New parent links for the regional NAT gateway route table and the `CHILD`
   resource configuration. (scan-accuracy criterion 1)
-- [ ] ENIs: `service-eni` replaces `requester-managed-eni`, and the config query selects the ENI
+- [x] ENIs: `service-eni` replaces `requester-managed-eni`, and the config query selects the ENI
   `description`, `requesterId` and `attachment.instanceOwnerId`, plus `dhcpConfigurations` and
   route table `associations`. inventory.md and the comment in `config.go` follow ADR-0017.
   (criterion 2)
