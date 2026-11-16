@@ -1,0 +1,15 @@
+{
+  "group": "Elastic IPs deleted days before, still in the Resource Explorer index",
+  "spec_count": 2,
+  "why": "Resource Explorer-only records of a type AWS Config records are dropped",
+  "resource_explorer": [
+    {
+      "arn": "arn:aws:ec2:eu-west-1:111111111111:elastic-ip/eipalloc-0f0000000000000f1",
+      "type": "ec2:elastic-ip"
+    },
+    {
+      "arn": "arn:aws:ec2:eu-west-1:111111111111:elastic-ip/eipalloc-0f0000000000000f2",
+      "type": "ec2:elastic-ip"
+    }
+  ]
+}

@@ -382,7 +382,7 @@ the last box.
   is read. (criterion 7)
 - [x] `--explain-coverage` lists the AWS Config types scan doesn't map, with counts per account
   and region. (criterion 8)
-- [ ] `testdata/validation/` holds an anonymized fixture for each of the 13 false-positive
+- [x] `testdata/validation/` holds an anonymized fixture for each of the 13 false-positive
   groups, and a testscript scans them with no `unmanaged` finding. `TestSpec_accounts_4` passes,
   so the read-only policy needs no new action. `mise run validation:stats` prints a reviewed CSV's
   aggregate row. (criterion 9)

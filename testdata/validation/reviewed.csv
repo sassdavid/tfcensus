@@ -1,0 +1,9 @@
+account,region,category,cfn_type,source_type,tf_types,arn,id,name,owner,rule,reason,managed_by,created,sources,tags,stack,verdict,group
+111111111111,global,managed,AWS::IAM::Role,,aws_iam_role,arn:aws:iam::111111111111:role/ci-deploy,AROA0VALIDATION00010,ci-deploy,,match/identity,matched,iam:default:aws_iam_role.ci_deploy,,config,,,,
+111111111111,global,unmanaged,Native::IAM::RolePolicyAttachment,,aws_iam_role_policy_attachment,,AWSServiceRoleForECS/arn:aws:iam::aws:policy/x,,,rules/no-match,no state manages it,,,native:iam-attachments,,,fp,service-role children
+111111111111,global,unmanaged,Native::IAM::RolePolicyAttachment,,aws_iam_role_policy_attachment,,ci-deploy/arn:aws:iam::aws:policy/y,,,rules/no-match,no state manages it,,,native:iam-attachments,,,tp,
+111111111111,eu-west-1,unmanaged,AWS::EC2::NetworkInterface,,aws_network_interface,arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0b0000000000000b1,eni-0b0000000000000b1,,,rules/no-match,no state manages it,,,config,,,FP,service ENIs
+111111111111,eu-west-1,unmanaged,AWS::ECR::Repository,,aws_ecr_repository,arn:aws:ecr:eu-west-1:111111111111:repository/clickops,clickops,clickops,,rules/no-match,no state manages it,,,config,,,unsure,
+111111111111,eu-west-1,unmanaged,,ecs:task,,arn:aws:ecs:eu-west-1:111111111111:task/main/0a1b,0a1b,,,rules/no-match,no state manages it,,,resource-explorer,,,,
+111111111111,eu-west-1,undetermined,,eks:podidentityassociation,,arn:aws:eks:eu-west-1:111111111111:podidentityassociation/main/a-0a1b,a-0a1b,,,match/no-type-mapping,no type mapping,,,resource-explorer,,,,
+111111111111,eu-west-1,aws-managed,AWS::EC2::VPC,,aws_vpc,arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0def,vpc-0def,,aws,pack/aws-defaults/default-vpc,default VPC,,,config,,,,

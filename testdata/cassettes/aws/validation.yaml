@@ -1,0 +1,1375 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            encryption:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-flow-logs.s3.eu-west-1.amazonaws.com/?encryption=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ServerSideEncryptionConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Rule><ApplyServerSideEncryptionByDefault><SSEAlgorithm>AES256</SSEAlgorithm></ApplyServerSideEncryptionByDefault></Rule></ServerSideEncryptionConfiguration>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 1
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            lifecycle:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-flow-logs.s3.eu-west-1.amazonaws.com/?lifecycle=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <Error><Code>NoSuchLifecycleConfiguration</Code><Message>not set</Message><RequestId>0000000000000000</RequestId></Error>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 404 Not Found
+        code: 404
+        duration: 0s
+    - id: 2
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            policy:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-flow-logs.s3.eu-west-1.amazonaws.com/?policy=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Version":"2012-10-17","Statement":[{"Sid":"AWSLogDeliveryWrite","Effect":"Allow","Action":"s3:PutObject","Resource":"FIXTURE-SECRET-resource"},{"Sid":"AWSLogDeliveryAclCheck","Effect":"Allow","Action":"s3:PutObject","Resource":"FIXTURE-SECRET-resource"}]}'
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 3
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            publicAccessBlock:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-flow-logs.s3.eu-west-1.amazonaws.com/?publicAccessBlock=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <PublicAccessBlockConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><BlockPublicAcls>true</BlockPublicAcls><IgnorePublicAcls>true</IgnorePublicAcls><BlockPublicPolicy>true</BlockPublicPolicy><RestrictPublicBuckets>true</RestrictPublicBuckets></PublicAccessBlockConfiguration>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 4
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            versioning:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-flow-logs.s3.eu-west-1.amazonaws.com/?versioning=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <VersioningConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"></VersioningConfiguration>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 5
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            encryption:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-state-replica.s3.eu-west-1.amazonaws.com/?encryption=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ServerSideEncryptionConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Rule><ApplyServerSideEncryptionByDefault><SSEAlgorithm>AES256</SSEAlgorithm></ApplyServerSideEncryptionByDefault></Rule></ServerSideEncryptionConfiguration>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 6
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            lifecycle:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-state-replica.s3.eu-west-1.amazonaws.com/?lifecycle=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <LifecycleConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Rule><ID>expire</ID><Status>Enabled</Status><Filter/><Expiration><Days>30</Days></Expiration></Rule></LifecycleConfiguration>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 7
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            policy:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-state-replica.s3.eu-west-1.amazonaws.com/?policy=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Version":"2012-10-17","Statement":[{"Sid":"DenyInsecureTransport","Effect":"Allow","Action":"s3:PutObject","Resource":"FIXTURE-SECRET-resource"}]}'
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 8
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            publicAccessBlock:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-state-replica.s3.eu-west-1.amazonaws.com/?publicAccessBlock=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <PublicAccessBlockConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><BlockPublicAcls>true</BlockPublicAcls><IgnorePublicAcls>true</IgnorePublicAcls><BlockPublicPolicy>true</BlockPublicPolicy><RestrictPublicBuckets>true</RestrictPublicBuckets></PublicAccessBlockConfiguration>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 9
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            versioning:
+                - ""
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-state-replica.s3.eu-west-1.amazonaws.com/?versioning=
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <VersioningConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Status>Enabled</Status></VersioningConfiguration>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 10
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            list-type:
+                - "2"
+            prefix:
+                - env:/
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-validation-tfstate.s3.eu-west-1.amazonaws.com/?list-type=2&prefix=env%3A%2F
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |-
+            <?xml version="1.0" encoding="UTF-8"?>
+            <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+              <Name>acme-validation-tfstate</Name>
+              <IsTruncated>false</IsTruncated>
+              <Prefix>env:/</Prefix>
+              <MaxKeys>1000</MaxKeys>
+            </ListBucketResult>
+        headers:
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Type:
+                - text/xml; charset=utf-8
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwMTAwMDAwMDAwMDAwMDAwMDEwMDAwMDAwMDAwMDAwMDAxMDAwMDAwMDAwMDAwMDAwMQ==
+            X-Amz-Request-Id:
+                - "0000000000000001"
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 11
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            x-id:
+                - GetObject
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Checksum-Mode:
+                - ENABLED
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-validation-tfstate.s3.eu-west-1.amazonaws.com/iam/terraform.tfstate?x-id=GetObject
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 2292
+        body: |
+            {
+              "version": 4,
+              "terraform_version": "1.13.4",
+              "serial": 3,
+              "lineage": "0f1e2d3c-4b5a-4968-8776-a5b4c3d2e1f0",
+              "outputs": {},
+              "resources": [
+                {
+                  "mode": "managed",
+                  "type": "aws_iam_role",
+                  "name": "ci_deploy",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 0,
+                      "attributes": {
+                        "arn": "arn:aws:iam::111111111111:role/ci-deploy",
+                        "id": "ci-deploy",
+                        "name": "ci-deploy",
+                        "assume_role_policy": "FIXTURE-SECRET-trust"
+                      },
+                      "sensitive_attributes": []
+                    }
+                  ]
+                },
+                {
+                  "mode": "managed",
+                  "type": "aws_iam_role",
+                  "name": "ci_build",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 0,
+                      "attributes": {
+                        "arn": "arn:aws:iam::111111111111:role/ci-build",
+                        "id": "ci-build",
+                        "name": "ci-build"
+                      },
+                      "sensitive_attributes": []
+                    }
+                  ]
+                },
+                {
+                  "mode": "managed",
+                  "type": "aws_iam_policy",
+                  "name": "deploy",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 0,
+                      "attributes": {
+                        "arn": "arn:aws:iam::111111111111:policy/ci-deploy-policy",
+                        "id": "arn:aws:iam::111111111111:policy/ci-deploy-policy",
+                        "name": "ci-deploy-policy",
+                        "policy": "FIXTURE-SECRET-policy"
+                      },
+                      "sensitive_attributes": []
+                    }
+                  ]
+                },
+                {
+                  "mode": "managed",
+                  "type": "aws_iam_policy_attachment",
+                  "name": "deploy",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 0,
+                      "attributes": {
+                        "id": "deploy",
+                        "name": "deploy",
+                        "policy_arn": "arn:aws:iam::111111111111:policy/ci-deploy-policy",
+                        "roles": [
+                          "ci-deploy",
+                          "ci-build"
+                        ],
+                        "users": [],
+                        "groups": []
+                      },
+                      "sensitive_attributes": []
+                    }
+                  ]
+                }
+              ],
+              "check_results": null
+            }
+        headers:
+            Accept-Ranges:
+                - bytes
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Length:
+                - "2292"
+            Content-Type:
+                - text/plain; charset=utf-8
+            Etag:
+                - '"d98c1c25cfea0749532545b26418ba91"'
+            Last-Modified:
+                - Mon, 16 Nov 2026 08:00:00 GMT
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwMjAwMDAwMDAwMDAwMDAwMDIwMDAwMDAwMDAwMDAwMDAyMDAwMDAwMDAwMDAwMDAwMg==
+            X-Amz-Request-Id:
+                - "0000000000000002"
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 12
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            x-id:
+                - GetObject
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Checksum-Mode:
+                - ENABLED
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://acme-validation-tfstate.s3.eu-west-1.amazonaws.com/network/terraform.tfstate?x-id=GetObject
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 3137
+        body: |
+            {
+              "version": 4,
+              "terraform_version": "1.13.4",
+              "serial": 3,
+              "lineage": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+              "outputs": {},
+              "resources": [
+                {
+                  "mode": "managed",
+                  "type": "aws_vpc",
+                  "name": "main",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 0,
+                      "attributes": {
+                        "arn": "arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0a0000000000000a1",
+                        "id": "vpc-0a0000000000000a1",
+                        "cidr_block": "10.42.0.0/16"
+                      },
+                      "sensitive_attributes": [],
+                      "identity_schema_version": 0,
+                      "identity": {
+                        "account_id": "111111111111",
+                        "region": "eu-west-1",
+                        "id": "vpc-0a0000000000000a1"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "mode": "managed",
+                  "type": "aws_default_route_table",
+                  "name": "main",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 0,
+                      "attributes": {
+                        "arn": "arn:aws:ec2:eu-west-1:111111111111:route-table/rtb-0a0000000000000a2",
+                        "id": "rtb-0a0000000000000a2"
+                      },
+                      "sensitive_attributes": []
+                    }
+                  ]
+                },
+                {
+                  "mode": "managed",
+                  "type": "aws_nat_gateway",
+                  "name": "regional",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 0,
+                      "attributes": {
+                        "id": "nat-0a0000000000000a3"
+                      },
+                      "sensitive_attributes": []
+                    }
+                  ]
+                },
+                {
+                  "mode": "managed",
+                  "type": "aws_security_group",
+                  "name": "nodes",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 0,
+                      "attributes": {
+                        "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0a0000000000000a4",
+                        "id": "sg-0a0000000000000a4",
+                        "name": "eks-nodes"
+                      },
+                      "sensitive_attributes": []
+                    }
+                  ]
+                },
+                {
+                  "mode": "managed",
+                  "type": "aws_route53_zone",
+                  "name": "public",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 0,
+                      "attributes": {
+                        "arn": "arn:aws:route53:::hostedzone/Z0VALIDATION0PUBLIC",
+                        "id": "Z0VALIDATION0PUBLIC",
+                        "zone_id": "Z0VALIDATION0PUBLIC",
+                        "name": "acme.test"
+                      },
+                      "sensitive_attributes": []
+                    }
+                  ]
+                },
+                {
+                  "mode": "managed",
+                  "type": "aws_s3_bucket",
+                  "name": "flow_logs",
+                  "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+                  "instances": [
+                    {
+                      "schema_version": 0,
+                      "attributes": {
+                        "arn": "arn:aws:s3:::acme-flow-logs",
+                        "id": "acme-flow-logs",
+                        "bucket": "acme-flow-logs"
+                      },
+                      "sensitive_attributes": []
+                    }
+                  ]
+                }
+              ],
+              "check_results": null
+            }
+        headers:
+            Accept-Ranges:
+                - bytes
+            Access-Control-Allow-Origin:
+                - '*'
+            Content-Length:
+                - "3137"
+            Content-Type:
+                - text/plain; charset=utf-8
+            Etag:
+                - '"4ceeab759b6417f8a3cc9311ad5842bd"'
+            Last-Modified:
+                - Mon, 16 Nov 2026 08:00:00 GMT
+            Server:
+                - AmazonS3
+            X-Amz-Id-2:
+                - MDAwMDAwMDAwMDAwMDAwMzAwMDAwMDAwMDAwMDAwMDMwMDAwMDAwMDAwMDAwMDAzMDAwMDAwMDAwMDAwMDAwMw==
+            X-Amz-Request-Id:
+                - "0000000000000003"
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 13
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        url: https://route53.amazonaws.com/2013-04-01/hostedzone
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ListHostedZonesResponse xmlns="https://route53.amazonaws.com/doc/2013-04-01/"><HostedZones><HostedZone><Id>/hostedzone/Z0VALIDATION0PUBLIC</Id><Name>acme.test.</Name><CallerReference>validation</CallerReference></HostedZone><HostedZone><Id>/hostedzone/Z0VALIDATION0LEGACY</Id><Name>legacy.acme.test.</Name><CallerReference>validation</CallerReference></HostedZone></HostedZones><IsTruncated>false</IsTruncated><MaxItems>100</MaxItems></ListHostedZonesResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 14
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        url: https://route53.amazonaws.com/2013-04-01/hostedzone/Z0VALIDATION0LEGACY/rrset
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ListResourceRecordSetsResponse xmlns="https://route53.amazonaws.com/doc/2013-04-01/"><ResourceRecordSets><ResourceRecordSet><Name>legacy.acme.test.</Name><Type>NS</Type><TTL>300</TTL><ResourceRecords><ResourceRecord><Value>ns-2.awsdns-02.net.</Value></ResourceRecord></ResourceRecords></ResourceRecordSet><ResourceRecordSet><Name>legacy.acme.test.</Name><Type>SOA</Type><TTL>300</TTL><ResourceRecords><ResourceRecord><Value>ns-2.awsdns-02.net. awsdns-hostmaster.amazon.com. 1 7200 900 1209600 86400</Value></ResourceRecord></ResourceRecords></ResourceRecordSet></ResourceRecordSets><IsTruncated>false</IsTruncated><MaxItems>300</MaxItems></ListResourceRecordSetsResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 15
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        url: https://route53.amazonaws.com/2013-04-01/hostedzone/Z0VALIDATION0PUBLIC/rrset
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ListResourceRecordSetsResponse xmlns="https://route53.amazonaws.com/doc/2013-04-01/"><ResourceRecordSets><ResourceRecordSet><Name>acme.test.</Name><Type>NS</Type><TTL>300</TTL><ResourceRecords><ResourceRecord><Value>ns-1.awsdns-01.org.</Value></ResourceRecord></ResourceRecords></ResourceRecordSet><ResourceRecordSet><Name>acme.test.</Name><Type>SOA</Type><TTL>300</TTL><ResourceRecords><ResourceRecord><Value>ns-1.awsdns-01.org. awsdns-hostmaster.amazon.com. 1 7200 900 1209600 86400</Value></ResourceRecord></ResourceRecords></ResourceRecordSet><ResourceRecordSet><Name>a-app.acme.test.</Name><Type>TXT</Type><TTL>300</TTL><ResourceRecords><ResourceRecord><Value>&quot;heritage=external-dns,external-dns/owner=main,external-dns/resource=ingress/apps/app&quot;</Value></ResourceRecord></ResourceRecords></ResourceRecordSet><ResourceRecordSet><Name>app.acme.test.</Name><Type>A</Type><AliasTarget><HostedZoneId>Z32O12XQLNTSW2</HostedZoneId><DNSName>k8s-apps-0a1b2c3d.eu-west-1.elb.amazonaws.com.</DNSName><EvaluateTargetHealth>true</EvaluateTargetHealth></AliasTarget></ResourceRecordSet><ResourceRecordSet><Name>cname-api.acme.test.</Name><Type>TXT</Type><TTL>300</TTL><ResourceRecords><ResourceRecord><Value>&quot;heritage=external-dns,external-dns/owner=main,external-dns/resource=service/apps/api&quot;</Value></ResourceRecord></ResourceRecords></ResourceRecordSet><ResourceRecordSet><Name>api.acme.test.</Name><Type>A</Type><AliasTarget><HostedZoneId>Z32O12XQLNTSW2</HostedZoneId><DNSName>k8s-apps-0a1b2c3d.eu-west-1.elb.amazonaws.com.</DNSName><EvaluateTargetHealth>true</EvaluateTargetHealth></AliasTarget></ResourceRecordSet></ResourceRecordSets><IsTruncated>false</IsTruncated><MaxItems>300</MaxItems></ListResourceRecordSetsResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 16
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        form:
+            bucket-region:
+                - eu-west-1
+            x-id:
+                - ListBuckets
+        headers:
+            Accept-Encoding:
+                - identity
+            X-Amz-Content-Sha256:
+                - e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        url: https://s3.eu-west-1.amazonaws.com/?bucket-region=eu-west-1&x-id=ListBuckets
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ListAllMyBucketsResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>fake-owner</ID></Owner><Buckets><Bucket><Name>acme-state-replica</Name><CreationDate>2026-03-01T08:00:00Z</CreationDate><BucketRegion>eu-west-1</BucketRegion></Bucket><Bucket><Name>acme-flow-logs</Name><CreationDate>2026-03-01T08:00:00Z</CreationDate><BucketRegion>eu-west-1</BucketRegion></Bucket></Buckets></ListAllMyBucketsResult>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 17
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 70
+        host: ""
+        body: '{"MaxResults":100,"TypeName":"AWS::VpcLattice::ResourceConfiguration"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+            X-Amz-Target:
+                - CloudApiService.ListResources
+        url: https://cloudcontrolapi.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"ResourceDescriptions":[]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 18
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 64
+        host: ""
+        body: '{"MaxResults":100,"TypeName":"AWS::VpcLattice::ResourceGateway"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+            X-Amz-Target:
+                - CloudApiService.ListResources
+        url: https://cloudcontrolapi.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"ResourceDescriptions":[]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 19
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 82
+        host: ""
+        body: '{"MaxResults":100,"TypeName":"AWS::VpcLattice::ServiceNetworkResourceAssociation"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+            X-Amz-Target:
+                - CloudApiService.ListResources
+        url: https://cloudcontrolapi.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"ResourceDescriptions":[]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 20
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 77
+        host: ""
+        body: '{"MaxResults":100,"TypeName":"AWS::VpcLattice::ServiceNetworkVpcAssociation"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+            X-Amz-Target:
+                - CloudApiService.ListResources
+        url: https://cloudcontrolapi.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"ResourceDescriptions":[]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 21
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 177
+        host: ""
+        body: Action=ListStackResources&StackName=arn%3Aaws%3Acloudformation%3Aeu-west-1%3A111111111111%3Astack%2Facme-legacy-network%2F6f1e2d3c-0000-4000-8000-000000000002&Version=2010-05-15
+        form:
+            Action:
+                - ListStackResources
+            StackName:
+                - arn:aws:cloudformation:eu-west-1:111111111111:stack/acme-legacy-network/6f1e2d3c-0000-4000-8000-000000000002
+            Version:
+                - "2010-05-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://cloudformation.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ListStackResourcesResponse xmlns="http://cloudformation.amazonaws.com/doc/2010-05-15/"><ListStackResourcesResult><StackResourceSummaries><member><LogicalResourceId>Vpc</LogicalResourceId><PhysicalResourceId>vpc-0d0000000000000d3</PhysicalResourceId><ResourceType>AWS::EC2::VPC</ResourceType><LastUpdatedTimestamp>2026-03-01T08:05:00Z</LastUpdatedTimestamp><ResourceStatus>CREATE_COMPLETE</ResourceStatus></member><member><LogicalResourceId>Zone</LogicalResourceId><PhysicalResourceId>Z0VALIDATION0LEGACY</PhysicalResourceId><ResourceType>AWS::Route53::HostedZone</ResourceType><LastUpdatedTimestamp>2026-03-01T08:05:00Z</LastUpdatedTimestamp><ResourceStatus>CREATE_COMPLETE</ResourceStatus></member></StackResourceSummaries></ListStackResourcesResult></ListStackResourcesResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 22
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 176
+        host: ""
+        body: Action=ListStackResources&StackName=arn%3Aaws%3Acloudformation%3Aeu-west-1%3A111111111111%3Astack%2Facme-state-backend%2F6f1e2d3c-0000-4000-8000-000000000002&Version=2010-05-15
+        form:
+            Action:
+                - ListStackResources
+            StackName:
+                - arn:aws:cloudformation:eu-west-1:111111111111:stack/acme-state-backend/6f1e2d3c-0000-4000-8000-000000000002
+            Version:
+                - "2010-05-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://cloudformation.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ListStackResourcesResponse xmlns="http://cloudformation.amazonaws.com/doc/2010-05-15/"><ListStackResourcesResult><StackResourceSummaries><member><LogicalResourceId>ReplicaBucket</LogicalResourceId><PhysicalResourceId>acme-state-replica</PhysicalResourceId><ResourceType>AWS::S3::Bucket</ResourceType><LastUpdatedTimestamp>2026-03-01T08:05:00Z</LastUpdatedTimestamp><ResourceStatus>CREATE_COMPLETE</ResourceStatus></member><member><LogicalResourceId>ReplicationRole</LogicalResourceId><PhysicalResourceId>acme-state-replication</PhysicalResourceId><ResourceType>AWS::IAM::Role</ResourceType><LastUpdatedTimestamp>2026-03-01T08:05:00Z</LastUpdatedTimestamp><ResourceStatus>CREATE_COMPLETE</ResourceStatus></member></StackResourceSummaries></ListStackResourcesResult></ListStackResourcesResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 23
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 1069
+        host: ""
+        body: Action=ListStacks&StackStatusFilter.member.1=CREATE_COMPLETE&StackStatusFilter.member.10=IMPORT_ROLLBACK_IN_PROGRESS&StackStatusFilter.member.11=ROLLBACK_COMPLETE&StackStatusFilter.member.12=ROLLBACK_FAILED&StackStatusFilter.member.13=ROLLBACK_IN_PROGRESS&StackStatusFilter.member.14=UPDATE_COMPLETE&StackStatusFilter.member.15=UPDATE_COMPLETE_CLEANUP_IN_PROGRESS&StackStatusFilter.member.16=UPDATE_FAILED&StackStatusFilter.member.17=UPDATE_IN_PROGRESS&StackStatusFilter.member.18=UPDATE_ROLLBACK_COMPLETE&StackStatusFilter.member.19=UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS&StackStatusFilter.member.2=CREATE_FAILED&StackStatusFilter.member.20=UPDATE_ROLLBACK_FAILED&StackStatusFilter.member.21=UPDATE_ROLLBACK_IN_PROGRESS&StackStatusFilter.member.3=CREATE_IN_PROGRESS&StackStatusFilter.member.4=DELETE_FAILED&StackStatusFilter.member.5=DELETE_IN_PROGRESS&StackStatusFilter.member.6=IMPORT_COMPLETE&StackStatusFilter.member.7=IMPORT_IN_PROGRESS&StackStatusFilter.member.8=IMPORT_ROLLBACK_COMPLETE&StackStatusFilter.member.9=IMPORT_ROLLBACK_FAILED&Version=2010-05-15
+        form:
+            Action:
+                - ListStacks
+            StackStatusFilter.member.1:
+                - CREATE_COMPLETE
+            StackStatusFilter.member.2:
+                - CREATE_FAILED
+            StackStatusFilter.member.3:
+                - CREATE_IN_PROGRESS
+            StackStatusFilter.member.4:
+                - DELETE_FAILED
+            StackStatusFilter.member.5:
+                - DELETE_IN_PROGRESS
+            StackStatusFilter.member.6:
+                - IMPORT_COMPLETE
+            StackStatusFilter.member.7:
+                - IMPORT_IN_PROGRESS
+            StackStatusFilter.member.8:
+                - IMPORT_ROLLBACK_COMPLETE
+            StackStatusFilter.member.9:
+                - IMPORT_ROLLBACK_FAILED
+            StackStatusFilter.member.10:
+                - IMPORT_ROLLBACK_IN_PROGRESS
+            StackStatusFilter.member.11:
+                - ROLLBACK_COMPLETE
+            StackStatusFilter.member.12:
+                - ROLLBACK_FAILED
+            StackStatusFilter.member.13:
+                - ROLLBACK_IN_PROGRESS
+            StackStatusFilter.member.14:
+                - UPDATE_COMPLETE
+            StackStatusFilter.member.15:
+                - UPDATE_COMPLETE_CLEANUP_IN_PROGRESS
+            StackStatusFilter.member.16:
+                - UPDATE_FAILED
+            StackStatusFilter.member.17:
+                - UPDATE_IN_PROGRESS
+            StackStatusFilter.member.18:
+                - UPDATE_ROLLBACK_COMPLETE
+            StackStatusFilter.member.19:
+                - UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS
+            StackStatusFilter.member.20:
+                - UPDATE_ROLLBACK_FAILED
+            StackStatusFilter.member.21:
+                - UPDATE_ROLLBACK_IN_PROGRESS
+            Version:
+                - "2010-05-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://cloudformation.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ListStacksResponse xmlns="http://cloudformation.amazonaws.com/doc/2010-05-15/"><ListStacksResult><StackSummaries><member><StackId>arn:aws:cloudformation:eu-west-1:111111111111:stack/acme-state-backend/6f1e2d3c-0000-4000-8000-000000000002</StackId><StackName>acme-state-backend</StackName><CreationTime>2026-03-01T08:00:00Z</CreationTime><StackStatus>CREATE_COMPLETE</StackStatus></member><member><StackId>arn:aws:cloudformation:eu-west-1:111111111111:stack/acme-legacy-network/6f1e2d3c-0000-4000-8000-000000000002</StackId><StackName>acme-legacy-network</StackName><CreationTime>2026-03-01T08:00:00Z</CreationTime><StackStatus>CREATE_COMPLETE</StackStatus></member></StackSummaries></ListStacksResult></ListStacksResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 24
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - StarlingDoveService.DescribeConfigurationAggregators
+        url: https://config.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"ConfigurationAggregators":[]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 25
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - StarlingDoveService.DescribeConfigurationRecorderStatus
+        url: https://config.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"ConfigurationRecordersStatus":[{"name":"default","recording":true,"lastStatus":"SUCCESS"}]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 26
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - StarlingDoveService.DescribeConfigurationRecorders
+        url: https://config.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"ConfigurationRecorders":[{"name":"default","roleARN":"arn:aws:iam::111111111111:role/aws-config","recordingGroup":{"allSupported":true,"includeGlobalResourceTypes":true},"recordingMode":{"recordingFrequency":"CONTINUOUS"}}]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 27
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 13
+        host: ""
+        body: '{"limit":100}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - StarlingDoveService.GetDiscoveredResourceCounts
+        url: https://config.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"resourceCounts":[],"totalDiscoveredResources":0}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 28
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2457
+        host: ""
+        body: '{"Expression":"SELECT resourceId, resourceName, resourceType, arn, awsRegion, accountId, resourceCreationTime, tags, relationships, configuration.associations, configuration.attachment.instanceOwnerId, configuration.defaultForAz, configuration.description, configuration.dhcpConfigurations, configuration.interfaceType, configuration.isDefault, configuration.keyManager, configuration.requesterId, configuration.requesterManaged WHERE resourceType IN (''AWS::ACM::Certificate'', ''AWS::ApiGateway::Method'', ''AWS::ApiGateway::RestApi'', ''AWS::ApiGateway::Stage'', ''AWS::Athena::DataCatalog'', ''AWS::Athena::WorkGroup'', ''AWS::Backup::BackupPlan'', ''AWS::Backup::BackupSelection'', ''AWS::Backup::BackupVault'', ''AWS::CloudFormation::Stack'', ''AWS::CloudWatch::Alarm'', ''AWS::CodeBuild::Project'', ''AWS::CodePipeline::Pipeline'', ''AWS::DynamoDB::Table'', ''AWS::EC2::ClientVpnEndpoint'', ''AWS::EC2::CustomerGateway'', ''AWS::EC2::DHCPOptions'', ''AWS::EC2::EIP'', ''AWS::EC2::EIPAssociation'', ''AWS::EC2::FlowLog'', ''AWS::EC2::Instance'', ''AWS::EC2::InternetGateway'', ''AWS::EC2::LaunchTemplate'', ''AWS::EC2::NatGateway'', ''AWS::EC2::NetworkAcl'', ''AWS::EC2::NetworkInterface'', ''AWS::EC2::PrefixList'', ''AWS::EC2::RouteTable'', ''AWS::EC2::SecurityGroup'', ''AWS::EC2::Subnet'', ''AWS::EC2::SubnetRouteTableAssociation'', ''AWS::EC2::VPC'', ''AWS::EC2::VPCEndpoint'', ''AWS::EC2::VPCEndpointService'', ''AWS::EC2::VPCPeeringConnection'', ''AWS::EC2::VPNConnection'', ''AWS::EC2::VPNGateway'', ''AWS::EC2::Volume'', ''AWS::ECR::Repository'', ''AWS::EFS::AccessPoint'', ''AWS::EFS::FileSystem'', ''AWS::EKS::Addon'', ''AWS::EKS::Cluster'', ''AWS::ElasticLoadBalancingV2::Listener'', ''AWS::ElasticLoadBalancingV2::LoadBalancer'', ''AWS::ElasticLoadBalancingV2::TargetGroup'', ''AWS::Events::EventBus'', ''AWS::Events::Rule'', ''AWS::Glue::Database'', ''AWS::IAM::Group'', ''AWS::IAM::InstanceProfile'', ''AWS::IAM::OIDCProvider'', ''AWS::IAM::Policy'', ''AWS::IAM::Role'', ''AWS::IAM::User'', ''AWS::KMS::Alias'', ''AWS::KMS::Key'', ''AWS::KinesisAnalyticsV2::Application'', ''AWS::Lambda::Function'', ''AWS::MSK::Cluster'', ''AWS::MSK::Configuration'', ''AWS::OpenSearch::Domain'', ''AWS::QuickSight::DataSource'', ''AWS::RDS::DBCluster'', ''AWS::RDS::DBInstance'', ''AWS::RDS::DBSubnetGroup'', ''AWS::RDS::OptionGroup'', ''AWS::ResourceExplorer2::Index'', ''AWS::Route53::HostedZone'', ''AWS::Route53Resolver::ResolverRule'', ''AWS::Route53Resolver::ResolverRuleAssociation'', ''AWS::S3::Bucket'', ''AWS::SNS::Topic'', ''AWS::SQS::Queue'', ''AWS::SecretsManager::Secret'')","Limit":100}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+            X-Amz-Target:
+                - StarlingDoveService.SelectResourceConfig
+        url: https://config.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Results":["{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:iam::111111111111:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS\",\"awsRegion\":\"global\",\"relationships\":[],\"resourceId\":\"AROA0VALIDATION00001\",\"resourceName\":\"AWSServiceRoleForECS\",\"resourceType\":\"AWS::IAM::Role\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:iam::111111111111:role/aws-reserved/sso.amazonaws.com/eu-west-1/AWSReservedSSO_AdministratorAccess_0a1b2c3d4e5f6a7b\",\"awsRegion\":\"global\",\"relationships\":[],\"resourceId\":\"AROA0VALIDATION00002\",\"resourceName\":\"AWSReservedSSO_AdministratorAccess_0a1b2c3d4e5f6a7b\",\"resourceType\":\"AWS::IAM::Role\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:iam::111111111111:role/aws-controltower-AdministratorExecutionRole\",\"awsRegion\":\"global\",\"relationships\":[],\"resourceId\":\"AROA0VALIDATION00003\",\"resourceName\":\"aws-controltower-AdministratorExecutionRole\",\"resourceType\":\"AWS::IAM::Role\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:iam::111111111111:role/acme-state-replication\",\"awsRegion\":\"global\",\"relationships\":[],\"resourceId\":\"AROA0VALIDATION00004\",\"resourceName\":\"acme-state-replication\",\"resourceType\":\"AWS::IAM::Role\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:s3:::acme-state-replica\",\"awsRegion\":\"eu-west-1\",\"relationships\":[],\"resourceId\":\"acme-state-replica\",\"resourceName\":\"acme-state-replica\",\"resourceType\":\"AWS::S3::Bucket\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0b0000000000000b1\",\"awsRegion\":\"eu-west-1\",\"configuration\":{\"attachment\":{\"instanceOwnerId\":\"999999999991\"},\"description\":\"[DO NOT DELETE] ENI managed by MSK\",\"interfaceType\":\"interface\",\"requesterId\":\"AROA0SERVICE0000001\",\"requesterManaged\":false},\"relationships\":[{\"relationshipName\":\"Is contained in Vpc\",\"resourceId\":\"vpc-0a0000000000000a1\",\"resourceType\":\"AWS::EC2::VPC\"}],\"resourceId\":\"eni-0b0000000000000b1\",\"resourceName\":\"\",\"resourceType\":\"AWS::EC2::NetworkInterface\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0b0000000000000b2\",\"awsRegion\":\"eu-west-1\",\"configuration\":{\"description\":\"AWS Lambda VPC ENI-orders-0a1b2c3d\",\"interfaceType\":\"interface\",\"requesterId\":\"AROA0VALIDATION00009:orders\",\"requesterManaged\":false},\"relationships\":[{\"relationshipName\":\"Is contained in Vpc\",\"resourceId\":\"vpc-0a0000000000000a1\",\"resourceType\":\"AWS::EC2::VPC\"}],\"resourceId\":\"eni-0b0000000000000b2\",\"resourceName\":\"\",\"resourceType\":\"AWS::EC2::NetworkInterface\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0b0000000000000b3\",\"awsRegion\":\"eu-west-1\",\"configuration\":{\"description\":\"QuickSight VPC connection\",\"interfaceType\":\"quicksight\",\"requesterManaged\":false},\"relationships\":[{\"relationshipName\":\"Is contained in Vpc\",\"resourceId\":\"vpc-0a0000000000000a1\",\"resourceType\":\"AWS::EC2::VPC\"}],\"resourceId\":\"eni-0b0000000000000b3\",\"resourceName\":\"\",\"resourceType\":\"AWS::EC2::NetworkInterface\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0b0000000000000b4\",\"awsRegion\":\"eu-west-1\",\"configuration\":{\"attachment\":{\"instanceOwnerId\":\"amazon-aws\"},\"description\":\"ClientVPN-endpoint-cvpn-endpoint-0a1b\",\"interfaceType\":\"interface\",\"requesterManaged\":false},\"relationships\":[{\"relationshipName\":\"Is contained in Vpc\",\"resourceId\":\"vpc-0a0000000000000a1\",\"resourceType\":\"AWS::EC2::VPC\"}],\"resourceId\":\"eni-0b0000000000000b4\",\"resourceName\":\"\",\"resourceType\":\"AWS::EC2::NetworkInterface\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0b0000000000000b5\",\"awsRegion\":\"eu-west-1\",\"configuration\":{\"attachment\":{\"instanceOwnerId\":\"999999999992\"},\"description\":\"ENI for Flink application\",\"interfaceType\":\"interface\",\"requesterManaged\":false},\"relationships\":[{\"relationshipName\":\"Is contained in Vpc\",\"resourceId\":\"vpc-0a0000000000000a1\",\"resourceType\":\"AWS::EC2::VPC\"}],\"resourceId\":\"eni-0b0000000000000b5\",\"resourceName\":\"\",\"resourceType\":\"AWS::EC2::NetworkInterface\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:route53:::hostedzone/Z0VALIDATION0PUBLIC\",\"awsRegion\":\"global\",\"relationships\":[],\"resourceId\":\"Z0VALIDATION0PUBLIC\",\"resourceName\":\"acme.test.\",\"resourceType\":\"AWS::Route53::HostedZone\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0c0000000000000c1\",\"awsRegion\":\"eu-west-1\",\"relationships\":[{\"relationshipName\":\"Is contained in Vpc\",\"resourceId\":\"vpc-0a0000000000000a1\",\"resourceType\":\"AWS::EC2::VPC\"}],\"resourceId\":\"sg-0c0000000000000c1\",\"resourceName\":\"eks-cluster-sg-main-0a1b2c3d\",\"resourceType\":\"AWS::EC2::SecurityGroup\",\"tags\":[{\"key\":\"aws:eks:cluster-name\",\"value\":\"main\"},{\"key\":\"kubernetes.io/cluster/main\",\"value\":\"owned\"}]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0c0000000000000c2\",\"awsRegion\":\"eu-west-1\",\"relationships\":[{\"relationshipName\":\"Is contained in Vpc\",\"resourceId\":\"vpc-0a0000000000000a1\",\"resourceType\":\"AWS::EC2::VPC\"}],\"resourceId\":\"sg-0c0000000000000c2\",\"resourceName\":\"k8s-traffic-main-0a1b2c3d4e\",\"resourceType\":\"AWS::EC2::SecurityGroup\",\"tags\":[{\"key\":\"elbv2.k8s.aws/cluster\",\"value\":\"main\"},{\"key\":\"elbv2.k8s.aws/resource\",\"value\":\"backend-sg\"}]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0a0000000000000a4\",\"awsRegion\":\"eu-west-1\",\"relationships\":[{\"relationshipName\":\"Is contained in Vpc\",\"resourceId\":\"vpc-0a0000000000000a1\",\"resourceType\":\"AWS::EC2::VPC\"}],\"resourceId\":\"sg-0a0000000000000a4\",\"resourceName\":\"eks-nodes\",\"resourceType\":\"AWS::EC2::SecurityGroup\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:route53:::hostedzone/Z0VALIDATION0LEGACY\",\"awsRegion\":\"global\",\"relationships\":[],\"resourceId\":\"Z0VALIDATION0LEGACY\",\"resourceName\":\"legacy.acme.test.\",\"resourceType\":\"AWS::Route53::HostedZone\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:dhcp-options/dopt-0d0000000000000d1\",\"awsRegion\":\"eu-west-1\",\"configuration\":{\"dhcpConfigurations\":[{\"key\":\"domain-name\",\"values\":[{\"value\":\"eu-west-1.compute.internal\"}]},{\"key\":\"domain-name-servers\",\"values\":[{\"value\":\"AmazonProvidedDNS\"}]}]},\"relationships\":[],\"resourceId\":\"dopt-0d0000000000000d1\",\"resourceName\":\"\",\"resourceType\":\"AWS::EC2::DHCPOptions\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0a0000000000000a1\",\"awsRegion\":\"eu-west-1\",\"configuration\":{\"isDefault\":false},\"relationships\":[],\"resourceId\":\"vpc-0a0000000000000a1\",\"resourceName\":\"\",\"resourceType\":\"AWS::EC2::VPC\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0d0000000000000d2\",\"awsRegion\":\"eu-west-1\",\"relationships\":[{\"relationshipName\":\"Is contained in Vpc\",\"resourceId\":\"vpc-0a0000000000000a1\",\"resourceType\":\"AWS::EC2::VPC\"}],\"resourceId\":\"sg-0d0000000000000d2\",\"resourceName\":\"default\",\"resourceType\":\"AWS::EC2::SecurityGroup\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0d0000000000000d3\",\"awsRegion\":\"eu-west-1\",\"configuration\":{\"isDefault\":false},\"relationships\":[],\"resourceId\":\"vpc-0d0000000000000d3\",\"resourceName\":\"\",\"resourceType\":\"AWS::EC2::VPC\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:route-table/rtb-0d0000000000000d4\",\"awsRegion\":\"eu-west-1\",\"configuration\":{\"associations\":[{\"main\":true,\"routeTableAssociationId\":\"rtbassoc-0d0000000000000d4\"}]},\"relationships\":[{\"relationshipName\":\"Is contained in Vpc\",\"resourceId\":\"vpc-0d0000000000000d3\",\"resourceType\":\"AWS::EC2::VPC\"}],\"resourceId\":\"rtb-0d0000000000000d4\",\"resourceName\":\"\",\"resourceType\":\"AWS::EC2::RouteTable\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:natgateway/nat-0a0000000000000a3\",\"awsRegion\":\"eu-west-1\",\"relationships\":[{\"relationshipName\":\"Is contained in Vpc\",\"resourceId\":\"vpc-0a0000000000000a1\",\"resourceType\":\"AWS::EC2::VPC\"}],\"resourceId\":\"nat-0a0000000000000a3\",\"resourceName\":\"\",\"resourceType\":\"AWS::EC2::NatGateway\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:route-table/rtb-0d0000000000000d5\",\"awsRegion\":\"eu-west-1\",\"configuration\":{\"associations\":[]},\"relationships\":[{\"relationshipName\":\"Is contained in Vpc\",\"resourceId\":\"vpc-0a0000000000000a1\",\"resourceType\":\"AWS::EC2::VPC\"}],\"resourceId\":\"rtb-0d0000000000000d5\",\"resourceName\":\"\",\"resourceType\":\"AWS::EC2::RouteTable\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:iam::111111111111:role/AWSControlTowerExecution\",\"awsRegion\":\"global\",\"relationships\":[],\"resourceId\":\"AROA0VALIDATION00005\",\"resourceName\":\"AWSControlTowerExecution\",\"resourceType\":\"AWS::IAM::Role\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:iam::111111111111:role/AWSControlTower_VPCFlowLogsRole\",\"awsRegion\":\"global\",\"relationships\":[],\"resourceId\":\"AROA0VALIDATION00006\",\"resourceName\":\"AWSControlTower_VPCFlowLogsRole\",\"resourceType\":\"AWS::IAM::Role\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:iam::111111111111:role/service-role/aws-quicksight-service-role-v0\",\"awsRegion\":\"global\",\"relationships\":[],\"resourceId\":\"AROA0VALIDATION00007\",\"resourceName\":\"aws-quicksight-service-role-v0\",\"resourceType\":\"AWS::IAM::Role\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:iam::111111111111:policy/service-role/AWSQuickSightS3Policy\",\"awsRegion\":\"global\",\"relationships\":[],\"resourceId\":\"ANPA0VALIDATION00001\",\"resourceName\":\"AWSQuickSightS3Policy\",\"resourceType\":\"AWS::IAM::Policy\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:secretsmanager:eu-west-1:111111111111:secret:rds!db-0e0000000000000e1-AbCdEf\",\"awsRegion\":\"eu-west-1\",\"relationships\":[],\"resourceId\":\"arn:aws:secretsmanager:eu-west-1:111111111111:secret:rds!db-0e0000000000000e1-AbCdEf\",\"resourceName\":\"rds!db-0e0000000000000e1\",\"resourceType\":\"AWS::SecretsManager::Secret\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:secretsmanager:eu-west-1:111111111111:secret:s2svpn!vpn-0e0000000000000e2-GhIjKl\",\"awsRegion\":\"eu-west-1\",\"relationships\":[],\"resourceId\":\"arn:aws:secretsmanager:eu-west-1:111111111111:secret:s2svpn!vpn-0e0000000000000e2-GhIjKl\",\"resourceName\":\"s2svpn!vpn-0e0000000000000e2\",\"resourceType\":\"AWS::SecretsManager::Secret\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:s3:::acme-flow-logs\",\"awsRegion\":\"eu-west-1\",\"relationships\":[],\"resourceId\":\"acme-flow-logs\",\"resourceName\":\"acme-flow-logs\",\"resourceType\":\"AWS::S3::Bucket\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:iam::111111111111:role/ci-deploy\",\"awsRegion\":\"global\",\"relationships\":[],\"resourceId\":\"AROA0VALIDATION00010\",\"resourceName\":\"ci-deploy\",\"resourceType\":\"AWS::IAM::Role\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:iam::111111111111:role/ci-build\",\"awsRegion\":\"global\",\"relationships\":[],\"resourceId\":\"AROA0VALIDATION00011\",\"resourceName\":\"ci-build\",\"resourceType\":\"AWS::IAM::Role\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:iam::111111111111:policy/ci-deploy-policy\",\"awsRegion\":\"global\",\"relationships\":[],\"resourceId\":\"ANPA0VALIDATION00002\",\"resourceName\":\"ci-deploy-policy\",\"resourceType\":\"AWS::IAM::Policy\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:route-table/rtb-0a0000000000000a2\",\"awsRegion\":\"eu-west-1\",\"configuration\":{\"associations\":[{\"main\":true,\"routeTableAssociationId\":\"rtbassoc-0a0000000000000a2\"}]},\"relationships\":[{\"relationshipName\":\"Is contained in Vpc\",\"resourceId\":\"vpc-0a0000000000000a1\",\"resourceType\":\"AWS::EC2::VPC\"}],\"resourceId\":\"rtb-0a0000000000000a2\",\"resourceName\":\"\",\"resourceType\":\"AWS::EC2::RouteTable\",\"tags\":[]}"]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.1
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 29
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 133
+        host: ""
+        body: Action=DescribeNatGateways&Filter.1.Name=state&Filter.1.Value.1=pending&Filter.1.Value.2=available&MaxResults=1000&Version=2016-11-15
+        form:
+            Action:
+                - DescribeNatGateways
+            Filter.1.Name:
+                - state
+            Filter.1.Value.1:
+                - pending
+            Filter.1.Value.2:
+                - available
+            MaxResults:
+                - "1000"
+            Version:
+                - "2016-11-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://ec2.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <DescribeNatGatewaysResponse xmlns="http://ec2.amazonaws.com/doc/2016-11-15/"><natGatewaySet><item><natGatewayId>nat-0a0000000000000a3</natGatewayId><state>available</state><availabilityMode>regional</availabilityMode><routeTableId>rtb-0d0000000000000d5</routeTableId></item></natGatewaySet></DescribeNatGatewaysResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 30
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 68
+        host: ""
+        body: Action=DescribeSecurityGroupRules&MaxResults=1000&Version=2016-11-15
+        form:
+            Action:
+                - DescribeSecurityGroupRules
+            MaxResults:
+                - "1000"
+            Version:
+                - "2016-11-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://ec2.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <DescribeSecurityGroupRulesResponse xmlns="http://ec2.amazonaws.com/doc/2016-11-15/"><securityGroupRuleSet><item><securityGroupRuleId>sgr-0c0000000000000c1</securityGroupRuleId><groupId>sg-0c0000000000000c1</groupId><groupOwnerId>111111111111</groupOwnerId><isEgress>false</isEgress><ipProtocol>-1</ipProtocol><fromPort>-1</fromPort><toPort>-1</toPort><referencedGroupInfo><groupId>sg-0c0000000000000c1</groupId><userId>111111111111</userId></referencedGroupInfo><description>Allow the cluster to talk to itself</description></item><item><securityGroupRuleId>sgr-0c0000000000000c2</securityGroupRuleId><groupId>sg-0c0000000000000c2</groupId><groupOwnerId>111111111111</groupOwnerId><isEgress>false</isEgress><ipProtocol>tcp</ipProtocol><fromPort>443</fromPort><toPort>443</toPort><cidrIpv4>0.0.0.0/0</cidrIpv4><description>[k8s] Managed SecurityGroup for LoadBalancer</description></item><item><securityGroupRuleId>sgr-0c0000000000000c3</securityGroupRuleId><groupId>sg-0a0000000000000a4</groupId><groupOwnerId>111111111111</groupOwnerId><isEgress>false</isEgress><ipProtocol>tcp</ipProtocol><fromPort>8080</fromPort><toPort>8080</toPort><referencedGroupInfo><groupId>sg-0c0000000000000c2</groupId><userId>111111111111</userId></referencedGroupInfo><description>elbv2.k8s.aws/targetGroupBinding=shared</description></item><item><securityGroupRuleId>sgr-0d0000000000000d2</securityGroupRuleId><groupId>sg-0d0000000000000d2</groupId><groupOwnerId>111111111111</groupOwnerId><isEgress>true</isEgress><ipProtocol>-1</ipProtocol><fromPort>-1</fromPort><toPort>-1</toPort><cidrIpv4>0.0.0.0/0</cidrIpv4><description></description></item><item><securityGroupRuleId>sgr-0d0000000000000d3</securityGroupRuleId><groupId>sg-0d0000000000000d2</groupId><groupOwnerId>111111111111</groupOwnerId><isEgress>false</isEgress><ipProtocol>-1</ipProtocol><fromPort>-1</fromPort><toPort>-1</toPort><referencedGroupInfo><groupId>sg-0d0000000000000d2</groupId><userId>111111111111</userId></referencedGroupInfo><description></description></item></securityGroupRuleSet></DescribeSecurityGroupRulesResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 31
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 120
+        host: ""
+        body: Action=GetAccountAuthorizationDetails&Filter.member.1=Role&Filter.member.2=User&Filter.member.3=Group&Version=2010-05-08
+        form:
+            Action:
+                - GetAccountAuthorizationDetails
+            Filter.member.1:
+                - Role
+            Filter.member.2:
+                - User
+            Filter.member.3:
+                - Group
+            Version:
+                - "2010-05-08"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://iam.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <GetAccountAuthorizationDetailsResponse xmlns="https://iam.amazonaws.com/doc/2010-05-08/"><GetAccountAuthorizationDetailsResult><IsTruncated>false</IsTruncated><UserDetailList/><GroupDetailList/><RoleDetailList><member><Path>/aws-service-role/ecs.amazonaws.com/</Path><RoleName>AWSServiceRoleForECS</RoleName><RoleId>AROA0VALIDATION00001</RoleId><Arn>arn:aws:iam::111111111111:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS</Arn><CreateDate>2026-03-01T08:00:00Z</CreateDate><AttachedManagedPolicies><member><PolicyName>AmazonECSServiceRolePolicy</PolicyName><PolicyArn>arn:aws:iam::aws:policy/aws-service-role/AmazonECSServiceRolePolicy</PolicyArn></member></AttachedManagedPolicies><RolePolicyList></RolePolicyList></member><member><Path>/aws-reserved/sso.amazonaws.com/eu-west-1/</Path><RoleName>AWSReservedSSO_AdministratorAccess_0a1b2c3d4e5f6a7b</RoleName><RoleId>AROA0VALIDATION00002</RoleId><Arn>arn:aws:iam::111111111111:role/aws-reserved/sso.amazonaws.com/eu-west-1/AWSReservedSSO_AdministratorAccess_0a1b2c3d4e5f6a7b</Arn><CreateDate>2026-03-01T08:00:00Z</CreateDate><AttachedManagedPolicies><member><PolicyName>AdministratorAccess</PolicyName><PolicyArn>arn:aws:iam::aws:policy/AdministratorAccess</PolicyArn></member></AttachedManagedPolicies><RolePolicyList><member><PolicyName>AwsSSOInlinePolicy</PolicyName><PolicyDocument>FIXTURE-SECRET-document</PolicyDocument></member></RolePolicyList></member><member><Path>/</Path><RoleName>aws-controltower-AdministratorExecutionRole</RoleName><RoleId>AROA0VALIDATION00003</RoleId><Arn>arn:aws:iam::111111111111:role/aws-controltower-AdministratorExecutionRole</Arn><CreateDate>2026-03-01T08:00:00Z</CreateDate><AttachedManagedPolicies><member><PolicyName>AdministratorAccess</PolicyName><PolicyArn>arn:aws:iam::aws:policy/AdministratorAccess</PolicyArn></member></AttachedManagedPolicies><RolePolicyList></RolePolicyList></member><member><Path>/</Path><RoleName>acme-state-replication</RoleName><RoleId>AROA0VALIDATION00004</RoleId><Arn>arn:aws:iam::111111111111:role/acme-state-replication</Arn><CreateDate>2026-03-01T08:00:00Z</CreateDate><AttachedManagedPolicies></AttachedManagedPolicies><RolePolicyList><member><PolicyName>replication</PolicyName><PolicyDocument>FIXTURE-SECRET-document</PolicyDocument></member></RolePolicyList></member><member><Path>/</Path><RoleName>AWSControlTowerExecution</RoleName><RoleId>AROA0VALIDATION00005</RoleId><Arn>arn:aws:iam::111111111111:role/AWSControlTowerExecution</Arn><CreateDate>2026-03-01T08:00:00Z</CreateDate><AttachedManagedPolicies><member><PolicyName>AdministratorAccess</PolicyName><PolicyArn>arn:aws:iam::aws:policy/AdministratorAccess</PolicyArn></member></AttachedManagedPolicies><RolePolicyList></RolePolicyList></member><member><Path>/</Path><RoleName>AWSControlTower_VPCFlowLogsRole</RoleName><RoleId>AROA0VALIDATION00006</RoleId><Arn>arn:aws:iam::111111111111:role/AWSControlTower_VPCFlowLogsRole</Arn><CreateDate>2026-03-01T08:00:00Z</CreateDate><AttachedManagedPolicies></AttachedManagedPolicies><RolePolicyList><member><PolicyName>CloudWatchLogsDelivery</PolicyName><PolicyDocument>FIXTURE-SECRET-document</PolicyDocument></member></RolePolicyList></member><member><Path>/service-role/</Path><RoleName>aws-quicksight-service-role-v0</RoleName><RoleId>AROA0VALIDATION00007</RoleId><Arn>arn:aws:iam::111111111111:role/service-role/aws-quicksight-service-role-v0</Arn><CreateDate>2026-03-01T08:00:00Z</CreateDate><AttachedManagedPolicies><member><PolicyName>AWSQuickSightS3Policy</PolicyName><PolicyArn>arn:aws:iam::111111111111:policy/service-role/AWSQuickSightS3Policy</PolicyArn></member></AttachedManagedPolicies><RolePolicyList></RolePolicyList></member><member><Path>/</Path><RoleName>ci-deploy</RoleName><RoleId>AROA0VALIDATION00010</RoleId><Arn>arn:aws:iam::111111111111:role/ci-deploy</Arn><CreateDate>2026-03-01T08:00:00Z</CreateDate><AttachedManagedPolicies><member><PolicyName>ci-deploy-policy</PolicyName><PolicyArn>arn:aws:iam::111111111111:policy/ci-deploy-policy</PolicyArn></member></AttachedManagedPolicies><RolePolicyList></RolePolicyList></member><member><Path>/</Path><RoleName>ci-build</RoleName><RoleId>AROA0VALIDATION00011</RoleId><Arn>arn:aws:iam::111111111111:role/ci-build</Arn><CreateDate>2026-03-01T08:00:00Z</CreateDate><AttachedManagedPolicies><member><PolicyName>ci-deploy-policy</PolicyName><PolicyArn>arn:aws:iam::111111111111:policy/ci-deploy-policy</PolicyArn></member></AttachedManagedPolicies><RolePolicyList></RolePolicyList></member></RoleDetailList><Policies/></GetAccountAuthorizationDetailsResult></GetAccountAuthorizationDetailsResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 32
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        url: https://resource-explorer-2.eu-west-1.amazonaws.com/GetDefaultView
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"ViewArn":"arn:aws:resource-explorer-2:eu-west-1:111111111111:view/all-resources/5d3c2b1a-0f9e-4d8c-b7a6-000000000002"}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 33
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/json
+        url: https://resource-explorer-2.eu-west-1.amazonaws.com/ListIndexes
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Indexes":[{"Arn":"arn:aws:resource-explorer-2:eu-west-1:111111111111:index/0c7a9f4e-1b2d-4e5f-8a9b-000000000002","Region":"eu-west-1","Type":"LOCAL"}]}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 34
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 64
+        host: ""
+        body: '{"Filters":{"FilterString":"region:eu-west-1"},"MaxResults":500}'
+        headers:
+            Content-Type:
+                - application/json
+        url: https://resource-explorer-2.eu-west-1.amazonaws.com/ListResources
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Resources":[{"Arn":"arn:aws:logs:eu-west-1:111111111111:log-group:API-Gateway-Execution-Logs_a1b2c3d4e5/prod","OwningAccountId":"111111111111","Region":"eu-west-1","ResourceType":"logs:log-group","Service":"logs"},{"Arn":"arn:aws:logs:eu-west-1:111111111111:log-group:/aws/apigateway/welcome","OwningAccountId":"111111111111","Region":"eu-west-1","ResourceType":"logs:log-group","Service":"logs"},{"Arn":"arn:aws:ec2:eu-west-1:111111111111:elastic-ip/eipalloc-0f0000000000000f1","OwningAccountId":"111111111111","Region":"eu-west-1","ResourceType":"ec2:elastic-ip","Service":"ec2"},{"Arn":"arn:aws:ec2:eu-west-1:111111111111:elastic-ip/eipalloc-0f0000000000000f2","OwningAccountId":"111111111111","Region":"eu-west-1","ResourceType":"ec2:elastic-ip","Service":"ec2"}]}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 35
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/json
+        url: https://resource-explorer-2.eu-west-1.amazonaws.com/ListSupportedResourceTypes
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"ResourceTypes":[{"ResourceType":"logs:log-group","Service":"logs"}]}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 36
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 2
+        host: ""
+        body: '{}'
+        headers:
+            Content-Type:
+                - application/json
+        url: https://resource-explorer-2.eu-west-1.amazonaws.com/ListViews
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"Views":["arn:aws:resource-explorer-2:eu-west-1:111111111111:view/all-resources/5d3c2b1a-0f9e-4d8c-b7a6-000000000002"]}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 37
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 43
+        host: ""
+        body: Action=GetCallerIdentity&Version=2011-06-15
+        form:
+            Action:
+                - GetCallerIdentity
+            Version:
+                - "2011-06-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://sts.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: |
+            <GetCallerIdentityResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">
+              <GetCallerIdentityResult>
+                <Arn>arn:aws:iam::111111111111:user/tfcensus-readonly</Arn>
+                <UserId>AIDAEXAMPLEUSERID</UserId>
+                <Account>111111111111</Account>
+              </GetCallerIdentityResult>
+              <ResponseMetadata><RequestId>00000000-0000-4000-8000-000000000000</RequestId></ResponseMetadata>
+            </GetCallerIdentityResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s

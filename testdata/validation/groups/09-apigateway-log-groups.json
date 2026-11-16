@@ -1,0 +1,15 @@
+{
+  "group": "API Gateway execution log groups and /aws/apigateway/welcome",
+  "spec_count": 5,
+  "why": "apigateway-log-group",
+  "resource_explorer": [
+    {
+      "arn": "arn:aws:logs:eu-west-1:111111111111:log-group:API-Gateway-Execution-Logs_a1b2c3d4e5/prod",
+      "type": "logs:log-group"
+    },
+    {
+      "arn": "arn:aws:logs:eu-west-1:111111111111:log-group:/aws/apigateway/welcome",
+      "type": "logs:log-group"
+    }
+  ]
+}

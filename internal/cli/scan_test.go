@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"maps"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -69,8 +70,8 @@ type item struct {
 
 func (it item) row() string {
 	tags := []map[string]string{}
-	for k, v := range it.Tags {
-		tags = append(tags, map[string]string{"key": k, "value": v})
+	for _, k := range slices.Sorted(maps.Keys(it.Tags)) {
+		tags = append(tags, map[string]string{"key": k, "value": it.Tags[k]})
 	}
 	rels := []map[string]string{}
 	for _, r := range it.Rels {

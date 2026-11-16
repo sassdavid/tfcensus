@@ -1,0 +1,86 @@
+{
+  "group": "Security group rules of the EKS cluster security group and of AWS Load Balancer Controller groups, and its rules on node groups",
+  "spec_count": 8,
+  "why": "eks-cluster-security-group and the kubernetes tag rule with inheritance, aws-load-balancer-controller-rule",
+  "config": [
+    {
+      "type": "AWS::EC2::SecurityGroup",
+      "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0c0000000000000c1",
+      "id": "sg-0c0000000000000c1",
+      "region": "eu-west-1",
+      "name": "eks-cluster-sg-main-0a1b2c3d",
+      "tags": {
+        "aws:eks:cluster-name": "main",
+        "kubernetes.io/cluster/main": "owned"
+      },
+      "relationships": [
+        [
+          "AWS::EC2::VPC",
+          "vpc-0a0000000000000a1",
+          "Is contained in Vpc"
+        ]
+      ]
+    },
+    {
+      "type": "AWS::EC2::SecurityGroup",
+      "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0c0000000000000c2",
+      "id": "sg-0c0000000000000c2",
+      "region": "eu-west-1",
+      "name": "k8s-traffic-main-0a1b2c3d4e",
+      "tags": {
+        "elbv2.k8s.aws/cluster": "main",
+        "elbv2.k8s.aws/resource": "backend-sg"
+      },
+      "relationships": [
+        [
+          "AWS::EC2::VPC",
+          "vpc-0a0000000000000a1",
+          "Is contained in Vpc"
+        ]
+      ]
+    },
+    {
+      "type": "AWS::EC2::SecurityGroup",
+      "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0a0000000000000a4",
+      "id": "sg-0a0000000000000a4",
+      "region": "eu-west-1",
+      "name": "eks-nodes",
+      "relationships": [
+        [
+          "AWS::EC2::VPC",
+          "vpc-0a0000000000000a1",
+          "Is contained in Vpc"
+        ]
+      ]
+    }
+  ],
+  "sg_rules": [
+    {
+      "id": "sgr-0c0000000000000c1",
+      "group": "sg-0c0000000000000c1",
+      "protocol": "-1",
+      "from": -1,
+      "to": -1,
+      "peer": "sg-0c0000000000000c1",
+      "description": "Allow the cluster to talk to itself"
+    },
+    {
+      "id": "sgr-0c0000000000000c2",
+      "group": "sg-0c0000000000000c2",
+      "protocol": "tcp",
+      "from": 443,
+      "to": 443,
+      "cidr": "0.0.0.0/0",
+      "description": "[k8s] Managed SecurityGroup for LoadBalancer"
+    },
+    {
+      "id": "sgr-0c0000000000000c3",
+      "group": "sg-0a0000000000000a4",
+      "protocol": "tcp",
+      "from": 8080,
+      "to": 8080,
+      "peer": "sg-0c0000000000000c2",
+      "description": "elbv2.k8s.aws/targetGroupBinding=shared"
+    }
+  ]
+}

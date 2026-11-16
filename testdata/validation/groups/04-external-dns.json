@@ -1,0 +1,52 @@
+{
+  "group": "Route 53 records that external-dns owns (TXT and A ALIAS)",
+  "spec_count": 8,
+  "why": "external-dns, including the legacy cname- token on an A ALIAS record",
+  "zones": [
+    {
+      "id": "Z0VALIDATION0PUBLIC",
+      "name": "acme.test",
+      "records": [
+        {
+          "name": "acme.test",
+          "type": "NS",
+          "value": "ns-1.awsdns-01.org."
+        },
+        {
+          "name": "acme.test",
+          "type": "SOA",
+          "value": "ns-1.awsdns-01.org. awsdns-hostmaster.amazon.com. 1 7200 900 1209600 86400"
+        },
+        {
+          "name": "a-app.acme.test",
+          "type": "TXT",
+          "value": "\"heritage=external-dns,external-dns/owner=main,external-dns/resource=ingress/apps/app\""
+        },
+        {
+          "name": "app.acme.test",
+          "type": "A",
+          "alias": true
+        },
+        {
+          "name": "cname-api.acme.test",
+          "type": "TXT",
+          "value": "\"heritage=external-dns,external-dns/owner=main,external-dns/resource=service/apps/api\""
+        },
+        {
+          "name": "api.acme.test",
+          "type": "A",
+          "alias": true
+        }
+      ]
+    }
+  ],
+  "config": [
+    {
+      "type": "AWS::Route53::HostedZone",
+      "arn": "arn:aws:route53:::hostedzone/Z0VALIDATION0PUBLIC",
+      "id": "Z0VALIDATION0PUBLIC",
+      "region": "global",
+      "name": "acme.test."
+    }
+  ]
+}

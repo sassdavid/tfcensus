@@ -1,0 +1,108 @@
+{
+  "group": "ENIs that MSK, Lambda, QuickSight, Client VPN and Managed Service for Apache Flink created, all with RequesterManaged=false",
+  "spec_count": 27,
+  "why": "service-eni (attachment owner, interface type, description)",
+  "config": [
+    {
+      "type": "AWS::EC2::NetworkInterface",
+      "arn": "arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0b0000000000000b1",
+      "id": "eni-0b0000000000000b1",
+      "region": "eu-west-1",
+      "configuration": {
+        "requesterManaged": false,
+        "interfaceType": "interface",
+        "description": "[DO NOT DELETE] ENI managed by MSK",
+        "requesterId": "AROA0SERVICE0000001",
+        "attachment": {
+          "instanceOwnerId": "999999999991"
+        }
+      },
+      "relationships": [
+        [
+          "AWS::EC2::VPC",
+          "vpc-0a0000000000000a1",
+          "Is contained in Vpc"
+        ]
+      ]
+    },
+    {
+      "type": "AWS::EC2::NetworkInterface",
+      "arn": "arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0b0000000000000b2",
+      "id": "eni-0b0000000000000b2",
+      "region": "eu-west-1",
+      "configuration": {
+        "requesterManaged": false,
+        "interfaceType": "interface",
+        "description": "AWS Lambda VPC ENI-orders-0a1b2c3d",
+        "requesterId": "AROA0VALIDATION00009:orders"
+      },
+      "relationships": [
+        [
+          "AWS::EC2::VPC",
+          "vpc-0a0000000000000a1",
+          "Is contained in Vpc"
+        ]
+      ]
+    },
+    {
+      "type": "AWS::EC2::NetworkInterface",
+      "arn": "arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0b0000000000000b3",
+      "id": "eni-0b0000000000000b3",
+      "region": "eu-west-1",
+      "configuration": {
+        "requesterManaged": false,
+        "interfaceType": "quicksight",
+        "description": "QuickSight VPC connection"
+      },
+      "relationships": [
+        [
+          "AWS::EC2::VPC",
+          "vpc-0a0000000000000a1",
+          "Is contained in Vpc"
+        ]
+      ]
+    },
+    {
+      "type": "AWS::EC2::NetworkInterface",
+      "arn": "arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0b0000000000000b4",
+      "id": "eni-0b0000000000000b4",
+      "region": "eu-west-1",
+      "configuration": {
+        "requesterManaged": false,
+        "interfaceType": "interface",
+        "description": "ClientVPN-endpoint-cvpn-endpoint-0a1b",
+        "attachment": {
+          "instanceOwnerId": "amazon-aws"
+        }
+      },
+      "relationships": [
+        [
+          "AWS::EC2::VPC",
+          "vpc-0a0000000000000a1",
+          "Is contained in Vpc"
+        ]
+      ]
+    },
+    {
+      "type": "AWS::EC2::NetworkInterface",
+      "arn": "arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0b0000000000000b5",
+      "id": "eni-0b0000000000000b5",
+      "region": "eu-west-1",
+      "configuration": {
+        "requesterManaged": false,
+        "interfaceType": "interface",
+        "description": "ENI for Flink application",
+        "attachment": {
+          "instanceOwnerId": "999999999992"
+        }
+      },
+      "relationships": [
+        [
+          "AWS::EC2::VPC",
+          "vpc-0a0000000000000a1",
+          "Is contained in Vpc"
+        ]
+      ]
+    }
+  ]
+}
