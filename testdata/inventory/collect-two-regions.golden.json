@@ -49,6 +49,13 @@
     {
       "account": "111111111111",
       "region": "eu-west-1",
+      "layer": "native:ec2-nat-gateways",
+      "status": "ok",
+      "count": 0
+    },
+    {
+      "account": "111111111111",
+      "region": "eu-west-1",
       "layer": "native:s3-subresources",
       "status": "ok",
       "count": 4
@@ -71,6 +78,13 @@
       "account": "111111111111",
       "region": "us-east-1",
       "layer": "native:ec2-sg-rules",
+      "status": "ok",
+      "count": 0
+    },
+    {
+      "account": "111111111111",
+      "region": "us-east-1",
+      "layer": "native:ec2-nat-gateways",
       "status": "ok",
       "count": 0
     },

@@ -48,3 +48,75 @@ aws-service  alias of a customer key                       rules/no-match
 derived      ECS task                                      pack/derived/ecs-task derived
 ephemeral    log group of a managed function               pack/ephemeral/managed-lambda-log-group ignored
 ephemeral    log group of an unmanaged function            rules/no-match
+aws-defaults apex NS record                                pack/aws-defaults/apex-ns-soa aws-managed
+aws-defaults apex SOA record                               pack/aws-defaults/apex-ns-soa aws-managed
+aws-defaults NS delegation below the apex                  rules/no-match
+aws-defaults default DHCP options                          pack/aws-defaults/default-dhcp-options aws-managed
+aws-defaults default DHCP options in us-east-1             pack/aws-defaults/default-dhcp-options aws-managed
+aws-defaults DHCP options with a custom DNS server         rules/no-match
+aws-defaults tagged DHCP options with the default values   rules/no-match
+aws-defaults main route table                              pack/aws-defaults/main-route-table aws-managed
+aws-defaults route table of a subnet                       rules/no-match
+aws-defaults route table of a regional NAT gateway         pack/aws-defaults/regional-nat-route-table aws-managed
+aws-defaults CodeDeploy default configuration              pack/aws-defaults/account-defaults aws-managed
+aws-defaults AppConfig predefined strategy                 pack/aws-defaults/account-defaults aws-managed
+aws-defaults Keyspaces system keyspace                     pack/aws-defaults/account-defaults aws-managed
+aws-defaults ECS FARGATE capacity provider                 pack/aws-defaults/account-defaults aws-managed
+aws-defaults Scheduler default group                       pack/aws-defaults/account-defaults aws-managed
+aws-defaults default event bus                             pack/aws-defaults/account-defaults aws-managed
+aws-defaults auto-defined Resolver rule                    pack/aws-defaults/account-defaults aws-managed
+aws-defaults Athena primary workgroup                      pack/aws-defaults/account-defaults aws-managed
+aws-defaults AWS Backup Default vault                      pack/aws-defaults/account-defaults aws-managed
+aws-defaults X-Ray Default sampling rule                   pack/aws-defaults/account-defaults aws-managed
+aws-defaults ElastiCache default user                      pack/aws-defaults/account-defaults aws-managed
+aws-defaults RDS default parameter group                   pack/aws-defaults/account-defaults aws-managed
+aws-defaults AWS-managed prefix list                       pack/aws-defaults/account-defaults aws-managed
+aws-defaults event bus a team created                      rules/no-match
+aws-defaults Resolver rule a team created                  rules/no-match
+aws-defaults ECS capacity provider of an Auto Scaling group rules/no-match
+aws-service  Control Tower execution role                  pack/aws-service/control-tower aws-managed
+aws-service  Control Tower flow logs role                  pack/aws-service/control-tower aws-managed
+aws-service  role named like Control Tower but not by it   rules/no-match
+aws-service  EKS cluster security group                    pack/aws-service/eks-cluster-security-group aws-managed
+aws-service  group named like the EKS one without the tag  rules/no-match
+aws-service  QuickSight service role                       pack/aws-service/quicksight-service-role aws-managed
+aws-service  QuickSight service policy                     pack/aws-service/quicksight-service-role aws-managed
+aws-service  QuickSight role outside /service-role/        rules/no-match
+aws-service  API Gateway execution log group               pack/aws-service/apigateway-log-group aws-managed
+aws-service  API Gateway welcome log group                 pack/aws-service/apigateway-log-group aws-managed
+aws-service  API access log group a team created           rules/no-match
+aws-service  RDS master user secret                        pack/aws-service/service-linked-secret aws-managed
+aws-service  site-to-site VPN secret                       pack/aws-service/service-linked-secret aws-managed
+aws-service  secret with the owningService tag             pack/aws-service/service-linked-secret aws-managed
+aws-service  application secret                            rules/no-match
+aws-service  flow-log bucket policy                        pack/aws-service/log-delivery-bucket-policy aws-managed
+aws-service  bucket policy with log delivery and a team statement rules/no-match
+aws-service  bucket policy whose statement has no Sid      rules/no-match
+other-iac    AFT execution role                            pack/other-iac/aft other-iac
+other-iac    resource tagged managed_by AFT                pack/other-iac/aft other-iac
+other-iac    role named like AFT but not by it             rules/no-match
+other-iac    CloudFormation stack                          pack/other-iac/cloudformation-stack other-iac
+other-iac    external-dns TXT ownership record             pack/other-iac/external-dns other-iac
+other-iac    A record external-dns owns                    pack/other-iac/external-dns other-iac
+other-iac    A record someone created                      rules/no-match
+other-iac    rule the Load Balancer Controller described   pack/other-iac/aws-load-balancer-controller-rule other-iac
+other-iac    rule that references a controller-managed group pack/other-iac/aws-load-balancer-controller-rule other-iac
+other-iac    rule that references an ordinary group        rules/no-match
+other-iac    rule the in-tree cloud provider described     pack/other-iac/in-tree-elb-rule other-iac
+other-iac    VPC CNI network interface by tag              pack/other-iac/vpc-cni-eni other-iac
+other-iac    VPC CNI network interface by instance tag     pack/other-iac/vpc-cni-eni other-iac
+other-iac    EBS CSI volume                                pack/other-iac/ebs-csi other-iac
+other-iac    EFS CSI access point                          pack/other-iac/efs-csi other-iac
+other-iac    ACK bucket                                    pack/other-iac/ack other-iac
+other-iac    volume with a team tag                        rules/no-match
+derived      version of a managed function                 pack/derived/lambda-version derived
+derived      version of a function no unit manages         rules/no-match
+derived      automated RDS snapshot                        pack/derived/rds-automated-snapshot derived
+derived      automated RDS backup                          pack/derived/rds-automated-snapshot derived
+derived      manual RDS snapshot                           rules/no-match
+derived      recovery point in a managed vault             pack/derived/backup-recovery-point derived
+derived      recovery point in a vault no unit manages     rules/no-match
+derived      Pod Identity association an add-on owns       pack/derived/addon-pod-identity-association derived
+derived      Pod Identity association a team created       rules/no-match
+derived      target tracking alarm                         pack/derived/target-tracking-alarm derived
+derived      alarm a team created                          rules/no-match

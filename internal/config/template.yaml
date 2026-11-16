@@ -47,6 +47,9 @@ schema_version: 1
 #     derived: true
 #     ephemeral: true
 #   never_hide: []                 # categories user rules can't give to IAM users
+#   external_dns:                  # TXT registry settings of your external-dns deployments
+#     txt_prefix: ""               # --txt-prefix; empty tries no prefix, then external-dns-
+#     txt_suffix: ""               # --txt-suffix
 #
 # rules: []                        # ownership rules, see docs/plan/specs/ownership-rules.md
 #

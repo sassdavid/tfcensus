@@ -1,0 +1,45 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        url: https://route53.amazonaws.com/2013-04-01/hostedzone
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ListHostedZonesResponse xmlns="https://route53.amazonaws.com/doc/2013-04-01/"><HostedZones><HostedZone><Id>/hostedzone/Z1</Id><Name>example.com.</Name><CallerReference>r</CallerReference><ResourceRecordSetCount>3</ResourceRecordSetCount></HostedZone></HostedZones><IsTruncated>false</IsTruncated><MaxItems>100</MaxItems><Marker></Marker></ListHostedZonesResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 1
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 0
+        host: ""
+        url: https://route53.amazonaws.com/2013-04-01/hostedzone/Z1/rrset
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ListResourceRecordSetsResponse xmlns="https://route53.amazonaws.com/doc/2013-04-01/"><ResourceRecordSets><ResourceRecordSet><Name>a-app.example.com.</Name><Type>TXT</Type><TTL>300</TTL><ResourceRecords><ResourceRecord><Value>&quot;heritage=external-dns,external-dns/owner=main,external-dns/resource=ingress/web/app&quot;</Value></ResourceRecord></ResourceRecords></ResourceRecordSet><ResourceRecordSet><Name>app.example.com.</Name><Type>A</Type><TTL>300</TTL><ResourceRecords><ResourceRecord><Value>192.0.2.1</Value></ResourceRecord></ResourceRecords></ResourceRecordSet><ResourceRecordSet><Name>cname-api.example.com.</Name><Type>TXT</Type><TTL>300</TTL><ResourceRecords><ResourceRecord><Value>&quot;heritage=external-dns,external-dns/owner=main,external-dns/resource=ingress/web/app&quot;</Value></ResourceRecord></ResourceRecords></ResourceRecordSet><ResourceRecordSet><Name>api.example.com.</Name><Type>A</Type><AliasTarget><HostedZoneId>Z2</HostedZoneId><DNSName>web-1.eu-west-1.elb.amazonaws.com.</DNSName><EvaluateTargetHealth>false</EvaluateTargetHealth></AliasTarget></ResourceRecordSet><ResourceRecordSet><Name>external-dns-a-web.example.com.</Name><Type>TXT</Type><TTL>300</TTL><ResourceRecords><ResourceRecord><Value>&quot;ZXhhbXBsZS1lbmNyeXB0ZWQtb3duZXItcmVjb3JkLXZhbHVl&quot;</Value></ResourceRecord></ResourceRecords></ResourceRecordSet><ResourceRecordSet><Name>web.example.com.</Name><Type>A</Type><TTL>300</TTL><ResourceRecords><ResourceRecord><Value>192.0.2.1</Value></ResourceRecord></ResourceRecords></ResourceRecordSet><ResourceRecordSet><Name>a-ghost.example.com.</Name><Type>TXT</Type><TTL>300</TTL><ResourceRecords><ResourceRecord><Value>&quot;ZXhhbXBsZS1lbmNyeXB0ZWQtb3duZXItcmVjb3JkLXZhbHVl&quot;</Value></ResourceRecord></ResourceRecords></ResourceRecordSet><ResourceRecordSet><Name>example.com.</Name><Type>TXT</Type><TTL>300</TTL><ResourceRecords><ResourceRecord><Value>&quot;v=spf1 include:_spf.example.net ~all&quot;</Value></ResourceRecord></ResourceRecords></ResourceRecordSet><ResourceRecordSet><Name>manual.example.com.</Name><Type>A</Type><TTL>300</TTL><ResourceRecords><ResourceRecord><Value>192.0.2.1</Value></ResourceRecord></ResourceRecords></ResourceRecordSet></ResourceRecordSets><IsTruncated>false</IsTruncated><MaxItems>2</MaxItems></ListResourceRecordSetsResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s

@@ -21,7 +21,7 @@ stderr 'rule "typo": column 9'
 
 # The same rules in a valid file compile.
 exec tfcensus rules test good.yaml
-stdout '^26 rules compiled \(good.yaml\)$'
+stdout '^50 rules compiled \(good.yaml\)$'
 
 -- bad-shape.yaml --
 schema_version: 1

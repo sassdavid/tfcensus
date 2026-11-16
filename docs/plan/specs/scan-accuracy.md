@@ -248,13 +248,13 @@ how the next accounts show what is still missing.
   it with stubbed AWS and checks that none of it is `unmanaged`.
 
 ## Acceptance criteria
-1. [ ] Inheritance: a table test covers every child kind above, the three inheriting parent
+1. [x] Inheritance: a table test covers every child kind above, the three inheriting parent
    categories, a `managed` parent (child stays `unmanaged`), depth 3, an ignored child and a
    `never_hide` guard. `--explain` prints the parent chain (golden).
 2. [x] `service-eni` has positive fixtures for each condition and negatives for an unattached
    user-created ENI and an EC2 instance's primary ENI. The config query cassettes include the
    three new properties.
-3. [ ] The Kubernetes controller rules, the AWS default rules and the AWS service rules above
+3. [x] The Kubernetes controller rules, the AWS default rules and the AWS service rules above
    each have positive and negative fixtures (`TestSpec_ownership_1` covers the packs). The
    external-dns test covers prefix, suffix, the legacy `cname-` token on an A ALIAS record, the
    `%{record_type}` template and an encrypted value.

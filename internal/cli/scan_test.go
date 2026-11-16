@@ -339,6 +339,8 @@ func scanStubs(r *awstest.Router, iamOnly, aggregated bool) {
 	r.On("cloudcontrolapi", "ListResources", "AWS::VpcLattice::", none, none, none, none)
 	r.On("cloudcontrolapi", "ListResources", "ListenerArn", ok(`{"ResourceDescriptions":[{"Identifier":"`+
 		arnELB("listener-rule/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2/9683b2d02a6cabee")+`","Properties":"{}"}]}`))
+	r.On("ec2", "DescribeNatGateways", "", ok(`<DescribeNatGatewaysResponse `+
+		`xmlns="http://ec2.amazonaws.com/doc/2016-11-15/"><natGatewaySet/></DescribeNatGatewaysResponse>`))
 	r.On("ec2", "DescribeSecurityGroupRules", "", ok(`<DescribeSecurityGroupRulesResponse `+
 		`xmlns="http://ec2.amazonaws.com/doc/2016-11-15/"><securityGroupRuleSet/></DescribeSecurityGroupRulesResponse>`))
 	r.On(

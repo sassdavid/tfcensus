@@ -1145,6 +1145,1376 @@
         "cfn_type": "AWS::Logs::LogGroup",
         "arn": "arn:aws:logs:eu-west-1:111111111111:log-group:/aws/lambda/clickops-fn"
       }
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "apex NS record",
+      "want": "pack/aws-defaults/apex-ns-soa",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::Route53::RecordSet",
+        "sources": [
+          "native:route53-records"
+        ],
+        "id": "Z1_example.com_NS",
+        "name": "example.com",
+        "attrs": {
+          "name": "example.com",
+          "type": "NS",
+          "apex": "true",
+          "zone_id": "Z1",
+          "set_identifier": "",
+          "short_name": ""
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "apex SOA record",
+      "want": "pack/aws-defaults/apex-ns-soa",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::Route53::RecordSet",
+        "sources": [
+          "native:route53-records"
+        ],
+        "id": "Z1_example.com_SOA",
+        "name": "example.com",
+        "attrs": {
+          "name": "example.com",
+          "type": "SOA",
+          "apex": "true",
+          "zone_id": "Z1",
+          "set_identifier": "",
+          "short_name": ""
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "NS delegation below the apex",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::Route53::RecordSet",
+        "sources": [
+          "native:route53-records"
+        ],
+        "id": "Z1_dev.example.com_NS",
+        "name": "dev.example.com",
+        "attrs": {
+          "name": "dev.example.com",
+          "type": "NS",
+          "apex": "false",
+          "zone_id": "Z1",
+          "set_identifier": "",
+          "short_name": ""
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "default DHCP options",
+      "want": "pack/aws-defaults/default-dhcp-options",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::EC2::DHCPOptions",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:dhcp-options/dopt-1",
+        "id": "dopt-1",
+        "attrs": {
+          "dhcp_options": "domain-name-servers=AmazonProvidedDNS;domain-name=eu-west-1.compute.internal"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "default DHCP options in us-east-1",
+      "want": "pack/aws-defaults/default-dhcp-options",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::EC2::DHCPOptions",
+        "sources": [
+          "config"
+        ],
+        "region": "us-east-1",
+        "arn": "arn:aws:ec2:us-east-1:111111111111:dhcp-options/dopt-2",
+        "id": "dopt-2",
+        "attrs": {
+          "dhcp_options": "domain-name-servers=AmazonProvidedDNS;domain-name=ec2.internal"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "DHCP options with a custom DNS server",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::EC2::DHCPOptions",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:dhcp-options/dopt-3",
+        "id": "dopt-3",
+        "attrs": {
+          "dhcp_options": "domain-name-servers=10.0.0.2;domain-name=corp.internal"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "tagged DHCP options with the default values",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::EC2::DHCPOptions",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:dhcp-options/dopt-4",
+        "id": "dopt-4",
+        "tags": {
+          "Name": "shared"
+        },
+        "attrs": {
+          "dhcp_options": "domain-name-servers=AmazonProvidedDNS;domain-name=eu-west-1.compute.internal"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "main route table",
+      "want": "pack/aws-defaults/main-route-table",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::EC2::RouteTable",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:route-table/rtb-main",
+        "id": "rtb-main",
+        "attrs": {
+          "main": "true"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "route table of a subnet",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::EC2::RouteTable",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:route-table/rtb-app",
+        "id": "rtb-app",
+        "attrs": {
+          "main": "false"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "route table of a regional NAT gateway",
+      "want": "pack/aws-defaults/regional-nat-route-table",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::EC2::RouteTable",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:route-table/rtb-nat",
+        "id": "rtb-nat",
+        "attrs": {
+          "main": "false",
+          "regional_nat_gateway": "nat-0reg"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "CodeDeploy default configuration",
+      "want": "pack/aws-defaults/account-defaults",
+      "resource": {
+        "account": "111111111111",
+        "sources": [
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:codedeploy:eu-west-1:111111111111:deploymentconfig:CodeDeployDefault.OneAtATime",
+        "id": "CodeDeployDefault.OneAtATime",
+        "source_type": "codedeploy:deploymentconfig"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "AppConfig predefined strategy",
+      "want": "pack/aws-defaults/account-defaults",
+      "resource": {
+        "account": "111111111111",
+        "sources": [
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:appconfig:eu-west-1:111111111111:deploymentstrategy/AppConfig.AllAtOnce",
+        "id": "AppConfig.AllAtOnce",
+        "source_type": "appconfig:deploymentstrategy"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "Keyspaces system keyspace",
+      "want": "pack/aws-defaults/account-defaults",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::Cassandra::Keyspace",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:cassandra:eu-west-1:111111111111:/keyspace/system_schema/",
+        "id": "system_schema",
+        "name": "system_schema"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "ECS FARGATE capacity provider",
+      "want": "pack/aws-defaults/account-defaults",
+      "resource": {
+        "account": "111111111111",
+        "sources": [
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:ecs:eu-west-1:111111111111:capacity-provider/FARGATE",
+        "id": "FARGATE",
+        "source_type": "ecs:capacity-provider"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "Scheduler default group",
+      "want": "pack/aws-defaults/account-defaults",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::Scheduler::ScheduleGroup",
+        "sources": [
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:scheduler:eu-west-1:111111111111:schedule-group/default",
+        "id": "default",
+        "name": "default"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "default event bus",
+      "want": "pack/aws-defaults/account-defaults",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::Events::EventBus",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:events:eu-west-1:111111111111:event-bus/default",
+        "id": "default",
+        "name": "default"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "auto-defined Resolver rule",
+      "want": "pack/aws-defaults/account-defaults",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::Route53Resolver::ResolverRule",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:route53resolver:eu-west-1:111111111111:resolver-rule/rslvr-autodefined-rr-internet-resolver",
+        "id": "rslvr-autodefined-rr-internet-resolver"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "Athena primary workgroup",
+      "want": "pack/aws-defaults/account-defaults",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::Athena::WorkGroup",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:athena:eu-west-1:111111111111:workgroup/primary",
+        "id": "primary",
+        "name": "primary"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "AWS Backup Default vault",
+      "want": "pack/aws-defaults/account-defaults",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::Backup::BackupVault",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:backup:eu-west-1:111111111111:backup-vault:Default",
+        "id": "Default",
+        "name": "Default"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "X-Ray Default sampling rule",
+      "want": "pack/aws-defaults/account-defaults",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::XRay::SamplingRule",
+        "sources": [
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:xray:eu-west-1:111111111111:sampling-rule/Default",
+        "id": "Default"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "ElastiCache default user",
+      "want": "pack/aws-defaults/account-defaults",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::ElastiCache::User",
+        "sources": [
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:elasticache:eu-west-1:111111111111:user:default",
+        "id": "default",
+        "name": "default"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "RDS default parameter group",
+      "want": "pack/aws-defaults/account-defaults",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::RDS::DBParameterGroup",
+        "sources": [
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:rds:eu-west-1:111111111111:pg:default.postgres16",
+        "id": "default.postgres16",
+        "name": "default.postgres16"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "AWS-managed prefix list",
+      "want": "pack/aws-defaults/account-defaults",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::EC2::PrefixList",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:ec2:eu-west-1:aws:prefix-list/pl-6da54004",
+        "id": "pl-6da54004",
+        "name": "com.amazonaws.eu-west-1.s3"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "event bus a team created",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::Events::EventBus",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:events:eu-west-1:111111111111:event-bus/orders",
+        "id": "orders",
+        "name": "orders"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "Resolver rule a team created",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::Route53Resolver::ResolverRule",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:route53resolver:eu-west-1:111111111111:resolver-rule/rslvr-rr-0a1b",
+        "id": "rslvr-rr-0a1b"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-defaults",
+      "name": "ECS capacity provider of an Auto Scaling group",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "sources": [
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:ecs:eu-west-1:111111111111:capacity-provider/app-asg",
+        "id": "app-asg",
+        "source_type": "ecs:capacity-provider"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "Control Tower execution role",
+      "want": "pack/aws-service/control-tower",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::IAM::Role",
+        "sources": [
+          "config"
+        ],
+        "arn": "arn:aws:iam::111111111111:role/AWSControlTowerExecution",
+        "id": "AROAAWSCONTR",
+        "name": "AWSControlTowerExecution"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "Control Tower flow logs role",
+      "want": "pack/aws-service/control-tower",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::IAM::Role",
+        "sources": [
+          "config"
+        ],
+        "arn": "arn:aws:iam::111111111111:role/AWSControlTower_VPCFlowLogsRole",
+        "id": "AROAAWSCONTR",
+        "name": "AWSControlTower_VPCFlowLogsRole"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "role named like Control Tower but not by it",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::IAM::Role",
+        "sources": [
+          "config"
+        ],
+        "arn": "arn:aws:iam::111111111111:role/ControlTowerAdmins",
+        "id": "AROACONTROLT",
+        "name": "ControlTowerAdmins"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "EKS cluster security group",
+      "want": "pack/aws-service/eks-cluster-security-group",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::EC2::SecurityGroup",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0eks",
+        "id": "sg-0eks",
+        "name": "eks-cluster-sg-main-1234567890",
+        "tags": {
+          "aws:eks:cluster-name": "main",
+          "kubernetes.io/cluster/main": "owned"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "group named like the EKS one without the tag",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::EC2::SecurityGroup",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0fake",
+        "id": "sg-0fake",
+        "name": "eks-cluster-sg-copy"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "QuickSight service role",
+      "want": "pack/aws-service/quicksight-service-role",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::IAM::Role",
+        "sources": [
+          "config"
+        ],
+        "arn": "arn:aws:iam::111111111111:role/service-role/aws-quicksight-service-role-v0",
+        "id": "AROAAWS-QUIC",
+        "name": "aws-quicksight-service-role-v0"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "QuickSight service policy",
+      "want": "pack/aws-service/quicksight-service-role",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::IAM::ManagedPolicy",
+        "sources": [
+          "config"
+        ],
+        "arn": "arn:aws:iam::111111111111:policy/service-role/AWSQuickSightS3Policy",
+        "id": "ANPAQS",
+        "name": "AWSQuickSightS3Policy"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "QuickSight role outside /service-role/",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::IAM::Role",
+        "sources": [
+          "config"
+        ],
+        "arn": "arn:aws:iam::111111111111:role/aws-quicksight-service-role-v0",
+        "id": "AROAAWS-QUIC",
+        "name": "aws-quicksight-service-role-v0"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "API Gateway execution log group",
+      "want": "pack/aws-service/apigateway-log-group",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::Logs::LogGroup",
+        "sources": [
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:logs:eu-west-1:111111111111:log-group:API-Gateway-Execution-Logs_a1b2c3/prod",
+        "id": "API-Gateway-Execution-Logs_a1b2c3/prod",
+        "name": "API-Gateway-Execution-Logs_a1b2c3/prod"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "API Gateway welcome log group",
+      "want": "pack/aws-service/apigateway-log-group",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::Logs::LogGroup",
+        "sources": [
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:logs:eu-west-1:111111111111:log-group:/aws/apigateway/welcome",
+        "id": "/aws/apigateway/welcome",
+        "name": "/aws/apigateway/welcome"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "API access log group a team created",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::Logs::LogGroup",
+        "sources": [
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:logs:eu-west-1:111111111111:log-group:/apigateway/access/orders",
+        "id": "/apigateway/access/orders",
+        "name": "/apigateway/access/orders"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "RDS master user secret",
+      "want": "pack/aws-service/service-linked-secret",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::SecretsManager::Secret",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:secretsmanager:eu-west-1:111111111111:secret:rds!db-0a1b2c3d-AbCdEf",
+        "id": "arn:aws:secretsmanager:eu-west-1:111111111111:secret:rds!db-0a1b2c3d-AbCdEf",
+        "name": "rds!db-0a1b2c3d-AbCdEf"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "site-to-site VPN secret",
+      "want": "pack/aws-service/service-linked-secret",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::SecretsManager::Secret",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:secretsmanager:eu-west-1:111111111111:secret:s2svpn!vpn-0a1b-AbCdEf",
+        "id": "arn:aws:secretsmanager:eu-west-1:111111111111:secret:s2svpn!vpn-0a1b-AbCdEf",
+        "name": "s2svpn!vpn-0a1b-AbCdEf"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "secret with the owningService tag",
+      "want": "pack/aws-service/service-linked-secret",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::SecretsManager::Secret",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:secretsmanager:eu-west-1:111111111111:secret:app-credentials-AbCdEf",
+        "id": "arn:aws:secretsmanager:eu-west-1:111111111111:secret:app-credentials-AbCdEf",
+        "name": "app-credentials-AbCdEf",
+        "tags": {
+          "aws:secretsmanager:owningService": "appflow"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "application secret",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::SecretsManager::Secret",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:secretsmanager:eu-west-1:111111111111:secret:orders/db-AbCdEf",
+        "id": "arn:aws:secretsmanager:eu-west-1:111111111111:secret:orders/db-AbCdEf",
+        "name": "orders/db-AbCdEf"
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "flow-log bucket policy",
+      "want": "pack/aws-service/log-delivery-bucket-policy",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::S3::BucketPolicy",
+        "sources": [
+          "native:s3-subresources"
+        ],
+        "region": "eu-west-1",
+        "id": "flow-logs",
+        "attrs": {
+          "bucket": "flow-logs",
+          "policy_sids": "AWSLogDeliveryAclCheck,AWSLogDeliveryWrite"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "bucket policy with log delivery and a team statement",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::S3::BucketPolicy",
+        "sources": [
+          "native:s3-subresources"
+        ],
+        "region": "eu-west-1",
+        "id": "shared-logs",
+        "attrs": {
+          "bucket": "shared-logs",
+          "policy_sids": "AWSLogDeliveryWrite,DenyInsecureTransport"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "aws-service",
+      "name": "bucket policy whose statement has no Sid",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::S3::BucketPolicy",
+        "sources": [
+          "native:s3-subresources"
+        ],
+        "region": "eu-west-1",
+        "id": "app-logs",
+        "attrs": {
+          "bucket": "app-logs",
+          "policy_sids": ",AWSLogDeliveryWrite"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "other-iac",
+      "name": "AFT execution role",
+      "want": "pack/other-iac/aft",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::IAM::Role",
+        "sources": [
+          "config"
+        ],
+        "arn": "arn:aws:iam::111111111111:role/AWSAFTExecution",
+        "id": "AROAAWSAFTEX",
+        "name": "AWSAFTExecution"
+      },
+      "related": []
+    },
+    {
+      "pack": "other-iac",
+      "name": "resource tagged managed_by AFT",
+      "want": "pack/other-iac/aft",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::S3::Bucket",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:s3:::aft-logs",
+        "id": "aft-logs",
+        "name": "aft-logs",
+        "tags": {
+          "managed_by": "AFT"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "other-iac",
+      "name": "role named like AFT but not by it",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::IAM::Role",
+        "sources": [
+          "config"
+        ],
+        "arn": "arn:aws:iam::111111111111:role/AWSAFTReader",
+        "id": "AROAAWSAFTRE",
+        "name": "AWSAFTReader"
+      },
+      "related": []
+    },
+    {
+      "pack": "other-iac",
+      "name": "CloudFormation stack",
+      "want": "pack/other-iac/cloudformation-stack",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::CloudFormation::Stack",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:cloudformation:eu-west-1:111111111111:stack/base/0a1b-2",
+        "id": "arn:aws:cloudformation:eu-west-1:111111111111:stack/base/0a1b-2",
+        "name": "base"
+      },
+      "related": []
+    },
+    {
+      "pack": "other-iac",
+      "name": "external-dns TXT ownership record",
+      "want": "pack/other-iac/external-dns",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::Route53::RecordSet",
+        "sources": [
+          "native:route53-records"
+        ],
+        "id": "Z1_a-app.example.com_TXT",
+        "name": "a-app.example.com",
+        "attrs": {
+          "name": "a-app.example.com",
+          "type": "TXT",
+          "apex": "false",
+          "zone_id": "Z1",
+          "set_identifier": "",
+          "short_name": "",
+          "external_dns": "true"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "other-iac",
+      "name": "A record external-dns owns",
+      "want": "pack/other-iac/external-dns",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::Route53::RecordSet",
+        "sources": [
+          "native:route53-records"
+        ],
+        "id": "Z1_app.example.com_A",
+        "name": "app.example.com",
+        "attrs": {
+          "name": "app.example.com",
+          "type": "A",
+          "apex": "false",
+          "zone_id": "Z1",
+          "set_identifier": "",
+          "short_name": "",
+          "external_dns": "true"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "other-iac",
+      "name": "A record someone created",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::Route53::RecordSet",
+        "sources": [
+          "native:route53-records"
+        ],
+        "id": "Z1_manual.example.com_A",
+        "name": "manual.example.com",
+        "attrs": {
+          "name": "manual.example.com",
+          "type": "A",
+          "apex": "false",
+          "zone_id": "Z1",
+          "set_identifier": "",
+          "short_name": ""
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "other-iac",
+      "name": "rule the Load Balancer Controller described",
+      "want": "pack/other-iac/aws-load-balancer-controller-rule",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::EC2::SecurityGroupIngress",
+        "sources": [
+          "native:ec2-sg-rules"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group-rule/sgr-0lbc",
+        "id": "sgr-0lbc",
+        "attrs": {
+          "group_id": "sg-0node",
+          "rule_key": "x",
+          "controller": "aws-load-balancer-controller"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "other-iac",
+      "name": "rule that references a controller-managed group",
+      "want": "pack/other-iac/aws-load-balancer-controller-rule",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::EC2::SecurityGroupIngress",
+        "sources": [
+          "native:ec2-sg-rules"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group-rule/sgr-0ref",
+        "id": "sgr-0ref",
+        "attrs": {
+          "group_id": "sg-0node",
+          "rule_key": "x"
+        },
+        "relationships": [
+          {
+            "cfn_type": "AWS::EC2::SecurityGroup",
+            "id": "sg-0lb",
+            "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0lb",
+            "relationship": "References"
+          }
+        ]
+      },
+      "related": [
+        {
+          "resourceId": "sg-0lb",
+          "resourceName": "k8s-traffic-main",
+          "resourceType": "AWS::EC2::SecurityGroup",
+          "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0lb",
+          "awsRegion": "eu-west-1",
+          "accountId": "111111111111",
+          "tags": [
+            {
+              "key": "elbv2.k8s.aws/cluster",
+              "value": "main"
+            }
+          ],
+          "relationships": []
+        }
+      ]
+    },
+    {
+      "pack": "other-iac",
+      "name": "rule that references an ordinary group",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::EC2::SecurityGroupIngress",
+        "sources": [
+          "native:ec2-sg-rules"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group-rule/sgr-0peer",
+        "id": "sgr-0peer",
+        "attrs": {
+          "group_id": "sg-0node",
+          "rule_key": "x"
+        },
+        "relationships": [
+          {
+            "cfn_type": "AWS::EC2::SecurityGroup",
+            "id": "sg-0app",
+            "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0app",
+            "relationship": "References"
+          }
+        ]
+      },
+      "related": []
+    },
+    {
+      "pack": "other-iac",
+      "name": "rule the in-tree cloud provider described",
+      "want": "pack/other-iac/in-tree-elb-rule",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::EC2::SecurityGroupIngress",
+        "sources": [
+          "native:ec2-sg-rules"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group-rule/sgr-0nlb",
+        "id": "sgr-0nlb",
+        "attrs": {
+          "group_id": "sg-0node",
+          "rule_key": "x",
+          "controller": "cloud-provider-aws"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "other-iac",
+      "name": "VPC CNI network interface by tag",
+      "want": "pack/other-iac/vpc-cni-eni",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::EC2::NetworkInterface",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0cni1",
+        "id": "eni-0cni1",
+        "tags": {
+          "eks:eni:owner": "amazon-vpc-cni"
+        },
+        "attrs": {
+          "interface_type": "interface",
+          "requester_managed": "false"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "other-iac",
+      "name": "VPC CNI network interface by instance tag",
+      "want": "pack/other-iac/vpc-cni-eni",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::EC2::NetworkInterface",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0cni2",
+        "id": "eni-0cni2",
+        "tags": {
+          "node.k8s.amazonaws.com/instance_id": "i-0a1b"
+        },
+        "attrs": {
+          "interface_type": "interface",
+          "requester_managed": "false"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "other-iac",
+      "name": "EBS CSI volume",
+      "want": "pack/other-iac/ebs-csi",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::EC2::Volume",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:volume/vol-0csi",
+        "id": "vol-0csi",
+        "tags": {
+          "ebs.csi.aws.com/cluster": "true",
+          "kubernetes.io/created-for/pvc/name": "data"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "other-iac",
+      "name": "EFS CSI access point",
+      "want": "pack/other-iac/efs-csi",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::EFS::AccessPoint",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:elasticfilesystem:eu-west-1:111111111111:access-point/fsap-0csi",
+        "id": "fsap-0csi",
+        "tags": {
+          "efs.csi.aws.com/cluster": "true"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "other-iac",
+      "name": "ACK bucket",
+      "want": "pack/other-iac/ack",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::S3::Bucket",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:s3:::ack-data",
+        "id": "ack-data",
+        "name": "ack-data",
+        "tags": {
+          "services.k8s.aws/controller-version": "s3-1.0.20",
+          "services.k8s.aws/namespace": "apps"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "other-iac",
+      "name": "volume with a team tag",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::EC2::Volume",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:ec2:eu-west-1:111111111111:volume/vol-0team",
+        "id": "vol-0team",
+        "tags": {
+          "team": "data"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "version of a managed function",
+      "want": "pack/derived/lambda-version",
+      "resource": {
+        "account": "111111111111",
+        "sources": [
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:lambda:eu-west-1:111111111111:function:orders:3",
+        "id": "3",
+        "source_type": "lambda:function/version"
+      },
+      "related": [],
+      "in_state": [
+        [
+          "aws_lambda_function",
+          "orders"
+        ]
+      ]
+    },
+    {
+      "pack": "derived",
+      "name": "version of a function no unit manages",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "sources": [
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:lambda:eu-west-1:111111111111:function:clickops:3",
+        "id": "3",
+        "source_type": "lambda:function/version"
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "automated RDS snapshot",
+      "want": "pack/derived/rds-automated-snapshot",
+      "resource": {
+        "account": "111111111111",
+        "sources": [
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:rds:eu-west-1:111111111111:snapshot:rds:orders-2026-11-15-03-10",
+        "id": "rds:orders-2026-11-15-03-10",
+        "source_type": "rds:snapshot"
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "automated RDS backup",
+      "want": "pack/derived/rds-automated-snapshot",
+      "resource": {
+        "account": "111111111111",
+        "sources": [
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:rds:eu-west-1:111111111111:auto-backup:ab-0a1b",
+        "id": "ab-0a1b",
+        "source_type": "rds:auto-backup"
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "manual RDS snapshot",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "sources": [
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:rds:eu-west-1:111111111111:snapshot:before-upgrade",
+        "id": "before-upgrade",
+        "source_type": "rds:snapshot"
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "recovery point in a managed vault",
+      "want": "pack/derived/backup-recovery-point",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::Backup::RecoveryPoint",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:backup:eu-west-1:111111111111:recovery-point:0a1b2c3d",
+        "id": "0a1b2c3d",
+        "relationships": [
+          {
+            "cfn_type": "AWS::Backup::BackupVault",
+            "id": "main",
+            "relationship": "Is contained in BackupVault"
+          }
+        ]
+      },
+      "related": [],
+      "in_state": [
+        [
+          "aws_backup_vault",
+          "main"
+        ]
+      ]
+    },
+    {
+      "pack": "derived",
+      "name": "recovery point in a vault no unit manages",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::Backup::RecoveryPoint",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:backup:eu-west-1:111111111111:recovery-point:0a1b2c3d",
+        "id": "0a1b2c3d",
+        "relationships": [
+          {
+            "cfn_type": "AWS::Backup::BackupVault",
+            "id": "adhoc",
+            "relationship": "Is contained in BackupVault"
+          }
+        ]
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "Pod Identity association an add-on owns",
+      "want": "pack/derived/addon-pod-identity-association",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::EKS::PodIdentityAssociation",
+        "sources": [
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:eks:eu-west-1:111111111111:podidentityassociation/main/a-0addon",
+        "id": "a-0addon",
+        "attrs": {
+          "owner_arn": "arn:aws:eks:eu-west-1:111111111111:addon/main/vpc-cni/0a1b"
+        }
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "Pod Identity association a team created",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::EKS::PodIdentityAssociation",
+        "sources": [
+          "resource-explorer"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:eks:eu-west-1:111111111111:podidentityassociation/main/a-0team",
+        "id": "a-0team"
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "target tracking alarm",
+      "want": "pack/derived/target-tracking-alarm",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::CloudWatch::Alarm",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:cloudwatch:eu-west-1:111111111111:alarm:TargetTracking-table/orders-AlarmHigh-0a1b",
+        "id": "TargetTracking-table/orders-AlarmHigh-0a1b",
+        "name": "TargetTracking-table/orders-AlarmHigh-0a1b"
+      },
+      "related": []
+    },
+    {
+      "pack": "derived",
+      "name": "alarm a team created",
+      "want": "",
+      "resource": {
+        "account": "111111111111",
+        "cfn_type": "AWS::CloudWatch::Alarm",
+        "sources": [
+          "config"
+        ],
+        "region": "eu-west-1",
+        "arn": "arn:aws:cloudwatch:eu-west-1:111111111111:alarm:orders-5xx",
+        "id": "orders-5xx",
+        "name": "orders-5xx"
+      },
+      "related": []
     }
   ]
 }

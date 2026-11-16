@@ -828,7 +828,7 @@ interactions:
         proto_major: 1
         proto_minor: 1
         content_length: -1
-        body: '{"Results":["{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0a1b2c3d4e5f60718\",\"awsRegion\":\"eu-west-1\",\"configuration\":{\"isDefault\":false},\"relationships\":[],\"resourceId\":\"vpc-0a1b2c3d4e5f60718\",\"resourceName\":\"\",\"resourceType\":\"AWS::EC2::VPC\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0def00000000000a1\",\"awsRegion\":\"eu-west-1\",\"configuration\":{\"isDefault\":true},\"relationships\":[],\"resourceId\":\"vpc-0def00000000000a1\",\"resourceName\":\"\",\"resourceType\":\"AWS::EC2::VPC\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0aa11bb22cc33dd44\",\"awsRegion\":\"eu-west-1\",\"relationships\":[{\"relationshipName\":\"Is contained in Vpc\",\"resourceId\":\"vpc-0a1b2c3d4e5f60718\",\"resourceType\":\"AWS::EC2::VPC\"}],\"resourceId\":\"sg-0aa11bb22cc33dd44\",\"resourceName\":\"web\",\"resourceType\":\"AWS::EC2::SecurityGroup\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0def00000000000b2\",\"awsRegion\":\"eu-west-1\",\"relationships\":[{\"relationshipName\":\"Is contained in Vpc\",\"resourceId\":\"vpc-0def00000000000a1\",\"resourceType\":\"AWS::EC2::VPC\"}],\"resourceId\":\"sg-0def00000000000b2\",\"resourceName\":\"default\",\"resourceType\":\"AWS::EC2::SecurityGroup\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0c11c0b5000000003\",\"awsRegion\":\"eu-west-1\",\"relationships\":[],\"resourceCreationTime\":\"2026-10-01T09:00:00.000Z\",\"resourceId\":\"sg-0c11c0b5000000003\",\"resourceName\":\"clickops-debug\",\"resourceType\":\"AWS::EC2::SecurityGroup\",\"tags\":[{\"key\":\"owner\",\"value\":\"alice\"}]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:internet-gateway/igw-0def00000000000c3\",\"awsRegion\":\"eu-west-1\",\"relationships\":[{\"relationshipName\":\"Is attached to Vpc\",\"resourceId\":\"vpc-0def00000000000a1\",\"resourceType\":\"AWS::EC2::VPC\"}],\"resourceId\":\"igw-0def00000000000c3\",\"resourceName\":\"\",\"resourceType\":\"AWS::EC2::InternetGateway\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0aa00000000000d4\",\"awsRegion\":\"eu-west-1\",\"configuration\":{\"interfaceType\":\"nat_gateway\",\"requesterManaged\":true},\"relationships\":[],\"resourceId\":\"eni-0aa00000000000d4\",\"resourceName\":\"\",\"resourceType\":\"AWS::EC2::NetworkInterface\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:instance/i-0aa00000000000e5\",\"awsRegion\":\"eu-west-1\",\"relationships\":[],\"resourceId\":\"i-0aa00000000000e5\",\"resourceName\":\"\",\"resourceType\":\"AWS::EC2::Instance\",\"tags\":[{\"key\":\"owner\",\"value\":\"sandbox\"},{\"key\":\"Name\",\"value\":\"try-arm\"}]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-aws0-4000-8000-000000000001\",\"awsRegion\":\"eu-west-1\",\"configuration\":{\"keyManager\":\"AWS\"},\"relationships\":[],\"resourceId\":\"0b1c2d3e-aws0-4000-8000-000000000001\",\"resourceName\":\"\",\"resourceType\":\"AWS::KMS::Key\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:sqs:eu-west-1:111111111111:billing-events\",\"awsRegion\":\"eu-west-1\",\"relationships\":[],\"resourceId\":\"https://sqs.eu-west-1.amazonaws.com/111111111111/billing-events\",\"resourceName\":\"billing-events\",\"resourceType\":\"AWS::SQS::Queue\",\"tags\":[{\"key\":\"aws:cloudformation:stack-name\",\"value\":\"billing\"}]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:s3:::acme-growth-experiments\",\"awsRegion\":\"eu-west-1\",\"relationships\":[],\"resourceId\":\"acme-growth-experiments\",\"resourceName\":\"acme-growth-experiments\",\"resourceType\":\"AWS::S3::Bucket\",\"tags\":[{\"key\":\"team\",\"value\":\"growth\"}]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:elasticloadbalancing:eu-west-1:111111111111:loadbalancer/app/web/50dc6c495c0c9188\",\"awsRegion\":\"eu-west-1\",\"relationships\":[],\"resourceId\":\"arn:aws:elasticloadbalancing:eu-west-1:111111111111:loadbalancer/app/web/50dc6c495c0c9188\",\"resourceName\":\"web\",\"resourceType\":\"AWS::ElasticLoadBalancingV2::LoadBalancer\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2\",\"awsRegion\":\"eu-west-1\",\"relationships\":[],\"resourceId\":\"arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2\",\"resourceName\":\"\",\"resourceType\":\"AWS::ElasticLoadBalancingV2::Listener\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:lambda:eu-west-1:111111111111:function:acme-api\",\"awsRegion\":\"eu-west-1\",\"relationships\":[],\"resourceId\":\"acme-api\",\"resourceName\":\"acme-api\",\"resourceType\":\"AWS::Lambda::Function\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:iam::111111111111:role/acme-app\",\"awsRegion\":\"global\",\"relationships\":[],\"resourceId\":\"AROAACMEAPP00000001\",\"resourceName\":\"acme-app\",\"resourceType\":\"AWS::IAM::Role\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:iam::111111111111:role/acme-shared\",\"awsRegion\":\"global\",\"relationships\":[],\"resourceId\":\"AROAACMESHARED00002\",\"resourceName\":\"acme-shared\",\"resourceType\":\"AWS::IAM::Role\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:iam::111111111111:role/aws-service-role/support.amazonaws.com/AWSServiceRoleForSupport\",\"awsRegion\":\"global\",\"relationships\":[],\"resourceId\":\"AROASUPPORT00000003\",\"resourceName\":\"AWSServiceRoleForSupport\",\"resourceType\":\"AWS::IAM::Role\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:iam::111111111111:role/clickops-admin\",\"awsRegion\":\"global\",\"relationships\":[],\"resourceCreationTime\":\"2026-08-12T15:30:00.000Z\",\"resourceId\":\"AROACLICKOPS0000004\",\"resourceName\":\"clickops-admin\",\"resourceType\":\"AWS::IAM::Role\",\"tags\":[{\"key\":\"created-by\",\"value\":\"bob\"}]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:iam::111111111111:user/sandbox-user\",\"awsRegion\":\"global\",\"relationships\":[],\"resourceId\":\"AIDASANDBOX00000005\",\"resourceName\":\"sandbox-user\",\"resourceType\":\"AWS::IAM::User\",\"tags\":[{\"key\":\"owner\",\"value\":\"sandbox\"}]}"]}'
+        body: '{"Results":["{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0a1b2c3d4e5f60718\",\"awsRegion\":\"eu-west-1\",\"configuration\":{\"isDefault\":false},\"relationships\":[],\"resourceId\":\"vpc-0a1b2c3d4e5f60718\",\"resourceName\":\"\",\"resourceType\":\"AWS::EC2::VPC\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0def00000000000a1\",\"awsRegion\":\"eu-west-1\",\"configuration\":{\"isDefault\":true},\"relationships\":[],\"resourceId\":\"vpc-0def00000000000a1\",\"resourceName\":\"\",\"resourceType\":\"AWS::EC2::VPC\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0aa11bb22cc33dd44\",\"awsRegion\":\"eu-west-1\",\"relationships\":[{\"relationshipName\":\"Is contained in Vpc\",\"resourceId\":\"vpc-0a1b2c3d4e5f60718\",\"resourceType\":\"AWS::EC2::VPC\"}],\"resourceId\":\"sg-0aa11bb22cc33dd44\",\"resourceName\":\"web\",\"resourceType\":\"AWS::EC2::SecurityGroup\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0def00000000000b2\",\"awsRegion\":\"eu-west-1\",\"relationships\":[{\"relationshipName\":\"Is contained in Vpc\",\"resourceId\":\"vpc-0def00000000000a1\",\"resourceType\":\"AWS::EC2::VPC\"}],\"resourceId\":\"sg-0def00000000000b2\",\"resourceName\":\"default\",\"resourceType\":\"AWS::EC2::SecurityGroup\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0c11c0b5000000003\",\"awsRegion\":\"eu-west-1\",\"relationships\":[],\"resourceCreationTime\":\"2026-10-01T09:00:00.000Z\",\"resourceId\":\"sg-0c11c0b5000000003\",\"resourceName\":\"clickops-debug\",\"resourceType\":\"AWS::EC2::SecurityGroup\",\"tags\":[{\"key\":\"owner\",\"value\":\"alice\"}]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:internet-gateway/igw-0def00000000000c3\",\"awsRegion\":\"eu-west-1\",\"relationships\":[{\"relationshipName\":\"Is attached to Vpc\",\"resourceId\":\"vpc-0def00000000000a1\",\"resourceType\":\"AWS::EC2::VPC\"}],\"resourceId\":\"igw-0def00000000000c3\",\"resourceName\":\"\",\"resourceType\":\"AWS::EC2::InternetGateway\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0aa00000000000d4\",\"awsRegion\":\"eu-west-1\",\"configuration\":{\"interfaceType\":\"nat_gateway\",\"requesterManaged\":true},\"relationships\":[],\"resourceId\":\"eni-0aa00000000000d4\",\"resourceName\":\"\",\"resourceType\":\"AWS::EC2::NetworkInterface\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:ec2:eu-west-1:111111111111:instance/i-0aa00000000000e5\",\"awsRegion\":\"eu-west-1\",\"relationships\":[],\"resourceId\":\"i-0aa00000000000e5\",\"resourceName\":\"\",\"resourceType\":\"AWS::EC2::Instance\",\"tags\":[{\"key\":\"Name\",\"value\":\"try-arm\"},{\"key\":\"owner\",\"value\":\"sandbox\"}]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-aws0-4000-8000-000000000001\",\"awsRegion\":\"eu-west-1\",\"configuration\":{\"keyManager\":\"AWS\"},\"relationships\":[],\"resourceId\":\"0b1c2d3e-aws0-4000-8000-000000000001\",\"resourceName\":\"\",\"resourceType\":\"AWS::KMS::Key\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:sqs:eu-west-1:111111111111:billing-events\",\"awsRegion\":\"eu-west-1\",\"relationships\":[],\"resourceId\":\"https://sqs.eu-west-1.amazonaws.com/111111111111/billing-events\",\"resourceName\":\"billing-events\",\"resourceType\":\"AWS::SQS::Queue\",\"tags\":[{\"key\":\"aws:cloudformation:stack-name\",\"value\":\"billing\"}]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:s3:::acme-growth-experiments\",\"awsRegion\":\"eu-west-1\",\"relationships\":[],\"resourceId\":\"acme-growth-experiments\",\"resourceName\":\"acme-growth-experiments\",\"resourceType\":\"AWS::S3::Bucket\",\"tags\":[{\"key\":\"team\",\"value\":\"growth\"}]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:elasticloadbalancing:eu-west-1:111111111111:loadbalancer/app/web/50dc6c495c0c9188\",\"awsRegion\":\"eu-west-1\",\"relationships\":[],\"resourceId\":\"arn:aws:elasticloadbalancing:eu-west-1:111111111111:loadbalancer/app/web/50dc6c495c0c9188\",\"resourceName\":\"web\",\"resourceType\":\"AWS::ElasticLoadBalancingV2::LoadBalancer\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2\",\"awsRegion\":\"eu-west-1\",\"relationships\":[],\"resourceId\":\"arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2\",\"resourceName\":\"\",\"resourceType\":\"AWS::ElasticLoadBalancingV2::Listener\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:lambda:eu-west-1:111111111111:function:acme-api\",\"awsRegion\":\"eu-west-1\",\"relationships\":[],\"resourceId\":\"acme-api\",\"resourceName\":\"acme-api\",\"resourceType\":\"AWS::Lambda::Function\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:iam::111111111111:role/acme-app\",\"awsRegion\":\"global\",\"relationships\":[],\"resourceId\":\"AROAACMEAPP00000001\",\"resourceName\":\"acme-app\",\"resourceType\":\"AWS::IAM::Role\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:iam::111111111111:role/acme-shared\",\"awsRegion\":\"global\",\"relationships\":[],\"resourceId\":\"AROAACMESHARED00002\",\"resourceName\":\"acme-shared\",\"resourceType\":\"AWS::IAM::Role\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:iam::111111111111:role/aws-service-role/support.amazonaws.com/AWSServiceRoleForSupport\",\"awsRegion\":\"global\",\"relationships\":[],\"resourceId\":\"AROASUPPORT00000003\",\"resourceName\":\"AWSServiceRoleForSupport\",\"resourceType\":\"AWS::IAM::Role\",\"tags\":[]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:iam::111111111111:role/clickops-admin\",\"awsRegion\":\"global\",\"relationships\":[],\"resourceCreationTime\":\"2026-08-12T15:30:00.000Z\",\"resourceId\":\"AROACLICKOPS0000004\",\"resourceName\":\"clickops-admin\",\"resourceType\":\"AWS::IAM::Role\",\"tags\":[{\"key\":\"created-by\",\"value\":\"bob\"}]}","{\"accountId\":\"111111111111\",\"arn\":\"arn:aws:iam::111111111111:user/sandbox-user\",\"awsRegion\":\"global\",\"relationships\":[],\"resourceId\":\"AIDASANDBOX00000005\",\"resourceName\":\"sandbox-user\",\"resourceType\":\"AWS::IAM::User\",\"tags\":[{\"key\":\"owner\",\"value\":\"sandbox\"}]}"]}'
         headers:
             Content-Type:
                 - application/x-amz-json-1.1
@@ -836,6 +836,44 @@ interactions:
         code: 200
         duration: 0s
     - id: 18
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 133
+        host: ""
+        body: Action=DescribeNatGateways&Filter.1.Name=state&Filter.1.Value.1=pending&Filter.1.Value.2=available&MaxResults=1000&Version=2016-11-15
+        form:
+            Action:
+                - DescribeNatGateways
+            Filter.1.Name:
+                - state
+            Filter.1.Value.1:
+                - pending
+            Filter.1.Value.2:
+                - available
+            MaxResults:
+                - "1000"
+            Version:
+                - "2016-11-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://ec2.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <DescribeNatGatewaysResponse xmlns="http://ec2.amazonaws.com/doc/2016-11-15/"><natGatewaySet/></DescribeNatGatewaysResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 19
       request:
         proto: ""
         proto_major: 0
@@ -867,7 +905,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 19
+    - id: 20
       request:
         proto: ""
         proto_major: 0
@@ -903,7 +941,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 20
+    - id: 21
       request:
         proto: ""
         proto_major: 0
@@ -924,7 +962,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 21
+    - id: 22
       request:
         proto: ""
         proto_major: 0
@@ -949,7 +987,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 22
+    - id: 23
       request:
         proto: ""
         proto_major: 0
@@ -974,7 +1012,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 23
+    - id: 24
       request:
         proto: ""
         proto_major: 0
@@ -999,7 +1037,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 24
+    - id: 25
       request:
         proto: ""
         proto_major: 0
@@ -1024,7 +1062,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 25
+    - id: 26
       request:
         proto: ""
         proto_major: 0

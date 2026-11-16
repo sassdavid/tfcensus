@@ -8,7 +8,9 @@
   owner: iam-identity-center
   reason: permission set role that IAM Identity Center created
 - name: control-tower
-  match: resource.name.startsWith("aws-controltower-") || resource.arn.contains(":role/aws-controltower-")
+  match: >-
+    resource.name.startsWith("aws-controltower-") || resource.name.startsWith("AWSControlTower") ||
+    resource.arn.contains(":role/aws-controltower-") || resource.arn.contains(":role/AWSControlTower")
   owner: control-tower
   reason: created by AWS Control Tower
 - name: stacksets-execution-role
@@ -29,3 +31,35 @@
     resource.arn.contains(":role/cdk-hnb659fds-")
   owner: cdk
   reason: CDK bootstrap resource (default qualifier hnb659fds)
+- name: eks-cluster-security-group
+  match: >-
+    resource.type == "AWS::EC2::SecurityGroup" && resource.name.startsWith("eks-cluster-sg-") &&
+    "aws:eks:cluster-name" in resource.tags
+  owner: eks
+  reason: cluster security group that EKS creates with every cluster
+- name: quicksight-service-role
+  match: >-
+    resource.type in ["AWS::IAM::Role", "AWS::IAM::ManagedPolicy"] &&
+    (resource.arn.contains(":role/service-role/") || resource.arn.contains(":policy/service-role/")) &&
+    (resource.name.startsWith("aws-quicksight-") || resource.name.startsWith("AWSQuickSight"))
+  owner: quicksight
+  reason: service role or policy that QuickSight created under /service-role/
+- name: apigateway-log-group
+  match: >-
+    resource.type == "AWS::Logs::LogGroup" &&
+    (resource.name.startsWith("API-Gateway-Execution-Logs_") || resource.name == "/aws/apigateway/welcome")
+  owner: apigateway
+  reason: execution log group that API Gateway created
+- name: service-linked-secret
+  match: >-
+    resource.type == "AWS::SecretsManager::Secret" &&
+    (resource.name.matches("^(appflow|databrew|datasync|directconnect|ecs-sc|events|marketplace-deployment|opsworks-cm|pcs|rds|redshift|s2svpn|sqlworkbench)!") ||
+    "aws:secretsmanager:owningService" in resource.tags)
+  reason: secret that an AWS service created and manages (a <service>! name or the owningService tag)
+- name: log-delivery-bucket-policy
+  match: >-
+    resource.type == "AWS::S3::BucketPolicy" && resource.attrs.?policy_sids.orValue("") != "" &&
+    resource.attrs.policy_sids.split(",").all(s, s.startsWith("AWSLogDeliveryWrite") ||
+    s.startsWith("AWSLogDeliveryAclCheck"))
+  owner: log-delivery
+  reason: bucket policy that log delivery added (only AWSLogDeliveryWrite and AWSLogDeliveryAclCheck statements)

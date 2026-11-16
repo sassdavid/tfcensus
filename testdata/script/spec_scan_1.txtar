@@ -857,6 +857,13 @@ account,region,category,cfn_type,source_type,tf_types,arn,id,name,owner,rule,rea
       {
         "account": "111111111111",
         "region": "eu-west-1",
+        "layer": "native:ec2-nat-gateways",
+        "status": "ok",
+        "count": 0
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
         "layer": "native:s3-subresources",
         "status": "ok",
         "count": 0
@@ -1228,7 +1235,8 @@ account,region,category,cfn_type,source_type,tf_types,arn,id,name,owner,rule,rea
             null,
             [
               "config",
-              "re"
+              "re",
+              "native"
             ]
           ]
         },
