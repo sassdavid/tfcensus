@@ -89,7 +89,7 @@ func (l *Limiters) For(account, region, service string) *rate.Limiter {
 }
 
 // APIOption returns an SDK client option that waits for the bucket before each operation call,
-// each page of a paginator included. Retries go through the SDK's own adaptive rate limiter.
+// each page of a paginator included. Retries skip the bucket: the SDK's retryer spaces them.
 func (l *Limiters) APIOption(account, region, service string) func(*middleware.Stack) error {
 	b := l.For(account, region, service)
 	return func(s *middleware.Stack) error {

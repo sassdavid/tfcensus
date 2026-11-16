@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/spf13/cobra"
@@ -368,8 +369,21 @@ func reasonSuffix(reason string) string {
 }
 
 // moveClients returns the backend clients of a unit, from its backend credentials. Read-only
-// commands get no writer.
+// commands get no writer. Units with the same credentials and region share their clients.
 func moveClients(b *accounts.Backends, refs map[string]accounts.BackendRef, write bool) migrate.ClientsFunc {
+	var mu sync.Mutex
+	tables := map[string]*dynamodb.Client{}
+	table := func(acct *accounts.Account, region string) *dynamodb.Client {
+		key := acct.Source + "\x00" + acct.RoleARN + "\x00" + region
+		mu.Lock()
+		defer mu.Unlock()
+		c, ok := tables[key]
+		if !ok {
+			c = dynamodb.NewFromConfig(acct.Config, func(o *dynamodb.Options) { o.Region = region })
+			tables[key] = c
+		}
+		return c
+	}
 	return func(ctx context.Context, u *migrate.Unit) (*migrate.Clients, error) {
 		acct, region, err := b.Credentials(ctx, refs[u.Path])
 		if err != nil {
@@ -380,7 +394,7 @@ func moveClients(b *accounts.Backends, refs map[string]accounts.BackendRef, writ
 		if write {
 			c.Writer = s3c
 			if u.Table != "" {
-				c.Table = dynamodb.NewFromConfig(acct.Config, func(o *dynamodb.Options) { o.Region = region })
+				c.Table = table(acct, region)
 			}
 		}
 		return c, nil

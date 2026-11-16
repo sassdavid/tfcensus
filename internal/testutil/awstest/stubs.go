@@ -41,7 +41,6 @@ func bucketSubresources() map[string]Stub {
 		),
 		"lifecycle": missing("NoSuchLifecycleConfiguration", "The lifecycle configuration does not exist"),
 		"logging":   {Body: `<BucketLoggingStatus xmlns="` + s3XMLNS + `"/>`},
-		"location":  {},
 	}
 }
 
@@ -79,22 +78,40 @@ func (f *Fake) region(bucket string) string {
 	return "us-east-1"
 }
 
+// headBucket answers HeadBucket the way S3 does: the bucket's region in a header, also on the
+// 403 for a denied bucket and the 301 for a request sent to another region's endpoint.
+func (f *Fake) headBucket(w http.ResponseWriter, req *http.Request) {
+	bucket := bucketOf(req.URL.Host)
+	denied := slices.Contains(f.Deny, bucket)
+	if ok, _ := f.backend.BucketExists(bucket); !ok && f.Regions[bucket] == "" && !denied {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	region := f.region(bucket)
+	w.Header().Set("X-Amz-Bucket-Region", region)
+	switch {
+	case denied:
+		w.WriteHeader(http.StatusForbidden)
+	case hostRegion(req.URL.Host) != region:
+		w.WriteHeader(http.StatusMovedPermanently)
+	}
+}
+
+// hostRegion returns the region of an S3 virtual-hosted endpoint such as
+// bucket.s3.eu-west-1.amazonaws.com. The global endpoint is us-east-1.
+func hostRegion(host string) string {
+	_, rest, _ := strings.Cut(host, ".s3.")
+	region, _, _ := strings.Cut(rest, ".")
+	if region == "" || region == "amazonaws" {
+		return "us-east-1"
+	}
+	return region
+}
+
 func (f *Fake) bucketConfig(w http.ResponseWriter, req *http.Request) {
 	bucket, sub := bucketOf(req.URL.Host), subresource(req)
 	if ok, _ := f.backend.BucketExists(bucket); !ok && f.Regions[bucket] == "" {
 		writeS3Error(w, http.StatusNotFound, "NoSuchBucket", "The specified bucket does not exist")
-		return
-	}
-	if sub == "location" {
-		loc := f.region(bucket)
-		if loc == "us-east-1" {
-			loc = ""
-		}
-		writeStub(
-			w,
-			"application/xml",
-			Stub{Body: `<LocationConstraint xmlns="` + s3XMLNS + `">` + loc + `</LocationConstraint>`},
-		)
 		return
 	}
 	stub, ok := f.Stubs["s3:"+bucket+"?"+sub]

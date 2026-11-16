@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -134,4 +136,32 @@ func TestProbeCache(t *testing.T) {
 	_, err = probe.New(probe.Options{CacheDir: dir, Clock: clock}).Probe(t.Context(), &offline, regions)
 	require.NoError(t, err)
 	assert.NotZero(t, ct.calls.Load(), "after 24 hours the cache is stale")
+}
+
+// TestProbeAggregatorPages reads every page of DescribeConfigurationAggregators.
+func TestProbeAggregatorPages(t *testing.T) {
+	t.Parallel()
+	page := func(name, next string) awstest.Stub {
+		body := `{"ConfigurationAggregators":[{"ConfigurationAggregatorName":"` + name + `"}]`
+		if next != "" {
+			body += `,"NextToken":"` + next + `"`
+		}
+		return awstest.Stub{Body: body + "}"}
+	}
+	rt := awstest.NewRouter(t).
+		On("resource-explorer-2", "ListIndexes", "", awstest.Stub{Body: `{"Indexes":[]}`}).
+		On("config", "DescribeConfigurationRecorders", "", awstest.Stub{Body: `{"ConfigurationRecorders":[]}`}).
+		On("config", "DescribeConfigurationAggregators", `"NextToken":"page-2"`, page("acme-a", "")).
+		On("config", "DescribeConfigurationAggregators", "", page("acme-b", "page-2"))
+	acct := &accounts.Account{ID: "111111111111", Partition: "aws", Config: aws.Config{
+		Region:           "eu-west-1",
+		Credentials:      credentials.NewStaticCredentialsProvider("AKIAFAKE", "fake-secret", ""),
+		HTTPClient:       &http.Client{Transport: rt},
+		RetryMaxAttempts: 1,
+	}}
+	r, err := probe.New(probe.Options{}).Probe(t.Context(), acct, []string{"eu-west-1"})
+	require.NoError(t, err)
+	require.Len(t, r.Regions, 1)
+	assert.Equal(t, probe.StatusAvailable, r.Regions[0].Aggregators.Status)
+	assert.Equal(t, []string{"acme-a", "acme-b"}, r.Regions[0].Aggregators.Names)
 }

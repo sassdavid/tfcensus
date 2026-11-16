@@ -2,6 +2,7 @@ package accounts_test
 
 import (
 	"encoding/json"
+	"net/http"
 	"net/url"
 	"os"
 	"path"
@@ -91,8 +92,8 @@ func iamAction(t *testing.T, r *cassette.Request) string {
 		return "s3:GetAccountPublicAccessBlock"
 	}
 	switch target := r.Headers.Get("X-Amz-Target"); {
-	case service == "s3" && u.Query().Get("list-type") == "2":
-		return "s3:ListBucket"
+	case service == "s3" && (u.Query().Get("list-type") == "2" || r.Method == http.MethodHead && u.Path == "/"):
+		return "s3:ListBucket" // HeadBucket needs s3:ListBucket
 	case service == "s3" && u.Query().Get("x-id") == "ListBuckets":
 		return "s3:ListAllMyBuckets"
 	case service == "s3" && u.Query().Get("x-id") == "":
@@ -149,7 +150,6 @@ func s3Subresource(t *testing.T, q url.Values) string {
 		"replication":       "GetReplicationConfiguration",
 		"lifecycle":         "GetLifecycleConfiguration",
 		"logging":           "GetBucketLogging",
-		"location":          "GetBucketLocation",
 	}
 	for sub, action := range actions {
 		if q.Has(sub) {

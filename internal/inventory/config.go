@@ -120,6 +120,7 @@ func (l *configLayer) List(
 		}
 		client := configservice.NewFromConfig(acct.Config, func(o *configservice.Options) {
 			o.Region = region
+			o.Retryer = accounts.AdaptiveRetryer(acct.Config)
 			o.APIOptions = append(o.APIOptions, l.env.Limits.APIOption(acct.ID, region, ServiceConfig))
 		})
 		pages := configservice.NewSelectResourceConfigPaginator(client, &configservice.SelectResourceConfigInput{

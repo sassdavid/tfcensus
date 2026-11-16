@@ -40,8 +40,8 @@ type Fake struct {
 	Deny []string
 	// Stubs answers the requests gofakes3 doesn't serve; see [Fake.RoundTrip] for the keys.
 	Stubs map[string]Stub
-	// Regions maps a bucket to its region, for ListBuckets and GetBucketLocation. Unlisted
-	// buckets are in us-east-1.
+	// Regions maps a bucket to its region, for ListBuckets and HeadBucket. Unlisted buckets are
+	// in us-east-1.
 	Regions map[string]string
 }
 
@@ -118,6 +118,8 @@ func (f *Fake) RoundTrip(req *http.Request) (*http.Response, error) {
 		f.json(rec, req, jsonService(host))
 	case strings.HasPrefix(host, "s3.") && req.URL.Path == "/":
 		f.listBuckets(rec)
+	case req.Method == http.MethodHead && req.URL.Path == "/":
+		f.headBucket(rec, req)
 	case f.denied(host):
 		writeS3Error(rec, http.StatusForbidden, "AccessDenied", "Access Denied")
 	case subresource(req) != "":

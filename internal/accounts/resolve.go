@@ -210,7 +210,7 @@ func (l *Loader) OrgAccounts(ctx context.Context, mgmt *Account, parents bool) (
 			return nil, fmt.Errorf("list organization accounts: %w", err)
 		}
 		for _, a := range page.Accounts {
-			if active(a) {
+			if a.State == types.AccountStateActive {
 				out = append(out, OrgAccount{ID: aws.ToString(a.Id), Name: aws.ToString(a.Name)})
 			}
 		}
@@ -229,13 +229,6 @@ func (l *Loader) OrgAccounts(ctx context.Context, mgmt *Account, parents bool) (
 		}
 	}
 	return out, nil
-}
-
-func active(a types.Account) bool {
-	if a.State != "" {
-		return a.State == types.AccountStateActive
-	}
-	return a.Status == types.AccountStatusActive
 }
 
 // BaseFor returns the credentials that own account id, for chaining a backend role: the profile

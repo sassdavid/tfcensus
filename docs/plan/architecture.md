@@ -76,6 +76,6 @@ type Finding struct {
 
 ## Execution model
 - Read-only by default (an IAM policy is documented). Only `move apply` writes, and only to state ([adr/0007](adr/0007-read-only-by-default.md)).
-- Fan-out: accounts (4) × regions (4) × layer pages. Adaptive retry. Each `aws.Config` is cached per profile/role.
+- Fan-out: accounts (4) × regions (4) × layer pages. Adaptive retry for Cloud Control, Config and Resource Explorer, standard retry with 8 attempts elsewhere (engineering ADR-0005). Each `aws.Config` is cached per profile/role.
 - Results cache: `$XDG_CACHE_HOME/tfcensus/<account>/<region>/<layer>.json.zst` with a TTL (default 1 h), so a re-run with different filters or rules is instant (`--refresh` bypasses it).
 - Determinism: findings are sorted by account, region, type, id.

@@ -17,7 +17,8 @@
 
 **AWS.**
 - One `aws.Config` per profile or assumed role, loaded once (so SSO doesn't prompt N times). Per-region `cfg.Copy()`.
-- `RetryModeAdaptive` for Cloud Control, Config and Resource Explorer. Standard retry with `MaxAttempts=8` elsewhere. Add `retry.AddWithErrorCodes` for known throttle codes.
+- `RetryModeAdaptive` for Cloud Control, Config and Resource Explorer (`accounts.AdaptiveRetryer`). Standard retry with `MaxAttempts=8` elsewhere. The inventory's per-service token bucket paces first attempts only and retries skip it, so the adaptive rate limiter and the SDK's retry quota stay on.
+- `retry.DefaultThrottleErrorCodes` already has every throttle code tfcensus has seen (`Throttling`, `ThrottlingException`, `RequestLimitExceeded`, `SlowDown`) and the SDK treats an unmodeled 429 as a throttle, so there is no `retry.AddWithErrorCodes` list. Add one when a service sends a throttle code outside that set.
 - Nested errgroup limits: accounts (default 4) → regions (default 4) → per-API pages.
 - An expired SSO token is detected once per profile. The message tells the user to run `aws sso login --profile X`, and the profile is skipped, not retried.
 

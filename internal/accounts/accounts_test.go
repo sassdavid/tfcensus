@@ -1,13 +1,22 @@
 package accounts_test
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"log/slog"
+	"net/http"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/aws/retry"
+	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/service/cloudcontrol"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/smithy-go"
+	"github.com/aws/smithy-go/logging"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -220,4 +229,89 @@ func TestOURoles(t *testing.T) {
 	assert.Equal(t, "arn:aws:iam::222222222222:role/SandboxAdmin", res.Accounts[1].RoleARN)
 	assert.Equal(t, accounts.KindOrg, res.Accounts[1].Kind)
 	assert.Equal(t, "acme-sandbox", res.Accounts[1].Name)
+}
+
+func loadProfile(t *testing.T, opts accounts.Options) *accounts.Account {
+	t.Helper()
+	home := t.TempDir()
+	awstest.WriteConfig(t, home, []awstest.Profile{{Name: "acme-live", Region: "eu-west-1"}}, "")
+	opts.Lookup = app.Env{"HOME=" + home}.Lookup
+	opts.Transport = awstest.Replay(t, filepath.Join(cassettes, "units-account-id"))
+	acct, err := accounts.New(opts).Profile(t.Context(), "acme-live")
+	require.NoError(t, err)
+	return acct
+}
+
+// TestRetrySettings checks ADR-0005: standard retry with 8 attempts for every client, adaptive
+// retry where a client asks for it, and Options.MaxAttempts overriding the limit of both.
+func TestRetrySettings(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name        string
+		maxAttempts int
+		want        int
+	}{
+		{name: "default", want: accounts.DefaultMaxAttempts},
+		{name: "override", maxAttempts: 2, want: 2},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			cfg := loadProfile(t, accounts.Options{MaxAttempts: tt.maxAttempts}).Config
+
+			standard := s3.NewFromConfig(cfg).Options()
+			assert.Equal(t, aws.RetryModeStandard, standard.RetryMode)
+			assert.Equal(t, tt.want, standard.Retryer.MaxAttempts())
+
+			adaptive := accounts.AdaptiveRetryer(cfg)
+			assert.IsType(t, &retry.AdaptiveMode{}, adaptive)
+			assert.Equal(t, tt.want, adaptive.MaxAttempts())
+			cc := cloudcontrol.NewFromConfig(cfg, func(o *cloudcontrol.Options) { o.Retryer = adaptive }).Options()
+			assert.Equal(t, tt.want, cc.Retryer.MaxAttempts())
+		})
+	}
+	custom := aws.Config{Retryer: func() aws.Retryer { return aws.NopRetryer{} }}
+	assert.Equal(t, aws.NopRetryer{}, accounts.AdaptiveRetryer(custom), "a Retryer on the config wins")
+}
+
+// TestSDKLogger sends SDK log lines to the loader's logger: warnings at warn level, the rest at
+// debug level.
+func TestSDKLogger(t *testing.T) {
+	t.Parallel()
+	var buf bytes.Buffer
+	logger := slog.New(slog.NewTextHandler(&buf, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+		ReplaceAttr: func(_ []string, a slog.Attr) slog.Attr {
+			if a.Key == slog.TimeKey {
+				return slog.Attr{}
+			}
+			return a
+		},
+	}))
+	cfg := loadProfile(t, accounts.Options{Logger: logger}).Config
+	buf.Reset()
+	cfg.Logger.Logf(logging.Warn, "falling back to %s", "IMDSv1")
+	cfg.Logger.Logf(logging.Debug, "request %d", 1)
+	assert.Equal(t, "level=WARN msg=\"falling back to IMDSv1\" source=aws-sdk\n"+
+		"level=DEBUG msg=\"request 1\" source=aws-sdk\n", buf.String())
+}
+
+// TestOrgAccountsState keeps the accounts whose State is ACTIVE and ignores the retired Status
+// field.
+func TestOrgAccountsState(t *testing.T) {
+	t.Parallel()
+	rt := awstest.NewRouter(t).On("organizations", "ListAccounts", "", awstest.Stub{Body: `{"Accounts":[` +
+		`{"Id":"222222222222","Name":"acme-dev","State":"ACTIVE","Status":"ACTIVE"},` +
+		`{"Id":"333333333333","Name":"acme-old","State":"SUSPENDED","Status":"ACTIVE"},` +
+		`{"Id":"444444444444","Name":"acme-closing","State":"PENDING_CLOSURE"},` +
+		`{"Id":"555555555555","Name":"acme-status-only","Status":"ACTIVE"}]}`})
+	mgmt := &accounts.Account{ID: "111111111111", Partition: "aws", Config: aws.Config{
+		Region:           accounts.DefaultRegion,
+		Credentials:      credentials.NewStaticCredentialsProvider("AKIAFAKE", "fake-secret", ""),
+		HTTPClient:       &http.Client{Transport: rt},
+		RetryMaxAttempts: 1,
+	}}
+	got, err := accounts.New(accounts.Options{}).OrgAccounts(t.Context(), mgmt, false)
+	require.NoError(t, err)
+	assert.Equal(t, []accounts.OrgAccount{{ID: "222222222222", Name: "acme-dev"}}, got)
 }

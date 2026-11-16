@@ -118,10 +118,6 @@ func preconditionFailed(err error) bool {
 	return false
 }
 
-// quietChecksum stops the SDK from logging to stderr when an object was stored without a checksum,
-// as objects written by older terraform versions and emulators are.
-func quietChecksum(o *s3.Options) { o.DisableLogOutputChecksumValidationSkipped = true }
-
 // pull reads the unit's state with the version it was read at.
 func pull(ctx context.Context, c ObjectReader, u *Unit) (snapshot, error) {
 	return getObject(ctx, c, u.Bucket, u.Key, "")
@@ -132,7 +128,7 @@ func getObject(ctx context.Context, c ObjectReader, bucket, key, version string)
 	if version != "" {
 		in.VersionId = aws.String(version)
 	}
-	out, err := c.GetObject(ctx, in, quietChecksum)
+	out, err := c.GetObject(ctx, in)
 	if notFound(err) {
 		return snapshot{}, nil
 	}
@@ -184,7 +180,7 @@ func versioned(ctx context.Context, c ObjectReader, u *Unit) (bool, error) {
 // readHistory returns the unit's history and its ETag; a missing history is empty.
 func readHistory(ctx context.Context, c ObjectReader, u *Unit) (*History, string, error) {
 	key := u.Key + HistorySuffix
-	out, err := c.GetObject(ctx, &s3.GetObjectInput{Bucket: aws.String(u.Bucket), Key: aws.String(key)}, quietChecksum)
+	out, err := c.GetObject(ctx, &s3.GetObjectInput{Bucket: aws.String(u.Bucket), Key: aws.String(key)})
 	if notFound(err) {
 		return &History{Version: historyVersion, Unit: u.Path, Records: []Record{}}, "", nil
 	}
