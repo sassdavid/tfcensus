@@ -27,6 +27,8 @@ type Env struct {
 	S3PathStyle bool // custom endpoints (emulators) need path-style bucket addressing
 	// CloudControlTypes are the CloudFormation types the Cloud Control layer lists.
 	CloudControlTypes []string
+	// ExternalDNS is the TXT registry naming of the external-dns deployments.
+	ExternalDNS ExternalDNS
 }
 
 func (e *Env) logger() *slog.Logger {

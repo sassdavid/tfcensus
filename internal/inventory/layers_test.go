@@ -196,6 +196,22 @@ func rePage(next string, resources ...string) string {
 	return `{"Resources":[` + strings.Join(resources, ",") + `]` + tok + `}`
 }
 
+// natPage is a DescribeNatGateways page with the given gateways.
+func natPage(gateways ...string) string {
+	return `<DescribeNatGatewaysResponse xmlns="http://ec2.amazonaws.com/doc/2016-11-15/"><natGatewaySet>` +
+		strings.Join(gateways, "") + `</natGatewaySet></DescribeNatGatewaysResponse>`
+}
+
+// natGateway is one NAT gateway; a regional one has a route table.
+func natGateway(id, routeTable string) string {
+	mode, rtb := "zonal", ""
+	if routeTable != "" {
+		mode, rtb = "regional", "<routeTableId>"+routeTable+"</routeTableId>"
+	}
+	return "<item><natGatewayId>" + id + "</natGatewayId><state>available</state><availabilityMode>" + mode +
+		"</availabilityMode>" + rtb + "</item>"
+}
+
 // sgRule is one rule of security group sg-1.
 func sgRule(id string, egress bool, proto string, from, to int, source string) string {
 	const group = "sg-1"
@@ -731,4 +747,94 @@ func TestDecodeConfigItem(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, tt.want, r.Attrs, tt.row)
 	}
+}
+
+// TestNATRouteTables: the route table of a regional NAT gateway is listed with the gateway as its
+// parent; a zonal gateway has none.
+func TestNATRouteTables(t *testing.T) {
+	t.Parallel()
+
+	rt := transport(t, "inventory-nat-gateways", func(r *awstest.Router) {
+		r.On("ec2", "DescribeNatGateways", "state", ok(natPage(
+			natGateway("nat-0reg", "rtb-0nat"), natGateway("nat-0zonal", ""))))
+	})
+	e := env(t)
+	res, err := inventory.NewCollector(inventory.Options{Env: e, Layers: inventory.NativeLayers(e)}).
+		Collect(t.Context(), inventory.Request{
+			Targets: []inventory.Target{{Account: account(rt), Report: oneRegion()}},
+			Layers:  []string{inventory.LayerNATGateways},
+		})
+	require.NoError(t, err)
+	require.Len(t, res.Resources, 1)
+	r := res.Resources[0]
+	assert.Equal(t, "arn:aws:ec2:eu-west-1:"+acct+":route-table/rtb-0nat", r.ARN)
+	assert.Equal(t, map[string]string{"regional_nat_gateway": "nat-0reg"}, r.Attrs)
+	require.Len(t, r.Parents, 1)
+	assert.Equal(t, "arn:aws:ec2:eu-west-1:"+acct+":natgateway/nat-0reg", r.Parents[0].ARN)
+}
+
+// TestBucketPolicySids: the S3 lister keeps a bucket policy's statement IDs and nothing else of it.
+func TestBucketPolicySids(t *testing.T) {
+	t.Parallel()
+
+	rt := transport(t, "inventory-bucket-policy-sids", func(r *awstest.Router) {
+		r.On("s3", "ListBuckets", "", ok(buckets("", "flow-logs")))
+		r.On("s3", "GetBucketPolicy", "flow-logs.", ok(`{"Version":"2012-10-17","Statement":[`+
+			`{"Sid":"AWSLogDeliveryWrite","Effect":"Allow","Principal":{"Service":"delivery.logs.amazonaws.com"},`+
+			`"Action":"s3:PutObject","Resource":"arn:aws:s3:::flow-logs/`+policyDoc+`"},`+
+			`{"Sid":"AWSLogDeliveryAclCheck","Effect":"Allow","Action":"s3:GetBucketAcl"}]}`))
+	})
+	e := env(t)
+	res, err := inventory.NewCollector(inventory.Options{Env: e, Layers: inventory.NativeLayers(e)}).
+		Collect(t.Context(), inventory.Request{
+			Targets: []inventory.Target{{Account: account(rt), Report: oneRegion()}},
+			Types:   []string{"AWS::S3::BucketPolicy"},
+		})
+	require.NoError(t, err)
+	require.Len(t, res.Resources, 1)
+	assert.Equal(t, map[string]string{
+		"bucket": "flow-logs", "policy_sids": "AWSLogDeliveryAclCheck,AWSLogDeliveryWrite",
+	}, res.Resources[0].Attrs)
+	assert.NotContains(t, fmt.Sprint(res.Resources), policyDoc)
+}
+
+// TestSGRuleController: a rule whose description a Kubernetes controller wrote gets the
+// controller's name, a rule that references a group links to it, and the description isn't kept.
+func TestSGRuleController(t *testing.T) {
+	t.Parallel()
+
+	rule := func(id, desc, peer string) string {
+		ref := "<cidrIpv4>10.0.0.0/8</cidrIpv4>"
+		if peer != "" {
+			ref = "<referencedGroupInfo><groupId>" + peer + "</groupId><userId>" + acct + "</userId></referencedGroupInfo>"
+		}
+		return "<item><securityGroupRuleId>" + id + "</securityGroupRuleId><groupId>sg-1</groupId><groupOwnerId>" +
+			acct + "</groupOwnerId><isEgress>false</isEgress><ipProtocol>tcp</ipProtocol><fromPort>80</fromPort>" +
+			"<toPort>80</toPort>" + ref + "<description>" + desc + "</description></item>"
+	}
+	rt := transport(t, "inventory-sg-rule-controller", func(r *awstest.Router) {
+		r.On("ec2", "DescribeSecurityGroupRules", "", ok(`<DescribeSecurityGroupRulesResponse `+
+			`xmlns="http://ec2.amazonaws.com/doc/2016-11-15/"><securityGroupRuleSet>`+
+			rule("sgr-lbc", "elbv2.k8s.aws/targetGroupBinding=shared", "sg-0lb")+
+			rule("sgr-nlb", "kubernetes.io/rule/nlb/client=a1b2", "")+
+			rule("sgr-own", "office VPN "+policyDoc, "")+
+			`</securityGroupRuleSet></DescribeSecurityGroupRulesResponse>`))
+	})
+	e := env(t)
+	res, err := inventory.NewCollector(inventory.Options{Env: e, Layers: inventory.NativeLayers(e)}).
+		Collect(t.Context(), inventory.Request{
+			Targets: []inventory.Target{{Account: account(rt), Report: oneRegion()}},
+			Layers:  []string{inventory.LayerSGRules},
+		})
+	require.NoError(t, err)
+	got := map[string]inventory.CloudResource{}
+	for _, r := range res.Resources {
+		got[r.ID] = r
+	}
+	assert.Equal(t, "aws-load-balancer-controller", got["sgr-lbc"].Attrs["controller"])
+	assert.Equal(t, "cloud-provider-aws", got["sgr-nlb"].Attrs["controller"])
+	assert.NotContains(t, got["sgr-own"].Attrs, "controller")
+	require.Len(t, got["sgr-lbc"].Relationships, 1)
+	assert.Equal(t, "sg-0lb", got["sgr-lbc"].Relationships[0].ID)
+	assert.NotContains(t, fmt.Sprint(res.Resources), policyDoc)
 }

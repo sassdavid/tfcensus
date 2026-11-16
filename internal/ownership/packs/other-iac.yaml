@@ -11,6 +11,51 @@
   match: resource.tags.exists(k, k.startsWith("crossplane.io/") || k.startsWith("crossplane-"))
   owner: crossplane
   reason: tagged by Crossplane (crossplane-kind, crossplane-name)
+- name: aft
+  match: >-
+    resource.type == "AWS::IAM::Role" && resource.name in ["AWSAFTAdmin", "AWSAFTExecution", "AWSAFTService"] ||
+    resource.tags.?managed_by.orValue("") == "AFT"
+  owner: aft
+  reason: created by Account Factory for Terraform
+- name: cloudformation-stack
+  match: resource.type == "AWS::CloudFormation::Stack"
+  owner: cloudformation
+  reason: a CloudFormation stack is itself infrastructure as code
+- name: external-dns
+  match: resource.type == "AWS::Route53::RecordSet" && resource.attrs.?external_dns.orValue("") == "true"
+  owner: external-dns
+  reason: record or TXT ownership record of external-dns (heritage=external-dns)
+- name: aws-load-balancer-controller-rule
+  match: >-
+    resource.type in ["AWS::EC2::SecurityGroupIngress", "AWS::EC2::SecurityGroupEgress"] &&
+    (resource.attrs.?controller.orValue("") == "aws-load-balancer-controller" ||
+    resource.relationships.exists(r, r.relationship == "References" && "elbv2.k8s.aws/cluster" in r.tags))
+  owner: aws-load-balancer-controller
+  reason: security group rule that the AWS Load Balancer Controller wrote
+- name: in-tree-elb-rule
+  match: >-
+    resource.type in ["AWS::EC2::SecurityGroupIngress", "AWS::EC2::SecurityGroupEgress"] &&
+    resource.attrs.?controller.orValue("") == "cloud-provider-aws"
+  owner: cloud-provider-aws
+  reason: security group rule that the in-tree Kubernetes cloud provider wrote for an NLB
+- name: vpc-cni-eni
+  match: >-
+    resource.type == "AWS::EC2::NetworkInterface" &&
+    ("eks:eni:owner" in resource.tags || "node.k8s.amazonaws.com/instance_id" in resource.tags)
+  owner: vpc-cni
+  reason: network interface that the Amazon VPC CNI plugin created
+- name: ebs-csi
+  match: '"ebs.csi.aws.com/cluster" in resource.tags'
+  owner: ebs-csi-driver
+  reason: volume or snapshot that the EBS CSI driver created
+- name: efs-csi
+  match: '"efs.csi.aws.com/cluster" in resource.tags'
+  owner: efs-csi-driver
+  reason: access point that the EFS CSI driver created
+- name: ack
+  match: '"services.k8s.aws/controller-version" in resource.tags'
+  owner: ack
+  reason: created by an AWS Controllers for Kubernetes (ACK) controller
 - name: kubernetes
   match: >-
     resource.tags.exists(k, k.startsWith("kubernetes.io/cluster/") || k.startsWith("elbv2.k8s.aws/") ||

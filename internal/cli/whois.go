@@ -358,6 +358,7 @@ func whoisLive(
 	inv, err := collectLive(cmd, d, m, liveRequest{
 		accounts: p.targets, regions: p.regionsFor(cfg), layers: layers, types: p.types,
 		cc: ccTypes(cfg, m, layers, p.types), loader: loader, aggregator: cfg.Accounts.Aggregator,
+		externalDNS: cfg.Scan.ExternalDNS,
 	})
 	if err != nil {
 		return nil, err

@@ -1,34 +1,58 @@
-resource                                     AWSServiceRoleForECS:extra
-type                                         AWS::IAM::RolePolicy
-where                                        111111111111 global
-sources                                      native
-match                                        unmatched: no state (match/not-in-state)
-rules                                        first match wins
-  pack/aws-defaults/default-vpc              no match
-  pack/aws-defaults/default-subnet           no match
-  pack/aws-defaults/default-network-acl      no match
-  pack/aws-defaults/default-security-group   no match
-  pack/aws-defaults/default-vpc-children     no match
-  pack/aws-service/service-linked-role       no match
-  pack/aws-service/sso-role                  no match
-  pack/aws-service/control-tower             no match
-  pack/aws-service/stacksets-execution-role  no match
-  pack/aws-service/aws-managed-kms-key       no match
-  pack/aws-service/aws-kms-alias             no match
-  pack/aws-service/cdk-bootstrap             no match
-  pack/other-iac/cloudformation              no match
-  pack/other-iac/pulumi                      no match
-  pack/other-iac/crossplane                  no match
-  pack/other-iac/kubernetes                  no match
-  pack/derived/service-eni                   no match
-  pack/derived/autoscaled-instance           no match
-  pack/derived/node-launch-template          no match
-  pack/derived/ecs-task                      no match
-  pack/derived/lambda-edge-replica           no match
-  pack/derived/derived-instance-volume       no match
-  pack/derived/backup-snapshot               no match
-  pack/ephemeral/managed-lambda-log-group    no match
-  pack/ephemeral/athena-query-results        no match
-  user/hide-debug                            no match
-parent                                       AWS::IAM::Role arn:aws:iam::111111111111:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS, aws-managed (pack/aws-service/service-linked-role)
-category                                     aws-managed, owner aws: child of AWS::IAM::Role arn:aws:iam::111111111111:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS, aws-managed (pack/aws-service/service-linked-role) (inherit/aws-managed)
+resource                                            AWSServiceRoleForECS:extra
+type                                                AWS::IAM::RolePolicy
+where                                               111111111111 global
+sources                                             native
+match                                               unmatched: no state (match/not-in-state)
+rules                                               first match wins
+  pack/aws-defaults/default-vpc                     pack off
+  pack/aws-defaults/default-subnet                  pack off
+  pack/aws-defaults/default-network-acl             pack off
+  pack/aws-defaults/default-security-group          pack off
+  pack/aws-defaults/default-vpc-children            pack off
+  pack/aws-defaults/apex-ns-soa                     pack off
+  pack/aws-defaults/default-dhcp-options            pack off
+  pack/aws-defaults/main-route-table                pack off
+  pack/aws-defaults/regional-nat-route-table        pack off
+  pack/aws-defaults/account-defaults                pack off
+  pack/aws-service/service-linked-role              no match
+  pack/aws-service/sso-role                         no match
+  pack/aws-service/control-tower                    no match
+  pack/aws-service/stacksets-execution-role         no match
+  pack/aws-service/aws-managed-kms-key              no match
+  pack/aws-service/aws-kms-alias                    no match
+  pack/aws-service/cdk-bootstrap                    no match
+  pack/aws-service/eks-cluster-security-group       no match
+  pack/aws-service/quicksight-service-role          no match
+  pack/aws-service/apigateway-log-group             no match
+  pack/aws-service/service-linked-secret            no match
+  pack/aws-service/log-delivery-bucket-policy       no match
+  pack/other-iac/cloudformation                     no match
+  pack/other-iac/pulumi                             no match
+  pack/other-iac/crossplane                         no match
+  pack/other-iac/aft                                no match
+  pack/other-iac/cloudformation-stack               no match
+  pack/other-iac/external-dns                       no match
+  pack/other-iac/aws-load-balancer-controller-rule  no match
+  pack/other-iac/in-tree-elb-rule                   no match
+  pack/other-iac/vpc-cni-eni                        no match
+  pack/other-iac/ebs-csi                            no match
+  pack/other-iac/efs-csi                            no match
+  pack/other-iac/ack                                no match
+  pack/other-iac/kubernetes                         no match
+  pack/derived/service-eni                          no match
+  pack/derived/autoscaled-instance                  no match
+  pack/derived/node-launch-template                 no match
+  pack/derived/ecs-task                             no match
+  pack/derived/lambda-edge-replica                  no match
+  pack/derived/derived-instance-volume              no match
+  pack/derived/backup-snapshot                      no match
+  pack/derived/lambda-version                       no match
+  pack/derived/rds-automated-snapshot               no match
+  pack/derived/backup-recovery-point                no match
+  pack/derived/addon-pod-identity-association       no match
+  pack/derived/target-tracking-alarm                no match
+  pack/ephemeral/managed-lambda-log-group           no match
+  pack/ephemeral/athena-query-results               no match
+  user/hide-debug                                   no match
+parent                                              AWS::IAM::Role arn:aws:iam::111111111111:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS, aws-managed (pack/aws-service/service-linked-role)
+category                                            aws-managed, owner aws: child of AWS::IAM::Role arn:aws:iam::111111111111:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS, aws-managed (pack/aws-service/service-linked-role) (inherit/aws-managed)

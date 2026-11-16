@@ -18,6 +18,7 @@ const (
 	LayerConfig         = "config"
 	LayerRE             = "resource-explorer"
 	LayerSGRules        = "native:ec2-sg-rules"
+	LayerNATGateways    = "native:ec2-nat-gateways"
 	LayerIAMAttachments = "native:iam-attachments"
 	LayerRoute53Records = "native:route53-records"
 	LayerS3Subresources = "native:s3-subresources"
@@ -27,7 +28,14 @@ const (
 // LayerOrder returns every layer name in precedence order.
 func LayerOrder() []string {
 	return []string{
-		LayerConfig, LayerRE, LayerSGRules, LayerIAMAttachments, LayerRoute53Records, LayerS3Subresources, LayerCC,
+		LayerConfig,
+		LayerRE,
+		LayerSGRules,
+		LayerNATGateways,
+		LayerIAMAttachments,
+		LayerRoute53Records,
+		LayerS3Subresources,
+		LayerCC,
 	}
 }
 

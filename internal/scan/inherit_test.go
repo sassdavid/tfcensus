@@ -66,6 +66,9 @@ func inheritEngine(t *testing.T, neverHide ...ownership.Category) scan.Sources {
 			Reason: "debug policy",
 		}},
 		NeverHide: neverHide,
+		// The aws-defaults pack would decide apex records and route tables itself; these tests are
+		// about inheritance.
+		Packs: map[string]bool{ownership.PackAWSDefaults: false},
 	})
 	require.NoError(t, err)
 	return scan.Sources{Engine: eng, Map: m}

@@ -99,6 +99,8 @@ regions                                   ["eu-west-1","eu-central-1"]          
 rules                                     []                                              default
 scan.cloudcontrol_types                   []                                              default
 scan.cloudformation                       true                                            default
+scan.external_dns.txt_prefix              ""                                              default
+scan.external_dns.txt_suffix              ""                                              default
 scan.layers                               auto                                            default
 scan.never_hide                           []                                              default
 scan.packs.aws-defaults                   true                                            default

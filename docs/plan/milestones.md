@@ -351,7 +351,7 @@ ACM certificates. Decisions: [ADR-0017](adr/0017-scan-accuracy.md) (accepted 202
 The read-only rerun in the last box needs a prompt that names the profile, as the header says.
 If one session can't finish, the open boxes carry over to the next session, and v0.4.0 waits for
 the last box.
-- [ ] Inheritance: a second classification pass gives `unmanaged` and `undetermined` children
+- [x] Inheritance: a second classification pass gives `unmanaged` and `undetermined` children
   the category of an `aws-managed`, `other-iac` or `derived` parent (`inherit/<category>`), keeps
   children of `managed` parents `unmanaged`, honours `never_hide`, and `--explain` prints the
   parent chain. New parent links for the regional NAT gateway route table and the `CHILD`
@@ -360,7 +360,7 @@ the last box.
   `description`, `requesterId` and `attachment.instanceOwnerId`, plus `dhcpConfigurations` and
   route table `associations`. inventory.md and the comment in `config.go` follow ADR-0017.
   (criterion 2)
-- [ ] Rules: the Kubernetes controller rules (external-dns with prefix and suffix settings, AWS
+- [x] Rules: the Kubernetes controller rules (external-dns with prefix and suffix settings, AWS
   Load Balancer Controller and in-tree rules, VPC CNI, EBS and EFS CSI, ACK, the EKS cluster
   security group), the AWS default rules (apex NS and SOA, default DHCP options, main route
   table, regional NAT route table, account defaults checked on the validation account) and the

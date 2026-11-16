@@ -61,6 +61,7 @@ func fleetStubs(r *awstest.Router) {
 	r.On("ec2", "DescribeSecurityGroupRules", "ec2.eu-west-1.", ok(sgPage("",
 		sgRule("sgr-1", false, "tcp", 443, 443, "10.0.0.0/8"))))
 	r.On("ec2", "DescribeSecurityGroupRules", "ec2.us-east-1.", ok(sgPage("")))
+	r.On("ec2", "DescribeNatGateways", "", ok(natPage()), ok(natPage()))
 	r.On("s3", "ListBuckets", "bucket-region=eu-west-1", ok(buckets("", "acme-logs")))
 	r.On("s3", "ListBuckets", "bucket-region=us-east-1", ok(buckets("")))
 	bucketConfig(r, "acme-logs")

@@ -9,8 +9,7 @@
     "network_load_balancer", "quicksight", "transit_gateway", "trunk", "vpc_endpoint"] ||
     resource.attrs.?instance_owner_id.orValue(resource.account) != resource.account ||
     ["AWS Lambda VPC ENI-", "aws-K8S-", "aws-k8s-branch-eni", "aws-k8s-trunk-eni"].exists(p,
-    resource.attrs.?description.orValue("").startsWith(p)) ||
-    "eks:eni:owner" in resource.tags)
+    resource.attrs.?description.orValue("").startsWith(p)))
   reason: >-
     network interface that an AWS service created (requester-managed, a service interface type, an
     attachment owned by another account, or a Lambda or VPC CNI description)
@@ -45,3 +44,31 @@
   match: '"aws:backup:source-resource" in resource.tags'
   owner: aws-backup
   reason: snapshot or recovery point that AWS Backup created
+- name: lambda-version
+  match: >-
+    resource.source_type == "lambda:function/version" && resource.arn.split(":").size() == 8 &&
+    in_state("aws_lambda_function", resource.arn.split(":")[6])
+  owner: lambda
+  reason: published version of a Lambda function a unit manages (publish = true)
+- name: rds-automated-snapshot
+  match: >-
+    resource.source_type == "rds:auto-backup" ||
+    (resource.source_type in ["rds:snapshot", "rds:cluster-snapshot"] ||
+    resource.type in ["AWS::RDS::DBSnapshot", "AWS::RDS::DBClusterSnapshot"]) &&
+    (resource.arn.contains(":snapshot:rds:") || resource.arn.contains(":cluster-snapshot:rds:"))
+  owner: rds
+  reason: automated RDS snapshot or backup
+- name: backup-recovery-point
+  match: >-
+    (resource.type == "AWS::Backup::RecoveryPoint" || resource.source_type == "backup:recovery-point") &&
+    resource.relationships.exists(r, r.type == "AWS::Backup::BackupVault" && in_state("aws_backup_vault", r.id))
+  owner: aws-backup
+  reason: recovery point in a backup vault a unit manages
+- name: addon-pod-identity-association
+  match: resource.type == "AWS::EKS::PodIdentityAssociation" && resource.attrs.?owner_arn.orValue("") != ""
+  owner: eks
+  reason: Pod Identity association that an EKS add-on owns (ownerArn is set)
+- name: target-tracking-alarm
+  match: resource.type == "AWS::CloudWatch::Alarm" && resource.name.startsWith("TargetTracking-")
+  owner: application-autoscaling
+  reason: alarm that a target tracking scaling policy created

@@ -152,6 +152,9 @@ rules: []
 scan:
   cloudcontrol_types: []
   cloudformation: true
+  external_dns:
+    txt_prefix: ""
+    txt_suffix: ""
   layers: auto
   never_hide: []
   packs:

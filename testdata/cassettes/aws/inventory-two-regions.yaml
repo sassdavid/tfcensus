@@ -284,6 +284,44 @@ interactions:
         proto: ""
         proto_major: 0
         proto_minor: 0
+        content_length: 133
+        host: ""
+        body: Action=DescribeNatGateways&Filter.1.Name=state&Filter.1.Value.1=pending&Filter.1.Value.2=available&MaxResults=1000&Version=2016-11-15
+        form:
+            Action:
+                - DescribeNatGateways
+            Filter.1.Name:
+                - state
+            Filter.1.Value.1:
+                - pending
+            Filter.1.Value.2:
+                - available
+            MaxResults:
+                - "1000"
+            Version:
+                - "2016-11-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://ec2.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <DescribeNatGatewaysResponse xmlns="http://ec2.amazonaws.com/doc/2016-11-15/"><natGatewaySet></natGatewaySet></DescribeNatGatewaysResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 11
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
         content_length: 68
         host: ""
         body: Action=DescribeSecurityGroupRules&MaxResults=1000&Version=2016-11-15
@@ -311,7 +349,45 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 11
+    - id: 12
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 133
+        host: ""
+        body: Action=DescribeNatGateways&Filter.1.Name=state&Filter.1.Value.1=pending&Filter.1.Value.2=available&MaxResults=1000&Version=2016-11-15
+        form:
+            Action:
+                - DescribeNatGateways
+            Filter.1.Name:
+                - state
+            Filter.1.Value.1:
+                - pending
+            Filter.1.Value.2:
+                - available
+            MaxResults:
+                - "1000"
+            Version:
+                - "2016-11-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://ec2.us-east-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <DescribeNatGatewaysResponse xmlns="http://ec2.amazonaws.com/doc/2016-11-15/"><natGatewaySet></natGatewaySet></DescribeNatGatewaysResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 13
       request:
         proto: ""
         proto_major: 0
@@ -343,7 +419,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 12
+    - id: 14
       request:
         proto: ""
         proto_major: 0
@@ -379,7 +455,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 13
+    - id: 15
       request:
         proto: ""
         proto_major: 0
@@ -404,7 +480,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 14
+    - id: 16
       request:
         proto: ""
         proto_major: 0

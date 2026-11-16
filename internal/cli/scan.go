@@ -413,7 +413,7 @@ func (e *scanEnv) cacheKey(disc discovery.Result) (string, error) {
 		"version": buildinfo.Get().Version, "accounts": e.cfg.Accounts, "regions": e.cfg.Regions,
 		"all_regions": e.cfg.AllRegions,
 		"layers":      e.layers, "types": e.cfn, "cloudcontrol": e.cc, "units": units, "index": index,
-		"cloudformation": e.cfg.Scan.CloudFormation,
+		"cloudformation": e.cfg.Scan.CloudFormation, "external_dns": e.cfg.Scan.ExternalDNS,
 	})
 }
 
@@ -480,6 +480,7 @@ func (e *scanEnv) collect(loader *accounts.Loader, disc discovery.Result) (*scan
 		},
 		layers: e.layers, types: e.cfn, cc: e.cc, refresh: e.a.refresh,
 		loader: loader, aggregator: e.cfg.Accounts.Aggregator, stacks: e.cfg.Scan.CloudFormation,
+		externalDNS: e.cfg.Scan.ExternalDNS,
 	})
 	if err != nil {
 		return nil, err
@@ -500,6 +501,8 @@ type liveRequest struct {
 	loader     *accounts.Loader
 	aggregator config.Aggregator
 	stacks     bool // also list CloudFormation stack resources
+	// externalDNS is how external-dns names its TXT ownership records.
+	externalDNS config.ExternalDNS
 }
 
 // collectLive probes each account and runs the inventory layers, as scan and whois do.
@@ -517,7 +520,10 @@ func collectLive(cmd *cobra.Command, d *app.Deps, m *typemap.Map, req liveReques
 		}
 		targets = append(targets, inventory.Target{Account: acct, Report: rep})
 	}
-	env := &inventory.Env{Map: m, Limits: inventory.NewLimiters(nil), Logger: d.Logger, CloudControlTypes: req.cc}
+	env := &inventory.Env{
+		Map: m, Limits: inventory.NewLimiters(nil), Logger: d.Logger, CloudControlTypes: req.cc,
+		ExternalDNS: inventory.ExternalDNS{Prefix: req.externalDNS.TXTPrefix, Suffix: req.externalDNS.TXTSuffix},
+	}
 	col := inventory.NewCollector(inventory.Options{Env: env})
 	res, err := col.Collect(ctx, inventory.Request{
 		Targets: targets, Layers: req.layers, Types: req.types,

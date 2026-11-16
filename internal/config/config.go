@@ -80,11 +80,19 @@ type Aggregator struct {
 
 // Scan configures the unmanaged-resource scan.
 type Scan struct {
-	Layers            string   `json:"layers"             jsonschema_description:"Inventory layers: auto, or a comma-separated list of re, config, cc and native."`
-	CloudControlTypes []string `json:"cloudcontrol_types" jsonschema_description:"CloudFormation types listed through Cloud Control, on top of the types only Cloud Control lists (the VPC Lattice resource gateways, resource configurations and service network associations)."`
-	CloudFormation    bool     `json:"cloudformation"     jsonschema_description:"List CloudFormation stack resources; a resource a stack lists and no state manages is other-iac."`
-	Packs             Packs    `json:"packs"`
-	NeverHide         []string `json:"never_hide"         jsonschema_description:"Categories that user rules can't give to guarded resources (IAM users)."                                                                                                                        jsonschema:"enum=other-iac,enum=aws-managed,enum=derived,enum=ignored"`
+	Layers            string      `json:"layers"             jsonschema_description:"Inventory layers: auto, or a comma-separated list of re, config, cc and native."`
+	CloudControlTypes []string    `json:"cloudcontrol_types" jsonschema_description:"CloudFormation types listed through Cloud Control, on top of the types only Cloud Control lists (the VPC Lattice resource gateways, resource configurations and service network associations)."`
+	CloudFormation    bool        `json:"cloudformation"     jsonschema_description:"List CloudFormation stack resources; a resource a stack lists and no state manages is other-iac."`
+	Packs             Packs       `json:"packs"`
+	NeverHide         []string    `json:"never_hide"         jsonschema_description:"Categories that user rules can't give to guarded resources (IAM users)."                                                                                                                        jsonschema:"enum=other-iac,enum=aws-managed,enum=derived,enum=ignored"`
+	ExternalDNS       ExternalDNS `json:"external_dns"`
+}
+
+// ExternalDNS holds the TXT registry settings of the external-dns deployments, so scan finds the
+// record each TXT ownership record belongs to.
+type ExternalDNS struct {
+	TXTPrefix string `json:"txt_prefix" jsonschema_description:"external-dns --txt-prefix; may hold %{record_type}. Empty tries no prefix, then external-dns-."`
+	TXTSuffix string `json:"txt_suffix" jsonschema_description:"external-dns --txt-suffix; may hold %{record_type}."`
 }
 
 // Rule is an ownership rule: a CEL expression over resource and unit.

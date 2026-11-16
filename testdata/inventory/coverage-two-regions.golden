@@ -30,7 +30,7 @@ AWS::EC2::NatGateway                           -                    config+re   
 AWS::EC2::NetworkAcl                           -                    config+re               re
 AWS::EC2::NetworkInterface                     -                    config+re               re
 AWS::EC2::PrefixList                           -                    config+re               re
-AWS::EC2::RouteTable                           -                    config+re               re
+AWS::EC2::RouteTable                           -                    config+re+native        re+native
 AWS::EC2::SecurityGroup                        -                    config+re               re
 AWS::EC2::SecurityGroupEgress                  -                    native                  native
 AWS::EC2::SecurityGroupIngress                 -                    native                  native

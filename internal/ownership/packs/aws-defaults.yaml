@@ -16,3 +16,49 @@
     resource.type in ["AWS::EC2::InternetGateway", "AWS::EC2::RouteTable", "AWS::EC2::DHCPOptions"] &&
     resource.relationships.exists(r, r.type == "AWS::EC2::VPC" && r.attrs.?is_default.orValue("") == "true")
   reason: internet gateway, route table or DHCP options of the default VPC
+- name: apex-ns-soa
+  match: >-
+    resource.type == "AWS::Route53::RecordSet" && resource.attrs.?apex.orValue("") == "true" &&
+    resource.attrs.?type.orValue("") in ["NS", "SOA"]
+  reason: NS or SOA record at a hosted zone's apex, which Route 53 creates with every zone
+- name: default-dhcp-options
+  match: >-
+    resource.type == "AWS::EC2::DHCPOptions" && size(resource.tags) == 0 &&
+    resource.attrs.?dhcp_options.orValue("") == "domain-name-servers=AmazonProvidedDNS;domain-name=" +
+    (resource.region == "us-east-1" ? "ec2.internal" : resource.region + ".compute.internal")
+  reason: DHCP options that AWS creates with the default VPC (only domain-name and AmazonProvidedDNS)
+- name: main-route-table
+  match: resource.type == "AWS::EC2::RouteTable" && resource.attrs.?main.orValue("") == "true"
+  reason: main route table that AWS creates with every VPC
+- name: regional-nat-route-table
+  match: resource.type == "AWS::EC2::RouteTable" && resource.attrs.?regional_nat_gateway.orValue("") != ""
+  reason: route table that AWS creates with a regional NAT gateway
+- name: account-defaults
+  match: >-
+    (resource.source_type == "codedeploy:deploymentconfig" || resource.type == "AWS::CodeDeploy::DeploymentConfig") &&
+    [resource.name, resource.id].exists(n, n.startsWith("CodeDeployDefault.")) ||
+    (resource.source_type == "appconfig:deploymentstrategy" || resource.type == "AWS::AppConfig::DeploymentStrategy") &&
+    [resource.name, resource.id].exists(n, n.startsWith("AppConfig.")) ||
+    resource.type == "AWS::Cassandra::Keyspace" && [resource.name, resource.id].exists(n, n.startsWith("system")) ||
+    (resource.source_type == "ecs:capacity-provider" || resource.type == "AWS::ECS::CapacityProvider") &&
+    [resource.name, resource.id].exists(n, n in ["FARGATE", "FARGATE_SPOT"]) ||
+    resource.type in ["AWS::Scheduler::ScheduleGroup", "AWS::Events::EventBus"] &&
+    [resource.name, resource.id].exists(n, n == "default") ||
+    resource.type in ["AWS::Route53Resolver::ResolverRule", "AWS::Route53Resolver::ResolverRuleAssociation"] &&
+    resource.id.startsWith("rslvr-autodefined-") ||
+    resource.type == "AWS::Athena::WorkGroup" && resource.name == "primary" ||
+    resource.type == "AWS::Athena::DataCatalog" && resource.name == "AwsDataCatalog" ||
+    resource.type == "AWS::Backup::BackupVault" && resource.name == "Default" ||
+    resource.type in ["AWS::XRay::Group", "AWS::XRay::SamplingRule"] &&
+    [resource.name, resource.id].exists(n, n == "Default") ||
+    resource.type == "AWS::ElastiCache::User" && resource.name == "default" ||
+    resource.type == "AWS::MemoryDB::User" && resource.name == "default" ||
+    resource.type == "AWS::MemoryDB::ACL" && resource.name == "open-access" ||
+    resource.type in ["AWS::RDS::DBParameterGroup", "AWS::MemoryDB::ParameterGroup"] && resource.name.startsWith("default.") ||
+    resource.type == "AWS::RDS::OptionGroup" && resource.name.startsWith("default:") ||
+    resource.type == "AWS::EC2::PrefixList" && (resource.arn.contains(":aws:prefix-list/") || resource.name.startsWith("com.amazonaws.")) ||
+    resource.type == "AWS::AppRunner::AutoScalingConfiguration" && resource.arn.contains(":autoscalingconfiguration/DefaultConfiguration/")
+  reason: >-
+    resource that every account or region has once the service is used: default deployment
+    configurations, capacity providers, buses, groups, workgroups, vaults, users, parameter groups,
+    auto-defined Resolver rules and AWS-managed prefix lists

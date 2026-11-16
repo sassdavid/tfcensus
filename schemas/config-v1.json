@@ -213,6 +213,20 @@
           },
           "type": "array",
           "description": "Categories that user rules can't give to guarded resources (IAM users)."
+        },
+        "external_dns": {
+          "properties": {
+            "txt_prefix": {
+              "type": "string",
+              "description": "external-dns --txt-prefix; may hold %{record_type}. Empty tries no prefix, then external-dns-."
+            },
+            "txt_suffix": {
+              "type": "string",
+              "description": "external-dns --txt-suffix; may hold %{record_type}."
+            }
+          },
+          "additionalProperties": false,
+          "type": "object"
         }
       },
       "additionalProperties": false,
