@@ -1,0 +1,75 @@
+{
+  "group": "Children of CloudFormation resources: attachments and inline policy of aws-controltower-* roles, the subresources of a state bucket and the inline policy of its replication role (both from a stack)",
+  "spec_count": 8,
+  "why": "inheritance from the aws-managed Control Tower role and from the other-iac bucket and role a stack lists",
+  "config": [
+    {
+      "type": "AWS::IAM::Role",
+      "arn": "arn:aws:iam::111111111111:role/aws-controltower-AdministratorExecutionRole",
+      "id": "AROA0VALIDATION00003",
+      "region": "global",
+      "name": "aws-controltower-AdministratorExecutionRole"
+    },
+    {
+      "type": "AWS::IAM::Role",
+      "arn": "arn:aws:iam::111111111111:role/acme-state-replication",
+      "id": "AROA0VALIDATION00004",
+      "region": "global",
+      "name": "acme-state-replication"
+    },
+    {
+      "type": "AWS::S3::Bucket",
+      "arn": "arn:aws:s3:::acme-state-replica",
+      "id": "acme-state-replica",
+      "region": "eu-west-1",
+      "name": "acme-state-replica"
+    }
+  ],
+  "iam_roles": [
+    {
+      "name": "aws-controltower-AdministratorExecutionRole",
+      "path": "/",
+      "id": "AROA0VALIDATION00003",
+      "attached": [
+        "arn:aws:iam::aws:policy/AdministratorAccess"
+      ]
+    },
+    {
+      "name": "acme-state-replication",
+      "path": "/",
+      "id": "AROA0VALIDATION00004",
+      "inline": [
+        "replication"
+      ]
+    }
+  ],
+  "buckets": [
+    {
+      "name": "acme-state-replica",
+      "policy_sids": [
+        "DenyInsecureTransport"
+      ],
+      "versioning": true,
+      "encryption": true,
+      "pab": true,
+      "lifecycle": true
+    }
+  ],
+  "stacks": [
+    {
+      "name": "acme-state-backend",
+      "resources": [
+        {
+          "logical": "ReplicaBucket",
+          "type": "AWS::S3::Bucket",
+          "physical": "acme-state-replica"
+        },
+        {
+          "logical": "ReplicationRole",
+          "type": "AWS::IAM::Role",
+          "physical": "acme-state-replication"
+        }
+      ]
+    }
+  ]
+}

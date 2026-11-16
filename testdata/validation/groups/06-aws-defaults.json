@@ -1,0 +1,182 @@
+{
+  "group": "AWS defaults: apex NS and SOA, default DHCP options, rules of default security groups, the main route table of a VPC from a stack, the route table of a regional NAT gateway",
+  "spec_count": 12,
+  "why": "apex-ns-soa, default-dhcp-options, default-security-group with inheritance, main-route-table, regional-nat-route-table",
+  "zones": [
+    {
+      "id": "Z0VALIDATION0LEGACY",
+      "name": "legacy.acme.test",
+      "records": [
+        {
+          "name": "legacy.acme.test",
+          "type": "NS",
+          "value": "ns-2.awsdns-02.net."
+        },
+        {
+          "name": "legacy.acme.test",
+          "type": "SOA",
+          "value": "ns-2.awsdns-02.net. awsdns-hostmaster.amazon.com. 1 7200 900 1209600 86400"
+        }
+      ]
+    }
+  ],
+  "config": [
+    {
+      "type": "AWS::Route53::HostedZone",
+      "arn": "arn:aws:route53:::hostedzone/Z0VALIDATION0LEGACY",
+      "id": "Z0VALIDATION0LEGACY",
+      "region": "global",
+      "name": "legacy.acme.test."
+    },
+    {
+      "type": "AWS::EC2::DHCPOptions",
+      "arn": "arn:aws:ec2:eu-west-1:111111111111:dhcp-options/dopt-0d0000000000000d1",
+      "id": "dopt-0d0000000000000d1",
+      "region": "eu-west-1",
+      "configuration": {
+        "dhcpConfigurations": [
+          {
+            "key": "domain-name",
+            "values": [
+              {
+                "value": "eu-west-1.compute.internal"
+              }
+            ]
+          },
+          {
+            "key": "domain-name-servers",
+            "values": [
+              {
+                "value": "AmazonProvidedDNS"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "AWS::EC2::VPC",
+      "arn": "arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0a0000000000000a1",
+      "id": "vpc-0a0000000000000a1",
+      "region": "eu-west-1",
+      "configuration": {
+        "isDefault": false
+      }
+    },
+    {
+      "type": "AWS::EC2::SecurityGroup",
+      "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0d0000000000000d2",
+      "id": "sg-0d0000000000000d2",
+      "region": "eu-west-1",
+      "name": "default",
+      "relationships": [
+        [
+          "AWS::EC2::VPC",
+          "vpc-0a0000000000000a1",
+          "Is contained in Vpc"
+        ]
+      ]
+    },
+    {
+      "type": "AWS::EC2::VPC",
+      "arn": "arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0d0000000000000d3",
+      "id": "vpc-0d0000000000000d3",
+      "region": "eu-west-1",
+      "configuration": {
+        "isDefault": false
+      }
+    },
+    {
+      "type": "AWS::EC2::RouteTable",
+      "arn": "arn:aws:ec2:eu-west-1:111111111111:route-table/rtb-0d0000000000000d4",
+      "id": "rtb-0d0000000000000d4",
+      "region": "eu-west-1",
+      "configuration": {
+        "associations": [
+          {
+            "main": true,
+            "routeTableAssociationId": "rtbassoc-0d0000000000000d4"
+          }
+        ]
+      },
+      "relationships": [
+        [
+          "AWS::EC2::VPC",
+          "vpc-0d0000000000000d3",
+          "Is contained in Vpc"
+        ]
+      ]
+    },
+    {
+      "type": "AWS::EC2::NatGateway",
+      "arn": "arn:aws:ec2:eu-west-1:111111111111:natgateway/nat-0a0000000000000a3",
+      "id": "nat-0a0000000000000a3",
+      "region": "eu-west-1",
+      "relationships": [
+        [
+          "AWS::EC2::VPC",
+          "vpc-0a0000000000000a1",
+          "Is contained in Vpc"
+        ]
+      ]
+    },
+    {
+      "type": "AWS::EC2::RouteTable",
+      "arn": "arn:aws:ec2:eu-west-1:111111111111:route-table/rtb-0d0000000000000d5",
+      "id": "rtb-0d0000000000000d5",
+      "region": "eu-west-1",
+      "configuration": {
+        "associations": []
+      },
+      "relationships": [
+        [
+          "AWS::EC2::VPC",
+          "vpc-0a0000000000000a1",
+          "Is contained in Vpc"
+        ]
+      ]
+    }
+  ],
+  "sg_rules": [
+    {
+      "id": "sgr-0d0000000000000d2",
+      "group": "sg-0d0000000000000d2",
+      "egress": true,
+      "protocol": "-1",
+      "from": -1,
+      "to": -1,
+      "cidr": "0.0.0.0/0"
+    },
+    {
+      "id": "sgr-0d0000000000000d3",
+      "group": "sg-0d0000000000000d2",
+      "protocol": "-1",
+      "from": -1,
+      "to": -1,
+      "peer": "sg-0d0000000000000d2"
+    }
+  ],
+  "nat_gateways": [
+    {
+      "id": "nat-0a0000000000000a3",
+      "route_table": "rtb-0d0000000000000d5"
+    }
+  ],
+  "stacks": [
+    {
+      "name": "acme-legacy-network",
+      "resources": [
+        {
+          "logical": "Vpc",
+          "type": "AWS::EC2::VPC",
+          "physical": "vpc-0d0000000000000d3"
+        },
+        {
+          "logical": "Zone",
+          "type": "AWS::Route53::HostedZone",
+          "physical": "Z0VALIDATION0LEGACY"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "group": "An aws_iam_policy_attachment (2 live attachments) and an aws_default_route_table",
+  "spec_count": 3,
+  "why": "aws_iam_policy_attachment expands to one key per principal; aws_default_route_table is curated",
+  "config": [
+    {
+      "type": "AWS::IAM::Role",
+      "arn": "arn:aws:iam::111111111111:role/ci-deploy",
+      "id": "AROA0VALIDATION00010",
+      "region": "global",
+      "name": "ci-deploy"
+    },
+    {
+      "type": "AWS::IAM::Role",
+      "arn": "arn:aws:iam::111111111111:role/ci-build",
+      "id": "AROA0VALIDATION00011",
+      "region": "global",
+      "name": "ci-build"
+    },
+    {
+      "type": "AWS::IAM::Policy",
+      "arn": "arn:aws:iam::111111111111:policy/ci-deploy-policy",
+      "id": "ANPA0VALIDATION00002",
+      "region": "global",
+      "name": "ci-deploy-policy"
+    },
+    {
+      "type": "AWS::EC2::RouteTable",
+      "arn": "arn:aws:ec2:eu-west-1:111111111111:route-table/rtb-0a0000000000000a2",
+      "id": "rtb-0a0000000000000a2",
+      "region": "eu-west-1",
+      "configuration": {
+        "associations": [
+          {
+            "main": true,
+            "routeTableAssociationId": "rtbassoc-0a0000000000000a2"
+          }
+        ]
+      },
+      "relationships": [
+        [
+          "AWS::EC2::VPC",
+          "vpc-0a0000000000000a1",
+          "Is contained in Vpc"
+        ]
+      ]
+    }
+  ],
+  "iam_roles": [
+    {
+      "name": "ci-deploy",
+      "path": "/",
+      "id": "AROA0VALIDATION00010",
+      "attached": [
+        "arn:aws:iam::111111111111:policy/ci-deploy-policy"
+      ]
+    },
+    {
+      "name": "ci-build",
+      "path": "/",
+      "id": "AROA0VALIDATION00011",
+      "attached": [
+        "arn:aws:iam::111111111111:policy/ci-deploy-policy"
+      ]
+    }
+  ]
+}

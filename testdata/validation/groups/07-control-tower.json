@@ -1,0 +1,39 @@
+{
+  "group": "AWSControlTowerExecution and AWSControlTower_VPCFlowLogsRole with their attachments",
+  "spec_count": 4,
+  "why": "control-tower, widened to AWSControlTower*, with inheritance",
+  "config": [
+    {
+      "type": "AWS::IAM::Role",
+      "arn": "arn:aws:iam::111111111111:role/AWSControlTowerExecution",
+      "id": "AROA0VALIDATION00005",
+      "region": "global",
+      "name": "AWSControlTowerExecution"
+    },
+    {
+      "type": "AWS::IAM::Role",
+      "arn": "arn:aws:iam::111111111111:role/AWSControlTower_VPCFlowLogsRole",
+      "id": "AROA0VALIDATION00006",
+      "region": "global",
+      "name": "AWSControlTower_VPCFlowLogsRole"
+    }
+  ],
+  "iam_roles": [
+    {
+      "name": "AWSControlTowerExecution",
+      "path": "/",
+      "id": "AROA0VALIDATION00005",
+      "attached": [
+        "arn:aws:iam::aws:policy/AdministratorAccess"
+      ]
+    },
+    {
+      "name": "AWSControlTower_VPCFlowLogsRole",
+      "path": "/",
+      "id": "AROA0VALIDATION00006",
+      "inline": [
+        "CloudWatchLogsDelivery"
+      ]
+    }
+  ]
+}

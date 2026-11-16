@@ -1,0 +1,6 @@
+# Config for the validation scan (passed with --config): the built-in packs and nothing else, as
+# in the first real-account scan. The clock is 2026-11-16.
+schema_version: 1
+regions: [eu-west-1]
+scan:
+  layers: config,re,native,cc

@@ -1,0 +1,31 @@
+{
+  "group": "QuickSight service roles and policies under /service-role/",
+  "spec_count": 6,
+  "why": "quicksight-service-role, with inheritance for the attachment",
+  "config": [
+    {
+      "type": "AWS::IAM::Role",
+      "arn": "arn:aws:iam::111111111111:role/service-role/aws-quicksight-service-role-v0",
+      "id": "AROA0VALIDATION00007",
+      "region": "global",
+      "name": "aws-quicksight-service-role-v0"
+    },
+    {
+      "type": "AWS::IAM::Policy",
+      "arn": "arn:aws:iam::111111111111:policy/service-role/AWSQuickSightS3Policy",
+      "id": "ANPA0VALIDATION00001",
+      "region": "global",
+      "name": "AWSQuickSightS3Policy"
+    }
+  ],
+  "iam_roles": [
+    {
+      "name": "aws-quicksight-service-role-v0",
+      "path": "/service-role/",
+      "id": "AROA0VALIDATION00007",
+      "attached": [
+        "arn:aws:iam::111111111111:policy/service-role/AWSQuickSightS3Policy"
+      ]
+    }
+  ]
+}

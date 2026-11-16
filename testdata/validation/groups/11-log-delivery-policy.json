@@ -1,0 +1,25 @@
+{
+  "group": "A flow-log bucket policy that log delivery added",
+  "spec_count": 1,
+  "why": "log-delivery-bucket-policy (statement IDs only)",
+  "config": [
+    {
+      "type": "AWS::S3::Bucket",
+      "arn": "arn:aws:s3:::acme-flow-logs",
+      "id": "acme-flow-logs",
+      "region": "eu-west-1",
+      "name": "acme-flow-logs"
+    }
+  ],
+  "buckets": [
+    {
+      "name": "acme-flow-logs",
+      "policy_sids": [
+        "AWSLogDeliveryWrite",
+        "AWSLogDeliveryAclCheck"
+      ],
+      "encryption": true,
+      "pab": true
+    }
+  ]
+}
