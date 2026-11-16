@@ -108,6 +108,20 @@ func (s *session) init(ctx context.Context) error {
 // backend. Plans never take the state lock. Errors carry no terraform output, which can hold
 // attribute values.
 func (t *Terragrunt) Plan(ctx context.Context, dir, workspace, stateFile string) ([]ResourceChange, error) {
+	b, err := t.plan(ctx, dir, workspace, stateFile)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePlan(b)
+}
+
+// PlanJSON plans a workspace of the unit against its backend and returns the plan as terraform show
+// -json prints it. Like [Terragrunt.Plan], it takes no lock and its errors carry no terraform output.
+func (t *Terragrunt) PlanJSON(ctx context.Context, dir, workspace string) ([]byte, error) {
+	return t.plan(ctx, dir, workspace, "")
+}
+
+func (t *Terragrunt) plan(ctx context.Context, dir, workspace, stateFile string) ([]byte, error) {
 	s, err := t.open(dir, workspace)
 	if err != nil {
 		return nil, err
@@ -131,7 +145,7 @@ func (t *Terragrunt) Plan(ctx context.Context, dir, workspace, stateFile string)
 	if err != nil {
 		return nil, quiet(err, "show", false)
 	}
-	return ParsePlan(res.Stdout)
+	return res.Stdout, nil
 }
 
 // Push runs terraform state push with file in a workspace of the unit. Terraform takes the backend

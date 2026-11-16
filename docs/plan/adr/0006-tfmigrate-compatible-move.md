@@ -1,6 +1,7 @@
 # tfcensus ADR-0006: Move migrations are tfmigrate-compatible in spirit, unit-aware and plan-verified
 
 - Status: accepted (2026-11-09). State pulls, rollback and confirmation are refined by [ADR-0011](0011-move-state-io-and-rollback.md).
+  `move suggest` uses its own engine instead of tfautomv's ([ADR-0016](0016-own-move-suggest-engine.md)).
 
 ## Context
 tfmigrate (MIT, v0.4.6, active) has proven the migration-file model and plan-verified dry runs. Its

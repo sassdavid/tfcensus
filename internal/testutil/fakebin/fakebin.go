@@ -26,7 +26,8 @@ const (
 	maxCallLine       = 16 << 20 // one JSON line per call; argv can be long
 )
 
-// Spec describes a fake tool. The first rule whose Args is a prefix of the call's args answers it.
+// Spec describes a fake tool. The first rule whose Args is a prefix of the call's args, and whose Dir
+// matches the call's working directory, answers it.
 type Spec struct {
 	Rules     []Rule   `json:"rules"`
 	RecordEnv []string `json:"record_env,omitempty"` // env vars recorded with each call
@@ -35,6 +36,7 @@ type Spec struct {
 // Rule is one canned response.
 type Rule struct {
 	Args            []string `json:"args,omitempty"`
+	Dir             string   `json:"dir,omitempty"` // suffix of the working directory, slash-separated; empty matches any
 	Stdout          string   `json:"stdout,omitempty"`
 	StdoutFile      string   `json:"stdout_file,omitempty"` // appended after Stdout; relative to the fake's directory
 	Stderr          string   `json:"stderr,omitempty"`
@@ -146,8 +148,15 @@ func run(argv0 string, args []string, spec Spec, stdout, stderr io.Writer) int {
 		_, _ = fmt.Fprintf(stderr, "fakebin: %v\n", err)
 		return 1
 	}
+	cwd, wdErr := os.Getwd()
+	if wdErr != nil {
+		_, _ = fmt.Fprintf(stderr, "fakebin: getwd: %v\n", wdErr)
+		return 1
+	}
+	cwd = filepath.ToSlash(cwd)
 	idx := slices.IndexFunc(spec.Rules, func(r Rule) bool {
-		return len(r.Args) <= len(args) && slices.Equal(r.Args, args[:len(r.Args)])
+		return len(r.Args) <= len(args) && slices.Equal(r.Args, args[:len(r.Args)]) &&
+			(r.Dir == "" || cwd == r.Dir || strings.HasSuffix(cwd, "/"+r.Dir))
 	})
 	if idx < 0 {
 		_, _ = fmt.Fprintf(stderr, "fakebin: no rule matches %q\n", args)

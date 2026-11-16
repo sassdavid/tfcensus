@@ -12,7 +12,7 @@
 | `tfcensus whois <arn\|id>…` | which unit(s) manage it; double-managed check | v0.1 |
 | `tfcensus codify --into <unit> [--from scan.json]` | emit `import` blocks (+ `.tfquery.hcl`) for unmanaged resources | v0.1 |
 | `tfcensus move plan\|apply\|rollback\|mark-applied\|status <migration.hcl>` | state moves between units/accounts | v0.1 |
-| `tfcensus move suggest --from <unit> --to <unit>…` | auto-detect moves from plans (tfautomv engine) → draft migration file | v0.4 |
+| `tfcensus move suggest --from <unit> --to <unit>…` | auto-detect moves from plans (own strict 1:1 engine, ADR-0016) → draft migration file | v0.4 |
 | `tfcensus report html` | static single-file HTML from a scan/drift/audit JSON | v0.1 |
 | `tfcensus mcp` | stdio MCP server, read-only | v0.1 |
 | `tfcensus config show\|validate\|init`, `cache info\|clear` (the probe and scan caches, one row each; `clear` deletes both), `completion`, `version` | standard | v0.1 |

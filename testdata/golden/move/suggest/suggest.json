@@ -1,0 +1,131 @@
+{
+  "schema_version": "1",
+  "tool": "tfcensus",
+  "version": "test",
+  "generated_at": "2026-11-12T09:00:00Z",
+  "data": {
+    "from": [
+      "live/network"
+    ],
+    "to": [
+      "live/network",
+      "live/network-sg",
+      "live/network-endpoints"
+    ],
+    "source": "plan-dir",
+    "ignore": [
+      "json:aws_vpc_endpoint:policy"
+    ],
+    "comparisons": 11,
+    "moves": [
+      {
+        "type": "aws_security_group",
+        "from_unit": "live/network",
+        "from_address": "aws_security_group.app",
+        "to_unit": "live/network-sg",
+        "to_address": "aws_security_group.app"
+      },
+      {
+        "type": "aws_ssm_parameter",
+        "from_unit": "live/network",
+        "from_address": "aws_ssm_parameter.db_password",
+        "to_unit": "live/network-sg",
+        "to_address": "aws_ssm_parameter.db_password"
+      },
+      {
+        "type": "aws_vpc",
+        "from_unit": "live/network",
+        "from_address": "aws_vpc.main",
+        "to_unit": "live/network",
+        "to_address": "aws_vpc.this"
+      },
+      {
+        "type": "aws_vpc_endpoint",
+        "from_unit": "live/network",
+        "from_address": "aws_vpc_endpoint.s3",
+        "to_unit": "live/network-endpoints",
+        "to_address": "module.endpoints.aws_vpc_endpoint.this[\"s3\"]"
+      },
+      {
+        "type": "aws_vpc_security_group_ingress_rule",
+        "from_unit": "live/network",
+        "from_address": "aws_vpc_security_group_ingress_rule.app[\"http\"]",
+        "to_unit": "live/network-sg",
+        "to_address": "aws_vpc_security_group_ingress_rule.app[\"http\"]"
+      },
+      {
+        "type": "aws_vpc_security_group_ingress_rule",
+        "from_unit": "live/network",
+        "from_address": "aws_vpc_security_group_ingress_rule.app[\"https\"]",
+        "to_unit": "live/network-sg",
+        "to_address": "aws_vpc_security_group_ingress_rule.app[\"https\"]"
+      }
+    ],
+    "unmatched": [
+      {
+        "unit": "live/network",
+        "address": "aws_iam_role.legacy",
+        "type": "aws_iam_role",
+        "action": "delete",
+        "candidates": []
+      },
+      {
+        "unit": "live/network",
+        "address": "aws_vpc_endpoint_route_table_association.s3",
+        "type": "aws_vpc_endpoint_route_table_association",
+        "action": "delete",
+        "candidates": [
+          {
+            "unit": "live/network-endpoints",
+            "address": "module.endpoints.aws_vpc_endpoint_route_table_association.this[\"a\"]"
+          },
+          {
+            "unit": "live/network-endpoints",
+            "address": "module.endpoints.aws_vpc_endpoint_route_table_association.this[\"b\"]"
+          }
+        ]
+      },
+      {
+        "unit": "live/network-endpoints",
+        "address": "module.endpoints.aws_vpc_endpoint_route_table_association.this[\"a\"]",
+        "type": "aws_vpc_endpoint_route_table_association",
+        "action": "create",
+        "candidates": [
+          {
+            "unit": "live/network",
+            "address": "aws_vpc_endpoint_route_table_association.s3"
+          }
+        ]
+      },
+      {
+        "unit": "live/network-endpoints",
+        "address": "module.endpoints.aws_vpc_endpoint_route_table_association.this[\"b\"]",
+        "type": "aws_vpc_endpoint_route_table_association",
+        "action": "create",
+        "candidates": [
+          {
+            "unit": "live/network",
+            "address": "aws_vpc_endpoint_route_table_association.s3"
+          }
+        ]
+      },
+      {
+        "unit": "live/network-sg",
+        "address": "aws_security_group.extra",
+        "type": "aws_security_group",
+        "action": "create",
+        "candidates": [],
+        "closest": {
+          "unit": "live/network",
+          "address": "aws_security_group.app",
+          "differ": [
+            "name",
+            "tags"
+          ]
+        }
+      }
+    ],
+    "draft": "# Drafted by tfcensus move suggest from plans. Review every block, then check the file with\n# tfcensus move plan <file> before tfcensus move apply.\n\nmigration \"units\" \"suggest_1\" {\n  from = \"live/network\"\n  to = {\n    \"live/network-endpoints\" = [\n      \"aws_vpc_endpoint.s3\",\n    ]\n    \"live/network-sg\" = [\n      \"aws_security_group.app\",\n      \"aws_ssm_parameter.db_password\",\n      \"aws_vpc_security_group_ingress_rule.app[\\\"http\\\"]\",\n      \"aws_vpc_security_group_ingress_rule.app[\\\"https\\\"]\",\n    ]\n  }\n}\n\nmigration \"units\" \"suggest_2\" {\n  from = \"live/network\"\n  actions = [\n    \"mv aws_vpc.main aws_vpc.this\",\n  ]\n}\n\nmigration \"units\" \"suggest_3\" {\n  from = \"live/network-endpoints\"\n  actions = [\n    \"mv aws_vpc_endpoint.s3 'module.endpoints.aws_vpc_endpoint.this[\\\"s3\\\"]'\",\n  ]\n}\n"
+  },
+  "errors": []
+}

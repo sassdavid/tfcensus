@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sassdavid/tfcensus/schemas/move-suggest-v1.json",
+  "title": "tfcensus move suggest --format json",
+  "description": "The report envelope (report-v1.json) with the moves move suggest found in plans and the drafted migration file. Addresses, types and attribute names are identifiers; no attribute value appears.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "tool", "version", "generated_at", "data", "errors"],
+  "properties": {
+    "schema_version": {"const": "1"},
+    "tool": {"const": "tfcensus"},
+    "version": {"type": "string", "minLength": 1},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "errors": {
+      "description": "Always empty: move suggest fails instead.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["message"],
+        "properties": {
+          "target": {"type": "string"},
+          "message": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to", "source", "ignore", "comparisons", "moves", "unmatched", "draft"],
+      "properties": {
+        "from": {"description": "The --from unit references, as given.", "type": "array", "items": {"type": "string"}},
+        "to": {"description": "The --to unit references, as given.", "type": "array", "items": {"type": "string"}},
+        "source": {
+          "description": "Where the plans came from: terragrunt plans, or the files under --plan-dir.",
+          "enum": ["terragrunt", "plan-dir"]
+        },
+        "ignore": {"description": "The --ignore rules.", "type": "array", "items": {"type": "string"}},
+        "comparisons": {"description": "Delete and create pairs of the same type that were compared.", "type": "integer", "minimum": 0},
+        "moves": {"type": "array", "items": {"$ref": "#/$defs/move"}},
+        "unmatched": {"type": "array", "items": {"$ref": "#/$defs/unmatched"}},
+        "draft_file": {"description": "The --draft path, when a draft was written there.", "type": "string"},
+        "draft": {"description": "The drafted migration file; empty when no move was found.", "type": "string"}
+      }
+    }
+  },
+  "$defs": {
+    "move": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "from_unit", "from_address", "to_unit", "to_address"],
+      "properties": {
+        "type": {"type": "string", "minLength": 1},
+        "from_unit": {"description": "Unit reference: path, or path:workspace.", "type": "string", "minLength": 1},
+        "from_address": {"type": "string", "minLength": 1},
+        "to_unit": {"type": "string", "minLength": 1},
+        "to_address": {"type": "string", "minLength": 1}
+      }
+    },
+    "ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unit", "address"],
+      "properties": {
+        "unit": {"type": "string", "minLength": 1},
+        "address": {"type": "string", "minLength": 1}
+      }
+    },
+    "unmatched": {
+      "description": "A planned delete or create that no move covers.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unit", "address", "type", "action", "candidates"],
+      "properties": {
+        "unit": {"type": "string", "minLength": 1},
+        "address": {"type": "string", "minLength": 1},
+        "type": {"type": "string", "minLength": 1},
+        "action": {"enum": ["delete", "create"]},
+        "candidates": {
+          "description": "Resources it fully matches. A move needs exactly one match on each side.",
+          "type": "array",
+          "items": {"$ref": "#/$defs/ref"}
+        },
+        "closest": {
+          "description": "Without a full match: the resource of the same type with the fewest differing attributes.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["unit", "address", "differ"],
+          "properties": {
+            "unit": {"type": "string", "minLength": 1},
+            "address": {"type": "string", "minLength": 1},
+            "differ": {"description": "Top-level attribute names that differ.", "type": "array", "items": {"type": "string"}}
+          }
+        }
+      }
+    }
+  }
+}

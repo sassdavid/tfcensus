@@ -1,0 +1,107 @@
+{
+  "applyable": true,
+  "complete": true,
+  "configuration": {
+    "provider_config": {
+      "aws": {
+        "full_name": "registry.terraform.io/hashicorp/aws",
+        "name": "aws"
+      }
+    },
+    "root_module": {}
+  },
+  "errored": false,
+  "format_version": "1.2",
+  "planned_values": {
+    "root_module": {}
+  },
+  "resource_changes": [
+    {
+      "address": "module.endpoints.aws_vpc_endpoint.this[\"s3\"]",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "after": {
+          "auto_accept": null,
+          "policy": "{\n  \"Statement\": [\n    {\n      \"Action\": \"s3:GetObject\",\n      \"Effect\": \"Allow\",\n      \"Principal\": \"*\",\n      \"Resource\": \"*\"\n    }\n  ],\n  \"Version\": \"2012-10-17\"\n}",
+          "service_name": "com.amazonaws.eu-west-1.s3",
+          "tags": {
+            "Name": "s3"
+          },
+          "vpc_endpoint_type": "Gateway",
+          "vpc_id": "vpc-0f1e2d3c4b5a69788"
+        },
+        "after_sensitive": {},
+        "after_unknown": {
+          "arn": true,
+          "id": true,
+          "owner_id": true,
+          "prefix_list_id": true,
+          "private_dns_enabled": true,
+          "route_table_ids": true,
+          "state": true,
+          "tags": {},
+          "tags_all": true
+        },
+        "before": null,
+        "before_sensitive": false
+      },
+      "index": "s3",
+      "mode": "managed",
+      "module_address": "module.endpoints",
+      "name": "this",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "type": "aws_vpc_endpoint"
+    },
+    {
+      "address": "module.endpoints.aws_vpc_endpoint_route_table_association.this[\"a\"]",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "after": {
+          "route_table_id": "rtb-0aa"
+        },
+        "after_sensitive": {},
+        "after_unknown": {
+          "id": true,
+          "vpc_endpoint_id": true
+        },
+        "before": null,
+        "before_sensitive": false
+      },
+      "index": "a",
+      "mode": "managed",
+      "module_address": "module.endpoints",
+      "name": "this",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "type": "aws_vpc_endpoint_route_table_association"
+    },
+    {
+      "address": "module.endpoints.aws_vpc_endpoint_route_table_association.this[\"b\"]",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "after": {
+          "route_table_id": "rtb-0aa"
+        },
+        "after_sensitive": {},
+        "after_unknown": {
+          "id": true,
+          "vpc_endpoint_id": true
+        },
+        "before": null,
+        "before_sensitive": false
+      },
+      "index": "b",
+      "mode": "managed",
+      "module_address": "module.endpoints",
+      "name": "this",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "type": "aws_vpc_endpoint_route_table_association"
+    }
+  ],
+  "terraform_version": "1.12.2"
+}
