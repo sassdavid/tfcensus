@@ -165,3 +165,129 @@ func TestProbeAggregatorPages(t *testing.T) {
 	assert.Equal(t, probe.StatusAvailable, r.Regions[0].Aggregators.Status)
 	assert.Equal(t, []string{"acme-a", "acme-b"}, r.Regions[0].Aggregators.Names)
 }
+
+func routerAccount(rt http.RoundTripper) *accounts.Account {
+	return &accounts.Account{ID: "333333333333", Partition: "aws", Config: aws.Config{
+		Region:           "eu-central-1",
+		Credentials:      credentials.NewStaticCredentialsProvider("AKIAFAKE", "fake-secret", ""),
+		HTTPClient:       &http.Client{Transport: rt},
+		RetryMaxAttempts: 1,
+	}}
+}
+
+// TestProbeAggregator reads the named aggregator and every page of its sources status, keeps the
+// result in the cache, and reports a missing aggregator and denied calls.
+func TestProbeAggregator(t *testing.T) {
+	t.Parallel()
+	agg := awstest.Stub{Body: `{"ConfigurationAggregators":[{"ConfigurationAggregatorName":"acme-org"}]}`}
+	source := func(id, typ, region, status string) string {
+		return `{"SourceId":"` + id + `","SourceType":"` + typ + `","AwsRegion":"` + region +
+			`","LastUpdateStatus":"` + status + `"}`
+	}
+
+	t.Run("available", func(t *testing.T) {
+		t.Parallel()
+		rt := awstest.NewRouter(t).
+			On("config", "DescribeConfigurationAggregators", `"acme-org"`, agg).
+			On("config", "DescribeConfigurationAggregatorSourcesStatus", `"NextToken":"page-2"`, awstest.Stub{
+				Body: `{"AggregatedSourceStatusList":[` + source(
+					"222222222222",
+					"ACCOUNT",
+					"eu-west-1",
+					"OUTDATED",
+				) + `]}`,
+			}).
+			On("config", "DescribeConfigurationAggregatorSourcesStatus", "", awstest.Stub{
+				Body: `{"AggregatedSourceStatusList":[` + source(
+					"o-acme",
+					"ORGANIZATION",
+					"eu-west-1",
+					"SUCCEEDED",
+				) + `,` +
+					source(
+						"o-acme",
+						"ORGANIZATION",
+						"us-east-1",
+						"FAILED",
+					) + `],"NextToken":"page-2"}`,
+			})
+		dir := t.TempDir()
+		now := time.Date(2026, 11, 10, 12, 0, 0, 0, time.UTC)
+		clock := func() time.Time { return now }
+		rep := probe.New(probe.Options{CacheDir: dir, Clock: clock}).
+			Aggregator(t.Context(), routerAccount(rt), "", "acme-org")
+		assert.Equal(t, &probe.AggregatorReport{
+			Name: "acme-org", Account: "333333333333", Region: "eu-central-1", Status: probe.StatusAvailable,
+			Sources: []probe.AggSource{
+				{Source: "222222222222", Type: probe.SourceAccount, Region: "eu-west-1", Status: "outdated"},
+				{Source: "o-acme", Type: probe.SourceOrganization, Region: "eu-west-1", Status: probe.SyncSucceeded},
+				{Source: "o-acme", Type: probe.SourceOrganization, Region: "us-east-1", Status: "failed"},
+			},
+			ProbedAt: now,
+		}, rep)
+
+		ct := &countingTransport{}
+		now = now.Add(23 * time.Hour)
+		cached := probe.New(probe.Options{CacheDir: dir, Clock: clock}).
+			Aggregator(t.Context(), routerAccount(ct), "eu-central-1", "acme-org")
+		assert.Zero(t, ct.calls.Load(), "a fresh cache needs no calls")
+		assert.True(t, cached.Cached)
+		assert.Equal(t, rep.Sources, cached.Sources)
+	})
+
+	t.Run("missing", func(t *testing.T) {
+		t.Parallel()
+		rt := awstest.NewRouter(t).On("config", "DescribeConfigurationAggregators", "", awstest.Stub{
+			Status: http.StatusBadRequest,
+			Body:   awstest.JSONError("NoSuchConfigurationAggregatorException", "no aggregator"),
+		})
+		rep := probe.New(probe.Options{}).Aggregator(t.Context(), routerAccount(rt), "eu-central-1", "acme-org")
+		assert.Equal(t, probe.StatusUnavailable, rep.Status)
+		assert.Empty(t, rep.Error)
+	})
+
+	t.Run("sources denied", func(t *testing.T) {
+		t.Parallel()
+		rt := awstest.NewRouter(t).
+			On("config", "DescribeConfigurationAggregators", "", agg).
+			On("config", "DescribeConfigurationAggregatorSourcesStatus", "", awstest.Stub{
+				Status: http.StatusBadRequest, Body: awstest.JSONError("AccessDeniedException", "denied"),
+			})
+		rep := probe.New(probe.Options{}).Aggregator(t.Context(), routerAccount(rt), "eu-central-1", "acme-org")
+		assert.Equal(t, probe.StatusDenied, rep.Status)
+		assert.Equal(t, "access denied for config:DescribeConfigurationAggregatorSourcesStatus", rep.Error)
+		assert.Empty(t, rep.Sources)
+	})
+}
+
+// TestAggregatorServes: the aggregator serves a pair when a source covers it and every source
+// that covers it succeeded.
+func TestAggregatorServes(t *testing.T) {
+	t.Parallel()
+	rep := &probe.AggregatorReport{Status: probe.StatusAvailable, Sources: []probe.AggSource{
+		{Source: "o-acme", Type: probe.SourceOrganization, Region: "eu-west-1", Status: probe.SyncSucceeded},
+		{Source: "o-acme", Type: probe.SourceOrganization, Region: "us-east-1", Status: "outdated"},
+		{Source: "222222222222", Type: probe.SourceAccount, Region: "eu-central-1", Status: probe.SyncSucceeded},
+		{Source: "333333333333", Type: probe.SourceAccount, Region: "eu-west-1", Status: "failed"},
+	}}
+	for _, tc := range []struct {
+		name            string
+		rep             *probe.AggregatorReport
+		account, region string
+		want            bool
+	}{
+		{"organization source", rep, "111111111111", "eu-west-1", true},
+		{"outdated source", rep, "111111111111", "us-east-1", false},
+		{"account source", rep, "222222222222", "eu-central-1", true},
+		{"other account", rep, "111111111111", "eu-central-1", false},
+		{"one failed source", rep, "333333333333", "eu-west-1", false},
+		{"no source in region", rep, "111111111111", "eu-north-1", false},
+		{"unavailable", &probe.AggregatorReport{Status: probe.StatusDenied, Sources: rep.Sources}, "111111111111", "eu-west-1", false},
+		{"nil", nil, "111111111111", "eu-west-1", false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			assert.Equal(t, tc.want, tc.rep.Serves(tc.account, tc.region))
+		})
+	}
+}

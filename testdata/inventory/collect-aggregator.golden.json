@@ -1,0 +1,50 @@
+{
+  "aggregator": {
+    "name": "acme-org",
+    "account": "333333333333",
+    "region": "eu-central-1",
+    "status": "ok",
+    "count": 5,
+    "served": 2,
+    "fallback": 1
+  },
+  "resources": [
+    "111111111111 AWS::IAM::Role arn:aws:iam::111111111111:role/app global",
+    "111111111111 AWS::EC2::SecurityGroup arn:aws:ec2:eu-west-1:111111111111:security-group/sg-a eu-west-1",
+    "111111111111 AWS::EC2::VPC arn:aws:ec2:us-east-1:111111111111:vpc/vpc-a us-east-1",
+    "222222222222 AWS::IAM::Role arn:aws:iam::222222222222:role/app global",
+    "222222222222 AWS::EC2::SecurityGroup arn:aws:ec2:eu-west-1:222222222222:security-group/sg-b eu-west-1"
+  ],
+  "runs": [
+    {
+      "account": "111111111111",
+      "region": "eu-west-1",
+      "layer": "config",
+      "status": "ok",
+      "count": 2,
+      "via": "aggregator"
+    },
+    {
+      "account": "111111111111",
+      "region": "us-east-1",
+      "layer": "config",
+      "status": "ok",
+      "count": 1
+    },
+    {
+      "account": "222222222222",
+      "region": "eu-west-1",
+      "layer": "config",
+      "status": "ok",
+      "count": 2,
+      "via": "aggregator"
+    },
+    {
+      "account": "222222222222",
+      "region": "us-east-1",
+      "layer": "config",
+      "status": "unsupported",
+      "count": 0
+    }
+  ]
+}

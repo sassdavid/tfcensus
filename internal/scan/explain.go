@@ -14,13 +14,15 @@ import (
 
 // Report is the result of a scan.
 type Report struct {
-	Regions  []Summary           `json:"regions"`
-	Accounts []Summary           `json:"accounts"`
-	Findings []Finding           `json:"findings"`
-	Runs     []inventory.Run     `json:"runs"`
-	Coverage *inventory.Coverage `json:"coverage"` // which layer listed each type, per account and region
-	Warnings []string            `json:"warnings"`
-	Cached   bool                `json:"cached"` // the inventory and state index came from the cache
+	Regions  []Summary       `json:"regions"`
+	Accounts []Summary       `json:"accounts"`
+	Findings []Finding       `json:"findings"`
+	Runs     []inventory.Run `json:"runs"`
+	// Aggregator is the outcome of the AWS Config aggregator queries, when the config layer used them.
+	Aggregator *inventory.AggregatorRun `json:"aggregator,omitempty"`
+	Coverage   *inventory.Coverage      `json:"coverage"` // which layer listed each type, per account and region
+	Warnings   []string                 `json:"warnings"`
+	Cached     bool                     `json:"cached"` // the inventory and state index came from the cache
 }
 
 // Explanation is the evaluation trace of one resource: its match, every rule's outcome, and the

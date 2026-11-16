@@ -18,7 +18,7 @@ For each (account, region), cached 24 h:
 | Resource Explorer index type | `resource-explorer-2:ListIndexes` | LOCAL vs AGGREGATOR; region coverage |
 | Resource Explorer view | `ListViews` / `GetDefaultView` | `ListResources` needs a view. Without one the RE layer is unavailable (we never create views; read-only) |
 | Config recorder | `DescribeConfigurationRecorders` + `...Status` | recording? allSupported? CONTINUOUS/DAILY? |
-| Config aggregator | `DescribeConfigurationAggregators` (in the configured audit/aggregator account) | org-wide `SelectAggregateResourceConfig` |
+| Config aggregator | `DescribeConfigurationAggregators` + `DescribeConfigurationAggregatorSourcesStatus` (in the configured audit/aggregator account) | org-wide `SelectAggregateResourceConfig` for the pairs whose sources succeeded ([inventory](inventory.md#config-aggregator-fast-path)) |
 | Cloud Control | always available, throttled | fallback layer |
 
 **Real-world check (2026-11-09, a non-prod Control Tower member account; `acme-nonprod` in examples):**

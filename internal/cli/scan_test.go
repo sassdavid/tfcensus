@@ -234,8 +234,9 @@ func reResourceBody(arn, reType string) string {
 
 // scanStubs serves the probe, every inventory layer and Cloud Control for the scan cassette. With
 // iamOnly, it serves a scan limited to IAM types: Config returns IAM items only and the layers
-// without IAM types make no calls.
-func scanStubs(r *awstest.Router, iamOnly bool) {
+// without IAM types make no calls. With aggregated, the config items come from the acme-org
+// aggregator in the audit account instead of the scanned account.
+func scanStubs(r *awstest.Router, iamOnly, aggregated bool) {
 	ok := func(body string) awstest.Stub { return awstest.Stub{Body: body} }
 	view := "arn:aws:resource-explorer-2:eu-west-1:" + scanAcct + ":view/all-resources/5d3c2b1a-0f9e-4d8c-b7a6-000000000001"
 	r.On("resource-explorer-2", "ListIndexes", "", ok(`{"Indexes":[{"Arn":"arn:aws:resource-explorer-2:eu-west-1:`+
@@ -243,6 +244,10 @@ func scanStubs(r *awstest.Router, iamOnly bool) {
 	r.On("resource-explorer-2", "ListSupportedResourceTypes", "", ok(`{"ResourceTypes":[`+
 		`{"ResourceType":"ec2:key-pair","Service":"ec2"},{"ResourceType":"logs:log-group","Service":"logs"}]}`))
 	r.On("resource-explorer-2", "ListViews", "", ok(`{"Views":["`+view+`"]}`))
+	if aggregated {
+		r.On("config", "DescribeConfigurationAggregators", `"acme-org"`, ok(`{"ConfigurationAggregators":[`+
+			`{"ConfigurationAggregatorName":"acme-org"}]}`))
+	}
 	r.On("config", "DescribeConfigurationAggregators", "", ok(`{"ConfigurationAggregators":[]}`))
 	r.On("resource-explorer-2", "GetDefaultView", "", ok(`{"ViewArn":"`+view+`"}`))
 	r.On("config", "DescribeConfigurationRecorders", "", ok(`{"ConfigurationRecorders":[{"name":"default",`+
@@ -254,7 +259,13 @@ func scanStubs(r *awstest.Router, iamOnly bool) {
 	if iamOnly {
 		items = slices.DeleteFunc(items, func(it item) bool { return !strings.HasPrefix(it.Type, "AWS::IAM::") })
 	}
-	r.On("config", "SelectResourceConfig", "", ok(configPageBody(items)))
+	if aggregated {
+		r.On("config", "DescribeConfigurationAggregatorSourcesStatus", "", ok(`{"AggregatedSourceStatusList":[`+
+			`{"SourceId":"o-acme","SourceType":"ORGANIZATION","AwsRegion":"eu-west-1","LastUpdateStatus":"SUCCEEDED"}]}`))
+		r.On("config", "SelectAggregateResourceConfig", "", ok(configPageBody(items)))
+	} else {
+		r.On("config", "SelectResourceConfig", "", ok(configPageBody(items)))
+	}
 	r.On("iam", "GetAccountAuthorizationDetails", "", ok(`<GetAccountAuthorizationDetailsResponse `+
 		`xmlns="https://iam.amazonaws.com/doc/2010-05-08/"><GetAccountAuthorizationDetailsResult>`+
 		`<IsTruncated>false</IsTruncated><UserDetailList/><GroupDetailList/><RoleDetailList/><Policies/>`+
@@ -316,7 +327,7 @@ func TestScanCassette(t *testing.T) { //nolint:paralleltest // writes the casset
 			fake.LoadManifest(scanManifest)
 			fake.Keys = map[string]string{"AKIAFAKEDEFAULT": scanAcct}
 			router := awstest.NewRouter(t)
-			scanStubs(router, tc.iamOnly)
+			scanStubs(router, tc.iamOnly, false)
 			rt := awstest.WriteCassette(t, tc.cassette, splitTransport{fake: fake, router: router})
 			args := []string{"scan", "tf-scan", "--config", scanConfig, "--format", "json", "--concurrency", "1"}
 			if tc.iamOnly {

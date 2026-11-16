@@ -88,7 +88,7 @@ func (l *reLayer) resource(res *retypes.Resource, acct *accounts.Account) CloudR
 		ARN:     arn,
 		Sources: []string{LayerRE},
 	}
-	if r.Region == "global" {
+	if r.Region == globalRegion {
 		r.Region = ""
 	}
 	if r.CFNType == "" {

@@ -380,12 +380,84 @@ func probeAggregators(ctx context.Context, client *configservice.Client) AggChec
 	return a
 }
 
-// Aggregator checks that the named AWS Config aggregator exists, for org-wide queries.
-func Aggregator(ctx context.Context, cfg aws.Config, region, name string) AggCheck {
-	c := cfg.Copy()
-	c.Region = cmp.Or(region, c.Region)
-	a := AggCheck{Status: StatusUnavailable, Names: []string{}}
-	out, err := configservice.NewFromConfig(c, adaptiveConfig(c)).DescribeConfigurationAggregators(ctx,
+// AggregatorReport is the AWS Config aggregator that accounts.aggregator names, with the sync
+// state of its sources.
+type AggregatorReport struct {
+	Name     string      `json:"name"`
+	Account  string      `json:"account"` // the account that owns the aggregator
+	Region   string      `json:"region"`
+	Status   Status      `json:"status"`
+	Error    string      `json:"error,omitempty"`
+	Sources  []AggSource `json:"sources"`
+	ProbedAt time.Time   `json:"probed_at"`
+	Cached   bool        `json:"cached"`
+}
+
+// AggSource is the sync state of one aggregator source in one region.
+type AggSource struct {
+	Source string `json:"source"` // an account ID, or an organization ID
+	Type   string `json:"type"`   // account or organization
+	Region string `json:"region"`
+	Status string `json:"status"` // succeeded, failed or outdated
+}
+
+// Aggregator source types and sync states.
+const (
+	SourceAccount      = "account"
+	SourceOrganization = "organization"
+	SyncSucceeded      = "succeeded"
+)
+
+// Serves reports whether the aggregator holds current data for account in region: a source that
+// covers the pair succeeded and none failed or is outdated. An organization source covers every
+// account in its region.
+func (a *AggregatorReport) Serves(account, region string) bool {
+	if a == nil || a.Status != StatusAvailable {
+		return false
+	}
+	served := false
+	for _, s := range a.Sources {
+		if s.Region != region || (s.Type == SourceAccount && s.Source != account) {
+			continue
+		}
+		if s.Status != SyncSucceeded {
+			return false
+		}
+		served = true
+	}
+	return served
+}
+
+// Aggregator checks the named AWS Config aggregator in acct's region (or region) and reads the
+// sync state of its sources, for the config layer's org-wide queries. Like [Prober.Probe], it
+// keeps a result for the TTL unless the check failed for a reason other than access.
+func (p *Prober) Aggregator(ctx context.Context, acct *accounts.Account, region, name string) *AggregatorReport {
+	region = cmp.Or(region, acct.Config.Region)
+	key := "aggregator-" + region + "-" + name
+	a := &AggregatorReport{}
+	if p.load(acct.ID, key, a) && a.Name == name {
+		return a
+	}
+	a = p.probeAggregator(ctx, acct.Config, region, name)
+	a.Account = acct.ID
+	if a.Status != StatusError && ctx.Err() == nil {
+		p.save(ctx, acct.ID, key, a)
+	}
+	return a
+}
+
+func (p *Prober) probeAggregator(ctx context.Context, base aws.Config, region, name string) *AggregatorReport {
+	cfg := base.Copy()
+	cfg.Region = region
+	a := &AggregatorReport{
+		Name:     name,
+		Region:   region,
+		Status:   StatusUnavailable,
+		Sources:  []AggSource{},
+		ProbedAt: p.now(),
+	}
+	client := configservice.NewFromConfig(cfg, adaptiveConfig(cfg))
+	out, err := client.DescribeConfigurationAggregators(ctx,
 		&configservice.DescribeConfigurationAggregatorsInput{ConfigurationAggregatorNames: []string{name}})
 	_, missing := errors.AsType[*cstypes.NoSuchConfigurationAggregatorException](err)
 	switch {
@@ -394,11 +466,32 @@ func Aggregator(ctx context.Context, cfg aws.Config, region, name string) AggChe
 	case err != nil:
 		a.Status, a.Error = failure("config:DescribeConfigurationAggregators", err)
 		return a
+	case len(out.ConfigurationAggregators) == 0:
+		return a
 	}
-	for _, agg := range out.ConfigurationAggregators {
-		a.Names = append(a.Names, aws.ToString(agg.ConfigurationAggregatorName))
-		a.Status = StatusAvailable
+	pages := configservice.NewDescribeConfigurationAggregatorSourcesStatusPaginator(client,
+		&configservice.DescribeConfigurationAggregatorSourcesStatusInput{ConfigurationAggregatorName: aws.String(name)})
+	for pages.HasMorePages() {
+		page, perr := pages.NextPage(ctx)
+		if perr != nil {
+			a.Status, a.Error = failure("config:DescribeConfigurationAggregatorSourcesStatus", perr)
+			a.Sources = []AggSource{}
+			return a
+		}
+		for _, s := range page.AggregatedSourceStatusList {
+			a.Sources = append(a.Sources, AggSource{
+				Source: aws.ToString(s.SourceId),
+				Type:   strings.ToLower(string(s.SourceType)),
+				Region: aws.ToString(s.AwsRegion),
+				Status: strings.ToLower(string(s.LastUpdateStatus)),
+			})
+		}
 	}
+	slices.SortFunc(a.Sources, func(x, y AggSource) int {
+		return cmp.Or(strings.Compare(x.Region, y.Region), strings.Compare(x.Type, y.Type),
+			strings.Compare(x.Source, y.Source))
+	})
+	a.Status = StatusAvailable
 	return a
 }
 
@@ -431,7 +524,7 @@ func layers(r *Region) []Layer {
 func (p *Prober) now() time.Time { return p.opts.Clock().UTC().Truncate(time.Second) }
 
 type cached interface {
-	*ResourceEx | *Region
+	*ResourceEx | *Region | *AggregatorReport
 }
 
 func (p *Prober) path(account, name string) string {
@@ -453,6 +546,8 @@ func load[T cached](p *Prober, account, name string, v T) bool {
 		at, x.Cached = x.ProbedAt, true
 	case *Region:
 		at, x.Cached = x.ProbedAt, true
+	case *AggregatorReport:
+		at, x.Cached = x.ProbedAt, true
 	}
 	return p.opts.Clock().Sub(at) < p.opts.TTL
 }
@@ -462,6 +557,8 @@ func (p *Prober) load(account, name string, v any) bool {
 	case *ResourceEx:
 		return load(p, account, name, x)
 	case *Region:
+		return load(p, account, name, x)
+	case *AggregatorReport:
 		return load(p, account, name, x)
 	}
 	return false

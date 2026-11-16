@@ -2,6 +2,7 @@ package cli
 
 import (
 	"cmp"
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -21,6 +22,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/inventory"
 	"github.com/sassdavid/tfcensus/internal/match"
 	"github.com/sassdavid/tfcensus/internal/ownership"
+	"github.com/sassdavid/tfcensus/internal/probe"
 	"github.com/sassdavid/tfcensus/internal/render"
 	"github.com/sassdavid/tfcensus/internal/scan"
 	"github.com/sassdavid/tfcensus/internal/tfstate"
@@ -75,6 +77,11 @@ Resources are listed in the --region regions, else the regions of the units that
 account. --all-regions lists every region the account has enabled (account:ListRegions).
 --account and --exclude-account choose the accounts to list; the state of units in other
 accounts is still read with their credentials.
+
+With accounts.aggregator set, the config layer reads every account and region whose aggregator
+sources are current with one SelectAggregateResourceConfig query in the aggregator's account.
+An account and region the aggregator returns nothing for is queried in that account. doctor
+shows the aggregator's sources.
 
 scan caches the inventory and state index under $XDG_CACHE_HOME/tfcensus/scan for cache.ttl
 (default 1h), keyed by the accounts, regions, layers, types and units. A re-run with other rules
@@ -234,7 +241,8 @@ func runScan(cmd *cobra.Command, d *app.Deps, sink render.Sink, cfg *config.Conf
 	sortFindings(findings)
 	rep := &scan.Report{
 		Findings: findings, Runs: snap.Inventory.Runs, Coverage: snap.Inventory.Coverage,
-		Warnings: []string{}, Cached: snap.cached,
+		Aggregator: snap.Inventory.Aggregator,
+		Warnings:   []string{}, Cached: snap.cached,
 	}
 	rep.Regions, rep.Accounts = scan.Summarize(findings)
 	for _, name := range eng.Expired() {
@@ -452,6 +460,7 @@ func (e *scanEnv) collect(loader *accounts.Loader, disc discovery.Result) (*scan
 			return e.regions(a, disc)
 		},
 		layers: e.layers, types: e.cfn, cc: e.cc, refresh: e.a.refresh,
+		loader: loader, aggregator: e.cfg.Accounts.Aggregator,
 	})
 	if err != nil {
 		return nil, err
@@ -467,6 +476,10 @@ type liveRequest struct {
 	types    []string // CloudFormation types; empty means every type
 	cc       []string
 	refresh  bool
+	// loader and aggregator locate the AWS Config aggregator that serves the config layer; an
+	// empty aggregator name turns the fast path off.
+	loader     *accounts.Loader
+	aggregator config.Aggregator
 }
 
 // collectLive probes each account and runs the inventory layers, as scan and whois do.
@@ -487,6 +500,7 @@ func collectLive(cmd *cobra.Command, d *app.Deps, m *typemap.Map, req liveReques
 	env := &inventory.Env{Map: m, Limits: inventory.NewLimiters(nil), Logger: d.Logger, CloudControlTypes: req.cc}
 	res, err := inventory.NewCollector(inventory.Options{Env: env}).Collect(ctx, inventory.Request{
 		Targets: targets, Layers: req.layers, Types: req.types,
+		Aggregator: liveAggregator(cmd, d, prober, req),
 	})
 	if errors.Is(err, inventory.ErrUnknownLayer) {
 		return nil, usageError(err)
@@ -495,6 +509,37 @@ func collectLive(cmd *cobra.Command, d *app.Deps, m *typemap.Map, req liveReques
 		return nil, fmt.Errorf("list live resources: %w", err)
 	}
 	return res, nil
+}
+
+// liveAggregator returns the aggregator that accounts.aggregator names, with its probe result,
+// or nil when none is named or its account doesn't load. The config layer then queries each
+// account.
+func liveAggregator(cmd *cobra.Command, d *app.Deps, prober *probe.Prober, req liveRequest) *inventory.Aggregator {
+	agg := req.aggregator
+	if agg.Name == "" || req.loader == nil {
+		return nil
+	}
+	acct, err := aggregatorAccount(cmd.Context(), req.loader, agg)
+	if err != nil {
+		d.Logger.WarnContext(cmd.Context(), "cannot use the config aggregator; querying each account",
+			"aggregator", agg.Name, "error", err)
+		return nil
+	}
+	rep := prober.Aggregator(cmd.Context(), acct, agg.Region, agg.Name)
+	if rep.Status != probe.StatusAvailable {
+		d.Logger.WarnContext(cmd.Context(), "config aggregator unavailable; querying each account",
+			"aggregator", agg.Name, "status", string(rep.Status), "error", rep.Error)
+		return nil
+	}
+	return &inventory.Aggregator{Account: acct, Report: rep}
+}
+
+// aggregatorAccount loads the account that owns the aggregator: its profile, else the default.
+func aggregatorAccount(ctx context.Context, l *accounts.Loader, agg config.Aggregator) (*accounts.Account, error) {
+	if agg.Profile != "" {
+		return l.Profile(ctx, agg.Profile)
+	}
+	return l.Default(ctx)
 }
 
 // regions returns the regions to scan in acct: the configured regions, else the regions of the

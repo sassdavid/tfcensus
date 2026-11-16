@@ -162,6 +162,10 @@ func scanNotes(rep *scan.Report, problems []scan.Problem) []string {
 			notes = append(notes, fmt.Sprintf("layer %s in %s: %s", r.Layer, where, r.Status))
 		}
 	}
+	if a := rep.Aggregator; a != nil && a.Status != inventory.RunOK {
+		notes = append(notes, fmt.Sprintf("config aggregator %s: %s; listed %d account and region pairs one by one",
+			a.Name, a.Status, a.Fallback))
+	}
 	for _, p := range problems {
 		notes = append(notes, p.Target+": error: "+p.Message)
 	}
