@@ -1,6 +1,7 @@
 # Spec: configuration
 
-Files: user `$XDG_CONFIG_HOME/tfcensus/config.yaml`, project `.tfcensus.yaml` (repo root). Precedence and
+Files: user `$XDG_CONFIG_HOME/tfcensus/config.yaml`, project `.tfcensus.yaml` (the nearest one up to the
+git root; outside a repository only the working directory). Precedence and
 provenance follow the [engineering standards](../../engineering/engineering-standards.md#configuration).
 
 ```yaml
@@ -46,7 +47,15 @@ Rules:
 - Unknown keys are an error.
 - Credentials are never stored in config.
 - Every list supports `expires` + `reason` where suppression is involved.
+- `tfcensus config init [path]` writes a template with every key commented out at its default, so it
+  changes nothing until edited. It writes `.tfcensus.yaml` in the working directory, the path, or with
+  `--user` the user file, and refuses to replace a file (exit 2) without `--force`. It has the same
+  shape as `relgap config init`.
 
 ## Acceptance criteria
 - [x] Schema generation and sync test; `config show --sources` golden; unknown-key error with file:line
   (`TestSpec_config_1` to `_3`).
+- [x] The `config init` template validates, sets nothing as written, and lists every key at its default
+  once uncommented (`TestSpec_config_4`). `testdata/script/config_init.txtar` covers the command.
+- [x] The project-file search stops at the git root or `config.Options.StopDir` and reads only the
+  working directory outside both (`TestSpec_config_5`).

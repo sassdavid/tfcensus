@@ -73,6 +73,9 @@ type Options struct {
 	// ExplicitFile replaces project-file discovery. TFCENSUS_CONFIG is used when empty.
 	ExplicitFile string
 
+	// StopDir ends the project-file search like a git root does. Empty means the git root.
+	StopDir string
+
 	// FlagKeys maps flag names to config keys. Only flags the user set are applied.
 	Flags    *pflag.FlagSet
 	FlagKeys map[string]string
@@ -201,7 +204,7 @@ func Locate(opts Options) ([]File, error) {
 		}
 		return append(files, File{Kind: SourceProject, Path: explicit, Found: found, Explicit: true}), nil
 	}
-	projectPath, err := FindProjectFile(opts.Cwd)
+	projectPath, err := FindProjectFile(opts.Cwd, opts.StopDir)
 	if err != nil {
 		return nil, err
 	}

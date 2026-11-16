@@ -82,7 +82,8 @@ The same input files always give the same bytes, so the file can be compared or 
 Layers, lowest to highest: defaults, `~/.config/tfcensus/config.yaml`, `.tfcensus.yaml` (nearest, up
 to the git root), `TFCENSUS_*` env vars, flags. Unknown keys are errors. Schema:
 [schemas/config-v1.json](schemas/config-v1.json). The env var names are in
-[docs/cli/tfcensus_config.md](docs/cli/tfcensus_config.md).
+[docs/cli/tfcensus_config.md](docs/cli/tfcensus_config.md). `tfcensus config init` writes a
+`.tfcensus.yaml` with every key commented out at its default.
 
 ## Development
 

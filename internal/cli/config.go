@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"text/tabwriter"
 
@@ -33,13 +35,15 @@ Env vars:     TFCENSUS_<KEY> with dots as underscores, e.g. TFCENSUS_CACHE_TTL=3
               Use __ to mark nesting explicitly (TFCENSUS_DISCOVERY__GENERATE_STACKS=true).
               Lists are comma-separated.
 
-Unknown keys and wrong types are errors (exit 2), reported with file:line:column.`,
+Unknown keys and wrong types are errors (exit 2), reported with file:line:column.
+'tfcensus config init' writes a commented file to start from.`,
 		Args: noArgs,
 	}
 	cmd.AddCommand(
 		newConfigShowCmd(d, g),
 		newConfigPathCmd(d, g),
 		newConfigValidateCmd(d, g),
+		newConfigInitCmd(d),
 	)
 	return cmd
 }
@@ -252,4 +256,68 @@ func validateConfig(cmd *cobra.Command, d *app.Deps, g *globals, args []string) 
 		return nil, all
 	}
 	return args, nil
+}
+
+func newConfigInitCmd(d *app.Deps) *cobra.Command {
+	var force, user bool
+	cmd := &cobra.Command{
+		Use:   "init [path]",
+		Short: "Write a commented config file",
+		Long: `Writes a config file that lists every key commented out at its default, so the file
+changes nothing until you uncomment a key. It goes to ` + config.ProjectFileName + ` in the working
+directory, to path, or with --user to the user file. The directory is created when it's missing.
+
+An existing file is kept, with exit code 2, unless you pass --force. The written path goes
+to stderr.`,
+		Example: `  ` + config.AppName + ` config init
+  ` + config.AppName + ` config init --user
+  ` + config.AppName + ` config init ci/` + config.AppName + `.yaml --force`,
+		Args: func(cmd *cobra.Command, args []string) error {
+			if err := cobra.MaximumNArgs(1)(cmd, args); err != nil {
+				return usageError(err)
+			}
+			return nil
+		},
+		ValidArgsFunction: complete.Files("yaml", "yml"),
+		RunE: func(_ *cobra.Command, args []string) error {
+			path, err := initPath(d, args, user)
+			if err != nil {
+				return err
+			}
+			err = config.WriteTemplate(path, force)
+			if errors.Is(err, config.ErrExists) {
+				return usageError(fmt.Errorf("%w; pass --force to replace it", err))
+			}
+			if err != nil {
+				return err
+			}
+			_, _ = fmt.Fprintf(d.Stderr, "%s: wrote %s\n", config.AppName, path)
+			return nil
+		},
+	}
+	cmd.Flags().BoolVar(&force, "force", false, "replace an existing file")
+	cmd.Flags().BoolVar(&user, "user", false, "write the user file instead of "+config.ProjectFileName)
+	return cmd
+}
+
+// initPath returns where config init writes: the argument, the user file or the project file
+// in the working directory.
+func initPath(d *app.Deps, args []string, user bool) (string, error) {
+	switch {
+	case user && len(args) > 0:
+		return "", usageError(errors.New("--user and a path can't be combined"))
+	case user:
+		return config.UserConfigPath(d.Env.Lookup, runtime.GOOS)
+	}
+	cwd, err := d.Getwd()
+	if err != nil {
+		return "", fmt.Errorf("get working directory: %w", err)
+	}
+	if len(args) == 0 {
+		return filepath.Join(cwd, config.ProjectFileName), nil
+	}
+	if filepath.IsAbs(args[0]) {
+		return args[0], nil
+	}
+	return filepath.Join(cwd, args[0]), nil
 }

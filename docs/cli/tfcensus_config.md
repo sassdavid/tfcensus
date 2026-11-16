@@ -15,6 +15,7 @@ Env vars:     TFCENSUS_<KEY> with dots as underscores, e.g. TFCENSUS_CACHE_TTL=3
               Lists are comma-separated.
 
 Unknown keys and wrong types are errors (exit 2), reported with file:line:column.
+'tfcensus config init' writes a commented file to start from.
 
 ### Options
 
@@ -40,6 +41,7 @@ Unknown keys and wrong types are errors (exit 2), reported with file:line:column
 ### SEE ALSO
 
 * [tfcensus](tfcensus.md)	 - Take a census of Terraform/OpenTofu and Terragrunt fleets on AWS
+* [tfcensus config init](tfcensus_config_init.md)	 - Write a commented config file
 * [tfcensus config path](tfcensus_config_path.md)	 - Print the config file locations tfcensus reads
 * [tfcensus config show](tfcensus_config_show.md)	 - Print the effective configuration
 * [tfcensus config validate](tfcensus_config_validate.md)	 - Validate config files against the schema

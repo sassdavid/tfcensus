@@ -1,0 +1,42 @@
+# config init writes the commented template, refuses to replace a file without --force, and
+# writes the user file with --user. TestSpec_config_4 checks the template itself.
+mkdir repo/.git
+cd repo
+
+exec tfcensus config init
+! stdout .
+stderr '^tfcensus: wrote .*\.tfcensus\.yaml$'
+grep '^schema_version: 1$' .tfcensus.yaml
+grep '^#   ttl: 1h ' .tfcensus.yaml
+exec tfcensus config validate .tfcensus.yaml
+exec tfcensus config show --sources
+stdout '^cache\.ttl +1h +default$'
+
+# An existing file is kept, with exit code 2.
+cp ../custom.yaml .tfcensus.yaml
+! exec tfcensus config init
+stderr 'file exists: .*\.tfcensus\.yaml; pass --force to replace it'
+cmp .tfcensus.yaml ../custom.yaml
+
+exec tfcensus config init --force
+grep '^#   ttl: 1h ' .tfcensus.yaml
+
+# A path argument, with missing directories created.
+exec tfcensus config init ci/tfcensus.yaml
+exec tfcensus config validate ci/tfcensus.yaml
+
+# --user writes $XDG_CONFIG_HOME/tfcensus/config.yaml.
+exec tfcensus config init --user
+exists $WORK/.config/tfcensus/config.yaml
+! exec tfcensus config init --user
+stderr 'pass --force'
+
+! exec tfcensus config init --user other.yaml
+stderr '--user and a path can''t be combined'
+! exec tfcensus config init a.yaml b.yaml
+stderr 'accepts at most 1 arg'
+
+-- custom.yaml --
+schema_version: 1
+cache:
+  ttl: 2h
