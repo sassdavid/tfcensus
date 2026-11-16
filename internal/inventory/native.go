@@ -9,6 +9,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
@@ -43,6 +44,7 @@ const (
 	cfnRole            = "AWS::IAM::Role"
 	cfnUser            = "AWS::IAM::User"
 	cfnGroup           = "AWS::IAM::Group"
+	cfnManagedPolicy   = "AWS::IAM::ManagedPolicy"
 	cfnHostedZone      = "AWS::Route53::HostedZone"
 	cfnRecordSet       = "AWS::Route53::RecordSet"
 	cfnBucket          = "AWS::S3::Bucket"
@@ -259,6 +261,10 @@ func (*iamAttachments) Global() bool               { return true }
 func (*iamAttachments) Supports(Capabilities) bool { return true }
 func (*iamAttachments) Types() []string {
 	return []string{
+		cfnRole,
+		cfnUser,
+		cfnGroup,
+		cfnManagedPolicy,
 		cfnRolePolicy,
 		cfnUserPolicy,
 		cfnGroupPolicy,
@@ -268,9 +274,11 @@ func (*iamAttachments) Types() []string {
 	}
 }
 
-// List reads every role, user and group with GetAccountAuthorizationDetails, which returns
-// their attached and inline policies in one paginated call. Policy documents come back too and
-// are dropped: only names and ARNs are kept.
+// List reads every role, user, group and customer managed policy with
+// GetAccountAuthorizationDetails, which returns the principals' attached and inline policies in
+// one paginated call. It yields the principals and policies themselves, because AWS Config and
+// Resource Explorer list IAM only in one region, which a scan may not cover. Policy documents
+// come back too and are dropped: only names, IDs, ARNs, tags and dates are kept.
 func (l *iamAttachments) List(
 	ctx context.Context,
 	acct *accounts.Account,
@@ -284,7 +292,10 @@ func (l *iamAttachments) List(
 			o.APIOptions = append(o.APIOptions, l.env.Limits.APIOption(acct.ID, region, ServiceIAM))
 		})
 		pages := iam.NewGetAccountAuthorizationDetailsPaginator(client, &iam.GetAccountAuthorizationDetailsInput{
-			Filter: []iamtypes.EntityType{iamtypes.EntityTypeRole, iamtypes.EntityTypeUser, iamtypes.EntityTypeGroup},
+			Filter: []iamtypes.EntityType{
+				iamtypes.EntityTypeRole, iamtypes.EntityTypeUser, iamtypes.EntityTypeGroup,
+				iamtypes.EntityTypeLocalManagedPolicy,
+			},
 		})
 		for pages.HasMorePages() {
 			page, err := pages.NextPage(ctx)
@@ -303,10 +314,12 @@ func iamPage(acct *accounts.Account, page *iam.GetAccountAuthorizationDetailsOut
 	var out []CloudResource
 	for _, d := range page.RoleDetailList {
 		p := principal{"role", aws.ToString(d.RoleName), aws.ToString(d.Arn), cfnRole, cfnRoleAttachment, cfnRolePolicy}
+		out = append(out, iamEntity(acct, cfnRole, d.Arn, d.RoleId, d.RoleName, d.CreateDate, d.Tags))
 		out = append(out, p.resources(acct, d.AttachedManagedPolicies, d.RolePolicyList)...)
 	}
 	for _, d := range page.UserDetailList {
 		p := principal{"user", aws.ToString(d.UserName), aws.ToString(d.Arn), cfnUser, cfnUserAttachment, cfnUserPolicy}
+		out = append(out, iamEntity(acct, cfnUser, d.Arn, d.UserId, d.UserName, d.CreateDate, d.Tags))
 		out = append(out, p.resources(acct, d.AttachedManagedPolicies, d.UserPolicyList)...)
 	}
 	for _, d := range page.GroupDetailList {
@@ -318,9 +331,37 @@ func iamPage(acct *accounts.Account, page *iam.GetAccountAuthorizationDetailsOut
 			cfnGroupAttachment,
 			cfnGroupPolicy,
 		}
+		out = append(out, iamEntity(acct, cfnGroup, d.Arn, d.GroupId, d.GroupName, d.CreateDate, nil))
 		out = append(out, p.resources(acct, d.AttachedManagedPolicies, d.GroupPolicyList)...)
 	}
+	for _, d := range page.Policies {
+		out = append(out, iamEntity(acct, cfnManagedPolicy, d.Arn, d.PolicyId, d.PolicyName, d.CreateDate, nil))
+	}
 	return out
+}
+
+// iamEntity is a role, user, group or customer managed policy as the IAM lister keeps it.
+func iamEntity(
+	acct *accounts.Account,
+	cfn string,
+	arn, id, name *string,
+	created *time.Time,
+	tags []iamtypes.Tag,
+) CloudResource {
+	r := CloudResource{
+		Account: acct.ID, CFNType: cfn, ARN: aws.ToString(arn), ID: aws.ToString(id), Name: aws.ToString(name),
+		Sources: []string{LayerIAMAttachments},
+	}
+	if created != nil {
+		r.Created = created.UTC().Format(time.RFC3339)
+	}
+	for _, t := range tags {
+		if r.Tags == nil {
+			r.Tags = map[string]string{}
+		}
+		r.Tags[aws.ToString(t.Key)] = aws.ToString(t.Value)
+	}
+	return r
 }
 
 type principal struct {

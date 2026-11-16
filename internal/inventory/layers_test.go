@@ -544,9 +544,12 @@ func layerCases() []layerCase {
 						r.On("iam", "GetAccountAuthorizationDetails", "", ok(iamPage("page-2", iamRole("app"))))
 					},
 					want: []string{
+						"AWS::IAM::Role arn:aws:iam::" + acct + ":role/app global",
 						"Native::IAM::RolePolicyAttachment app/" + readOnly + " global",
 						"AWS::IAM::RolePolicy app:inline global",
+						"AWS::IAM::User arn:aws:iam::" + acct + ":user/ci global",
 						"Native::IAM::UserPolicyAttachment ci/" + readOnly + " global",
+						"AWS::IAM::Group arn:aws:iam::" + acct + ":group/ops global",
 						"AWS::IAM::GroupPolicy ops:deploy global",
 					},
 				},
@@ -557,6 +560,7 @@ func layerCases() []layerCase {
 							ok(iamPage("", iamRole("app"))))
 					},
 					want: []string{
+						"AWS::IAM::Role arn:aws:iam::" + acct + ":role/app global",
 						"Native::IAM::RolePolicyAttachment app/" + readOnly + " global",
 						"AWS::IAM::RolePolicy app:inline global",
 					},

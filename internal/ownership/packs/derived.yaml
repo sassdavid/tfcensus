@@ -46,7 +46,8 @@
   reason: snapshot or recovery point that AWS Backup created
 - name: lambda-version
   match: >-
-    resource.source_type == "lambda:function/version" && resource.arn.split(":").size() == 8 &&
+    (resource.type == "AWS::Lambda::Version" || resource.source_type == "lambda:function/version") &&
+    resource.arn.split(":").size() == 8 &&
     in_state("aws_lambda_function", resource.arn.split(":")[6])
   owner: lambda
   reason: published version of a Lambda function a unit manages (publish = true)

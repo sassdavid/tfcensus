@@ -120,3 +120,4 @@ derived      Pod Identity association an add-on owns       pack/derived/addon-po
 derived      Pod Identity association a team created       rules/no-match
 derived      target tracking alarm                         pack/derived/target-tracking-alarm derived
 derived      alarm a team created                          rules/no-match
+derived      version of a managed function, typed by Resource Explorer pack/derived/lambda-version derived
