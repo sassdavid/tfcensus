@@ -83,6 +83,7 @@
         "category": "managed",
         "cfn_type": "AWS::EC2::SecurityGroup",
         "tf_types": [
+          "aws_default_security_group",
           "aws_security_group"
         ],
         "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0aa11bb22cc33dd44",

@@ -45,7 +45,7 @@ Sources for generating it, read from local checkouts (no provider binary, no `te
   names, and the tag policy mapping (`internal/tags/tagpolicy/tagris-terraform-mapping.hcl`) for
   Resource Explorer types.
 - **awscc's `all_schemas.hcl`** (MPL-2.0) as the CFN type universe.
-- Curated aws→CFN pairs seeded by name similarity + ARN resource-type patterns. About 300 types cover most real estates; the rest are reported as `undetermined: no type mapping`.
+- Curated aws→CFN pairs seeded by name similarity + ARN resource-type patterns. 136 types are curated (M21: every type the first validation account used, plus the `aws_default_*` types); each further account adds its types the same way. The rest are reported as `undetermined: no type mapping`. A curated entry with `unlisted` says why no layer can list its type, and `cc: true` sends a type that neither Config nor Resource Explorer lists to Cloud Control.
 
 Where a TF id format changed between provider versions, the entry lists both templates
 (`aws_db_instance` tries the DbiResourceId of provider 5 and later, then the identifier).

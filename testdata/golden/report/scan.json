@@ -117,6 +117,7 @@
         "category": "unmanaged",
         "cfn_type": "AWS::EC2::SecurityGroup",
         "tf_types": [
+          "aws_default_security_group",
           "aws_security_group"
         ],
         "arn": "arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0c11c0b5000000003",

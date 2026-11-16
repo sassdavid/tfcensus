@@ -63,7 +63,8 @@ type Instance struct {
 	// It stands in for Identity in states written before Terraform 1.12.
 	IdentityAttrs map[string]string
 	// RuleKeys are the [SGRule.Key] hashes of a security group rule's expanded tuples, or of a
-	// security group's inline rules, when [ParseOptions.RuleTuples] is set.
+	// security group's inline rules, or the [PolicyAttachmentKey] of each principal of
+	// aws_iam_policy_attachment, when [ParseOptions.RuleTuples] is set.
 	RuleKeys []string
 }
 
@@ -124,7 +125,8 @@ type ParseOptions struct {
 	// [Instance.IdentityAttrs]. Identity attributes are identifiers, so this keeps no secret.
 	IdentityAttrs func(tfType string) map[string]string
 	// RuleTuples hashes the rules of aws_security_group and aws_security_group_rule into
-	// [Instance.RuleKeys]. The rule values themselves are dropped.
+	// [Instance.RuleKeys], and expands aws_iam_policy_attachment into one
+	// [PolicyAttachmentKey] per principal. The rule values themselves are dropped.
 	RuleTuples bool
 }
 
@@ -359,7 +361,8 @@ func (p *parser) extras(tfType string) extras {
 			x.identity[attr] = ident
 		}
 	}
-	if p.opts.RuleTuples && (tfType == typeSecurityGroup || tfType == typeSecurityGroupRule) {
+	if p.opts.RuleTuples && (tfType == typeSecurityGroup || tfType == typeSecurityGroupRule ||
+		tfType == typePolicyAttachment) {
 		x.rules = &ruleCollector{tfType: tfType}
 	}
 	return x

@@ -538,17 +538,38 @@ func hclBody(path string) (*hclsyntax.Body, error) {
 	return body, nil
 }
 
-// guessCFN returns the CloudFormation type whose awscc name equals the TF type, either as is or
-// with the service name inserted (aws_vpc in package ec2 is awscc's aws_ec2_vpc).
+// guessCFN returns the CloudFormation type whose awscc name equals the TF type, either as is,
+// with the service name inserted (aws_vpc in package ec2 is awscc's aws_ec2_vpc), or through
+// [cfnAliases].
 func guessCFN(r *typemap.GenResource, cfn map[string]string) string {
 	if c, ok := cfn[r.TF]; ok {
 		return c
+	}
+	for _, a := range cfnAliases() {
+		name, ok := strings.CutPrefix(r.TF, a[0])
+		if ok && (strings.HasSuffix(a[0], "_") || name == "") {
+			if c, found := cfn[a[1]+name]; found {
+				return c
+			}
+		}
 	}
 	rest := strings.TrimPrefix(r.TF, "aws_")
 	if strings.HasPrefix(rest, r.Service+"_") {
 		return ""
 	}
 	return cfn["aws_"+r.Service+"_"+rest]
+}
+
+// cfnAliases maps the TF names of families that the aws and awscc providers name differently to
+// the awscc names. A name ending in "_" is a prefix; any other name must match whole.
+func cfnAliases() [][2]string {
+	return [][2]string{
+		{"aws_cloudwatch_event_", "aws_events_"},
+		{"aws_cloudwatch_metric_alarm", "aws_cloudwatch_alarm"},
+		{"aws_api_gateway_", "aws_apigateway_"},
+		{"aws_opensearch_domain", "aws_opensearchservice_domain"},
+		{"aws_codepipeline", "aws_codepipeline_pipeline"},
+	}
 }
 
 // licenseFile writes the MPL-2.0 text once, after a header naming both copyright holders. The

@@ -630,6 +630,12 @@ type stateRequest struct {
 	concurrency int
 }
 
+// stateParseOptions keeps what matching reads beyond identifiers: identity attributes for states
+// written before Terraform 1.12, security group rule tuples and policy attachment keys.
+func stateParseOptions(m *typemap.Map) tfstate.ParseOptions {
+	return tfstate.ParseOptions{IdentityAttrs: match.IdentityParseAttrs(m), RuleTuples: true}
+}
+
 // readStates reads every discovered unit's state and indexes it. States that fail become problems.
 func readStates(cmd *cobra.Command, d *app.Deps, cfg *config.Config, m *typemap.Map, req stateRequest) (
 	*tfstate.Index, []scan.Problem, error,
@@ -645,6 +651,7 @@ func readStates(cmd *cobra.Command, d *app.Deps, cfg *config.Config, m *typemap.
 		TFPath:      cfg.Binaries.Terraform,
 		Logger:      d.Logger,
 		Decrypt:     stateDecrypter(d, cfg),
+		Parse:       stateParseOptions(m),
 	})
 	states := reader.Read(cmd.Context(), req.disc.Units)
 	var problems []scan.Problem

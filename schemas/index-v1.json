@@ -50,6 +50,16 @@
               "id": { "type": "string" },
               "arn": { "type": "string" },
               "identity": { "type": "object", "additionalProperties": { "type": "string" } },
+              "identity_attrs": {
+                "description": "Identity attribute values read from resource attributes, for states written before Terraform 1.12.",
+                "type": "object",
+                "additionalProperties": { "type": "string" }
+              },
+              "rule_keys": {
+                "description": "Hashed security group rule tuples, or one key per principal of aws_iam_policy_attachment.",
+                "type": "array",
+                "items": { "type": "string" }
+              },
               "account": { "type": "string" },
               "region": { "type": "string" }
             }

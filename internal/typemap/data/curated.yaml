@@ -13,6 +13,14 @@
 #   derived     AWS creates the resource as a child of a parent; when lists field values
 #   cc_parent   Cloud Control lists the type only per parent: the parent's type and the
 #               resource model property that takes the parent's ARN
+#   cc          neither AWS Config nor Resource Explorer lists the type, so Cloud Control lists
+#               it by default (scan.cloudcontrol_types); its Resource Explorer types are dropped
+#   global      the type is account-wide even though the provider gives it a region
+#   unlisted    why no layer can list the type; it is curated for matching only, and its
+#               Resource Explorer types are dropped
+#
+# cfn must be a CloudFormation type in generated.yaml, a Native:: type, or the entry's own
+# config type when awscc has no type for it (AWS::ACM::Certificate).
 #
 # Fields in templates come from the live resource: its attributes, the ARN pattern's
 # placeholders, then id, arn, account, region and partition.
@@ -224,6 +232,9 @@
   cfn: AWS::EKS::Nodegroup
   arn: "arn:{partition}:eks:{region}:{account}:nodegroup/{cluster_name}/{node_group_name}/{uuid}"
   id: ["{cluster_name}:{node_group_name}"]
+  unlisted: >-
+    AWS Config doesn't record node groups and Resource Explorer doesn't index them; their
+    instances and launch templates are listed and are derived
 
 # ELBv2. aws_alb* are aliases of aws_lb*.
 - tf: aws_lb
@@ -318,3 +329,417 @@
   config: AWS::DynamoDB::Table
   arn: "arn:{partition}:dynamodb:{region}:{account}:table/{name}"
   id: ["{name}"]
+
+# Defaults that AWS creates with every VPC, adopted by a state through the aws_default_* types.
+- tf: aws_default_route_table
+  cfn: AWS::EC2::RouteTable
+  config: AWS::EC2::RouteTable
+  arn: "arn:{partition}:ec2:{region}:{account}:route-table/{id}"
+  id: ["{id}"]
+- tf: aws_default_security_group
+  cfn: AWS::EC2::SecurityGroup
+  config: AWS::EC2::SecurityGroup
+  arn: "arn:{partition}:ec2:{region}:{account}:security-group/{id}"
+  id: ["{id}"]
+- tf: aws_default_network_acl
+  cfn: AWS::EC2::NetworkAcl
+  config: AWS::EC2::NetworkAcl
+  arn: "arn:{partition}:ec2:{region}:{account}:network-acl/{id}"
+  id: ["{id}"]
+- tf: aws_default_vpc_dhcp_options
+  cfn: AWS::EC2::DHCPOptions
+  config: AWS::EC2::DHCPOptions
+  arn: "arn:{partition}:ec2:{region}:{account}:dhcp-options/{id}"
+  id: ["{id}"]
+
+# aws_iam_policy_attachment attaches one policy to several principals. The state reader expands
+# its roles, users and groups into one key per principal, like a security group rule's tuples.
+- tf: aws_iam_policy_attachment
+  cfn: [Native::IAM::RolePolicyAttachment, Native::IAM::UserPolicyAttachment, Native::IAM::GroupPolicyAttachment]
+  native: iam-attachments
+  rule_tuple: true
+
+# More VPC
+- tf: aws_vpc_endpoint
+  cfn: AWS::EC2::VPCEndpoint
+  config: AWS::EC2::VPCEndpoint
+  arn: "arn:{partition}:ec2:{region}:{account}:vpc-endpoint/{id}"
+  id: ["{id}"]
+- tf: aws_vpc_endpoint_service
+  cfn: AWS::EC2::VPCEndpointService
+  config: AWS::EC2::VPCEndpointService
+  re: ec2:vpc-endpoint-service
+  arn: "arn:{partition}:ec2:{region}:{account}:vpc-endpoint-service/{id}"
+  id: ["{id}"]
+- tf: aws_route_table_association
+  cfn: AWS::EC2::SubnetRouteTableAssociation
+  config: AWS::EC2::SubnetRouteTableAssociation
+  id: ["{id}"]
+- tf: aws_network_acl_association
+  cfn: AWS::EC2::SubnetNetworkAclAssociation
+  id: ["{id}"]
+  unlisted: AWS Config records the association inside the network ACL item, and Resource Explorer doesn't index it
+- tf: aws_vpc_ipv4_cidr_block_association
+  cfn: AWS::EC2::VPCCidrBlock
+  id: ["{id}"]
+  unlisted: AWS Config records the CIDR inside the VPC item, and Resource Explorer doesn't index it
+- tf: aws_vpc_peering_connection
+  cfn: AWS::EC2::VPCPeeringConnection
+  config: AWS::EC2::VPCPeeringConnection
+  arn: "arn:{partition}:ec2:{region}:{account}:vpc-peering-connection/{id}"
+  id: ["{id}"]
+- tf: aws_vpc_peering_connection_accepter
+  cfn: AWS::EC2::VPCPeeringConnection
+  config: AWS::EC2::VPCPeeringConnection
+  arn: "arn:{partition}:ec2:{region}:{account}:vpc-peering-connection/{id}"
+  id: ["{id}"]
+- tf: aws_flow_log
+  cfn: AWS::EC2::FlowLog
+  config: AWS::EC2::FlowLog
+  arn: "arn:{partition}:ec2:{region}:{account}:vpc-flow-log/{id}"
+  id: ["{id}"]
+- tf: aws_ec2_managed_prefix_list
+  cfn: AWS::EC2::PrefixList
+  config: AWS::EC2::PrefixList
+  arn: "arn:{partition}:ec2:{region}:{account}:prefix-list/{id}"
+  id: ["{id}"]
+- tf: aws_ec2_client_vpn_endpoint
+  cfn: AWS::EC2::ClientVpnEndpoint
+  config: AWS::EC2::ClientVpnEndpoint
+  arn: "arn:{partition}:ec2:{region}:{account}:client-vpn-endpoint/{id}"
+  id: ["{id}"]
+- tf: aws_customer_gateway
+  cfn: AWS::EC2::CustomerGateway
+  config: AWS::EC2::CustomerGateway
+  arn: "arn:{partition}:ec2:{region}:{account}:customer-gateway/{id}"
+  id: ["{id}"]
+- tf: aws_vpn_gateway
+  cfn: AWS::EC2::VPNGateway
+  config: AWS::EC2::VPNGateway
+  arn: "arn:{partition}:ec2:{region}:{account}:vpn-gateway/{id}"
+  id: ["{id}"]
+- tf: aws_vpn_connection
+  cfn: AWS::EC2::VPNConnection
+  config: AWS::EC2::VPNConnection
+  arn: "arn:{partition}:ec2:{region}:{account}:vpn-connection/{id}"
+  id: ["{id}"]
+- tf: aws_eip_association
+  cfn: AWS::EC2::EIPAssociation
+  config: AWS::EC2::EIPAssociation
+  id: ["{id}"]
+
+# VPC Lattice. AWS Config and Resource Explorer list only service networks; Cloud Control lists
+# the rest.
+- tf: aws_vpclattice_service_network
+  cfn: AWS::VpcLattice::ServiceNetwork
+  arn: "arn:{partition}:vpc-lattice:{region}:{account}:servicenetwork/{id}"
+  id: ["{id}"]
+- tf: aws_vpclattice_resource_gateway
+  cfn: AWS::VpcLattice::ResourceGateway
+  cc: true
+  arn: "arn:{partition}:vpc-lattice:{region}:{account}:resourcegateway/{id}"
+  id: ["{id}"]
+- tf: aws_vpclattice_resource_configuration
+  cfn: AWS::VpcLattice::ResourceConfiguration
+  cc: true
+  arn: "arn:{partition}:vpc-lattice:{region}:{account}:resourceconfiguration/{id}"
+  id: ["{id}"]
+- tf: aws_vpclattice_service_network_resource_association
+  cfn: AWS::VpcLattice::ServiceNetworkResourceAssociation
+  cc: true
+  arn: "arn:{partition}:vpc-lattice:{region}:{account}:servicenetworkresourceassociation/{id}"
+  id: ["{id}"]
+- tf: aws_vpclattice_service_network_vpc_association
+  cfn: AWS::VpcLattice::ServiceNetworkVpcAssociation
+  cc: true
+  arn: "arn:{partition}:vpc-lattice:{region}:{account}:servicenetworkvpcassociation/{id}"
+  id: ["{id}"]
+
+# More EKS
+- tf: aws_eks_addon
+  cfn: AWS::EKS::Addon
+  config: AWS::EKS::Addon
+  arn: "arn:{partition}:eks:{region}:{account}:addon/{cluster_name}/{addon_name}/{uuid}"
+  id: ["{cluster_name}:{addon_name}"]
+- tf: aws_eks_access_entry
+  cfn: AWS::EKS::AccessEntry
+  arn: "arn:{partition}:eks:{region}:{account}:access-entry/{cluster_name}/{kind}/{principal_account}/{principal}/{uuid}"
+  unlisted: AWS Config doesn't record access entries and Resource Explorer doesn't index them
+- tf: aws_eks_pod_identity_association
+  cfn: AWS::EKS::PodIdentityAssociation
+  re: eks:podidentityassociation
+  arn: "arn:{partition}:eks:{region}:{account}:podidentityassociation/{cluster_name}/{association_id}"
+  id: ["{association_id}"]
+- tf: aws_iam_openid_connect_provider
+  cfn: AWS::IAM::OIDCProvider
+  config: AWS::IAM::OIDCProvider
+  arn: "arn:{partition}:iam::{account}:oidc-provider/{url+}"
+  id: ["{arn}"]
+
+# Lambda and events
+- tf: aws_lambda_event_source_mapping
+  cfn: AWS::Lambda::EventSourceMapping
+  arn: "arn:{partition}:lambda:{region}:{account}:event-source-mapping:{uuid}"
+  id: ["{uuid}"]
+- tf: aws_lambda_layer_version
+  cfn: AWS::Lambda::LayerVersion
+  re: lambda:layer/version
+  arn: "arn:{partition}:lambda:{region}:{account}:layer:{layer_name}:{version}"
+  id: ["{arn}"]
+- tf: aws_cloudwatch_event_rule
+  cfn: AWS::Events::Rule
+  config: AWS::Events::Rule
+  re: events:rule
+  arn: "arn:{partition}:events:{region}:{account}:rule/{bus:(?:[^/]+/)?}{name}"
+  id: ["[{bus}]{name}"]
+- tf: aws_cloudwatch_event_bus
+  cfn: AWS::Events::EventBus
+  config: AWS::Events::EventBus
+  arn: "arn:{partition}:events:{region}:{account}:event-bus/{name}"
+  id: ["{name}"]
+- tf: aws_pipes_pipe
+  cfn: AWS::Pipes::Pipe
+  arn: "arn:{partition}:pipes:{region}:{account}:pipe/{name}"
+  id: ["{name}"]
+- tf: aws_scheduler_schedule_group
+  cfn: AWS::Scheduler::ScheduleGroup
+  arn: "arn:{partition}:scheduler:{region}:{account}:schedule-group/{name}"
+  id: ["{name}"]
+
+# Data stores. AWS Config names the OpenSearch type AWS::OpenSearch::Domain, CloudFormation
+# AWS::OpenSearchService::Domain; both map to this entry.
+- tf: aws_msk_cluster
+  cfn: AWS::MSK::Cluster
+  config: AWS::MSK::Cluster
+  re: kafka:cluster
+  arn: "arn:{partition}:kafka:{region}:{account}:cluster/{name}/{uuid}"
+  id: ["{arn}"]
+- tf: aws_msk_configuration
+  cfn: AWS::MSK::Configuration
+  config: AWS::MSK::Configuration
+  re: kafka:configuration
+  arn: "arn:{partition}:kafka:{region}:{account}:configuration/{name}/{uuid}"
+  id: ["{arn}"]
+- tf: aws_opensearch_domain
+  cfn: AWS::OpenSearchService::Domain
+  config: AWS::OpenSearch::Domain
+  re: es:domain
+  arn: "arn:{partition}:es:{region}:{account}:domain/{name}"
+  id: ["{arn}"]
+- tf: aws_elasticache_replication_group
+  cfn: AWS::ElastiCache::ReplicationGroup
+  arn: "arn:{partition}:elasticache:{region}:{account}:replicationgroup:{name}"
+  id: ["{name}"]
+- tf: aws_elasticache_user
+  cfn: AWS::ElastiCache::User
+  arn: "arn:{partition}:elasticache:{region}:{account}:user:{name}"
+  id: ["{name}"]
+- tf: aws_elasticache_user_group
+  cfn: AWS::ElastiCache::UserGroup
+  arn: "arn:{partition}:elasticache:{region}:{account}:usergroup:{name}"
+  id: ["{name}"]
+- tf: aws_memorydb_acl
+  cfn: AWS::MemoryDB::ACL
+  arn: "arn:{partition}:memorydb:{region}:{account}:acl/{name}"
+  id: ["{name}"]
+- tf: aws_memorydb_user
+  cfn: AWS::MemoryDB::User
+  arn: "arn:{partition}:memorydb:{region}:{account}:user/{name}"
+  id: ["{name}"]
+- tf: aws_memorydb_parameter_group
+  cfn: AWS::MemoryDB::ParameterGroup
+  arn: "arn:{partition}:memorydb:{region}:{account}:parametergroup/{name}"
+  id: ["{name}"]
+- tf: aws_db_parameter_group
+  cfn: AWS::RDS::DBParameterGroup
+  arn: "arn:{partition}:rds:{region}:{account}:pg:{name}"
+  id: ["{name}"]
+- tf: aws_db_option_group
+  cfn: AWS::RDS::OptionGroup
+  config: AWS::RDS::OptionGroup
+  arn: "arn:{partition}:rds:{region}:{account}:og:{name}"
+  id: ["{name}"]
+- tf: aws_efs_file_system
+  cfn: AWS::EFS::FileSystem
+  config: AWS::EFS::FileSystem
+  arn: "arn:{partition}:elasticfilesystem:{region}:{account}:file-system/{id}"
+  id: ["{id}"]
+- tf: aws_efs_access_point
+  cfn: AWS::EFS::AccessPoint
+  config: AWS::EFS::AccessPoint
+  arn: "arn:{partition}:elasticfilesystem:{region}:{account}:access-point/{id}"
+  id: ["{id}"]
+- tf: aws_efs_mount_target
+  cfn: AWS::EFS::MountTarget
+  id: ["{id}"]
+  unlisted: >-
+    a mount target has no ARN, and neither AWS Config nor Resource Explorer lists it; its network
+    interface is listed and is derived (service-eni)
+- tf: aws_glue_catalog_database
+  cfn: AWS::Glue::Database
+  config: AWS::Glue::Database
+  arn: "arn:{partition}:glue:{region}:{account}:database/{name}"
+  id: ["{account}:{name}"]
+- tf: aws_glue_catalog_table
+  cfn: AWS::Glue::Table
+  re: glue:table
+  arn: "arn:{partition}:glue:{region}:{account}:table/{database_name}/{name}"
+  id: ["{account}:{database_name}:{name}"]
+- tf: aws_athena_workgroup
+  cfn: AWS::Athena::WorkGroup
+  config: AWS::Athena::WorkGroup
+  arn: "arn:{partition}:athena:{region}:{account}:workgroup/{name}"
+  id: ["{name}"]
+- tf: aws_athena_data_catalog
+  cfn: AWS::Athena::DataCatalog
+  config: AWS::Athena::DataCatalog
+  arn: "arn:{partition}:athena:{region}:{account}:datacatalog/{name}"
+  id: ["{name}"]
+
+# API Gateway (REST). Its ARNs have no account.
+- tf: aws_api_gateway_rest_api
+  cfn: AWS::ApiGateway::RestApi
+  config: AWS::ApiGateway::RestApi
+  re: apigateway:restapis
+  arn: "arn:{partition}:apigateway:{region}::/restapis/{id}"
+  id: ["{id}"]
+- tf: aws_api_gateway_resource
+  cfn: AWS::ApiGateway::Resource
+  re: apigateway:restapis/resources
+  arn: "arn:{partition}:apigateway:{region}::/restapis/{rest_api_id}/resources/{id}"
+  id: ["{id}"]
+- tf: aws_api_gateway_method
+  cfn: AWS::ApiGateway::Method
+  config: AWS::ApiGateway::Method
+  re: apigateway:restapis/resources/methods
+  arn: "arn:{partition}:apigateway:{region}::/restapis/{rest_api_id}/resources/{resource_id}/methods/{http_method}"
+  id: ["agm-{rest_api_id}-{resource_id}-{http_method}"]
+- tf: aws_api_gateway_deployment
+  cfn: AWS::ApiGateway::Deployment
+  re: apigateway:restapis/deployments
+  arn: "arn:{partition}:apigateway:{region}::/restapis/{rest_api_id}/deployments/{id}"
+  id: ["{id}"]
+- tf: aws_api_gateway_stage
+  cfn: AWS::ApiGateway::Stage
+  config: AWS::ApiGateway::Stage
+  re: apigateway:restapis/stages
+  arn: "arn:{partition}:apigateway:{region}::/restapis/{rest_api_id}/stages/{stage_name}"
+  id: ["ags-{rest_api_id}-{stage_name}"]
+- tf: aws_api_gateway_domain_name
+  cfn: AWS::ApiGateway::DomainName
+  arn: "arn:{partition}:apigateway:{region}::/domainnames/{domain_name}"
+  id: ["{domain_name}"]
+  unlisted: AWS Config doesn't record REST API domain names and Resource Explorer doesn't index them
+- tf: aws_api_gateway_base_path_mapping
+  cfn: AWS::ApiGateway::BasePathMapping
+  arn: "arn:{partition}:apigateway:{region}::/domainnames/{domain_name}/basepathmappings/{base_path}"
+  id: ["{domain_name}/{base_path}"]
+  unlisted: AWS Config doesn't record base path mappings and Resource Explorer doesn't index them
+
+# Systems Manager, CloudWatch, certificates and CI/CD. SSM parameter ARNs drop the name's
+# leading slash, so both forms are tried.
+- tf: aws_ssm_parameter
+  cfn: AWS::SSM::Parameter
+  arn: "arn:{partition}:ssm:{region}:{account}:parameter/{name+}"
+  id: ["/{name}", "{name}"]
+- tf: aws_ssm_association
+  cfn: AWS::SSM::Association
+  arn: "arn:{partition}:ssm:{region}:{account}:association/{association_id}"
+  id: ["{association_id}"]
+- tf: aws_cloudwatch_metric_alarm
+  cfn: AWS::CloudWatch::Alarm
+  config: AWS::CloudWatch::Alarm
+  arn: "arn:{partition}:cloudwatch:{region}:{account}:alarm:{alarm_name:.+}"
+  id: ["{alarm_name}"]
+- tf: aws_cloudwatch_dashboard
+  cfn: AWS::CloudWatch::Dashboard
+  re: cloudwatch:dashboard
+  global: true
+  arn: "arn:{partition}:cloudwatch::{account}:dashboard/{dashboard_name+}"
+  id: ["{dashboard_name}"]
+- tf: aws_acm_certificate
+  cfn: AWS::ACM::Certificate
+  config: AWS::ACM::Certificate
+  arn: "arn:{partition}:acm:{region}:{account}:certificate/{id}"
+  id: ["{arn}"]
+- tf: aws_codebuild_project
+  cfn: AWS::CodeBuild::Project
+  config: AWS::CodeBuild::Project
+  arn: "arn:{partition}:codebuild:{region}:{account}:project/{name}"
+  id: ["{arn}"]
+- tf: aws_codepipeline
+  cfn: AWS::CodePipeline::Pipeline
+  config: AWS::CodePipeline::Pipeline
+  arn: "arn:{partition}:codepipeline:{region}:{account}:{name}"
+  id: ["{name}"]
+- tf: aws_kinesisanalyticsv2_application
+  cfn: AWS::KinesisAnalyticsV2::Application
+  config: AWS::KinesisAnalyticsV2::Application
+  arn: "arn:{partition}:kinesisanalytics:{region}:{account}:application/{name}"
+  id: ["{arn}"]
+
+# Backup, CloudFormation, QuickSight, Route 53 Resolver, X-Ray, Resource Explorer, App Runner
+- tf: aws_backup_plan
+  cfn: AWS::Backup::BackupPlan
+  config: AWS::Backup::BackupPlan
+  arn: "arn:{partition}:backup:{region}:{account}:backup-plan:{id}"
+  id: ["{id}"]
+- tf: aws_backup_vault
+  cfn: AWS::Backup::BackupVault
+  config: AWS::Backup::BackupVault
+  re: backup:backup-vault
+  arn: "arn:{partition}:backup:{region}:{account}:backup-vault:{name}"
+  id: ["{name}"]
+- tf: aws_backup_selection
+  cfn: AWS::Backup::BackupSelection
+  config: AWS::Backup::BackupSelection
+  id: ["{id}"]
+- tf: aws_cloudformation_stack
+  cfn: AWS::CloudFormation::Stack
+  config: AWS::CloudFormation::Stack
+  arn: "arn:{partition}:cloudformation:{region}:{account}:stack/{name}/{uuid}"
+  id: ["{arn}"]
+- tf: aws_quicksight_data_source
+  cfn: AWS::QuickSight::DataSource
+  config: AWS::QuickSight::DataSource
+  re: quicksight:datasource
+  arn: "arn:{partition}:quicksight:{region}:{account}:datasource/{data_source_id}"
+  id: ["{account}/{data_source_id}"]
+- tf: aws_quicksight_vpc_connection
+  cfn: AWS::QuickSight::VPCConnection
+  arn: "arn:{partition}:quicksight:{region}:{account}:vpcConnection/{vpc_connection_id}"
+  id: ["{account},{vpc_connection_id}"]
+  unlisted: AWS Config doesn't record QuickSight VPC connections and Resource Explorer doesn't index them
+- tf: aws_route53_resolver_rule
+  cfn: AWS::Route53Resolver::ResolverRule
+  config: AWS::Route53Resolver::ResolverRule
+  arn: "arn:{partition}:route53resolver:{region}:{account}:resolver-rule/{id}"
+  id: ["{id}"]
+- tf: aws_route53_resolver_rule_association
+  cfn: AWS::Route53Resolver::ResolverRuleAssociation
+  config: AWS::Route53Resolver::ResolverRuleAssociation
+  id: ["{id}"]
+- tf: aws_xray_group
+  cfn: AWS::XRay::Group
+  arn: "arn:{partition}:xray:{region}:{account}:group/{name}/{group_id}"
+  id: ["{arn}"]
+  unlisted: AWS Config doesn't record X-Ray groups and Resource Explorer doesn't index them
+- tf: aws_xray_sampling_rule
+  cfn: AWS::XRay::SamplingRule
+  arn: "arn:{partition}:xray:{region}:{account}:sampling-rule/{rule_name}"
+  id: ["{rule_name}"]
+- tf: aws_resourceexplorer2_index
+  cfn: AWS::ResourceExplorer2::Index
+  config: AWS::ResourceExplorer2::Index
+  re: resource-explorer-2:index
+  arn: "arn:{partition}:resource-explorer-2:{region}:{account}:index/{uuid}"
+  id: ["{arn}"]
+- tf: aws_resourceexplorer2_view
+  cfn: AWS::ResourceExplorer2::View
+  re: resource-explorer-2:view
+  arn: "arn:{partition}:resource-explorer-2:{region}:{account}:view/{name}/{uuid}"
+  id: ["{arn}"]
+- tf: aws_apprunner_auto_scaling_configuration_version
+  cfn: AWS::AppRunner::AutoScalingConfiguration
+  arn: "arn:{partition}:apprunner:{region}:{account}:autoscalingconfiguration/{name}/{revision}/{uuid}"
+  id: ["{arn}"]

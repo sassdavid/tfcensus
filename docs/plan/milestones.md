@@ -368,9 +368,9 @@ the last box.
   service-linked secrets, log-delivery bucket policies, Lambda versions, RDS automated snapshots,
   Backup recovery points, add-on Pod Identity associations), each with positive and negative
   fixtures. ownership-rules.md's pack table lists them. (criterion 3)
-- [ ] Matching: `aws_iam_policy_attachment` expands to one key per principal, and the
+- [x] Matching: `aws_iam_policy_attachment` expands to one key per principal, and the
   `aws_default_*` types are curated. (criterion 4)
-- [ ] Typemap: every type in scan-accuracy.md's table is curated, or its entry says why it can't
+- [x] Typemap: every type in scan-accuracy.md's table is curated, or its entry says why it can't
   be listed. A test keeps the list curated, `guessCFN` has the alias table, and Config and
   CloudFormation type names that differ (`AWS::OpenSearch::Domain` and
   `AWS::OpenSearchService::Domain`) map to one entry. matching.md's "about 300 types" line is

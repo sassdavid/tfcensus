@@ -112,8 +112,204 @@ func typeCases() []typeCase {
 	listenerARN := arnOf("elasticloadbalancing", "listener/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2")
 	tgARN := arnOf("elasticloadbalancing", "targetgroup/web/73e2d6bc24d8a067")
 	queueURL := "https://sqs." + region + ".amazonaws.com/" + acct + "/jobs"
+	// plain is a resource that matches by its TF id only; withARN also by the arn attribute.
+	plain := func(tf, cfn, a, liveID, stateID string) typeCase {
+		return typeCase{
+			tf: tf, live: live(cfn, func(r *inventory.CloudResource) { r.ARN, r.ID = a, liveID }),
+			state: tfstate.Instance{ID: stateID},
+		}
+	}
+	withARN := func(tf, cfn, a, liveID, stateID string) typeCase {
+		tc := plain(tf, cfn, a, liveID, stateID)
+		tc.state.ARN = a
+		return tc
+	}
+	apiARN := func(res string) string { return "arn:aws:apigateway:" + region + "::" + res }
+	ccARN := func(kind, id string) string { return arnOf("vpc-lattice", kind+"/"+id) }
 	return []typeCase{
 		ec2("aws_vpc", "AWS::EC2::VPC", "vpc", "vpc-1"),
+		withARN("aws_default_route_table", "AWS::EC2::RouteTable", arnOf("ec2", "route-table/rtb-main"), "rtb-main",
+			"rtb-main"),
+		withARN("aws_default_security_group", "AWS::EC2::SecurityGroup", arnOf("ec2", "security-group/sg-def"),
+			"sg-def", "sg-def"),
+		withARN("aws_default_network_acl", "AWS::EC2::NetworkAcl", arnOf("ec2", "network-acl/acl-def"), "acl-def",
+			"acl-def"),
+		withARN("aws_default_vpc_dhcp_options", "AWS::EC2::DHCPOptions", arnOf("ec2", "dhcp-options/dopt-def"),
+			"dopt-def", "dopt-def"),
+		withARN("aws_vpc_endpoint", "AWS::EC2::VPCEndpoint", arnOf("ec2", "vpc-endpoint/vpce-1"), "vpce-1", "vpce-1"),
+		withARN("aws_vpc_endpoint_service", "AWS::EC2::VPCEndpointService",
+			arnOf("ec2", "vpc-endpoint-service/vpce-svc-1"), "vpce-svc-1", "vpce-svc-1"),
+		plain("aws_route_table_association", "AWS::EC2::SubnetRouteTableAssociation", "", "rtbassoc-1", "rtbassoc-1"),
+		plain("aws_network_acl_association", "AWS::EC2::SubnetNetworkAclAssociation", "", "aclassoc-1", "aclassoc-1"),
+		plain("aws_vpc_ipv4_cidr_block_association", "AWS::EC2::VPCCidrBlock", "", "vpc-cidr-assoc-1",
+			"vpc-cidr-assoc-1"),
+		plain("aws_vpc_peering_connection", "AWS::EC2::VPCPeeringConnection",
+			arnOf("ec2", "vpc-peering-connection/pcx-1"), "pcx-1", "pcx-1"),
+		plain("aws_vpc_peering_connection_accepter", "AWS::EC2::VPCPeeringConnection",
+			arnOf("ec2", "vpc-peering-connection/pcx-2"), "pcx-2", "pcx-2"),
+		withARN("aws_flow_log", "AWS::EC2::FlowLog", arnOf("ec2", "vpc-flow-log/fl-1"), "fl-1", "fl-1"),
+		withARN(
+			"aws_ec2_managed_prefix_list",
+			"AWS::EC2::PrefixList",
+			arnOf("ec2", "prefix-list/pl-1"),
+			"pl-1",
+			"pl-1",
+		),
+		withARN("aws_ec2_client_vpn_endpoint", "AWS::EC2::ClientVpnEndpoint",
+			arnOf("ec2", "client-vpn-endpoint/cvpn-endpoint-1"), "cvpn-endpoint-1", "cvpn-endpoint-1"),
+		withARN("aws_customer_gateway", "AWS::EC2::CustomerGateway", arnOf("ec2", "customer-gateway/cgw-1"), "cgw-1",
+			"cgw-1"),
+		withARN("aws_vpn_gateway", "AWS::EC2::VPNGateway", arnOf("ec2", "vpn-gateway/vgw-1"), "vgw-1", "vgw-1"),
+		withARN(
+			"aws_vpn_connection",
+			"AWS::EC2::VPNConnection",
+			arnOf("ec2", "vpn-connection/vpn-1"),
+			"vpn-1",
+			"vpn-1",
+		),
+		plain("aws_eip_association", "AWS::EC2::EIPAssociation", "", "eipassoc-1", "eipassoc-1"),
+		withARN("aws_vpclattice_service_network", "AWS::VpcLattice::ServiceNetwork", ccARN("servicenetwork", "sn-1"),
+			"sn-1", "sn-1"),
+		withARN(
+			"aws_vpclattice_resource_gateway",
+			"AWS::VpcLattice::ResourceGateway",
+			ccARN("resourcegateway", "rgw-1"),
+			ccARN("resourcegateway", "rgw-1"),
+			"rgw-1",
+		),
+		withARN("aws_vpclattice_resource_configuration", "AWS::VpcLattice::ResourceConfiguration",
+			ccARN("resourceconfiguration", "rcfg-1"), ccARN("resourceconfiguration", "rcfg-1"), "rcfg-1"),
+		withARN("aws_vpclattice_service_network_resource_association",
+			"AWS::VpcLattice::ServiceNetworkResourceAssociation", ccARN("servicenetworkresourceassociation", "snra-1"),
+			ccARN("servicenetworkresourceassociation", "snra-1"), "snra-1"),
+		withARN("aws_vpclattice_service_network_vpc_association", "AWS::VpcLattice::ServiceNetworkVpcAssociation",
+			ccARN("servicenetworkvpcassociation", "snva-1"), ccARN("servicenetworkvpcassociation", "snva-1"), "snva-1"),
+		withARN("aws_eks_addon", "AWS::EKS::Addon", arnOf("eks", "addon/main/vpc-cni/0a1b2c3d"), "vpc-cni",
+			"main:vpc-cni"),
+		{tf: "aws_eks_access_entry", live: live("AWS::EKS::AccessEntry", func(r *inventory.CloudResource) {
+			r.ARN = arnOf("eks", "access-entry/main/role/"+acct+"/ci/0a1b2c3d")
+		}), state: tfstate.Instance{ID: "main:" + iamARN("role/ci")}, noID: true},
+		plain("aws_eks_pod_identity_association", "AWS::EKS::PodIdentityAssociation",
+			arnOf("eks", "podidentityassociation/main/a-0123456789abcdef0"), "", "a-0123456789abcdef0"),
+		{tf: "aws_iam_openid_connect_provider", live: live("AWS::IAM::OIDCProvider", func(r *inventory.CloudResource) {
+			r.Region, r.ARN = "", iamARN("oidc-provider/oidc.eks."+region+".amazonaws.com/id/ABC123")
+		}), state: tfstate.Instance{
+			ID:  iamARN("oidc-provider/oidc.eks." + region + ".amazonaws.com/id/ABC123"),
+			ARN: iamARN("oidc-provider/oidc.eks." + region + ".amazonaws.com/id/ABC123"),
+		}},
+		withARN("aws_lambda_event_source_mapping", "AWS::Lambda::EventSourceMapping",
+			arnOf("lambda", "event-source-mapping:6d3c4b2a"), "", "6d3c4b2a"),
+		withARN("aws_lambda_layer_version", "AWS::Lambda::LayerVersion", arnOf("lambda", "layer:deps:7"), "",
+			arnOf("lambda", "layer:deps:7")),
+		withARN("aws_cloudwatch_event_rule", "AWS::Events::Rule", arnOf("events", "rule/orders/nightly"), "",
+			"orders/nightly"),
+		withARN("aws_cloudwatch_event_rule", "AWS::Events::Rule", arnOf("events", "rule/hourly"), "", "hourly"),
+		withARN("aws_cloudwatch_event_bus", "AWS::Events::EventBus", arnOf("events", "event-bus/orders"), "orders",
+			"orders"),
+		withARN("aws_pipes_pipe", "AWS::Pipes::Pipe", arnOf("pipes", "pipe/sync"), "", "sync"),
+		withARN(
+			"aws_scheduler_schedule_group",
+			"AWS::Scheduler::ScheduleGroup",
+			arnOf("scheduler", "schedule-group/jobs"),
+			"",
+			"jobs",
+		),
+		withARN("aws_msk_cluster", "AWS::MSK::Cluster", arnOf("kafka", "cluster/events/0a1b-2"), "",
+			arnOf("kafka", "cluster/events/0a1b-2")),
+		withARN("aws_msk_configuration", "AWS::MSK::Configuration", arnOf("kafka", "configuration/events/0a1b-3"), "",
+			arnOf("kafka", "configuration/events/0a1b-3")),
+		withARN("aws_opensearch_domain", "AWS::OpenSearchService::Domain", arnOf("es", "domain/search"), "search",
+			arnOf("es", "domain/search")),
+		withARN("aws_elasticache_replication_group", "AWS::ElastiCache::ReplicationGroup",
+			arnOf("elasticache", "replicationgroup:cache"), "", "cache"),
+		withARN("aws_elasticache_user", "AWS::ElastiCache::User", arnOf("elasticache", "user:app"), "", "app"),
+		withARN("aws_elasticache_user_group", "AWS::ElastiCache::UserGroup", arnOf("elasticache", "usergroup:apps"), "",
+			"apps"),
+		withARN("aws_memorydb_acl", "AWS::MemoryDB::ACL", arnOf("memorydb", "acl/app"), "", "app"),
+		withARN("aws_memorydb_user", "AWS::MemoryDB::User", arnOf("memorydb", "user/app"), "", "app"),
+		withARN(
+			"aws_memorydb_parameter_group",
+			"AWS::MemoryDB::ParameterGroup",
+			arnOf("memorydb", "parametergroup/app"),
+			"",
+			"app",
+		),
+		withARN("aws_db_parameter_group", "AWS::RDS::DBParameterGroup", arnOf("rds", "pg:app-pg"), "", "app-pg"),
+		withARN("aws_db_option_group", "AWS::RDS::OptionGroup", arnOf("rds", "og:app-og"), "app-og", "app-og"),
+		withARN("aws_efs_file_system", "AWS::EFS::FileSystem", arnOf("elasticfilesystem", "file-system/fs-1"), "fs-1",
+			"fs-1"),
+		withARN("aws_efs_access_point", "AWS::EFS::AccessPoint", arnOf("elasticfilesystem", "access-point/fsap-1"),
+			"fsap-1", "fsap-1"),
+		plain("aws_efs_mount_target", "AWS::EFS::MountTarget", "", "fsmt-1", "fsmt-1"),
+		withARN("aws_glue_catalog_database", "AWS::Glue::Database", arnOf("glue", "database/analytics"), "analytics",
+			acct+":analytics"),
+		withARN("aws_glue_catalog_table", "AWS::Glue::Table", arnOf("glue", "table/analytics/events"), "",
+			acct+":analytics:events"),
+		withARN("aws_athena_workgroup", "AWS::Athena::WorkGroup", arnOf("athena", "workgroup/etl"), "etl", "etl"),
+		withARN("aws_athena_data_catalog", "AWS::Athena::DataCatalog", arnOf("athena", "datacatalog/lake"), "lake",
+			"lake"),
+		withARN("aws_api_gateway_rest_api", "AWS::ApiGateway::RestApi", apiARN("/restapis/a1b2c3"), "a1b2c3", "a1b2c3"),
+		plain("aws_api_gateway_resource", "AWS::ApiGateway::Resource", apiARN("/restapis/a1b2c3/resources/r4s5"), "",
+			"r4s5"),
+		plain("aws_api_gateway_method", "AWS::ApiGateway::Method",
+			apiARN("/restapis/a1b2c3/resources/r4s5/methods/GET"), "", "agm-a1b2c3-r4s5-GET"),
+		plain("aws_api_gateway_deployment", "AWS::ApiGateway::Deployment", apiARN("/restapis/a1b2c3/deployments/d6e7"),
+			"", "d6e7"),
+		withARN("aws_api_gateway_stage", "AWS::ApiGateway::Stage", apiARN("/restapis/a1b2c3/stages/prod"), "",
+			"ags-a1b2c3-prod"),
+		plain("aws_api_gateway_domain_name", "AWS::ApiGateway::DomainName", apiARN("/domainnames/api.acme.test"), "",
+			"api.acme.test"),
+		plain("aws_api_gateway_base_path_mapping", "AWS::ApiGateway::BasePathMapping",
+			apiARN("/domainnames/api.acme.test/basepathmappings/v1"), "", "api.acme.test/v1"),
+		withARN("aws_ssm_parameter", "AWS::SSM::Parameter", arnOf("ssm", "parameter/app/db/host"), "", "/app/db/host"),
+		withARN("aws_ssm_parameter", "AWS::SSM::Parameter", arnOf("ssm", "parameter/flag"), "", "flag"),
+		plain("aws_ssm_association", "AWS::SSM::Association", arnOf("ssm", "association/0a1b2c3d"), "", "0a1b2c3d"),
+		withARN("aws_cloudwatch_metric_alarm", "AWS::CloudWatch::Alarm", arnOf("cloudwatch", "alarm:cpu-high"),
+			"cpu-high", "cpu-high"),
+		{tf: "aws_cloudwatch_dashboard", live: live("AWS::CloudWatch::Dashboard", func(r *inventory.CloudResource) {
+			r.Region, r.ARN = "", "arn:aws:cloudwatch::"+acct+":dashboard/ops"
+		}), state: tfstate.Instance{ID: "ops"}},
+		withARN("aws_acm_certificate", "AWS::ACM::Certificate", arnOf("acm", "certificate/0f1e2d3c"), "0f1e2d3c",
+			arnOf("acm", "certificate/0f1e2d3c")),
+		withARN("aws_codebuild_project", "AWS::CodeBuild::Project", arnOf("codebuild", "project/build"), "build",
+			arnOf("codebuild", "project/build")),
+		withARN("aws_codepipeline", "AWS::CodePipeline::Pipeline", arnOf("codepipeline", "release"), "release",
+			"release"),
+		withARN("aws_kinesisanalyticsv2_application", "AWS::KinesisAnalyticsV2::Application",
+			arnOf("kinesisanalytics", "application/flink"), "flink", arnOf("kinesisanalytics", "application/flink")),
+		withARN(
+			"aws_backup_plan",
+			"AWS::Backup::BackupPlan",
+			arnOf("backup", "backup-plan:plan-1"),
+			"plan-1",
+			"plan-1",
+		),
+		withARN("aws_backup_vault", "AWS::Backup::BackupVault", arnOf("backup", "backup-vault:main"), "main", "main"),
+		plain("aws_backup_selection", "AWS::Backup::BackupSelection", "", "sel-1", "sel-1"),
+		plain(
+			"aws_cloudformation_stack",
+			"AWS::CloudFormation::Stack",
+			arnOf("cloudformation", "stack/base/0a1b-4"),
+			"",
+			arnOf("cloudformation", "stack/base/0a1b-4"),
+		),
+		withARN("aws_quicksight_data_source", "AWS::QuickSight::DataSource", arnOf("quicksight", "datasource/ds1"),
+			"ds1", acct+"/ds1"),
+		plain("aws_quicksight_vpc_connection", "AWS::QuickSight::VPCConnection",
+			arnOf("quicksight", "vpcConnection/vc1"), "", acct+",vc1"),
+		withARN("aws_route53_resolver_rule", "AWS::Route53Resolver::ResolverRule",
+			arnOf("route53resolver", "resolver-rule/rslvr-rr-1"), "rslvr-rr-1", "rslvr-rr-1"),
+		plain("aws_route53_resolver_rule_association", "AWS::Route53Resolver::ResolverRuleAssociation", "",
+			"rslvr-rrassoc-1", "rslvr-rrassoc-1"),
+		withARN("aws_xray_group", "AWS::XRay::Group", arnOf("xray", "group/app/G1"), "", arnOf("xray", "group/app/G1")),
+		withARN("aws_xray_sampling_rule", "AWS::XRay::SamplingRule", arnOf("xray", "sampling-rule/app"), "", "app"),
+		withARN("aws_resourceexplorer2_index", "AWS::ResourceExplorer2::Index",
+			arnOf("resource-explorer-2", "index/0a1b-5"), "", arnOf("resource-explorer-2", "index/0a1b-5")),
+		withARN("aws_resourceexplorer2_view", "AWS::ResourceExplorer2::View",
+			arnOf("resource-explorer-2", "view/all/0a1b-6"), "", arnOf("resource-explorer-2", "view/all/0a1b-6")),
+		withARN("aws_apprunner_auto_scaling_configuration_version", "AWS::AppRunner::AutoScalingConfiguration",
+			arnOf("apprunner", "autoscalingconfiguration/hi/1/0a1b-7"), "",
+			arnOf("apprunner", "autoscalingconfiguration/hi/1/0a1b-7")),
 		ec2("aws_subnet", "AWS::EC2::Subnet", "subnet", "subnet-1"),
 		ec2("aws_security_group", "AWS::EC2::SecurityGroup", "security-group", "sg-1"),
 		ec2("aws_internet_gateway", "AWS::EC2::InternetGateway", "internet-gateway", "igw-1"),
@@ -330,7 +526,7 @@ func TestSpec_matching_1(t *testing.T) {
 		}
 	}
 	for _, ty := range m.Curated() {
-		if ty.TF != "aws_security_group_rule" {
+		if !ty.Tuple {
 			assert.True(t, covered[ty.TF], "curated type %s has no test case", ty.TF)
 		}
 	}
@@ -601,4 +797,48 @@ func TestIdentityParseAttrs(t *testing.T) {
 		f("aws_iam_group_policy_attachment"),
 	)
 	assert.Nil(t, f("aws_glue_job"))
+}
+
+// TestSpec_scan_accuracy_4: aws_iam_policy_attachment with two roles and a user matches the three
+// live attachments, and aws_default_route_table matches the main route table.
+func TestSpec_scan_accuracy_4(t *testing.T) {
+	t.Parallel()
+
+	m := loadMap(t)
+	policy := "arn:aws:iam::" + acct + ":policy/deploy"
+	attachment := func(cfn, kind, name string) inventory.CloudResource {
+		return inventory.CloudResource{
+			Account: acct, CFNType: cfn, ID: name + "/" + policy, Sources: []string{inventory.LayerIAMAttachments},
+			Attrs: map[string]string{
+				kind: name, "policy_arn": policy, "rule_key": tfstate.PolicyAttachmentKey(kind, name, policy),
+			},
+		}
+	}
+	keys := []string{
+		tfstate.PolicyAttachmentKey("role", "ci", policy), tfstate.PolicyAttachmentKey("role", "deploy", policy),
+		tfstate.PolicyAttachmentKey("user", "release", policy),
+	}
+	ix := tfstate.BuildIndex([]tfstate.UnitState{
+		unitState("iam", "aws_iam_policy_attachment", tfstate.Instance{ID: "deploy", RuleKeys: keys}),
+		unitState("network", "aws_default_route_table", tfstate.Instance{ID: "rtb-main"}),
+	})
+	resources := []inventory.CloudResource{
+		attachment("Native::IAM::RolePolicyAttachment", "role", "ci"),
+		attachment("Native::IAM::RolePolicyAttachment", "role", "deploy"),
+		attachment("Native::IAM::UserPolicyAttachment", "user", "release"),
+		attachment("Native::IAM::RolePolicyAttachment", "role", "other"),
+		live("AWS::EC2::RouteTable", func(r *inventory.CloudResource) {
+			r.ARN, r.ID, r.Attrs = arnOf("ec2", "route-table/rtb-main"), "rtb-main", map[string]string{"main": "true"}
+		}),
+	}
+	got := match.New(m, ix).Match(resources)
+	for i, r := range got[:3] {
+		assert.Equal(t, match.CategoryManaged, r.Category, "attachment %d: %s", i, r.Reason)
+		assert.Equal(t, match.RuleTuple, r.Rule, "attachment %d", i)
+		require.Len(t, r.ManagedBy, 1)
+		assert.Equal(t, "aws_iam_policy_attachment.this", r.ManagedBy[0].Address)
+	}
+	assert.Equal(t, match.CategoryUnmatched, got[3].Category, "a principal the resource doesn't list")
+	assert.Equal(t, match.CategoryManaged, got[4].Category, got[4].Reason)
+	assert.Equal(t, "aws_default_route_table.this", got[4].ManagedBy[0].Address)
 }

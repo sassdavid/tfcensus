@@ -90,8 +90,12 @@ func New(m *typemap.Map, ix *tfstate.Index) *Matcher {
 		if e.ID != "" && e.AWS() {
 			mt.byID[e.ID] = appendRef(mt.byID[e.ID], ref)
 		}
+		region := e.Region
+		if t, ok := m.Type(e.Type); ok && t.Global {
+			region = ""
+		}
 		for _, rk := range e.RuleKeys {
-			v := e.Account + "/" + e.Region + "/" + rk
+			v := e.Account + "/" + region + "/" + rk
 			if e.Type == "aws_security_group" {
 				mt.inline[v] = appendRef(mt.inline[v], ref)
 			} else {
