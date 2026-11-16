@@ -22,6 +22,13 @@ jsonschema scan-v1.json stdout
 jsonschema report-v1.json stdout
 cmp stdout $WORK/golden/scan.json
 
+# --exclude-account drops the only account from the live listing. Its state is still read with
+# its credentials, so the run has no problems and nothing to report.
+exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml --exclude-account 111111111111 --format json --refresh
+stdout '"findings": \[\]'
+stdout '"errors": \[\]'
+! stderr 'account|state'
+
 -- aws/config --
 [default]
 region = eu-west-1

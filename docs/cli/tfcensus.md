@@ -28,10 +28,11 @@ stdout carries data, stderr carries logs. Use --format json for scripting.
 ### SEE ALSO
 
 * [tfcensus audit](tfcensus_audit.md)	 - Audit state backends
+* [tfcensus cache](tfcensus_cache.md)	 - Inspect or clear the probe and scan caches
 * [tfcensus codify](tfcensus_codify.md)	 - Write import blocks for unmanaged resources from a scan report
 * [tfcensus completion](tfcensus_completion.md)	 - Generate the autocompletion script for the specified shell
 * [tfcensus config](tfcensus_config.md)	 - Inspect and validate configuration
-* [tfcensus doctor](tfcensus_doctor.md)	 - Check AWS credentials and which inventory layers each account and region supports
+* [tfcensus doctor](tfcensus_doctor.md)	 - Check tool versions, AWS credentials and the inventory layers of each account and region
 * [tfcensus drift](tfcensus_drift.md)	 - Find drift between the units' state and AWS
 * [tfcensus inventory](tfcensus_inventory.md)	 - Read each unit's state: versions, providers, resource counts, serial and lineage
 * [tfcensus mcp](tfcensus_mcp.md)	 - Serve units, inventory, whois, scan_summary, audit_findings and drift_summary to an MCP client over stdio

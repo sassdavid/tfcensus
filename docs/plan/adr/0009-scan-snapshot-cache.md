@@ -25,4 +25,4 @@ the re-run still calls STS to resolve accounts, the probe for regions, and S3 to
   instant and make no AWS calls (`TestSpec_scan_4` counts them).
 - Changing one account or region collects everything again. A per-layer cache can be added under
   the snapshot later, if large estates need it.
-- `cache info|clear` will list and remove these files along with the probe cache.
+- `cache info|clear` lists and removes these files along with the probe cache.

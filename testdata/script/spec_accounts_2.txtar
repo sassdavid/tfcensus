@@ -26,6 +26,10 @@ region = eu-west-1
 aws_access_key_id = AKIAFAKE
 aws_secret_access_key = fake-secret
 -- want-doctor.txt --
+TOOL        PATH        VERSION  MINIMUM  STATUS
+terragrunt  terragrunt  -        1.0.0    not found
+terraform   terraform   -        1.5.0    not found
+
 SOURCE        KIND     ACCOUNT       NAME          STATUS
 acme-nonprod  profile  111111111111  acme-nonprod  ok
 
@@ -41,6 +45,11 @@ ACCOUNT       REGION        RESOURCE EXPLORER    CONFIG                         
 111111111111 (acme-nonprod): eu-north-1: no AWS Config recorder, so the config layer is off here.
 111111111111 (acme-nonprod): us-east-1: no AWS Config recorder, so the config layer is off here.
 -- want-doctor.md --
+| TOOL | PATH | VERSION | MINIMUM | STATUS |
+| --- | --- | --- | --- | --- |
+| terragrunt | terragrunt | - | 1.0.0 | not found |
+| terraform | terraform | - | 1.5.0 | not found |
+
 | SOURCE | KIND | ACCOUNT | NAME | STATUS |
 | --- | --- | --- | --- | --- |
 | acme-nonprod | profile | 111111111111 | acme-nonprod | ok |

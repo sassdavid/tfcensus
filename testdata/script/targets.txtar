@@ -1,0 +1,79 @@
+# --account, --exclude-account and --all-regions select what doctor probes. In org mode the filter
+# runs before any role is assumed: 333333333333 denies the assume-role in the cassette, so an
+# exclusion that ran later would still warn about it.
+env TEST_NOW=2026-11-10T12:00:00Z
+env TEST_CASSETTE=$CASSETTES/aws/doctor-org
+exec tfcensus doctor --org --management-profile acme-mgmt --region eu-west-1 --exclude-account 333333333333 --format plain
+stdout -count=2 '^acme-mgmt +org '
+! stdout 333333333333
+! stderr .
+exec tfcensus doctor --org --management-profile acme-mgmt --region eu-west-1 --account 222222222222 --format plain
+stdout -count=1 '^acme-mgmt +org +222222222222 '
+! stdout '111111111111|333333333333'
+! stderr .
+
+# An ID that no source loads is a warning; a malformed one is a usage error.
+exec tfcensus doctor --org --management-profile acme-mgmt --region eu-west-1 --account 222222222222 --account 999999999999 --format plain
+stderr -count=1 'WRN no account source loaded this account account=999999999999'
+exec expect-exit 2 tfcensus doctor --account 12345
+stderr 'accounts.include'
+
+# --all-regions probes the regions account:ListRegions returns, not the default four.
+env TEST_CASSETTE=$CASSETTES/aws/doctor-all-regions
+exec tfcensus doctor --profile acme-nonprod --all-regions --format plain --refresh
+cmp stdout want-all-regions.txt
+! stderr .
+
+# When ListRegions is denied, doctor says so and probes the default regions.
+env TEST_CASSETTE=$CASSETTES/aws/doctor-regions-denied
+exec tfcensus doctor --profile acme-nonprod --all-regions --format plain --refresh
+stderr -count=1 'WRN probing the default regions instead account=111111111111 error="list enabled regions of 111111111111: access denied for account:ListRegions"'
+stdout '^111111111111 \(acme-nonprod\): could not list the enabled regions \(account:ListRegions\); probed the default regions instead$'
+stdout -count=4 '^111111111111 +[a-z]+-[a-z]+-[0-9] '
+
+# --region and --all-regions exclude each other, and so do their config keys. A flag overrides
+# the other key from the config.
+exec expect-exit 2 tfcensus doctor --region eu-west-1 --all-regions
+stderr 'none of the others can be'
+cp both.yaml .tfcensus.yaml
+exec expect-exit 2 tfcensus doctor --profile acme-nonprod
+stderr 'regions and all_regions are both set'
+exec tfcensus config show --format json
+stdout '"all_regions": true'
+cp regions.yaml .tfcensus.yaml
+env TEST_CASSETTE=$CASSETTES/aws/doctor-all-regions
+exec tfcensus doctor --profile acme-nonprod --all-regions --format plain
+cmp stdout want-all-regions.txt
+
+-- home/.aws/config --
+[profile acme-mgmt]
+region = eu-west-1
+aws_access_key_id = AKIAFAKE
+aws_secret_access_key = fake-secret
+
+[profile acme-nonprod]
+region = eu-west-1
+aws_access_key_id = AKIAFAKE
+aws_secret_access_key = fake-secret
+-- both.yaml --
+schema_version: 1
+regions: [eu-central-1]
+all_regions: true
+-- regions.yaml --
+schema_version: 1
+regions: [eu-central-1]
+-- want-all-regions.txt --
+TOOL        PATH        VERSION  MINIMUM  STATUS
+terragrunt  terragrunt  -        1.0.0    not found
+terraform   terraform   -        1.5.0    not found
+
+SOURCE        KIND     ACCOUNT       NAME          STATUS
+acme-nonprod  profile  111111111111  acme-nonprod  ok
+
+ACCOUNT       REGION     RESOURCE EXPLORER    CONFIG                                 AGGREGATORS  LAYERS
+111111111111  eu-west-1  local, default view  recording (continuous, all supported)  none         re, config, cc, native
+111111111111  us-east-1  local, default view  no recorder                            none         re, cc, native
+
+111111111111 (acme-nonprod): Resource Explorer supports 649 resource types.
+111111111111 (acme-nonprod): Resource Explorer has local indexes only, so tfcensus searches each region on its own. An admin can promote one to an aggregator (`aws resource-explorer-2 update-index-type --type AGGREGATOR`).
+111111111111 (acme-nonprod): us-east-1: no AWS Config recorder, so the config layer is off here.

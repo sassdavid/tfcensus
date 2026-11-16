@@ -41,6 +41,8 @@ KEY                                       VALUE                                 
 accounts.aggregator.name                  ""                                              default
 accounts.aggregator.profile               ""                                              default
 accounts.aggregator.region                ""                                              default
+accounts.exclude                          []                                              default
+accounts.include                          []                                              default
 accounts.map.111111111111.name            acme-nonprod                                    project file $WORK/.tfcensus.yaml
 accounts.map.111111111111.profile         acme-nonprod                                    project file $WORK/.tfcensus.yaml
 accounts.org.enabled                      false                                           default
@@ -48,6 +50,7 @@ accounts.org.management_profile           ""                                    
 accounts.org.ou_roles                     {}                                              default
 accounts.org.role                         OrganizationAccountAccessRole                   default
 accounts.profiles                         ["acme-*"]                                      user file $WORK/.config/tfcensus/config.yaml
+all_regions                               false                                           default
 audit.discover_patterns                   ["*tfstate*","*terraform-state*","*tf-state*"]  default
 audit.policy.max_state_mb                 20                                              default
 audit.policy.min_provider_versions        {}                                              default

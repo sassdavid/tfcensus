@@ -67,7 +67,8 @@ is looked up across every type. --type narrows the lookup to TF types.
 When no state manages the resource, the ownership rules explain why (other-iac, aws-managed,
 ignored or unmanaged). Without --index, whois lists the resource's type in its account and region
 through the scan inventory layers, so the rules see its tags and relations. With --index the run
-stays offline and the rules see only what the ARN gives; --live lists anyway.
+stays offline and the rules see only what the ARN gives; --live lists anyway. An account that
+--account or --exclude-account leaves out is never listed, so its answers stay offline.
 
 --index reads an index written by tfcensus inventory --save-index instead of reading every state.
 
@@ -104,6 +105,7 @@ state read or a layer failed, 4 when every failure was a credential problem, and
 	}
 	addDiscoveryFlags(cmd, &a.filters)
 	addAccountFlags(cmd, d)
+	addAccountFilterFlags(cmd)
 	addOutputFlags(cmd, g, formats...)
 	addRegionFlag(cmd)
 	f := cmd.Flags()
@@ -288,9 +290,9 @@ type livePlan struct {
 	wanted  map[string]bool
 }
 
-// planLive collects what the answers that need a live lookup ask for. An answer whose account
-// has no credentials is marked so.
-func planLive(rv *whois.Resolver, accts *accounts.Result, answers []whois.Answer) livePlan {
+// planLive collects what the answers that need a live lookup ask for, in the accounts wants
+// keeps. An answer whose account has no credentials is marked so.
+func planLive(rv *whois.Resolver, accts *accounts.Result, answers []whois.Answer, wants func(string) bool) livePlan {
 	byAccount := map[string]*accounts.Account{}
 	for _, acct := range accts.Accounts {
 		byAccount[acct.ID] = acct
@@ -298,7 +300,8 @@ func planLive(rv *whois.Resolver, accts *accounts.Result, answers []whois.Answer
 	p := livePlan{regions: map[string][]string{}, wanted: map[string]bool{}}
 	for i := range answers {
 		f := &answers[i].Finding
-		if !rv.NeedsLive(&answers[i]) {
+		// An excluded account's answer stays offline: the rules saw only what the query gives.
+		if !rv.NeedsLive(&answers[i]) || !wants(f.Account) {
 			continue
 		}
 		acct, ok := byAccount[f.Account]
@@ -343,7 +346,8 @@ func whoisLive(
 	cmd *cobra.Command, d *app.Deps, cfg *config.Config, m *typemap.Map, rv *whois.Resolver,
 	accts *accounts.Result, queries []match.Query, answers []whois.Answer,
 ) ([]inventory.Run, error) {
-	p := planLive(rv, accts, answers)
+	warnUnmatched(cmd, d, cfg, accts)
+	p := planLive(rv, accts, answers, targetSelection(cfg).Wants)
 	if len(p.targets) == 0 {
 		return nil, nil
 	}

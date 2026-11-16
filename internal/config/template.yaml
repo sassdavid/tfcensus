@@ -16,6 +16,8 @@ schema_version: 1
 #
 # accounts:
 #   profiles: []                   # AWS profile globs from ~/.aws/config, for example ["acme-*"]
+#   include: []                    # account IDs doctor, scan and whois list; empty means all
+#   exclude: []                    # account IDs doctor, scan and whois skip
 #   org:
 #     enabled: false               # list the organization's accounts and assume a role in each
 #     management_profile: ""       # profile that lists the accounts; empty means the default credentials
@@ -28,6 +30,7 @@ schema_version: 1
 #     region: ""
 #
 # regions: []                      # empty means the regions in the units' backends and providers
+# all_regions: false               # every region each account has enabled, instead of regions
 #
 # scan:
 #   layers: auto                   # auto, or a comma-separated list of re, config, cc and native

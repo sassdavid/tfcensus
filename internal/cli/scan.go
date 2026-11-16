@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"runtime"
 	"slices"
 	"strings"
 	"time"
@@ -52,21 +51,7 @@ type scanArgs struct {
 	concurrency     int
 }
 
-func newScanCmd(d *app.Deps, g *globals) *cobra.Command {
-	a := scanArgs{}
-	formats := []render.Format{
-		render.FormatTTY,
-		render.FormatPlain,
-		render.FormatMD,
-		render.FormatJSON,
-		render.FormatCSV,
-		render.FormatSARIF,
-		render.FormatGitHub,
-	}
-	cmd := &cobra.Command{
-		Use:   "scan [paths...]",
-		Short: "Find AWS resources that no unit manages",
-		Long: `scan lists the live resources of every selected account and region, matches them against
+const scanLong = `scan lists the live resources of every selected account and region, matches them against
 the state of the discovered units, and puts each resource in one category:
 
   managed         matched to one state resource
@@ -86,12 +71,33 @@ which layer listed each type in each account and region.
 Coverage is (managed + double-managed) / (managed + double-managed + unmanaged) per account.
 aws-managed, derived, other-iac, ignored and undetermined resources don't count.
 
+Resources are listed in the --region regions, else the regions of the units that target the
+account. --all-regions lists every region the account has enabled (account:ListRegions).
+--account and --exclude-account choose the accounts to list; the state of units in other
+accounts is still read with their credentials.
+
 scan caches the inventory and state index under $XDG_CACHE_HOME/tfcensus/scan for cache.ttl
 (default 1h), keyed by the accounts, regions, layers, types and units. A re-run with other rules
 makes no AWS calls. --refresh lists again.
 
 The exit code is 3 when --fail-on finds at least --min-count findings, 1 when a layer, a state
-read or discovery failed, 4 when every failure was a credential problem, and 0 otherwise.`,
+read or discovery failed, 4 when every failure was a credential problem, and 0 otherwise.`
+
+func newScanCmd(d *app.Deps, g *globals) *cobra.Command {
+	a := scanArgs{}
+	formats := []render.Format{
+		render.FormatTTY,
+		render.FormatPlain,
+		render.FormatMD,
+		render.FormatJSON,
+		render.FormatCSV,
+		render.FormatSARIF,
+		render.FormatGitHub,
+	}
+	cmd := &cobra.Command{
+		Use:   "scan [paths...]",
+		Short: "Find AWS resources that no unit manages",
+		Long:  scanLong,
 		Example: `  tfcensus scan ~/src/infra/acme-live --profile acme-nonprod --region eu-west-1
   tfcensus scan --types 'AWS::IAM::*' --fail-on unmanaged
   tfcensus scan --rules extra-rules.yaml --format md > scan.md
@@ -110,6 +116,9 @@ read or discovery failed, 4 when every failure was a credential problem, and 0 o
 			if err != nil {
 				return err
 			}
+			if err = checkRegions(cmd, &res.Config); err != nil {
+				return err
+			}
 			a.paths = args
 			return runScan(cmd, d, g.sink(cmd, d), &res.Config, a)
 		},
@@ -117,7 +126,8 @@ read or discovery failed, 4 when every failure was a credential problem, and 0 o
 	addDiscoveryFlags(cmd, &a.filters)
 	addOutputFlags(cmd, g, formats...)
 	addAccountFlags(cmd, d)
-	addRegionFlag(cmd)
+	addAccountFilterFlags(cmd)
+	addAllRegionsFlags(cmd)
 	f := cmd.Flags()
 	f.StringSliceVar(&a.types, flagTypes, nil,
 		"resource types to scan, as CloudFormation or TF type globs such as 'AWS::IAM::*' or 'aws_security_group*'")
@@ -375,21 +385,12 @@ func (e *scanEnv) cacheKey(disc discovery.Result) (string, error) {
 	}
 	return scan.Key(map[string]any{
 		"version": buildinfo.Get().Version, "accounts": e.cfg.Accounts, "regions": e.cfg.Regions,
-		"layers": e.layers, "types": e.cfn, "cloudcontrol": e.cc, "units": units, "index": index,
+		"all_regions": e.cfg.AllRegions,
+		"layers":      e.layers, "types": e.cfn, "cloudcontrol": e.cc, "units": units, "index": index,
 	})
 }
 
-func (e *scanEnv) cache() (*scan.Cache, error) {
-	dir, err := config.CacheDirPath(e.d.Env.Lookup, runtime.GOOS)
-	if err != nil {
-		return nil, fmt.Errorf("find cache directory: %w", err)
-	}
-	ttl, err := time.ParseDuration(cmp.Or(e.cfg.Cache.TTL, "1h"))
-	if err != nil {
-		return nil, usageError(fmt.Errorf("cache.ttl %q: %w", e.cfg.Cache.TTL, err))
-	}
-	return &scan.Cache{Dir: dir, TTL: ttl, Now: e.d.Clock}, nil
-}
+func (e *scanEnv) cache() (*scan.Cache, error) { return newScanCache(e.d, e.cfg) }
 
 // snapshot returns the cached collection when it is fresh, else collects and caches it.
 func (e *scanEnv) snapshot(loader *accounts.Loader, disc discovery.Result) (*snapshot, error) {
@@ -439,8 +440,17 @@ func (e *scanEnv) collect(loader *accounts.Loader, disc discovery.Result) (*scan
 	if s.Index, err = e.stateIndex(loader, accts, disc, s); err != nil {
 		return nil, err
 	}
+	targets := liveTargets(e.cmd, e.d, e.cfg, accts)
+	enabled, regionErrs := enabledRegions(e.cmd, e.cfg, targets)
+	s.Problems = append(s.Problems, regionProblems(regionErrs)...)
 	s.Inventory, err = collectLive(e.cmd, e.d, e.m, liveRequest{
-		accounts: accts.Accounts, regions: func(a *accounts.Account) []string { return e.regions(a, disc) },
+		accounts: targets,
+		regions: func(a *accounts.Account) []string {
+			if r, ok := enabled[a.ID]; ok {
+				return r
+			}
+			return e.regions(a, disc)
+		},
 		layers: e.layers, types: e.cfn, cc: e.cc, refresh: e.a.refresh,
 	})
 	if err != nil {

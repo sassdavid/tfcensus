@@ -13,6 +13,8 @@ Narrow it before use:
   restricts decryption to requests made through S3.
 - `LockTables`: limit to your lock tables (`arn:aws:dynamodb:*:*:table/terraform-locks*`). `dynamodb:Scan` is used only
   to look for stale locks and orphaned digests. Lock items hold lock metadata, not state.
+- `EnabledRegions`: `account:ListRegions` runs only for `--all-regions` (config `all_regions`). Drop it if you never
+  use that flag.
 - `StateAccessLogging`: `audit backend` reads trail event selectors to see whether CloudTrail logs S3 data events
   for a state bucket that has no server access logging (S3-LOG).
 

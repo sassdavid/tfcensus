@@ -1,0 +1,58 @@
+# cache info counts the probe and scan cache files and how many are fresh; cache clear deletes
+# both. doctor warms the probe cache and scan writes one snapshot.
+env TEST_NOW=2026-11-10T12:00:00Z
+exec tfcensus cache info
+stdout '^CACHE +ENTRIES +BYTES +FRESH +STALE +TTL$'
+stdout '^probe +0 +0 +0 +0 +24h$'
+stdout '^scan +0 +0 +0 +0 +1h$'
+
+env TEST_CASSETTE=$CASSETTES/aws/doctor-nonprod
+exec tfcensus doctor --profile acme-nonprod
+env TEST_CASSETTE=$CASSETTES/aws/scan-fleet
+env AWS_CONFIG_FILE=$WORK/aws/config
+cd $REPOS
+exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml --format json
+cd $WORK
+
+exec tfcensus cache info
+stdout '^dir +.+[/\\]\.cache[/\\]tfcensus$'
+stdout '^probe +5 +[1-9][0-9]* +5 +0 +24h$'
+stdout '^scan +1 +[1-9][0-9]* +1 +0 +1h$'
+
+# Two hours later the snapshot is stale and the probe results are not.
+env TEST_NOW=2026-11-10T14:00:00Z
+exec tfcensus cache info --format json
+jsonschema report-v1.json stdout
+stdout '"name": "scan",[^}]+"fresh": 0,\s+"stale": 1'
+stdout '"name": "probe",[^}]+"fresh": 5,\s+"stale": 0'
+
+# cache.ttl changes the scan TTL.
+cp ttl.yaml .tfcensus.yaml
+exec tfcensus cache info
+stdout '^scan +1 +[1-9][0-9]* +1 +0 +3h$'
+
+exec tfcensus cache clear
+stdout '^probe +5 +[1-9][0-9]*$'
+stdout '^scan +1 +[1-9][0-9]*$'
+! exists .cache/tfcensus/probe
+! exists .cache/tfcensus/scan
+exec tfcensus cache info
+stdout '^probe +0 +0 +0 +0 +24h$'
+
+exec expect-exit 2 tfcensus cache info --format md
+exec expect-exit 2 tfcensus cache clear extra
+
+-- home/.aws/config --
+[profile acme-nonprod]
+region = eu-west-1
+aws_access_key_id = AKIAFAKE
+aws_secret_access_key = fake-secret
+-- aws/config --
+[default]
+region = eu-west-1
+aws_access_key_id = AKIAFAKEDEFAULT
+aws_secret_access_key = fake-default-secret
+-- ttl.yaml --
+schema_version: 1
+cache:
+  ttl: 3h

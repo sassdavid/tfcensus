@@ -72,6 +72,8 @@ accounts:
     name: ""
     profile: ""
     region: ""
+  exclude: []
+  include: []
   map: {}
   org:
     enabled: false
@@ -79,6 +81,7 @@ accounts:
     ou_roles: {}
     role: OrganizationAccountAccessRole
   profiles: []
+all_regions: false
 audit:
   discover_patterns:
     - '*tfstate*'

@@ -104,6 +104,16 @@ func (c *Cache) Newest() (*Snapshot, bool, error) {
 	return newest, c.Now().Sub(newest.Created) >= c.TTL, nil
 }
 
+// Fresh reports whether the file at path holds a snapshot that [Cache.Load] would use: readable,
+// in the current format and younger than the TTL.
+func (c *Cache) Fresh(path string) bool {
+	var s Snapshot
+	if tfstate.ReadIndexFile(path, &s) != nil || s.Format != snapshotFormat || s.Inventory == nil || s.Index == nil {
+		return false
+	}
+	return c.Now().Sub(s.Created) < c.TTL
+}
+
 // Save stores s under s.Key.
 func (c *Cache) Save(s *Snapshot) error {
 	if c == nil || c.Dir == "" {

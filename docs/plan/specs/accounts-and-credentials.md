@@ -29,6 +29,7 @@ This is why the layer order is decided per account/region by the probe, not hard
 
 ## Read-only IAM policy (shipped as `docs/iam/tfcensus-readonly.json`)
 - `sts:GetCallerIdentity`, `organizations:List*`/`Describe*`
+- `account:ListRegions` (`--all-regions`: the regions each account has enabled)
 - `s3:ListBucket`, `s3:GetObject` (state buckets), `s3:GetBucket*`, `s3:GetEncryptionConfiguration`, `s3:GetLifecycleConfiguration`, `s3:GetReplicationConfiguration`, `s3:GetBucketPolicy`, `s3:GetBucketPublicAccessBlock`, `s3:GetBucketOwnershipControls`, `s3:GetBucketLogging`, `s3:GetBucketVersioning`, `s3:GetAccountPublicAccessBlock`
 - `dynamodb:DescribeTable`, `dynamodb:DescribeContinuousBackups`, `dynamodb:Scan` (lock tables only, resource-scoped)
 - `kms:DescribeKey`, `kms:GetKeyPolicy`, `kms:ListAliases`
