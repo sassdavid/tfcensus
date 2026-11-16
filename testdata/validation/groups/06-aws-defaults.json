@@ -34,23 +34,10 @@
       "id": "dopt-0d0000000000000d1",
       "region": "eu-west-1",
       "configuration": {
-        "dhcpConfigurations": [
-          {
-            "key": "domain-name",
-            "values": [
-              {
-                "value": "eu-west-1.compute.internal"
-              }
-            ]
-          },
-          {
-            "key": "domain-name-servers",
-            "values": [
-              {
-                "value": "AmazonProvidedDNS"
-              }
-            ]
-          }
+        "DhcpOptionsId": "dopt-0d0000000000000d1",
+        "DomainName": "eu-west-1.compute.internal",
+        "DomainNameServers": [
+          "AmazonProvidedDNS"
         ]
       }
     },

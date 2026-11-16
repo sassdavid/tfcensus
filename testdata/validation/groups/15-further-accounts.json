@@ -1,0 +1,53 @@
+{
+  "group": "Found by accounts 2 and 3: the default DHCP options as AWS Config records them, EFS automatic backups, QuickSight service policies on a managed role",
+  "spec_count": 20,
+  "why": "DHCP options read from CloudFormation property names, efs-automatic-backup, quicksight-policy-attachment",
+  "config": [
+    {
+      "type": "AWS::EC2::DHCPOptions",
+      "arn": "arn:aws:ec2:eu-west-1:111111111111:dhcp-options/dopt-0f0000000000000f9",
+      "id": "dopt-0f0000000000000f9",
+      "region": "eu-west-1",
+      "configuration": {
+        "DhcpOptionsId": "dopt-0f0000000000000f9",
+        "DomainName": "eu-west-1.compute.internal",
+        "DomainNameServers": [
+          "AmazonProvidedDNS"
+        ],
+        "Tags": []
+      }
+    },
+    {
+      "type": "AWS::Backup::BackupPlan",
+      "arn": "arn:aws:backup:eu-west-1:111111111111:backup-plan:0e0f0a0b-1c2d-4e5f-8a9b-0c1d2e3f4a5b",
+      "id": "aws/efs/automatic-backup-plan",
+      "name": "aws/efs/automatic-backup-plan",
+      "region": "eu-west-1"
+    },
+    {
+      "type": "AWS::Backup::BackupVault",
+      "arn": "arn:aws:backup:eu-west-1:111111111111:backup-vault:aws/efs/automatic-backup-vault",
+      "id": "aws/efs/automatic-backup-vault",
+      "name": "aws/efs/automatic-backup-vault",
+      "region": "eu-west-1"
+    },
+    {
+      "type": "AWS::Backup::BackupSelection",
+      "arn": "arn:aws:backup:eu-west-1:111111111111:backup-plan:0e0f0a0b-1c2d-4e5f-8a9b-0c1d2e3f4a5b/selection/5e6f7a8b-9c0d-4e1f-a2b3-c4d5e6f7a8b9",
+      "id": "aws/efs/automatic-backup-selection",
+      "name": "aws/efs/automatic-backup-selection",
+      "region": "eu-west-1"
+    }
+  ],
+  "iam_roles": [
+    {
+      "name": "acme-quicksight",
+      "path": "/",
+      "id": "AROA0VALIDATION00020",
+      "attached": [
+        "arn:aws:iam::111111111111:policy/service-role/AWSQuickSightS3Policy",
+        "arn:aws:iam::aws:policy/service-role/AWSQuicksightAthenaAccess"
+      ]
+    }
+  ]
+}

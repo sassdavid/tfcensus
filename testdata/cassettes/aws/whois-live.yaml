@@ -492,7 +492,7 @@ interactions:
         proto_minor: 0
         content_length: 411
         host: ""
-        body: '{"Expression":"SELECT resourceId, resourceName, resourceType, arn, awsRegion, accountId, resourceCreationTime, tags, relationships, configuration.associations, configuration.attachment.instanceOwnerId, configuration.defaultForAz, configuration.description, configuration.dhcpConfigurations, configuration.interfaceType, configuration.isDefault, configuration.keyManager, configuration.requesterId, configuration.requesterManaged WHERE resourceType IN (''AWS::IAM::Role'')","Limit":100}'
+        body: '{"Expression":"SELECT resourceId, resourceName, resourceType, arn, awsRegion, accountId, resourceCreationTime, tags, relationships, configuration.DomainName, configuration.DomainNameServers, configuration.Ipv6AddressPreferredLeaseTime, configuration.NetbiosNameServers, configuration.NetbiosNodeType, configuration.NtpServers, configuration.associations, configuration.attachment.instanceOwnerId, configuration.defaultForAz, configuration.description, configuration.interfaceType, configuration.isDefault, configuration.keyManager, configuration.requesterId, configuration.requesterManaged WHERE resourceType IN (''AWS::IAM::Role'')","Limit":100}'
         headers:
             Content-Type:
                 - application/x-amz-json-1.1

@@ -738,11 +738,19 @@ func TestDecodeConfigItem(t *testing.T) {
 		},
 		{
 			`{"resourceType":"AWS::EC2::DHCPOptions","resourceId":"dopt-1","accountId":"111111111111",` +
-				`"awsRegion":"eu-west-1","configuration":{"dhcpConfigurations":[` +
-				`{"key":"domain-name-servers","values":[{"value":"AmazonProvidedDNS"}]},` +
-				`{"key":"domain-name","values":[{"value":"eu-west-1.compute.internal"}]}]}}`,
+				`"awsRegion":"eu-west-1","configuration":{"DhcpOptionsId":"dopt-1",` +
+				`"DomainName":"eu-west-1.compute.internal","DomainNameServers":["AmazonProvidedDNS"],"Tags":[]}}`,
 			map[string]string{
 				"dhcp_options": "domain-name-servers=AmazonProvidedDNS;domain-name=eu-west-1.compute.internal",
+			},
+		},
+		{
+			`{"resourceType":"AWS::EC2::DHCPOptions","resourceId":"dopt-2","accountId":"111111111111",` +
+				`"awsRegion":"eu-west-1","configuration":{"DomainName":"eu-west-1.compute.internal",` +
+				`"DomainNameServers":["10.0.0.2","AmazonProvidedDNS"],"NtpServers":["10.0.0.3"],"NetbiosNodeType":2}}`,
+			map[string]string{
+				"dhcp_options": "domain-name-servers=10.0.0.2,AmazonProvidedDNS;domain-name=eu-west-1.compute.internal;" +
+					"netbios-node-type=2;ntp-servers=10.0.0.3",
 			},
 		},
 	}

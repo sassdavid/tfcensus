@@ -27,6 +27,8 @@ rules                                               first match wins
   pack/aws-service/service-linked-secret            no match
   pack/aws-service/log-delivery-bucket-policy       no match
   pack/aws-service/autoscaling-managed-rule         no match
+  pack/aws-service/efs-automatic-backup             no match
+  pack/aws-service/quicksight-policy-attachment     no match
   pack/other-iac/cloudformation                     no match
   pack/other-iac/pulumi                             no match
   pack/other-iac/crossplane                         no match
