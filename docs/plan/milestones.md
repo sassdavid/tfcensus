@@ -8,9 +8,10 @@ Never run anything against real AWS accounts in a session unless the prompt expl
 Release mapping (revised 2026-11-13): every release goes to GitHub only (archives, checksums,
 SBOMs, the cosign bundle and attestations) until M19 turns the package channels on.
 **v0.1.0 = M0-M11**, v0.2.0 = M12-M13, v0.3.0 = M15-M18, and M14 releases the separate action
-repo (revised 2026-11-16: M17-M18 ship in v0.3.0, with no v0.4.0). M19 has no fixed version or
+repo (revised 2026-11-16: M17-M18 ship in v0.3.0, and v0.4.0 = M21). M19 has no fixed version or
 place in the order: the owner runs it when the GitHub releases look right. M20 waits for external
-users. The research and decisions behind M11-M20 are in [roadmap-research.md](roadmap-research.md).
+users. M21 (scan accuracy) comes from the first real-account scan and should ship before
+tfcensus is announced. The research and decisions behind M11-M20 are in [roadmap-research.md](roadmap-research.md).
 
 ---
 
@@ -341,3 +342,58 @@ Earlier versions stay GitHub only; the tap and the bucket start at that version.
 - [ ] An aqua-registry PR for `sassdavid/tfcensus` is merged (any time after v0.1.0).
 - [ ] A mise registry PR is merged, once there are 3 or more external users. mise's `packslip:`
   backend, which carries completions and man pages, is checked again for goreleaser support.
+
+### M21: Scan accuracy on real accounts → v0.4.0 (tfcensus only) ([scan-accuracy](specs/scan-accuracy.md))
+Scope: fix everything the first real-account scan got wrong, in one release, and measure it.
+The v0.3.0 scan of one non-prod account gave 147 false `unmanaged` findings out of 171 (86%),
+650 `undetermined` findings that were all "no type mapping", and missed VPC Lattice resources and
+ACM certificates. Decisions: [ADR-0017](adr/0017-scan-accuracy.md) (proposed; accept it first).
+The read-only rerun in the last box needs a prompt that names the profile, as the header says.
+If one session can't finish, the open boxes carry over to the next session, and v0.4.0 waits for
+the last box.
+- [ ] Inheritance: a second classification pass gives `unmanaged` and `undetermined` children
+  the category of an `aws-managed`, `other-iac` or `derived` parent (`inherit/<category>`), keeps
+  children of `managed` parents `unmanaged`, honours `never_hide`, and `--explain` prints the
+  parent chain. New parent links for the regional NAT gateway route table and the `CHILD`
+  resource configuration. (scan-accuracy criterion 1)
+- [ ] ENIs: `service-eni` replaces `requester-managed-eni`, and the config query selects the ENI
+  `description`, `requesterId` and `attachment.instanceOwnerId`, plus `dhcpConfigurations` and
+  route table `associations`. inventory.md and the comment in `config.go` follow ADR-0017.
+  (criterion 2)
+- [ ] Rules: the Kubernetes controller rules (external-dns with prefix and suffix settings, AWS
+  Load Balancer Controller and in-tree rules, VPC CNI, EBS and EFS CSI, ACK, the EKS cluster
+  security group), the AWS default rules (apex NS and SOA, default DHCP options, main route
+  table, regional NAT route table, account defaults checked on the validation account) and the
+  AWS service rules (Control Tower widened, AFT, QuickSight, API Gateway log groups,
+  service-linked secrets, log-delivery bucket policies, Lambda versions, RDS automated snapshots,
+  Backup recovery points, add-on Pod Identity associations), each with positive and negative
+  fixtures. ownership-rules.md's pack table lists them. (criterion 3)
+- [ ] Matching: `aws_iam_policy_attachment` expands to one key per principal, and the
+  `aws_default_*` types are curated. (criterion 4)
+- [ ] Typemap: every type in scan-accuracy.md's table is curated, or its entry says why it can't
+  be listed. A test keeps the list curated, `guessCFN` has the alias table, and Config and
+  CloudFormation type names that differ (`AWS::OpenSearch::Domain` and
+  `AWS::OpenSearchService::Domain`) map to one entry. matching.md's "about 300 types" line is
+  updated with the real count. (criterion 5)
+- [ ] Resource Explorer: records get an `id`, RE-only records of a Config-listed type are dropped
+  and counted, and the Kubernetes object types are skipped and counted. (criterion 6)
+- [ ] Cloud Control: `cc: true` types (the VPC Lattice resource gateway, resource configuration
+  and service network associations) are listed by default, and the resource configuration type
+  is read. (criterion 7)
+- [ ] `--explain-coverage` lists the AWS Config types scan doesn't map, with counts per account
+  and region. (criterion 8)
+- [ ] `testdata/validation/` holds an anonymized fixture for each of the 13 false-positive
+  groups, and a testscript scans them with no `unmanaged` finding. `TestSpec_accounts_4` passes,
+  so the read-only policy needs no new action. `mise run validation:stats` prints a reviewed CSV's
+  aggregate row. (criterion 9)
+- [ ] The read-only rerun on validation account 1 with the v0.3.0 command: under 5% false
+  positives among `unmanaged` findings, no `undetermined` finding of a curated type, and the VPC
+  Lattice resources and ACM certificates are listed. `docs/validation/nonprod-scan.md` has the
+  before and after rows (aggregates only), and ownership-rules.md criterion 5 and the M6 optional
+  box are ticked. (criterion 10)
+- [ ] Every further account the owner supplies gets a row in `docs/validation/nonprod-scan.md`.
+  Its false-positive groups get a rule and a fixture in this milestone, or an issue when the fix
+  needs a design of its own.
+- Not in M21: the Config aggregator (open question Q3), the external-dns DynamoDB and AWS Cloud
+  Map registries, EKS Auto Mode resources that EC2 hides from Describe calls, whois and codify
+  reading the new rules (they share the engine, but their goldens are a follow-up).
