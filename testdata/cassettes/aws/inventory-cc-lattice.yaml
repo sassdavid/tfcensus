@@ -33,6 +33,33 @@ interactions:
         proto: ""
         proto_major: 0
         proto_minor: 0
+        content_length: 195
+        host: ""
+        body: '{"MaxResults":100,"ResourceModel":"{\"ServiceNetworkIdentifier\":\"arn:aws:vpc-lattice:eu-west-1:111111111111:servicenetwork/sn-0a4\"}","TypeName":"AWS::VpcLattice::ServiceNetworkVpcAssociation"}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+            X-Amz-Target:
+                - CloudApiService.ListResources
+        url: https://cloudcontrolapi.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: '{"ResourceDescriptions":[{"Identifier":"arn:aws:vpc-lattice:eu-west-1:111111111111:servicenetworkvpcassociation/snva-0a5","Properties":"{\"Arn\":\"arn:aws:vpc-lattice:eu-west-1:111111111111:servicenetworkvpcassociation/snva-0a5\"}"}]}'
+        headers:
+            Content-Type:
+                - application/x-amz-json-1.0
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 2
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
         content_length: 70
         host: ""
         body: '{"MaxResults":100,"TypeName":"AWS::VpcLattice::ResourceConfiguration"}'
@@ -55,7 +82,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 2
+    - id: 3
       request:
         proto: ""
         proto_major: 0
@@ -82,7 +109,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 3
+    - id: 4
       request:
         proto: ""
         proto_major: 0
@@ -109,30 +136,28 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 4
+    - id: 5
       request:
         proto: ""
         proto_major: 0
         proto_minor: 0
-        content_length: 77
+        content_length: 64
         host: ""
-        body: '{"MaxResults":100,"TypeName":"AWS::VpcLattice::ServiceNetworkVpcAssociation"}'
+        body: '{"Filters":{"FilterString":"region:eu-west-1"},"MaxResults":500}'
         headers:
             Content-Type:
-                - application/x-amz-json-1.0
-            X-Amz-Target:
-                - CloudApiService.ListResources
-        url: https://cloudcontrolapi.eu-west-1.amazonaws.com/
+                - application/json
+        url: https://resource-explorer-2.eu-west-1.amazonaws.com/ListResources
         method: POST
       response:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
         content_length: -1
-        body: '{"ResourceDescriptions":[]}'
+        body: '{"Resources":[{"Arn":"arn:aws:vpc-lattice:eu-west-1:111111111111:servicenetwork/sn-0a4","OwningAccountId":"111111111111","Region":"eu-west-1","ResourceType":"vpc-lattice:servicenetwork","Service":"vpc-lattice"}]}'
         headers:
             Content-Type:
-                - application/x-amz-json-1.0
+                - application/json
         status: 200 OK
         code: 200
         duration: 0s

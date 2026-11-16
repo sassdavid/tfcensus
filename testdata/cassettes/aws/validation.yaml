@@ -815,33 +815,6 @@ interactions:
         proto: ""
         proto_major: 0
         proto_minor: 0
-        content_length: 77
-        host: ""
-        body: '{"MaxResults":100,"TypeName":"AWS::VpcLattice::ServiceNetworkVpcAssociation"}'
-        headers:
-            Content-Type:
-                - application/x-amz-json-1.0
-            X-Amz-Target:
-                - CloudApiService.ListResources
-        url: https://cloudcontrolapi.eu-west-1.amazonaws.com/
-        method: POST
-      response:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        content_length: -1
-        body: '{"ResourceDescriptions":[]}'
-        headers:
-            Content-Type:
-                - application/x-amz-json-1.0
-        status: 200 OK
-        code: 200
-        duration: 0s
-    - id: 21
-      request:
-        proto: ""
-        proto_major: 0
-        proto_minor: 0
         content_length: 177
         host: ""
         body: Action=ListStackResources&StackName=arn%3Aaws%3Acloudformation%3Aeu-west-1%3A111111111111%3Astack%2Facme-legacy-network%2F6f1e2d3c-0000-4000-8000-000000000002&Version=2010-05-15
@@ -869,7 +842,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 22
+    - id: 21
       request:
         proto: ""
         proto_major: 0
@@ -901,7 +874,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 23
+    - id: 22
       request:
         proto: ""
         proto_major: 0
@@ -973,7 +946,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 24
+    - id: 23
       request:
         proto: ""
         proto_major: 0
@@ -1000,7 +973,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 25
+    - id: 24
       request:
         proto: ""
         proto_major: 0
@@ -1027,7 +1000,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 26
+    - id: 25
       request:
         proto: ""
         proto_major: 0
@@ -1054,7 +1027,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 27
+    - id: 26
       request:
         proto: ""
         proto_major: 0
@@ -1081,7 +1054,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 28
+    - id: 27
       request:
         proto: ""
         proto_major: 0
@@ -1108,7 +1081,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 29
+    - id: 28
       request:
         proto: ""
         proto_major: 0
@@ -1146,7 +1119,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 30
+    - id: 29
       request:
         proto: ""
         proto_major: 0
@@ -1178,7 +1151,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 31
+    - id: 30
       request:
         proto: ""
         proto_major: 0
@@ -1214,7 +1187,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 32
+    - id: 31
       request:
         proto: ""
         proto_major: 0
@@ -1235,7 +1208,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 33
+    - id: 32
       request:
         proto: ""
         proto_major: 0
@@ -1260,7 +1233,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 34
+    - id: 33
       request:
         proto: ""
         proto_major: 0
@@ -1285,7 +1258,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 35
+    - id: 34
       request:
         proto: ""
         proto_major: 0
@@ -1310,7 +1283,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 36
+    - id: 35
       request:
         proto: ""
         proto_major: 0
@@ -1335,7 +1308,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 37
+    - id: 36
       request:
         proto: ""
         proto_major: 0
