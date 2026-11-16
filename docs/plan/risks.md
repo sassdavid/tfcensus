@@ -4,7 +4,7 @@
 |---|---|---|---|---|
 | R1 | **Type-mapping maintenance**, the reason driftctl stalled | high | high | Data-driven typemap generated from provider schemas and awscc ([ADR-0004](adr/0004-identity-arn-id-matching.md)); identity coverage grows upstream; unmapped → `undetermined`, never a false "managed" |
 | R2 | False positives erode trust | high | high | Built-in ownership packs, CEL rules with `--explain`, a measured FP rate under 5% before v0.1, categories instead of one "unmanaged" bucket |
-| R3 | AWS API throttling or slowness at Org scale | medium | medium | Capability-probed layers, the Config aggregator fast path, adaptive retry, per-layer caches, Cloud Control only for gap types |
+| R3 | AWS API throttling or slowness at Org scale | medium | medium | Capability-probed layers, the Config aggregator fast path, adaptive retry on the rate-limited APIs, per-layer caches, Cloud Control only for gap types |
 | R4 | `terraform query` / list resources mature and cover part of the use case | medium | medium | Complement rather than compete: codify emits `.tfquery.hcl`. tfcensus does multi-state, multi-account coverage and backend audit, which `query` (per-config, single provider) doesn't |
 | R5 | Terragrunt CLI or JSON churn (v1.x moves fast) | high | medium | Minimum version check, contract tests against pinned binaries nightly, the fast-path backend evaluator as a fallback |
 | R6 | OpenTofu encrypted state is unreadable | medium | low | Detect and report; optional `tofu show -json` path |

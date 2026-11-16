@@ -43,7 +43,9 @@ whichever region happens to run first. Resource Explorer runs only with a defaul
   `skipped`). A built-in **coverage matrix** (`tfcensus scan --explain-coverage`) shows, per type, which layer covered it in each account and region, so blind spots are visible rather than silent.
 
 ## Throughput and cost
-- Adaptive retry, plus one client-side token bucket per (account, region, service): Config 2 rps,
+- Retries per [engineering ADR-0005](../../engineering/adr/0005-http-and-api-clients.md): adaptive
+  for Cloud Control, Config and Resource Explorer, standard with 8 attempts for the rest. Plus one
+  client-side token bucket per (account, region, service): Config 2 rps,
   RE 5 rps, EC2 10 rps, S3 10 rps, Cloud Control 2 rps. IAM (5 rps) and Route 53 (5 rps) are
   global, so their bucket is per account.
 - `scan` caches its collected inventory and state index for `cache.ttl` (1 h), keyed by its inputs
