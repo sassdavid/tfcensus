@@ -165,12 +165,14 @@ func (s *saved) cachedScan() (*scan.Report, report.Source, []render.Error, error
 	}
 	inState.index(snap.Index)
 	results := match.New(m, snap.Index).Match(snap.Inventory.Resources)
-	findings := scan.Classify(results, eng, m, ownership.NewIndex(snap.Inventory.Resources))
+	findings := scan.Classify(results, scan.Sources{
+		Engine: eng, Map: m, Index: ownership.NewIndex(snap.Inventory.Resources), Stacks: stackIndex(snap.Inventory),
+	})
 	sortFindings(findings)
 	rep := &scan.Report{
 		Findings: findings, Runs: snap.Inventory.Runs, Coverage: snap.Inventory.Coverage,
 		Aggregator: snap.Inventory.Aggregator,
-		Warnings:   expiredWarnings(eng), Cached: true,
+		Warnings:   append(scan.StackOverlaps(findings), expiredWarnings(eng)...), Cached: true,
 	}
 	rep.Regions, rep.Accounts = scan.Summarize(findings)
 	src := report.Source{Cache: true, Created: snap.Created.UTC().Truncate(time.Second), Stale: stale}

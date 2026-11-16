@@ -65,9 +65,9 @@ the state of the discovered units, and puts each resource in one category:
   ignored         a user rule hides it
   undetermined    its type has no mapping, so tfcensus can't tell
 
-The flow is: capability probe, discovery, state index, inventory layers, matching, then the
-ownership rules (the built-in packs, then rules from the config and --rules files, first match
-wins). scan --explain <arn> prints how one resource was categorized; --explain-coverage prints
+The flow is: capability probe, discovery, state index, inventory layers, matching, CloudFormation
+stacks, then the ownership rules (the built-in packs, then rules from the config and --rules
+files, first match wins). scan --explain <arn> prints how one resource was categorized; --explain-coverage prints
 which layer listed each type in each account and region.
 
 Coverage is (managed + double-managed) / (managed + double-managed + unmanaged) per account.
@@ -83,12 +83,17 @@ sources are current with one SelectAggregateResourceConfig query in the aggregat
 An account and region the aggregator returns nothing for is queried in that account. doctor
 shows the aggregator's sources.
 
+scan lists the resources of every CloudFormation stack (cloudformation:ListStacks and
+ListStackResources) unless scan.cloudformation is false. A resource a stack lists and no state
+manages is other-iac with rule source/cloudformation; the finding names the stack. A resource a
+state manages stays managed, and the report warns that a stack lists it too.
+
 scan caches the inventory and state index under $XDG_CACHE_HOME/tfcensus/scan for cache.ttl
-(default 1h), keyed by the accounts, regions, layers, types and units. A re-run with other rules
+(default 1h), keyed by the accounts, regions, layers, types, units and scan.cloudformation. A re-run with other rules
 makes no AWS calls. --refresh lists again.
 
 The exit code is 3 when --fail-on finds at least --min-count findings, 1 when a layer, a state
-read or discovery failed, 4 when every failure was a credential problem, and 0 otherwise.`
+read, a stack listing or discovery failed, 4 when every failure was a credential problem, and 0 otherwise.`
 
 func newScanCmd(d *app.Deps, g *globals) *cobra.Command {
 	a := scanArgs{}
@@ -227,14 +232,16 @@ func runScan(cmd *cobra.Command, d *app.Deps, sink render.Sink, cfg *config.Conf
 	}
 	inState.index(snap.Index)
 	results := match.New(e.m, snap.Index).Match(snap.Inventory.Resources)
-	ix := ownership.NewIndex(snap.Inventory.Resources)
+	src := scan.Sources{
+		Engine: eng, Map: e.m, Index: ownership.NewIndex(snap.Inventory.Resources), Stacks: stackIndex(snap.Inventory),
+	}
 	if a.explain != "" {
-		return e.writeExplain(format, results, eng, ix)
+		return e.writeExplain(format, results, src)
 	}
 	if a.explainCoverage {
 		return writeCoverage(d, format, snap.Inventory.Coverage)
 	}
-	findings := scan.Classify(results, eng, e.m, ix)
+	findings := scan.Classify(results, src)
 	findings = slices.DeleteFunc(findings, func(f scan.Finding) bool {
 		return !e.types.Match(f.CFNType, f.SourceType, f.TFTypes)
 	})
@@ -245,6 +252,7 @@ func runScan(cmd *cobra.Command, d *app.Deps, sink render.Sink, cfg *config.Conf
 		Warnings:   []string{}, Cached: snap.cached,
 	}
 	rep.Regions, rep.Accounts = scan.Summarize(findings)
+	rep.Warnings = append(rep.Warnings, scan.StackOverlaps(findings)...)
 	for _, name := range eng.Expired() {
 		msg := fmt.Sprintf("rule %q is past its expires date and no longer matches", name)
 		rep.Warnings = append(rep.Warnings, msg)
@@ -395,6 +403,7 @@ func (e *scanEnv) cacheKey(disc discovery.Result) (string, error) {
 		"version": buildinfo.Get().Version, "accounts": e.cfg.Accounts, "regions": e.cfg.Regions,
 		"all_regions": e.cfg.AllRegions,
 		"layers":      e.layers, "types": e.cfn, "cloudcontrol": e.cc, "units": units, "index": index,
+		"cloudformation": e.cfg.Scan.CloudFormation,
 	})
 }
 
@@ -460,7 +469,7 @@ func (e *scanEnv) collect(loader *accounts.Loader, disc discovery.Result) (*scan
 			return e.regions(a, disc)
 		},
 		layers: e.layers, types: e.cfn, cc: e.cc, refresh: e.a.refresh,
-		loader: loader, aggregator: e.cfg.Accounts.Aggregator,
+		loader: loader, aggregator: e.cfg.Accounts.Aggregator, stacks: e.cfg.Scan.CloudFormation,
 	})
 	if err != nil {
 		return nil, err
@@ -480,6 +489,7 @@ type liveRequest struct {
 	// empty aggregator name turns the fast path off.
 	loader     *accounts.Loader
 	aggregator config.Aggregator
+	stacks     bool // also list CloudFormation stack resources
 }
 
 // collectLive probes each account and runs the inventory layers, as scan and whois do.
@@ -498,7 +508,8 @@ func collectLive(cmd *cobra.Command, d *app.Deps, m *typemap.Map, req liveReques
 		targets = append(targets, inventory.Target{Account: acct, Report: rep})
 	}
 	env := &inventory.Env{Map: m, Limits: inventory.NewLimiters(nil), Logger: d.Logger, CloudControlTypes: req.cc}
-	res, err := inventory.NewCollector(inventory.Options{Env: env}).Collect(ctx, inventory.Request{
+	col := inventory.NewCollector(inventory.Options{Env: env})
+	res, err := col.Collect(ctx, inventory.Request{
 		Targets: targets, Layers: req.layers, Types: req.types,
 		Aggregator: liveAggregator(cmd, d, prober, req),
 	})
@@ -508,7 +519,24 @@ func collectLive(cmd *cobra.Command, d *app.Deps, m *typemap.Map, req liveReques
 	if err != nil {
 		return nil, fmt.Errorf("list live resources: %w", err)
 	}
+	if req.stacks {
+		st, serr := col.Stacks(ctx, targets)
+		if serr != nil {
+			return nil, fmt.Errorf("list CloudFormation stacks: %w", serr)
+		}
+		res.Stacks = st.Resources
+		res.Runs = append(res.Runs, st.Runs...)
+	}
 	return res, nil
+}
+
+// stackIndex indexes the CloudFormation stack resources of an inventory, or returns nil when
+// the scan didn't list them.
+func stackIndex(inv *inventory.Result) *inventory.StackIndex {
+	if inv == nil || inv.Stacks == nil {
+		return nil
+	}
+	return inventory.NewStackIndex(inv.Stacks)
 }
 
 // liveAggregator returns the aggregator that accounts.aggregator names, with its probe result,
@@ -666,12 +694,7 @@ func sortFindings(fs []scan.Finding) {
 	})
 }
 
-func (e *scanEnv) writeExplain(
-	format render.Format,
-	results []match.Result,
-	eng *ownership.Engine,
-	ix *ownership.Index,
-) error {
+func (e *scanEnv) writeExplain(format render.Format, results []match.Result, src scan.Sources) error {
 	want := e.a.explain
 	if strings.HasPrefix(want, "arn:") {
 		want = typemap.NormalizeARN(want)
@@ -679,7 +702,7 @@ func (e *scanEnv) writeExplain(
 	for i := range results {
 		r := &results[i].Resource
 		if r.ARN == want || r.ID == want {
-			ex := scan.Explain(&results[i], eng, e.m, ix)
+			ex := scan.Explain(&results[i], src)
 			if format == render.FormatJSON {
 				return render.JSON(e.d.Stdout, render.NewEnvelope(buildinfo.Get().Version, e.d.Clock(), ex))
 			}

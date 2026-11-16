@@ -1,7 +1,7 @@
 # Spec: `tfcensus scan` report
 
 ## Flow
-capability probe → discovery (F1) → state index (F3) → inventory layers → match → ownership rules → report.
+capability probe → discovery (F1) → state index (F3) → inventory layers → match → CloudFormation stacks → ownership rules → report.
 
 ## Categories
 
@@ -10,7 +10,7 @@ capability probe → discovery (F1) → state index (F3) → inventory layers �
 | managed | matched to exactly one state resource | no |
 | double-managed | matched in more than one unit | separate gate `double-managed` |
 | unmanaged | no match, no rule | **yes** |
-| other-iac | owned by CFN/CDK/Pulumi/k8s controllers | no |
+| other-iac | owned by CFN/CDK/Pulumi/k8s controllers: listed by a CloudFormation stack, or tagged | no |
 | aws-managed | AWS-created or default | no |
 | derived | child of a managed or derived resource | no |
 | ignored | user rule | no |
@@ -28,6 +28,12 @@ capability probe → discovery (F1) → state index (F3) → inventory layers �
 - Exit codes: 3 when `--fail-on unmanaged|double-managed` finds at least `--min-count` findings
   (scoped by `--types`); else 1 when a layer, a state read or discovery failed; 4 when every
   failure was a credential problem and no layer listed anything; 0 otherwise.
+- CloudFormation source ([ADR-0014](../adr/0014-cloudformation-stack-source.md)): with
+  `scan.cloudformation` on (the default), scan lists every stack's resources. A resource that a
+  stack lists and no state manages is `other-iac` with owner `cloudformation` and rule
+  `source/cloudformation`, before any ownership rule. Every finding a stack lists has a `stack`
+  object (`name`, `id`, `root` for a nested stack, `logical_id`). A managed or double-managed one
+  keeps its category and the report warns. CSV has a `stack` column; tty and md list the stacks.
 - `--explain <arn|id>` prints one resource's match, every rule's outcome and its category;
   `--explain-coverage` prints the layer coverage matrix. A re-run with other rules reads the cached
   inventory ([ADR-0009](../adr/0009-scan-snapshot-cache.md)).
@@ -37,3 +43,8 @@ capability probe → discovery (F1) → state index (F3) → inventory layers �
 - [x] The summary's coverage % excludes aws-managed, derived, other-iac, ignored and undetermined (documented formula, unit-tested).
 - [x] `--fail-on unmanaged --types 'AWS::IAM::*'` exits 3 only for IAM findings.
 - [x] A re-run with different `--rules` uses the cache (no AWS calls; counter).
+- [x] CloudFormation stack resources (nested stacks, paginated listings, retained and deleted
+  resources, a denied region) join live resources by ID, ARN, name or ARN segment. A stack decides
+  before the rules, a state before the stack, and `scan.cloudformation: false` makes no stack
+  calls (`TestStacks`, `TestStackIndex`, `TestClassifyStacks`, `TestScanCloudFormationOff`, the
+  `spec_scan_1` goldens).

@@ -16,9 +16,9 @@ the state of the discovered units, and puts each resource in one category:
   ignored         a user rule hides it
   undetermined    its type has no mapping, so tfcensus can't tell
 
-The flow is: capability probe, discovery, state index, inventory layers, matching, then the
-ownership rules (the built-in packs, then rules from the config and --rules files, first match
-wins). scan --explain <arn> prints how one resource was categorized; --explain-coverage prints
+The flow is: capability probe, discovery, state index, inventory layers, matching, CloudFormation
+stacks, then the ownership rules (the built-in packs, then rules from the config and --rules
+files, first match wins). scan --explain <arn> prints how one resource was categorized; --explain-coverage prints
 which layer listed each type in each account and region.
 
 Coverage is (managed + double-managed) / (managed + double-managed + unmanaged) per account.
@@ -34,12 +34,17 @@ sources are current with one SelectAggregateResourceConfig query in the aggregat
 An account and region the aggregator returns nothing for is queried in that account. doctor
 shows the aggregator's sources.
 
+scan lists the resources of every CloudFormation stack (cloudformation:ListStacks and
+ListStackResources) unless scan.cloudformation is false. A resource a stack lists and no state
+manages is other-iac with rule source/cloudformation; the finding names the stack. A resource a
+state manages stays managed, and the report warns that a stack lists it too.
+
 scan caches the inventory and state index under $XDG_CACHE_HOME/tfcensus/scan for cache.ttl
-(default 1h), keyed by the accounts, regions, layers, types and units. A re-run with other rules
+(default 1h), keyed by the accounts, regions, layers, types, units and scan.cloudformation. A re-run with other rules
 makes no AWS calls. --refresh lists again.
 
 The exit code is 3 when --fail-on finds at least --min-count findings, 1 when a layer, a state
-read or discovery failed, 4 when every failure was a credential problem, and 0 otherwise.
+read, a stack listing or discovery failed, 4 when every failure was a credential problem, and 0 otherwise.
 
 ```
 tfcensus scan [paths...] [flags]

@@ -15,6 +15,7 @@ verbatim=(
 )
 
 cli_identical=(
+  .claude/rules/aws-sdk.md
   .claude/rules/go.md
   .claude/rules/writing.md
   .gitattributes

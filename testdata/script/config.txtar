@@ -150,6 +150,7 @@ regions: []
 rules: []
 scan:
   cloudcontrol_types: []
+  cloudformation: true
   layers: auto
   never_hide: []
   packs:

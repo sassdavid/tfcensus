@@ -488,6 +488,142 @@ interactions:
         proto: ""
         proto_major: 0
         proto_minor: 0
+        content_length: 165
+        host: ""
+        body: Action=ListStackResources&StackName=arn%3Aaws%3Acloudformation%3Aeu-west-1%3A111111111111%3Astack%2Fbilling%2F6f1e2d3c-0000-4000-8000-000000000001&Version=2010-05-15
+        form:
+            Action:
+                - ListStackResources
+            StackName:
+                - arn:aws:cloudformation:eu-west-1:111111111111:stack/billing/6f1e2d3c-0000-4000-8000-000000000001
+            Version:
+                - "2010-05-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://cloudformation.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ListStackResourcesResponse xmlns="http://cloudformation.amazonaws.com/doc/2010-05-15/"><ListStackResourcesResult><StackResourceSummaries><member><LogicalResourceId>EventsQueue</LogicalResourceId><PhysicalResourceId>https://sqs.eu-west-1.amazonaws.com/111111111111/billing-events</PhysicalResourceId><ResourceType>AWS::SQS::Queue</ResourceType><LastUpdatedTimestamp>2026-06-01T08:05:00Z</LastUpdatedTimestamp><ResourceStatus>CREATE_COMPLETE</ResourceStatus></member><member><LogicalResourceId>Api</LogicalResourceId><PhysicalResourceId>acme-api</PhysicalResourceId><ResourceType>AWS::Lambda::Function</ResourceType><LastUpdatedTimestamp>2026-06-01T08:05:00Z</LastUpdatedTimestamp><ResourceStatus>CREATE_COMPLETE</ResourceStatus></member><member><LogicalResourceId>AlarmsStack</LogicalResourceId><PhysicalResourceId>arn:aws:cloudformation:eu-west-1:111111111111:stack/billing-AlarmsStack-1ABCDEF/6f1e2d3c-0000-4000-8000-000000000001</PhysicalResourceId><ResourceType>AWS::CloudFormation::Stack</ResourceType><LastUpdatedTimestamp>2026-06-01T08:05:00Z</LastUpdatedTimestamp><ResourceStatus>CREATE_COMPLETE</ResourceStatus></member></StackResourceSummaries></ListStackResourcesResult></ListStackResourcesResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 8
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 185
+        host: ""
+        body: Action=ListStackResources&StackName=arn%3Aaws%3Acloudformation%3Aeu-west-1%3A111111111111%3Astack%2Fbilling-AlarmsStack-1ABCDEF%2F6f1e2d3c-0000-4000-8000-000000000001&Version=2010-05-15
+        form:
+            Action:
+                - ListStackResources
+            StackName:
+                - arn:aws:cloudformation:eu-west-1:111111111111:stack/billing-AlarmsStack-1ABCDEF/6f1e2d3c-0000-4000-8000-000000000001
+            Version:
+                - "2010-05-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://cloudformation.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ListStackResourcesResponse xmlns="http://cloudformation.amazonaws.com/doc/2010-05-15/"><ListStackResourcesResult><StackResourceSummaries><member><LogicalResourceId>Nightly</LogicalResourceId><PhysicalResourceId>billing-nightly</PhysicalResourceId><ResourceType>AWS::Events::Rule</ResourceType><LastUpdatedTimestamp>2026-06-01T08:05:00Z</LastUpdatedTimestamp><ResourceStatus>CREATE_COMPLETE</ResourceStatus></member></StackResourceSummaries></ListStackResourcesResult></ListStackResourcesResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 9
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 1069
+        host: ""
+        body: Action=ListStacks&StackStatusFilter.member.1=CREATE_COMPLETE&StackStatusFilter.member.10=IMPORT_ROLLBACK_IN_PROGRESS&StackStatusFilter.member.11=ROLLBACK_COMPLETE&StackStatusFilter.member.12=ROLLBACK_FAILED&StackStatusFilter.member.13=ROLLBACK_IN_PROGRESS&StackStatusFilter.member.14=UPDATE_COMPLETE&StackStatusFilter.member.15=UPDATE_COMPLETE_CLEANUP_IN_PROGRESS&StackStatusFilter.member.16=UPDATE_FAILED&StackStatusFilter.member.17=UPDATE_IN_PROGRESS&StackStatusFilter.member.18=UPDATE_ROLLBACK_COMPLETE&StackStatusFilter.member.19=UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS&StackStatusFilter.member.2=CREATE_FAILED&StackStatusFilter.member.20=UPDATE_ROLLBACK_FAILED&StackStatusFilter.member.21=UPDATE_ROLLBACK_IN_PROGRESS&StackStatusFilter.member.3=CREATE_IN_PROGRESS&StackStatusFilter.member.4=DELETE_FAILED&StackStatusFilter.member.5=DELETE_IN_PROGRESS&StackStatusFilter.member.6=IMPORT_COMPLETE&StackStatusFilter.member.7=IMPORT_IN_PROGRESS&StackStatusFilter.member.8=IMPORT_ROLLBACK_COMPLETE&StackStatusFilter.member.9=IMPORT_ROLLBACK_FAILED&Version=2010-05-15
+        form:
+            Action:
+                - ListStacks
+            StackStatusFilter.member.1:
+                - CREATE_COMPLETE
+            StackStatusFilter.member.2:
+                - CREATE_FAILED
+            StackStatusFilter.member.3:
+                - CREATE_IN_PROGRESS
+            StackStatusFilter.member.4:
+                - DELETE_FAILED
+            StackStatusFilter.member.5:
+                - DELETE_IN_PROGRESS
+            StackStatusFilter.member.6:
+                - IMPORT_COMPLETE
+            StackStatusFilter.member.7:
+                - IMPORT_IN_PROGRESS
+            StackStatusFilter.member.8:
+                - IMPORT_ROLLBACK_COMPLETE
+            StackStatusFilter.member.9:
+                - IMPORT_ROLLBACK_FAILED
+            StackStatusFilter.member.10:
+                - IMPORT_ROLLBACK_IN_PROGRESS
+            StackStatusFilter.member.11:
+                - ROLLBACK_COMPLETE
+            StackStatusFilter.member.12:
+                - ROLLBACK_FAILED
+            StackStatusFilter.member.13:
+                - ROLLBACK_IN_PROGRESS
+            StackStatusFilter.member.14:
+                - UPDATE_COMPLETE
+            StackStatusFilter.member.15:
+                - UPDATE_COMPLETE_CLEANUP_IN_PROGRESS
+            StackStatusFilter.member.16:
+                - UPDATE_FAILED
+            StackStatusFilter.member.17:
+                - UPDATE_IN_PROGRESS
+            StackStatusFilter.member.18:
+                - UPDATE_ROLLBACK_COMPLETE
+            StackStatusFilter.member.19:
+                - UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS
+            StackStatusFilter.member.20:
+                - UPDATE_ROLLBACK_FAILED
+            StackStatusFilter.member.21:
+                - UPDATE_ROLLBACK_IN_PROGRESS
+            Version:
+                - "2010-05-15"
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://cloudformation.eu-west-1.amazonaws.com/
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: -1
+        body: <ListStacksResponse xmlns="http://cloudformation.amazonaws.com/doc/2010-05-15/"><ListStacksResult><StackSummaries><member><StackId>arn:aws:cloudformation:eu-west-1:111111111111:stack/billing/6f1e2d3c-0000-4000-8000-000000000001</StackId><StackName>billing</StackName><CreationTime>2026-06-01T08:00:00Z</CreationTime><StackStatus>UPDATE_COMPLETE</StackStatus></member><member><StackId>arn:aws:cloudformation:eu-west-1:111111111111:stack/billing-AlarmsStack-1ABCDEF/6f1e2d3c-0000-4000-8000-000000000001</StackId><StackName>billing-AlarmsStack-1ABCDEF</StackName><CreationTime>2026-06-01T08:00:00Z</CreationTime><StackStatus>UPDATE_COMPLETE</StackStatus><ParentId>arn:aws:cloudformation:eu-west-1:111111111111:stack/billing/6f1e2d3c-0000-4000-8000-000000000001</ParentId><RootId>arn:aws:cloudformation:eu-west-1:111111111111:stack/billing/6f1e2d3c-0000-4000-8000-000000000001</RootId></member></StackSummaries></ListStacksResult></ListStacksResponse>
+        headers:
+            Content-Type:
+                - text/xml
+        status: 200 OK
+        code: 200
+        duration: 0s
+    - id: 10
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
         content_length: 2
         host: ""
         body: '{}'
@@ -510,7 +646,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 8
+    - id: 11
       request:
         proto: ""
         proto_major: 0
@@ -537,7 +673,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 9
+    - id: 12
       request:
         proto: ""
         proto_major: 0
@@ -564,7 +700,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 10
+    - id: 13
       request:
         proto: ""
         proto_major: 0
@@ -591,7 +727,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 11
+    - id: 14
       request:
         proto: ""
         proto_major: 0
@@ -623,7 +759,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 12
+    - id: 15
       request:
         proto: ""
         proto_major: 0
@@ -659,7 +795,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 13
+    - id: 16
       request:
         proto: ""
         proto_major: 0
@@ -680,7 +816,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 14
+    - id: 17
       request:
         proto: ""
         proto_major: 0
@@ -705,7 +841,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 15
+    - id: 18
       request:
         proto: ""
         proto_major: 0
@@ -723,14 +859,14 @@ interactions:
         proto_major: 1
         proto_minor: 1
         content_length: -1
-        body: '{"Resources":[{"Arn":"arn:aws:logs:eu-west-1:111111111111:log-group:/aws/lambda/acme-api","OwningAccountId":"111111111111","Region":"eu-west-1","ResourceType":"logs:log-group","Service":"logs"},{"Arn":"arn:aws:ec2:eu-west-1:111111111111:key-pair/key-0aa00000000000f6","OwningAccountId":"111111111111","Region":"eu-west-1","ResourceType":"ec2:key-pair","Service":"ec2"}]}'
+        body: '{"Resources":[{"Arn":"arn:aws:logs:eu-west-1:111111111111:log-group:/aws/lambda/acme-api","OwningAccountId":"111111111111","Region":"eu-west-1","ResourceType":"logs:log-group","Service":"logs"},{"Arn":"arn:aws:ec2:eu-west-1:111111111111:key-pair/key-0aa00000000000f6","OwningAccountId":"111111111111","Region":"eu-west-1","ResourceType":"ec2:key-pair","Service":"ec2"},{"CfnResourceType":"AWS::Events::Rule","Arn":"arn:aws:events:eu-west-1:111111111111:rule/billing-nightly","OwningAccountId":"111111111111","Region":"eu-west-1","ResourceType":"events:rule","Service":"events"}]}'
         headers:
             Content-Type:
                 - application/json
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 16
+    - id: 19
       request:
         proto: ""
         proto_major: 0
@@ -755,7 +891,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 17
+    - id: 20
       request:
         proto: ""
         proto_major: 0
@@ -780,7 +916,7 @@ interactions:
         status: 200 OK
         code: 200
         duration: 0s
-    - id: 18
+    - id: 21
       request:
         proto: ""
         proto_major: 0

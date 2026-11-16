@@ -153,6 +153,33 @@ func undeterminedReasons(rep *scan.Report) []string {
 	return out
 }
 
+// stackLines counts the findings each CloudFormation stack lists, one line per stack, sorted.
+func stackLines(rep *scan.Report) []string {
+	type key struct{ name, root string }
+	counts := map[key]int{}
+	for i := range rep.Findings {
+		if s := rep.Findings[i].Stack; s != nil {
+			counts[key{s.Name, s.Root}]++
+		}
+	}
+	keys := slices.SortedFunc(maps.Keys(counts), func(a, b key) int {
+		return cmp.Or(strings.Compare(a.name, b.name), strings.Compare(a.root, b.root))
+	})
+	out := make([]string, 0, len(keys))
+	for _, k := range keys {
+		label := k.name
+		if k.root != "" && k.root != k.name {
+			label += " (nested in " + k.root + ")"
+		}
+		noun := "resources"
+		if counts[k] == 1 {
+			noun = "resource"
+		}
+		out = append(out, fmt.Sprintf("%s: %d %s", label, counts[k], noun))
+	}
+	return out
+}
+
 // scanNotes lists failed layers, problems and warnings, one line each.
 func scanNotes(rep *scan.Report, problems []scan.Problem) []string {
 	var notes []string
@@ -208,6 +235,12 @@ func writeScanText(w io.Writer, rep *scan.Report, problems []scan.Problem, now t
 			if f := &rep.Findings[i]; f.Category == scan.CategoryDoubleManaged {
 				_, _ = fmt.Fprintf(w, "  %s %s: %s\n", f.Type(), f.Key(), refsText(f.ManagedBy))
 			}
+		}
+	}
+	if lines := stackLines(rep); len(lines) > 0 {
+		_, _ = fmt.Fprintf(w, "\nCloudFormation stacks (%d)\n", len(lines))
+		for _, l := range lines {
+			_, _ = fmt.Fprintln(w, "  "+l)
 		}
 	}
 	if reasons := undeterminedReasons(rep); len(reasons) > 0 {
@@ -284,6 +317,17 @@ func mdRow(cells []string) string {
 	return "| " + strings.Join(out, " | ") + " |\n"
 }
 
+// mdList writes a titled bullet list, or nothing when items is empty.
+func mdList(b *strings.Builder, title string, items []string) {
+	if len(items) == 0 {
+		return
+	}
+	b.WriteString("\n" + title + "\n\n")
+	for _, it := range items {
+		b.WriteString("- " + it + "\n")
+	}
+}
+
 func writeScanMarkdown(w io.Writer, rep *scan.Report, problems []scan.Problem, now time.Time) error {
 	var b strings.Builder
 	cols := summaryColumns()
@@ -313,12 +357,8 @@ func writeScanMarkdown(w io.Writer, rep *scan.Report, problems []scan.Problem, n
 		}
 		b.WriteString("\n</details>\n")
 	}
-	if reasons := undeterminedReasons(rep); len(reasons) > 0 {
-		b.WriteString("\nUndetermined:\n\n")
-		for _, r := range reasons {
-			b.WriteString("- " + r + "\n")
-		}
-	}
+	mdList(&b, "CloudFormation stacks:", stackLines(rep))
+	mdList(&b, "Undetermined:", undeterminedReasons(rep))
 	if notes := scanNotes(rep, problems); len(notes) > 0 {
 		b.WriteString("\n")
 		for _, n := range notes {
@@ -335,7 +375,7 @@ func writeScanMarkdown(w io.Writer, rep *scan.Report, problems []scan.Problem, n
 func writeScanCSV(w io.Writer, rep *scan.Report) error {
 	cw := csv.NewWriter(w)
 	_ = cw.Write(strings.Split("account,region,category,cfn_type,source_type,tf_types,arn,id,name,owner,rule,"+
-		"reason,managed_by,created,sources,tags", ","))
+		"reason,managed_by,created,sources,tags,stack", ","))
 	for i := range rep.Findings {
 		f := &rep.Findings[i]
 		managed := make([]string, len(f.ManagedBy))
@@ -346,10 +386,14 @@ func writeScanCSV(w io.Writer, rep *scan.Report) error {
 		for _, k := range slices.Sorted(maps.Keys(f.Tags)) {
 			tags = append(tags, k+"="+f.Tags[k])
 		}
+		stack := ""
+		if f.Stack != nil {
+			stack = f.Stack.Name
+		}
 		_ = cw.Write([]string{
 			f.Account, cmp.Or(f.Region, inventory.GlobalColumn), string(f.Category), f.CFNType, f.SourceType,
 			strings.Join(f.TFTypes, ";"), f.ARN, f.ID, f.Name, f.Owner, f.Rule, f.Reason, strings.Join(managed, ";"),
-			f.Created, strings.Join(f.Sources, ";"), strings.Join(tags, ";"),
+			f.Created, strings.Join(f.Sources, ";"), strings.Join(tags, ";"), stack,
 		})
 	}
 	cw.Flush()

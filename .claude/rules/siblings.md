@@ -29,6 +29,7 @@ Keep the same in both siblings:
 - Tool versions in mise.toml, action SHAs, and the mise version passed to `jdx/mise-action`.
 - The golden golangci-lint config tag and the local overrides (ADR-0008).
 - Comment and writing rules: `.claude/rules/go.md` and `.claude/rules/writing.md`.
+- AWS SDK rules: `.claude/rules/aws-sdk.md`.
 
 ## Release process and accounts
 

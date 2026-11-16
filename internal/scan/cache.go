@@ -16,7 +16,7 @@ import (
 )
 
 // snapshotFormat changes when [Snapshot] changes shape, so old cache files are ignored.
-const snapshotFormat = 1
+const snapshotFormat = 2
 
 // Snapshot is what a scan collected before matching: the live inventory, the state index and
 // the problems found on the way. Rules aren't part of it, so a re-run with other rules can reuse

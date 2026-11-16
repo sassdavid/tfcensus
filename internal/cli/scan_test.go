@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -232,6 +233,52 @@ func reResourceBody(arn, reType string) string {
 		arn, scanAcct, scanRegion, reType, svc)
 }
 
+// eventsRuleARN is an EventBridge rule that Resource Explorer lists and the typemap doesn't map,
+// so matching leaves it undetermined; a nested stack lists it.
+func eventsRuleARN() string { return "arn:aws:events:eu-west-1:" + scanAcct + ":rule/billing-nightly" }
+
+const cfnXMLNS = `xmlns="http://cloudformation.amazonaws.com/doc/2010-05-15/"`
+
+func scanStackID(name string) string {
+	return "arn:aws:cloudformation:eu-west-1:" + scanAcct + ":stack/" + name + "/6f1e2d3c-0000-4000-8000-000000000001"
+}
+
+// stackStubs serves the CloudFormation stacks of the scan account: billing lists the
+// billing-events queue (other-iac, and tagged too), the acme-api function (in a state as well)
+// and a nested stack, which lists the unmapped billing-nightly rule.
+func stackStubs(r *awstest.Router) {
+	ok := func(body string) awstest.Stub { return awstest.Stub{Body: body} }
+	nested := "billing-AlarmsStack-1ABCDEF"
+	summary := func(name, root string) string {
+		s := "<member><StackId>" + scanStackID(name) + "</StackId><StackName>" + name + "</StackName>" +
+			"<CreationTime>2026-06-01T08:00:00Z</CreationTime><StackStatus>UPDATE_COMPLETE</StackStatus>"
+		if root != "" {
+			s += "<ParentId>" + scanStackID(root) + "</ParentId><RootId>" + scanStackID(root) + "</RootId>"
+		}
+		return s + "</member>"
+	}
+	res := func(logical, cfn, physical string) string {
+		return "<member><LogicalResourceId>" + logical + "</LogicalResourceId><PhysicalResourceId>" + physical +
+			"</PhysicalResourceId><ResourceType>" + cfn + "</ResourceType><LastUpdatedTimestamp>" +
+			"2026-06-01T08:05:00Z</LastUpdatedTimestamp><ResourceStatus>CREATE_COMPLETE</ResourceStatus></member>"
+	}
+	resources := func(members ...string) string {
+		return "<ListStackResourcesResponse " + cfnXMLNS + "><ListStackResourcesResult><StackResourceSummaries>" +
+			strings.Join(
+				members,
+				"",
+			) + "</StackResourceSummaries></ListStackResourcesResult></ListStackResourcesResponse>"
+	}
+	r.On("cloudformation", "ListStacks", "", ok("<ListStacksResponse "+cfnXMLNS+"><ListStacksResult><StackSummaries>"+
+		summary("billing", "")+summary(nested, "billing")+"</StackSummaries></ListStacksResult></ListStacksResponse>"))
+	r.On("cloudformation", "ListStackResources", "stack%2F"+nested+"%2F", ok(resources(
+		res("Nightly", "AWS::Events::Rule", "billing-nightly"))))
+	r.On("cloudformation", "ListStackResources", "stack%2Fbilling%2F", ok(resources(
+		res("EventsQueue", "AWS::SQS::Queue", "https://sqs.eu-west-1.amazonaws.com/"+scanAcct+"/billing-events"),
+		res("Api", "AWS::Lambda::Function", "acme-api"),
+		res("AlarmsStack", "AWS::CloudFormation::Stack", scanStackID(nested)))))
+}
+
 // scanStubs serves the probe, every inventory layer and Cloud Control for the scan cassette. With
 // iamOnly, it serves a scan limited to IAM types: Config returns IAM items only and the layers
 // without IAM types make no calls. With aggregated, the config items come from the acme-org
@@ -270,13 +317,21 @@ func scanStubs(r *awstest.Router, iamOnly, aggregated bool) {
 		`xmlns="https://iam.amazonaws.com/doc/2010-05-08/"><GetAccountAuthorizationDetailsResult>`+
 		`<IsTruncated>false</IsTruncated><UserDetailList/><GroupDetailList/><RoleDetailList/><Policies/>`+
 		`</GetAccountAuthorizationDetailsResult></GetAccountAuthorizationDetailsResponse>`))
+	stackStubs(r)
 	if iamOnly {
 		r.On("resource-explorer-2", "ListResources", "", ok(`{"Resources":[]}`))
 		return
 	}
 	r.On("resource-explorer-2", "ListResources", "", ok(`{"Resources":[`+
 		reResourceBody("arn:aws:logs:eu-west-1:"+scanAcct+":log-group:/aws/lambda/acme-api", "logs:log-group")+","+
-		reResourceBody(arnEC2("key-pair/key-0aa00000000000f6"), "ec2:key-pair")+`]}`))
+		reResourceBody(arnEC2("key-pair/key-0aa00000000000f6"), "ec2:key-pair")+","+
+		strings.Replace(
+			reResourceBody(eventsRuleARN(), "events:rule"),
+			"{",
+			`{"CfnResourceType":"AWS::Events::Rule",`,
+			1,
+		)+
+		`]}`))
 	r.On("cloudcontrolapi", "ListResources", "ListenerArn", ok(`{"ResourceDescriptions":[{"Identifier":"`+
 		arnELB("listener-rule/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2/9683b2d02a6cabee")+`","Properties":"{}"}]}`))
 	r.On("ec2", "DescribeSecurityGroupRules", "", ok(`<DescribeSecurityGroupRulesResponse `+
@@ -416,6 +471,61 @@ func TestScanAttributeValues(t *testing.T) {
 	for label, out := range outputs {
 		for _, s := range secrets {
 			assert.NotContains(t, out, s, "%s contains an attribute value", label)
+		}
+	}
+}
+
+// hostCounter counts the requests to hosts that start with prefix.
+type hostCounter struct {
+	rt     http.RoundTripper
+	prefix string
+	n      atomic.Int64
+}
+
+func (h *hostCounter) RoundTrip(req *http.Request) (*http.Response, error) {
+	if strings.HasPrefix(req.URL.Host, h.prefix) {
+		h.n.Add(1)
+	}
+	return h.rt.RoundTrip(req)
+}
+
+// TestScanCloudFormationOff: with scan.cloudformation false, scan makes no CloudFormation stack
+// calls and the tag rule decides the tagged queue, as before the stack source existed.
+func TestScanCloudFormationOff(t *testing.T) {
+	t.Parallel()
+	b, err := os.ReadFile(scanConfig)
+	require.NoError(t, err)
+	cfg := filepath.Join(t.TempDir(), "tfcensus.yaml")
+	off := strings.Replace(string(b), "scan:\n", "scan:\n  cloudformation: false\n", 1)
+	require.NoError(t, os.WriteFile(cfg, []byte(off), 0o600))
+
+	rt := &hostCounter{rt: awstest.Replay(t, scanCassette), prefix: "cloudformation."}
+	var stdout, stderr bytes.Buffer
+	code := cli.Execute(t.Context(), scanDeps(t, rt, fleetHome(t), &stdout, &stderr),
+		[]string{"scan", "tf-scan", "--config", cfg, "--format", "json", "--concurrency", "1"})
+	require.Equal(t, cli.ExitOK, code, stderr.String())
+	assert.Zero(t, rt.n.Load(), "no CloudFormation stack calls")
+
+	var out struct {
+		Data struct {
+			Findings []struct {
+				ARN   string          `json:"arn"`
+				Rule  string          `json:"rule"`
+				Stack json.RawMessage `json:"stack"`
+			} `json:"findings"`
+			Runs []struct {
+				Layer string `json:"layer"`
+			} `json:"runs"`
+		} `json:"data"`
+	}
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &out))
+	for _, r := range out.Data.Runs {
+		assert.NotEqual(t, "cloudformation", r.Layer)
+	}
+	for _, f := range out.Data.Findings {
+		assert.Empty(t, f.Stack, f.ARN)
+		if f.ARN == "arn:aws:sqs:eu-west-1:"+scanAcct+":billing-events" {
+			assert.Equal(t, "pack/other-iac/cloudformation", f.Rule)
 		}
 	}
 }

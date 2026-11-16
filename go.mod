@@ -10,6 +10,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.21.0
 	github.com/aws/aws-sdk-go-v2/service/account v1.42.11
 	github.com/aws/aws-sdk-go-v2/service/cloudcontrol v1.38.12
+	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.84.0
 	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.65.12
 	github.com/aws/aws-sdk-go-v2/service/configservice v1.75.0
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.74.0

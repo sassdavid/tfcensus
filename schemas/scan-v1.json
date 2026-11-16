@@ -45,7 +45,7 @@
           "items": { "$ref": "#/$defs/finding" }
         },
         "runs": {
-          "description": "Each inventory layer's listing of one account and region.",
+          "description": "Each inventory layer's listing of one account and region, and each CloudFormation stack listing (layer cloudformation).",
           "type": "array",
           "items": {
             "type": "object",
@@ -155,7 +155,7 @@
         "owner": { "type": "string" },
         "reason": { "type": "string", "minLength": 1 },
         "rule": {
-          "description": "The match rule (match/...) or ownership rule (pack/<pack>/<name>, user/<name>, rules/no-match) that decided the category.",
+          "description": "The match rule (match/...), the CloudFormation source (source/cloudformation) or ownership rule (pack/<pack>/<name>, user/<name>, rules/no-match) that decided the category.",
           "type": "string",
           "minLength": 1
         },
@@ -170,6 +170,18 @@
               "workspace": { "type": "string" },
               "address": { "type": "string" }
             }
+          }
+        },
+        "stack": {
+          "description": "The CloudFormation stack that lists the resource. A resource no state manages is then other-iac; one a state manages keeps its category and the report warns.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "id", "logical_id"],
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "id": { "type": "string" },
+            "root": { "type": "string", "description": "The top-level stack, for a nested stack." },
+            "logical_id": { "type": "string" }
           }
         }
       }

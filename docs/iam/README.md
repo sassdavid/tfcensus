@@ -15,6 +15,8 @@ Narrow it before use:
   to look for stale locks and orphaned digests. Lock items hold lock metadata, not state.
 - `EnabledRegions`: `account:ListRegions` runs only for `--all-regions` (config `all_regions`). Drop it if you never
   use that flag.
+- `CloudFormationStacks`: `scan` lists stack resources to find what CloudFormation owns. It reads stack and resource
+  identifiers only, never templates or outputs. Drop it if you set `scan.cloudformation: false`.
 - `StateAccessLogging`: `audit backend` reads trail event selectors to see whether CloudTrail logs S3 data events
   for a state bucket that has no server access logging (S3-LOG).
 

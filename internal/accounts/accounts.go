@@ -190,8 +190,8 @@ func SDKLogger(logger *slog.Logger) logging.Logger {
 	})
 }
 
-// AdaptiveRetryer returns the retryer for clients of Cloud Control, Config and Resource Explorer,
-// whose low rate limits suit adaptive retry, with the attempt limit of cfg. A Retryer that cfg
+// AdaptiveRetryer returns the retryer for clients of Cloud Control, Config, Resource Explorer and
+// the CloudFormation stack listing, whose low rate limits suit adaptive retry, with the attempt limit of cfg. A Retryer that cfg
 // sets wins, so tests keep theirs.
 func AdaptiveRetryer(cfg aws.Config) aws.Retryer {
 	if cfg.Retryer != nil {

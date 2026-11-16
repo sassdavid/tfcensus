@@ -40,7 +40,7 @@ Research basis: emulator coverage was checked API by API against tfcensus's call
 
 ## Later: real-AWS validation (optional)
 1. **Read-only runs on existing non-prod work accounts** (manual, with named profiles approved per session):
-   - use a read-only role: ViewOnlyAccess + `config:Select*`, `resource-explorer-2:Search|List*|Get*`, `cloudformation:ListResources|GetResource`, and `s3:GetObject` + `kms:Decrypt` scoped to state buckets;
+   - use a read-only role: ViewOnlyAccess + `config:Select*`, `resource-explorer-2:Search|List*|Get*`, `cloudformation:ListResources|GetResource|ListStacks|ListStackResources`, and `s3:GetObject` + `kms:Decrypt` scoped to state buckets;
    - **check employer policy first**: state contains secrets, and tfcensus prints only identifiers;
    - record redacted cassettes during these runs. They become the realistic L0 fixtures. **Never run `move` there.**
 2. **A dedicated sandbox, if ever needed** (for `move` e2e on real S3, and experimenting with Config/RE setups):

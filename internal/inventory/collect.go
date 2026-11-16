@@ -71,6 +71,8 @@ type Result struct {
 	Coverage  *Coverage       `json:"coverage"`
 	// Aggregator is the outcome of the aggregator queries, when the config layer used them.
 	Aggregator *AggregatorRun `json:"aggregator,omitempty"`
+	// Stacks are the CloudFormation stack resources, when the scan listed them.
+	Stacks []StackResource `json:"stacks,omitempty"`
 }
 
 // Options configures a [Collector].

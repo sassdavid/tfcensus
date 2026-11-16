@@ -37,8 +37,8 @@ aws_secret_access_key = fake-default-secret
 -- golden/scan.txt --
 ACCOUNT       REGION     MANAGED  DOUBLE-MANAGED  UNMANAGED  OTHER-IAC  AWS-MANAGED  DERIVED  IGNORED  UNDETERMINED  COVERAGE
 111111111111  global     1        1               2          0          1            0        0        0             50.0%
-111111111111  eu-west-1  5        0               3          1          4            1        2        1             62.5%
-111111111111  total      6        1               5          1          5            1        2        1             58.3%
+111111111111  eu-west-1  5        0               3          2          4            1        2        1             62.5%
+111111111111  total      6        1               5          2          5            1        2        1             58.3%
 
 Unmanaged (5)
 AWS::EC2::SecurityGroup (1)
@@ -55,18 +55,23 @@ AWS::S3::Bucket (1)
 Double-managed (1)
   AWS::IAM::Role arn:aws:iam::111111111111:role/acme-shared: tf-scan/iam (aws_iam_role.shared) and tf-scan/iam-dup (aws_iam_role.shared)
 
+CloudFormation stacks (2)
+  billing: 2 resources
+  billing-AlarmsStack-1ABCDEF (nested in billing): 1 resource
+
 Undetermined (1)
   no type mapping for AWS::EC2::KeyPair: 1
 
+warning: AWS::Lambda::Function arn:aws:lambda:eu-west-1:111111111111:function:acme-api is in a state and in CloudFormation stack billing as Api
 warning: rule "growth-trial" is past its expires date and no longer matches
 
-22 resources: 6 managed, 1 double-managed, 5 unmanaged, 1 other-iac, 5 aws-managed, 1 derived, 2 ignored, 1 undetermined; coverage 58.3%
+23 resources: 6 managed, 1 double-managed, 5 unmanaged, 2 other-iac, 5 aws-managed, 1 derived, 2 ignored, 1 undetermined; coverage 58.3%
 -- golden/scan.md --
 | ACCOUNT | REGION | MANAGED | DOUBLE-MANAGED | UNMANAGED | OTHER-IAC | AWS-MANAGED | DERIVED | IGNORED | UNDETERMINED | COVERAGE |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 111111111111 | global | 1 | 1 | 2 | 0 | 1 | 0 | 0 | 0 | 50.0% |
-| 111111111111 | eu-west-1 | 5 | 0 | 3 | 1 | 4 | 1 | 2 | 1 | 62.5% |
-| 111111111111 | total | 6 | 1 | 5 | 1 | 5 | 1 | 2 | 1 | 58.3% |
+| 111111111111 | eu-west-1 | 5 | 0 | 3 | 2 | 4 | 1 | 2 | 1 | 62.5% |
+| 111111111111 | total | 6 | 1 | 5 | 2 | 5 | 1 | 2 | 1 | 58.3% |
 
 <details><summary>Account 111111111111: 5 unmanaged, 1 double-managed</summary>
 
@@ -81,37 +86,44 @@ warning: rule "growth-trial" is past its expires date and no longer matches
 
 </details>
 
+CloudFormation stacks:
+
+- billing: 2 resources
+- billing-AlarmsStack-1ABCDEF (nested in billing): 1 resource
+
 Undetermined:
 
 - no type mapping for AWS::EC2::KeyPair: 1
 
+- warning: AWS::Lambda::Function arn:aws:lambda:eu-west-1:111111111111:function:acme-api is in a state and in CloudFormation stack billing as Api
 - warning: rule "growth-trial" is past its expires date and no longer matches
 
-22 resources: 6 managed, 1 double-managed, 5 unmanaged, 1 other-iac, 5 aws-managed, 1 derived, 2 ignored, 1 undetermined; coverage 58.3%
+23 resources: 6 managed, 1 double-managed, 5 unmanaged, 2 other-iac, 5 aws-managed, 1 derived, 2 ignored, 1 undetermined; coverage 58.3%
 -- golden/scan.csv --
-account,region,category,cfn_type,source_type,tf_types,arn,id,name,owner,rule,reason,managed_by,created,sources,tags
-111111111111,global,managed,AWS::IAM::Role,,aws_iam_role,arn:aws:iam::111111111111:role/acme-app,AROAACMEAPP00000001,acme-app,,match/identity,matched tf-scan/iam aws_iam_role.app by identity,tf-scan/iam:default:aws_iam_role.app,,config,
-111111111111,global,double-managed,AWS::IAM::Role,,aws_iam_role,arn:aws:iam::111111111111:role/acme-shared,AROAACMESHARED00002,acme-shared,,match/double-managed,managed by aws_iam_role.shared and aws_iam_role.shared in different states,tf-scan/iam:default:aws_iam_role.shared;tf-scan/iam-dup:default:aws_iam_role.shared,,config,
-111111111111,global,unmanaged,AWS::IAM::Role,,aws_iam_role,arn:aws:iam::111111111111:role/clickops-admin,AROACLICKOPS0000004,clickops-admin,,rules/no-match,no state manages it and no rule matches,,2026-08-12T15:30:00Z,config,created-by=bob
-111111111111,global,unmanaged,AWS::IAM::User,,aws_iam_user,arn:aws:iam::111111111111:user/sandbox-user,AIDASANDBOX00000005,sandbox-user,,rules/no-match,no state manages it and no rule matches,,,config,owner=sandbox
-111111111111,global,aws-managed,AWS::IAM::Role,,aws_iam_role,arn:aws:iam::111111111111:role/aws-service-role/support.amazonaws.com/AWSServiceRoleForSupport,AROASUPPORT00000003,AWSServiceRoleForSupport,aws,pack/aws-service/service-linked-role,service-linked role that an AWS service created,,,config,
-111111111111,eu-west-1,managed,AWS::EC2::SecurityGroup,,aws_security_group,arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0aa11bb22cc33dd44,sg-0aa11bb22cc33dd44,web,,match/identity,matched tf-scan/network aws_security_group.web by identity,tf-scan/network:default:aws_security_group.web,,config,
-111111111111,eu-west-1,managed,AWS::EC2::VPC,,aws_vpc,arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0a1b2c3d4e5f60718,vpc-0a1b2c3d4e5f60718,,,match/identity,matched tf-scan/network aws_vpc.main by identity,tf-scan/network:default:aws_vpc.main,,config,
-111111111111,eu-west-1,managed,AWS::ElasticLoadBalancingV2::Listener,,aws_alb_listener;aws_lb_listener,arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2,arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2,,,match/identity,matched tf-scan/network aws_lb_listener.https by identity,tf-scan/network:default:aws_lb_listener.https,,config,
-111111111111,eu-west-1,managed,AWS::ElasticLoadBalancingV2::LoadBalancer,,aws_alb;aws_lb,arn:aws:elasticloadbalancing:eu-west-1:111111111111:loadbalancer/app/web/50dc6c495c0c9188,arn:aws:elasticloadbalancing:eu-west-1:111111111111:loadbalancer/app/web/50dc6c495c0c9188,web,,match/identity,matched tf-scan/network aws_lb.web by identity,tf-scan/network:default:aws_lb.web,,config,
-111111111111,eu-west-1,managed,AWS::Lambda::Function,,aws_lambda_function,arn:aws:lambda:eu-west-1:111111111111:function:acme-api,acme-api,acme-api,,match/identity,matched tf-scan/network aws_lambda_function.api by identity,tf-scan/network:default:aws_lambda_function.api,,config,
-111111111111,eu-west-1,unmanaged,AWS::EC2::SecurityGroup,,aws_security_group,arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0c11c0b5000000003,sg-0c11c0b5000000003,clickops-debug,,rules/no-match,no state manages it and no rule matches,,2026-10-01T09:00:00Z,config,owner=alice
-111111111111,eu-west-1,unmanaged,AWS::ElasticLoadBalancingV2::ListenerRule,,aws_lb_listener_rule,arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener-rule/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2/9683b2d02a6cabee,arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener-rule/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2/9683b2d02a6cabee,,,rules/no-match,no state manages it and no rule matches,,,cloudcontrol,
-111111111111,eu-west-1,unmanaged,AWS::S3::Bucket,,aws_s3_bucket,arn:aws:s3:::acme-growth-experiments,acme-growth-experiments,acme-growth-experiments,,rules/no-match,no state manages it and no rule matches,,,config,team=growth
-111111111111,eu-west-1,other-iac,AWS::SQS::Queue,,aws_sqs_queue,arn:aws:sqs:eu-west-1:111111111111:billing-events,https://sqs.eu-west-1.amazonaws.com/111111111111/billing-events,billing-events,cloudformation,pack/other-iac/cloudformation,"tagged by a CloudFormation stack (CloudFormation, CDK, StackSets, Control Tower)",,,config,aws:cloudformation:stack-name=billing
-111111111111,eu-west-1,aws-managed,AWS::EC2::InternetGateway,,aws_internet_gateway,arn:aws:ec2:eu-west-1:111111111111:internet-gateway/igw-0def00000000000c3,igw-0def00000000000c3,,aws,pack/aws-defaults/default-vpc-children,"internet gateway, route table or DHCP options of the default VPC",,,config,
-111111111111,eu-west-1,aws-managed,AWS::EC2::SecurityGroup,,aws_security_group,arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0def00000000000b2,sg-0def00000000000b2,default,aws,pack/aws-defaults/default-security-group,default security group that AWS creates with every VPC,,,config,
-111111111111,eu-west-1,aws-managed,AWS::EC2::VPC,,aws_vpc,arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0def00000000000a1,vpc-0def00000000000a1,,aws,pack/aws-defaults/default-vpc,default VPC that AWS creates in every region,,,config,
-111111111111,eu-west-1,aws-managed,AWS::KMS::Key,,aws_kms_key,arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-aws0-4000-8000-000000000001,0b1c2d3e-aws0-4000-8000-000000000001,,aws,pack/aws-service/aws-managed-kms-key,AWS managed KMS key (KeyManager AWS),,,config,
-111111111111,eu-west-1,derived,AWS::EC2::NetworkInterface,,aws_network_interface,arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0aa00000000000d4,eni-0aa00000000000d4,,aws,pack/derived/requester-managed-eni,network interface that a service manages (requester-managed or a service interface type),,,config,
-111111111111,eu-west-1,ignored,AWS::EC2::Instance,,aws_instance,arn:aws:ec2:eu-west-1:111111111111:instance/i-0aa00000000000e5,i-0aa00000000000e5,,platform,user/sandbox,Sandbox experiments are cleaned up every week,,,config,Name=try-arm;owner=sandbox
-111111111111,eu-west-1,ignored,AWS::Logs::LogGroup,,aws_cloudwatch_log_group,arn:aws:logs:eu-west-1:111111111111:log-group:/aws/lambda/acme-api,,/aws/lambda/acme-api,,pack/ephemeral/managed-lambda-log-group,log group that Lambda created for a function a unit manages,,,resource-explorer,
-111111111111,eu-west-1,undetermined,AWS::EC2::KeyPair,,,arn:aws:ec2:eu-west-1:111111111111:key-pair/key-0aa00000000000f6,,,,match/no-type-mapping,no type mapping for AWS::EC2::KeyPair,,,resource-explorer,
+account,region,category,cfn_type,source_type,tf_types,arn,id,name,owner,rule,reason,managed_by,created,sources,tags,stack
+111111111111,global,managed,AWS::IAM::Role,,aws_iam_role,arn:aws:iam::111111111111:role/acme-app,AROAACMEAPP00000001,acme-app,,match/identity,matched tf-scan/iam aws_iam_role.app by identity,tf-scan/iam:default:aws_iam_role.app,,config,,
+111111111111,global,double-managed,AWS::IAM::Role,,aws_iam_role,arn:aws:iam::111111111111:role/acme-shared,AROAACMESHARED00002,acme-shared,,match/double-managed,managed by aws_iam_role.shared and aws_iam_role.shared in different states,tf-scan/iam:default:aws_iam_role.shared;tf-scan/iam-dup:default:aws_iam_role.shared,,config,,
+111111111111,global,unmanaged,AWS::IAM::Role,,aws_iam_role,arn:aws:iam::111111111111:role/clickops-admin,AROACLICKOPS0000004,clickops-admin,,rules/no-match,no state manages it and no rule matches,,2026-08-12T15:30:00Z,config,created-by=bob,
+111111111111,global,unmanaged,AWS::IAM::User,,aws_iam_user,arn:aws:iam::111111111111:user/sandbox-user,AIDASANDBOX00000005,sandbox-user,,rules/no-match,no state manages it and no rule matches,,,config,owner=sandbox,
+111111111111,global,aws-managed,AWS::IAM::Role,,aws_iam_role,arn:aws:iam::111111111111:role/aws-service-role/support.amazonaws.com/AWSServiceRoleForSupport,AROASUPPORT00000003,AWSServiceRoleForSupport,aws,pack/aws-service/service-linked-role,service-linked role that an AWS service created,,,config,,
+111111111111,eu-west-1,managed,AWS::EC2::SecurityGroup,,aws_security_group,arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0aa11bb22cc33dd44,sg-0aa11bb22cc33dd44,web,,match/identity,matched tf-scan/network aws_security_group.web by identity,tf-scan/network:default:aws_security_group.web,,config,,
+111111111111,eu-west-1,managed,AWS::EC2::VPC,,aws_vpc,arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0a1b2c3d4e5f60718,vpc-0a1b2c3d4e5f60718,,,match/identity,matched tf-scan/network aws_vpc.main by identity,tf-scan/network:default:aws_vpc.main,,config,,
+111111111111,eu-west-1,managed,AWS::ElasticLoadBalancingV2::Listener,,aws_alb_listener;aws_lb_listener,arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2,arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2,,,match/identity,matched tf-scan/network aws_lb_listener.https by identity,tf-scan/network:default:aws_lb_listener.https,,config,,
+111111111111,eu-west-1,managed,AWS::ElasticLoadBalancingV2::LoadBalancer,,aws_alb;aws_lb,arn:aws:elasticloadbalancing:eu-west-1:111111111111:loadbalancer/app/web/50dc6c495c0c9188,arn:aws:elasticloadbalancing:eu-west-1:111111111111:loadbalancer/app/web/50dc6c495c0c9188,web,,match/identity,matched tf-scan/network aws_lb.web by identity,tf-scan/network:default:aws_lb.web,,config,,
+111111111111,eu-west-1,managed,AWS::Lambda::Function,,aws_lambda_function,arn:aws:lambda:eu-west-1:111111111111:function:acme-api,acme-api,acme-api,,match/identity,matched tf-scan/network aws_lambda_function.api by identity,tf-scan/network:default:aws_lambda_function.api,,config,,billing
+111111111111,eu-west-1,unmanaged,AWS::EC2::SecurityGroup,,aws_security_group,arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0c11c0b5000000003,sg-0c11c0b5000000003,clickops-debug,,rules/no-match,no state manages it and no rule matches,,2026-10-01T09:00:00Z,config,owner=alice,
+111111111111,eu-west-1,unmanaged,AWS::ElasticLoadBalancingV2::ListenerRule,,aws_lb_listener_rule,arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener-rule/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2/9683b2d02a6cabee,arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener-rule/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2/9683b2d02a6cabee,,,rules/no-match,no state manages it and no rule matches,,,cloudcontrol,,
+111111111111,eu-west-1,unmanaged,AWS::S3::Bucket,,aws_s3_bucket,arn:aws:s3:::acme-growth-experiments,acme-growth-experiments,acme-growth-experiments,,rules/no-match,no state manages it and no rule matches,,,config,team=growth,
+111111111111,eu-west-1,other-iac,AWS::Events::Rule,,,arn:aws:events:eu-west-1:111111111111:rule/billing-nightly,,,cloudformation,source/cloudformation,listed by CloudFormation stack billing-AlarmsStack-1ABCDEF (nested in billing) as Nightly,,,resource-explorer,,billing-AlarmsStack-1ABCDEF
+111111111111,eu-west-1,other-iac,AWS::SQS::Queue,,aws_sqs_queue,arn:aws:sqs:eu-west-1:111111111111:billing-events,https://sqs.eu-west-1.amazonaws.com/111111111111/billing-events,billing-events,cloudformation,source/cloudformation,listed by CloudFormation stack billing as EventsQueue,,,config,aws:cloudformation:stack-name=billing,billing
+111111111111,eu-west-1,aws-managed,AWS::EC2::InternetGateway,,aws_internet_gateway,arn:aws:ec2:eu-west-1:111111111111:internet-gateway/igw-0def00000000000c3,igw-0def00000000000c3,,aws,pack/aws-defaults/default-vpc-children,"internet gateway, route table or DHCP options of the default VPC",,,config,,
+111111111111,eu-west-1,aws-managed,AWS::EC2::SecurityGroup,,aws_security_group,arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0def00000000000b2,sg-0def00000000000b2,default,aws,pack/aws-defaults/default-security-group,default security group that AWS creates with every VPC,,,config,,
+111111111111,eu-west-1,aws-managed,AWS::EC2::VPC,,aws_vpc,arn:aws:ec2:eu-west-1:111111111111:vpc/vpc-0def00000000000a1,vpc-0def00000000000a1,,aws,pack/aws-defaults/default-vpc,default VPC that AWS creates in every region,,,config,,
+111111111111,eu-west-1,aws-managed,AWS::KMS::Key,,aws_kms_key,arn:aws:kms:eu-west-1:111111111111:key/0b1c2d3e-aws0-4000-8000-000000000001,0b1c2d3e-aws0-4000-8000-000000000001,,aws,pack/aws-service/aws-managed-kms-key,AWS managed KMS key (KeyManager AWS),,,config,,
+111111111111,eu-west-1,derived,AWS::EC2::NetworkInterface,,aws_network_interface,arn:aws:ec2:eu-west-1:111111111111:network-interface/eni-0aa00000000000d4,eni-0aa00000000000d4,,aws,pack/derived/requester-managed-eni,network interface that a service manages (requester-managed or a service interface type),,,config,,
+111111111111,eu-west-1,ignored,AWS::EC2::Instance,,aws_instance,arn:aws:ec2:eu-west-1:111111111111:instance/i-0aa00000000000e5,i-0aa00000000000e5,,platform,user/sandbox,Sandbox experiments are cleaned up every week,,,config,Name=try-arm;owner=sandbox,
+111111111111,eu-west-1,ignored,AWS::Logs::LogGroup,,aws_cloudwatch_log_group,arn:aws:logs:eu-west-1:111111111111:log-group:/aws/lambda/acme-api,,/aws/lambda/acme-api,,pack/ephemeral/managed-lambda-log-group,log group that Lambda created for a function a unit manages,,,resource-explorer,,
+111111111111,eu-west-1,undetermined,AWS::EC2::KeyPair,,,arn:aws:ec2:eu-west-1:111111111111:key-pair/key-0aa00000000000f6,,,,match/no-type-mapping,no type mapping for AWS::EC2::KeyPair,,,resource-explorer,,
 -- golden/scan.sarif --
 {
   "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json",
@@ -308,7 +320,7 @@ account,region,category,cfn_type,source_type,tf_types,arn,id,name,owner,rule,rea
           "double-managed": 0,
           "ignored": 2,
           "managed": 5,
-          "other-iac": 1,
+          "other-iac": 2,
           "undetermined": 1,
           "unmanaged": 3
         },
@@ -324,7 +336,7 @@ account,region,category,cfn_type,source_type,tf_types,arn,id,name,owner,rule,rea
           "double-managed": 1,
           "ignored": 2,
           "managed": 6,
-          "other-iac": 1,
+          "other-iac": 2,
           "undetermined": 1,
           "unmanaged": 5
         },
@@ -557,7 +569,12 @@ account,region,category,cfn_type,source_type,tf_types,arn,id,name,owner,rule,rea
             "workspace": "default",
             "address": "aws_lambda_function.api"
           }
-        ]
+        ],
+        "stack": {
+          "name": "billing",
+          "id": "arn:aws:cloudformation:eu-west-1:111111111111:stack/billing/6f1e2d3c-0000-4000-8000-000000000001",
+          "logical_id": "Api"
+        }
       },
       {
         "account": "111111111111",
@@ -620,6 +637,25 @@ account,region,category,cfn_type,source_type,tf_types,arn,id,name,owner,rule,rea
         "account": "111111111111",
         "region": "eu-west-1",
         "category": "other-iac",
+        "cfn_type": "AWS::Events::Rule",
+        "arn": "arn:aws:events:eu-west-1:111111111111:rule/billing-nightly",
+        "sources": [
+          "resource-explorer"
+        ],
+        "owner": "cloudformation",
+        "reason": "listed by CloudFormation stack billing-AlarmsStack-1ABCDEF (nested in billing) as Nightly",
+        "rule": "source/cloudformation",
+        "stack": {
+          "name": "billing-AlarmsStack-1ABCDEF",
+          "id": "arn:aws:cloudformation:eu-west-1:111111111111:stack/billing-AlarmsStack-1ABCDEF/6f1e2d3c-0000-4000-8000-000000000001",
+          "root": "billing",
+          "logical_id": "Nightly"
+        }
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "category": "other-iac",
         "cfn_type": "AWS::SQS::Queue",
         "tf_types": [
           "aws_sqs_queue"
@@ -634,8 +670,13 @@ account,region,category,cfn_type,source_type,tf_types,arn,id,name,owner,rule,rea
           "config"
         ],
         "owner": "cloudformation",
-        "reason": "tagged by a CloudFormation stack (CloudFormation, CDK, StackSets, Control Tower)",
-        "rule": "pack/other-iac/cloudformation"
+        "reason": "listed by CloudFormation stack billing as EventsQueue",
+        "rule": "source/cloudformation",
+        "stack": {
+          "name": "billing",
+          "id": "arn:aws:cloudformation:eu-west-1:111111111111:stack/billing/6f1e2d3c-0000-4000-8000-000000000001",
+          "logical_id": "EventsQueue"
+        }
       },
       {
         "account": "111111111111",
@@ -798,7 +839,7 @@ account,region,category,cfn_type,source_type,tf_types,arn,id,name,owner,rule,rea
         "region": "eu-west-1",
         "layer": "resource-explorer",
         "status": "ok",
-        "count": 2
+        "count": 3
       },
       {
         "account": "111111111111",
@@ -820,6 +861,13 @@ account,region,category,cfn_type,source_type,tf_types,arn,id,name,owner,rule,rea
         "layer": "cloudcontrol",
         "status": "ok",
         "count": 1
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "layer": "cloudformation",
+        "status": "ok",
+        "count": 4
       }
     ],
     "coverage": {
@@ -1386,6 +1434,7 @@ account,region,category,cfn_type,source_type,tf_types,arn,id,name,owner,rule,rea
       ]
     },
     "warnings": [
+      "AWS::Lambda::Function arn:aws:lambda:eu-west-1:111111111111:function:acme-api is in a state and in CloudFormation stack billing as Api",
       "rule \"growth-trial\" is past its expires date and no longer matches"
     ],
     "cached": false

@@ -29,7 +29,7 @@
           "double-managed": 0,
           "ignored": 2,
           "managed": 5,
-          "other-iac": 1,
+          "other-iac": 2,
           "undetermined": 1,
           "unmanaged": 3
         },
@@ -45,7 +45,7 @@
           "double-managed": 1,
           "ignored": 2,
           "managed": 6,
-          "other-iac": 1,
+          "other-iac": 2,
           "undetermined": 1,
           "unmanaged": 5
         },
@@ -278,7 +278,12 @@
             "workspace": "default",
             "address": "aws_lambda_function.api"
           }
-        ]
+        ],
+        "stack": {
+          "name": "billing",
+          "id": "arn:aws:cloudformation:eu-west-1:111111111111:stack/billing/6f1e2d3c-0000-4000-8000-000000000001",
+          "logical_id": "Api"
+        }
       },
       {
         "account": "111111111111",
@@ -341,6 +346,25 @@
         "account": "111111111111",
         "region": "eu-west-1",
         "category": "other-iac",
+        "cfn_type": "AWS::Events::Rule",
+        "arn": "arn:aws:events:eu-west-1:111111111111:rule/billing-nightly",
+        "sources": [
+          "resource-explorer"
+        ],
+        "owner": "cloudformation",
+        "reason": "listed by CloudFormation stack billing-AlarmsStack-1ABCDEF (nested in billing) as Nightly",
+        "rule": "source/cloudformation",
+        "stack": {
+          "name": "billing-AlarmsStack-1ABCDEF",
+          "id": "arn:aws:cloudformation:eu-west-1:111111111111:stack/billing-AlarmsStack-1ABCDEF/6f1e2d3c-0000-4000-8000-000000000001",
+          "root": "billing",
+          "logical_id": "Nightly"
+        }
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "category": "other-iac",
         "cfn_type": "AWS::SQS::Queue",
         "tf_types": [
           "aws_sqs_queue"
@@ -355,8 +379,13 @@
           "config"
         ],
         "owner": "cloudformation",
-        "reason": "tagged by a CloudFormation stack (CloudFormation, CDK, StackSets, Control Tower)",
-        "rule": "pack/other-iac/cloudformation"
+        "reason": "listed by CloudFormation stack billing as EventsQueue",
+        "rule": "source/cloudformation",
+        "stack": {
+          "name": "billing",
+          "id": "arn:aws:cloudformation:eu-west-1:111111111111:stack/billing/6f1e2d3c-0000-4000-8000-000000000001",
+          "logical_id": "EventsQueue"
+        }
       },
       {
         "account": "111111111111",
@@ -519,7 +548,7 @@
         "region": "eu-west-1",
         "layer": "resource-explorer",
         "status": "ok",
-        "count": 2
+        "count": 3
       },
       {
         "account": "111111111111",
@@ -541,6 +570,13 @@
         "layer": "cloudcontrol",
         "status": "ok",
         "count": 1
+      },
+      {
+        "account": "111111111111",
+        "region": "eu-west-1",
+        "layer": "cloudformation",
+        "status": "ok",
+        "count": 4
       }
     ],
     "coverage": {
@@ -1107,6 +1143,7 @@
       ]
     },
     "warnings": [
+      "AWS::Lambda::Function arn:aws:lambda:eu-west-1:111111111111:function:acme-api is in a state and in CloudFormation stack billing as Api",
       "rule \"growth-trial\" is past its expires date and no longer matches"
     ],
     "cached": false

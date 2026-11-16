@@ -35,6 +35,7 @@ This is why the layer order is decided per account/region by the probe, not hard
 - `kms:DescribeKey`, `kms:GetKeyPolicy`, `kms:ListAliases`
 - `resource-explorer-2:List*`/`Search`/`Get*`; `config:Describe*`/`Select*`/`List*`/`Get*`
 - `cloudformation:ListResources`/`GetResource`, `cloudformation:DescribeType` (Cloud Control)
+- `cloudformation:ListStacks`, `cloudformation:ListStackResources` (the CloudFormation source of scan, config `scan.cloudformation`)
 - read-only `Describe*`/`List*`/`Get*` for native enumerators (ec2, iam, route53, elasticloadbalancing, s3)
 - Equivalent to AWS-managed `ReadOnlyAccess` + `ViewOnlyAccess` combined. Docs say so.
 

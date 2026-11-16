@@ -42,6 +42,12 @@ whichever region happens to run first. Resource Explorer runs only with a defaul
 - `--types` limits all layers. A layer with none of the wanted types makes no calls (status
   `skipped`). A built-in **coverage matrix** (`tfcensus scan --explain-coverage`) shows, per type, which layer covered it in each account and region, so blind spots are visible rather than silent.
 
+## CloudFormation stacks
+scan also lists CloudFormation stack resources per account and region (`ListStacks`,
+`ListStackResources`). They aren't a layer: they don't add live resources, they say which
+stack owns one. Their runs have layer `cloudformation` and stay out of the coverage matrix
+([ADR-0014](../adr/0014-cloudformation-stack-source.md)).
+
 ## Config aggregator fast path
 - With `accounts.aggregator` set, `doctor`, `scan` and `whois` probe the aggregator in its
   account (`accounts.aggregator.profile`, else the default credentials) and region:
