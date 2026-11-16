@@ -294,8 +294,9 @@ identifiers map the organization. Trivy, Snyk, Steampipe and Infracost use the s
   directory counts.
 
 ### M17: Scan coverage → v0.4.0 (tfcensus only)
-- [ ] The Config aggregator fast path in `internal/inventory` (inventory.md, risk R3, open question
-  Q3), with the probe result from `doctor`.
+- [x] The Config aggregator fast path in `internal/inventory` (inventory.md, risk R3, open question
+  Q3), with the probe result from `doctor`. Inventory criterion 6 passes on cassettes; Q3 stays
+  open until a read-only run against the real org.
 - [ ] CloudFormation as a second IaC source: stack resources become `managed-by-cfn` with the
   stack name (open question Q4).
 

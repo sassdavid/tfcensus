@@ -169,7 +169,8 @@ func (s *saved) cachedScan() (*scan.Report, report.Source, []render.Error, error
 	sortFindings(findings)
 	rep := &scan.Report{
 		Findings: findings, Runs: snap.Inventory.Runs, Coverage: snap.Inventory.Coverage,
-		Warnings: expiredWarnings(eng), Cached: true,
+		Aggregator: snap.Inventory.Aggregator,
+		Warnings:   expiredWarnings(eng), Cached: true,
 	}
 	rep.Regions, rep.Accounts = scan.Summarize(findings)
 	src := report.Source{Cache: true, Created: snap.Created.UTC().Truncate(time.Second), Stale: stale}

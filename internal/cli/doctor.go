@@ -110,11 +110,13 @@ type doctorSource struct {
 
 // doctorAggregator is the AWS Config aggregator named in accounts.aggregator.
 type doctorAggregator struct {
-	Name    string       `json:"name"`
-	Profile string       `json:"profile,omitempty"`
-	Region  string       `json:"region,omitempty"`
-	Status  probe.Status `json:"status"`
-	Error   string       `json:"error,omitempty"`
+	Name    string            `json:"name"`
+	Profile string            `json:"profile,omitempty"`
+	Region  string            `json:"region,omitempty"`
+	Status  probe.Status      `json:"status"`
+	Error   string            `json:"error,omitempty"`
+	Sources []probe.AggSource `json:"sources,omitempty"`
+	Cached  bool              `json:"cached,omitempty"`
 }
 
 func runDoctor(cmd *cobra.Command, d *app.Deps, format render.Format, cfg *config.Config, refresh bool) error {
@@ -159,7 +161,7 @@ func runDoctor(cmd *cobra.Command, d *app.Deps, format render.Format, cfg *confi
 		return fmt.Errorf("probe accounts: %w", err)
 	}
 	if agg := cfg.Accounts.Aggregator; agg.Name != "" {
-		data.Aggregator = checkAggregator(cmd, loader, agg)
+		data.Aggregator = checkAggregator(cmd, loader, prober, agg)
 	}
 	if err = writeDoctor(d, format, data, res); err != nil {
 		return err
@@ -237,21 +239,19 @@ func toolNotes(tools []toolcheck.Tool) []string {
 	return out
 }
 
-func checkAggregator(cmd *cobra.Command, l *accounts.Loader, agg config.Aggregator) *doctorAggregator {
+// checkAggregator probes the aggregator that scan and whois read the config layer from, and
+// caches the result for them.
+func checkAggregator(
+	cmd *cobra.Command, l *accounts.Loader, prober *probe.Prober, agg config.Aggregator,
+) *doctorAggregator {
 	out := &doctorAggregator{Name: agg.Name, Profile: agg.Profile, Region: agg.Region}
-	var acct *accounts.Account
-	var err error
-	if agg.Profile != "" {
-		acct, err = l.Profile(cmd.Context(), agg.Profile)
-	} else {
-		acct, err = l.Default(cmd.Context())
-	}
+	acct, err := aggregatorAccount(cmd.Context(), l, agg)
 	if err != nil {
 		out.Status, out.Error = probe.StatusError, err.Error()
 		return out
 	}
-	c := probe.Aggregator(cmd.Context(), acct.Config, agg.Region, agg.Name)
-	out.Status, out.Error = c.Status, c.Error
+	rep := prober.Aggregator(cmd.Context(), acct, agg.Region, agg.Name)
+	out.Region, out.Status, out.Error, out.Sources, out.Cached = rep.Region, rep.Status, rep.Error, rep.Sources, rep.Cached
 	return out
 }
 
@@ -412,7 +412,33 @@ func aggregatorLine(a *doctorAggregator) string {
 	if a.Error != "" {
 		status += ": " + a.Error
 	}
+	if a.Status == probe.StatusAvailable {
+		status += aggregatorSources(a.Sources)
+	}
 	return "AWS Config aggregator " + a.Name + where + ": " + status
+}
+
+// aggregatorSources summarizes the sources and says what scan does with them.
+func aggregatorSources(sources []probe.AggSource) string {
+	if len(sources) == 0 {
+		return ", no sources. scan and whois query each account"
+	}
+	var regions []string
+	failing := 0
+	for _, s := range sources {
+		if !slices.Contains(regions, s.Region) {
+			regions = append(regions, s.Region)
+		}
+		if s.Status != probe.SyncSucceeded {
+			failing++
+		}
+	}
+	out := fmt.Sprintf(", %d %s in %d %s", len(sources), plural(len(sources), "source", "sources"),
+		len(regions), plural(len(regions), "region", "regions"))
+	if failing > 0 {
+		out += fmt.Sprintf(", %d failed or outdated", failing)
+	}
+	return out + ". scan and whois read AWS Config through it where its sources are current"
 }
 
 func writeDoctorText(w io.Writer, data doctorData) error {

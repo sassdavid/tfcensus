@@ -42,6 +42,30 @@ whichever region happens to run first. Resource Explorer runs only with a defaul
 - `--types` limits all layers. A layer with none of the wanted types makes no calls (status
   `skipped`). A built-in **coverage matrix** (`tfcensus scan --explain-coverage`) shows, per type, which layer covered it in each account and region, so blind spots are visible rather than silent.
 
+## Config aggregator fast path
+- With `accounts.aggregator` set, `doctor`, `scan` and `whois` probe the aggregator in its
+  account (`accounts.aggregator.profile`, else the default credentials) and region:
+  `DescribeConfigurationAggregators` by name, then `DescribeConfigurationAggregatorSourcesStatus`.
+  The result is cached 24 h with the other probe results, so `scan` reuses what `doctor` found.
+- The aggregator serves the config layer in an account and region when the probe would run the
+  config layer there anyway and a source covers the pair (an organization source covers every
+  account in its region) with every covering source `SUCCEEDED`. It never adds pairs the
+  per-account path would skip. A `FAILED` or `OUTDATED` source leaves the pair to the
+  per-account query.
+- One `SelectAggregateResourceConfig` query reads the served pairs: the per-account query plus
+  `accountId IN (...)` and `awsRegion IN (...)`, with `'global'` when a served region records global
+  types. Accounts are split over several queries so each expression stays within AWS's 4,096
+  characters. The query uses the aggregator account's Config budget (2 rps) and runs alongside the
+  other first-phase layers.
+- Rows go to their account and region. Global rows (IAM) go to the account's first served region
+  that records global types. Rows of a pair the aggregator doesn't serve are dropped.
+- A served pair with no rows, and every pair of a query that failed, falls back to the
+  per-account `SelectResourceConfig`. That covers accounts outside the aggregator's organization
+  and aggregation lag. A failed query logs a warning and adds a note to the report. It doesn't
+  make the scan incomplete, because the fallback lists those pairs.
+- Resources keep the source `config`. A run the aggregator listed has `via: aggregator`, and the
+  result has an `aggregator` block (status, rows, pairs served, pairs that fell back).
+
 ## Throughput and cost
 - Retries per [engineering ADR-0005](../../engineering/adr/0005-http-and-api-clients.md): adaptive
   for Cloud Control, Config and Resource Explorer, standard with 8 attempts for the rest. Plus one
@@ -64,3 +88,9 @@ whichever region happens to run first. Resource Explorer runs only with a defaul
 - [x] A parent-graph test: ELBv2 listeners listed via Cloud Control using load balancers found by the config layer.
 - [x] Nightly against emulators (`TestSpec_inventory_5`, `mise run test:emulator`, `.github/workflows/live.yml`;
   passed locally against moto 5.2.5 and Floci 2.4.0 on 2026-11-11 and in the nightly run 43206897470 on 2026-11-12): fixture "ClickOps" resources created via SDK in moto (EC2/IAM/Route53/S3) and Floci (Resource Explorer, Cloud Control) are all found by at least one layer. Config `Select*` is covered by L0 fixtures (no emulator runs Config SQL).
+- [x] The aggregator fast path (`TestSpec_inventory_6`): one paginated aggregate query serves two
+  accounts, global rows go to the region that records them, rows of an unserved pair are dropped,
+  and a pair with no rows falls back to its own account. A denied aggregate query falls back for
+  every pair (`TestAggregatorDenied`), a long account list is split over queries
+  (`TestAggregatorChunks`), and a scan through the aggregator makes no `SelectResourceConfig`
+  call and gives the same findings as the direct scan (`TestScanAggregator`).

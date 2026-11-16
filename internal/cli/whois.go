@@ -254,7 +254,7 @@ func whoisLiveStep(
 			Target: ae.Source, Message: ae.Err.Error(), Auth: errors.Is(ae.Err, accounts.ErrAuth),
 		})
 	}
-	runs, err := whoisLive(cmd, d, cfg, m, rv, accts, queries, answers)
+	runs, err := whoisLive(cmd, d, cfg, m, rv, loader, accts, queries, answers)
 	return runs, problems, err
 }
 
@@ -344,7 +344,7 @@ func (p *livePlan) regionsFor(cfg *config.Config) func(*accounts.Account) []stri
 // their regions and types, and refines those answers with what it finds.
 func whoisLive(
 	cmd *cobra.Command, d *app.Deps, cfg *config.Config, m *typemap.Map, rv *whois.Resolver,
-	accts *accounts.Result, queries []match.Query, answers []whois.Answer,
+	loader *accounts.Loader, accts *accounts.Result, queries []match.Query, answers []whois.Answer,
 ) ([]inventory.Run, error) {
 	warnUnmatched(cmd, d, cfg, accts)
 	p := planLive(rv, accts, answers, targetSelection(cfg).Wants)
@@ -356,7 +356,7 @@ func whoisLive(
 		"accounts", len(p.targets), "types", len(p.types))
 	inv, err := collectLive(cmd, d, m, liveRequest{
 		accounts: p.targets, regions: p.regionsFor(cfg), layers: layers, types: p.types,
-		cc: ccTypes(cfg, layers, p.types),
+		cc: ccTypes(cfg, layers, p.types), loader: loader, aggregator: cfg.Accounts.Aggregator,
 	})
 	if err != nil {
 		return nil, err

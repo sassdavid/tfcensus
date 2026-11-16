@@ -35,6 +35,9 @@ type Request struct {
 	// else layer names, where "native" stands for every native layer.
 	Layers []string
 	Types  []string // CloudFormation types; empty means every type
+	// Aggregator, when set and available, serves the config layer in every account and region
+	// whose aggregator sources are current.
+	Aggregator *Aggregator
 }
 
 // RunStatus is the outcome of one layer in one account and region.
@@ -57,6 +60,7 @@ type Run struct {
 	Layer   string    `json:"layer"`
 	Status  RunStatus `json:"status"`
 	Count   int       `json:"count"`
+	Via     string    `json:"via,omitempty"` // [ViaAggregator] when the aggregator listed it
 	Errors  []string  `json:"errors,omitempty"`
 }
 
@@ -65,6 +69,8 @@ type Result struct {
 	Resources []CloudResource `json:"resources"`
 	Runs      []Run           `json:"runs"`
 	Coverage  *Coverage       `json:"coverage"`
+	// Aggregator is the outcome of the aggregator queries, when the config layer used them.
+	Aggregator *AggregatorRun `json:"aggregator,omitempty"`
 }
 
 // Options configures a [Collector].
@@ -132,7 +138,23 @@ func (c *Collector) Collect(ctx context.Context, req Request) (*Result, error) {
 			first = append(first, t)
 		}
 	}
-	if err = c.runAll(ctx, first, nil); err != nil {
+	aggTasks, rest := splitAggregated(first, req.Aggregator)
+	var aggRun *AggregatorRun
+	var viaAgg func(context.Context)
+	if len(aggTasks) > 0 {
+		viaAgg = func(gctx context.Context) {
+			var fallback []*task
+			aggRun, fallback = c.aggregate(gctx, req.Aggregator, aggTasks, req.Types)
+			for _, t := range fallback {
+				t.types = req.Types
+			}
+			aggTasks = fallback
+		}
+	}
+	if err = c.runAll(ctx, rest, nil, viaAgg); err != nil {
+		return nil, err
+	}
+	if err = c.runAll(ctx, aggTasks, nil, nil); err != nil {
 		return nil, err
 	}
 	known := Merge(found(first), c.opts.Env)
@@ -142,16 +164,33 @@ func (c *Collector) Collect(ctx context.Context, req Request) (*Result, error) {
 			t.run.Status = RunSkipped
 		}
 	}
-	if err = c.runAll(ctx, second, known); err != nil {
+	if err = c.runAll(ctx, second, known, nil); err != nil {
 		return nil, err
 	}
-	res := &Result{Runs: make([]Run, 0, len(tasks))}
+	res := &Result{Runs: make([]Run, 0, len(tasks)), Aggregator: aggRun}
 	for _, t := range tasks {
 		res.Runs = append(res.Runs, t.run)
 	}
 	res.Resources = Merge(found(tasks), c.opts.Env)
 	res.Coverage = coverage(targets, tasks, layers, c.opts.Env, req.Types)
 	return res, nil
+}
+
+// splitAggregated returns the config tasks the aggregator serves, and the other tasks. Without
+// an available aggregator, or without such tasks, it serves none.
+func splitAggregated(tasks []*task, agg *Aggregator) ([]*task, []*task) {
+	if agg == nil || agg.Account == nil || agg.Report == nil || agg.Report.Status != probe.StatusAvailable {
+		return nil, tasks
+	}
+	var served, rest []*task
+	for _, t := range tasks {
+		if t.layer.Name() == LayerConfig && agg.Report.Serves(t.run.Account, t.region) {
+			served = append(served, t)
+		} else {
+			rest = append(rest, t)
+		}
+	}
+	return served, rest
 }
 
 func isDependent(l Layer) bool {
@@ -167,9 +206,22 @@ func found(tasks []*task) []CloudResource {
 	return all
 }
 
-func (c *Collector) runAll(ctx context.Context, tasks []*task, known []CloudResource) error {
+// runAll lists the tasks that have no status yet. extra, when set, runs alongside them in one of
+// the concurrency slots.
+func (c *Collector) runAll(
+	ctx context.Context,
+	tasks []*task,
+	known []CloudResource,
+	extra func(context.Context),
+) error {
 	g, gctx := errgroup.WithContext(ctx)
 	g.SetLimit(c.opts.Concurrency)
+	if extra != nil {
+		g.Go(func() error {
+			extra(gctx)
+			return nil
+		})
+	}
 	for _, t := range tasks {
 		if t.run.Status != "" {
 			continue

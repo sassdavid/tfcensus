@@ -29,6 +29,11 @@ account. --all-regions lists every region the account has enabled (account:ListR
 --account and --exclude-account choose the accounts to list; the state of units in other
 accounts is still read with their credentials.
 
+With accounts.aggregator set, the config layer reads every account and region whose aggregator
+sources are current with one SelectAggregateResourceConfig query in the aggregator's account.
+An account and region the aggregator returns nothing for is queried in that account. doctor
+shows the aggregator's sources.
+
 scan caches the inventory and state index under $XDG_CACHE_HOME/tfcensus/scan for cache.ttl
 (default 1h), keyed by the accounts, regions, layers, types and units. A re-run with other rules
 makes no AWS calls. --refresh lists again.

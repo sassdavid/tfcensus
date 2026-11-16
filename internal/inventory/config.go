@@ -36,6 +36,9 @@ func (e *Env) logger() *slog.Logger {
 	return e.Logger
 }
 
+// globalRegion is the region Config and Resource Explorer give global resources such as IAM roles.
+const globalRegion = "global"
+
 // configPageSize is the most results SelectResourceConfig returns per page.
 const configPageSize = 100
 
@@ -165,7 +168,7 @@ func DecodeConfigItem(m *typemap.Map, raw []byte) (CloudResource, error) {
 		ARN: typemap.NormalizeARN(row.ARN), ID: row.ResourceID, Name: row.ResourceName,
 		Sources: []string{LayerConfig},
 	}
-	if r.Region == "global" {
+	if r.Region == globalRegion {
 		r.Region = ""
 	}
 	for _, t := range row.Tags {
