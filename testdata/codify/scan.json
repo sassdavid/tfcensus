@@ -442,7 +442,7 @@
         ],
         "owner": "aws",
         "reason": "network interface that a service manages (requester-managed or a service interface type)",
-        "rule": "pack/derived/requester-managed-eni"
+        "rule": "pack/derived/service-eni"
       },
       {
         "account": "111111111111",

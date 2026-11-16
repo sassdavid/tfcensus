@@ -83,9 +83,16 @@ stack owns one. Their runs have layer `cloudformation` and stay out of the cover
 - AWS Config pricing, checked 2026-11-11 (aws.amazon.com/config/pricing): the page bills recorded
   configuration items, rule evaluations and conformance pack evaluations, and names no charge for
   advanced queries. The advanced query guide names none either.
-- The config layer selects `resourceCreationTime` and five configuration flags the ownership packs
-  read (`isDefault`, `defaultForAz`, `keyManager`, `requesterManaged`, `interfaceType`), never a
-  whole `configuration` document.
+- The config layer selects `resourceCreationTime` and the configuration properties the ownership
+  packs read, never a whole `configuration` document: the flags `isDefault`, `defaultForAz`,
+  `keyManager`, `requesterManaged` and `interfaceType`; an ENI's `description`, `requesterId` and
+  `attachment.instanceOwnerId`; DHCP options' `dhcpConfigurations` (kept as one `key=values`
+  string); and a route table's `associations` (kept as `main`). A value a user wrote is read only
+  when a rule needs it to tell a service from a person, and is never printed
+  ([ADR-0017](../adr/0017-scan-accuracy.md)).
+- `SelectResourceConfig` takes at most 4,096 characters of expression, so the layer splits the
+  sorted Config types into runs whose query stays under 2,560 characters, leaving room for an
+  aggregate query's account and region lists.
 
 ## Acceptance criteria
 - [x] Each layer has stubbed-response tests (paginated, throttled-then-success, AccessDenied).

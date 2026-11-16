@@ -21,9 +21,17 @@ other-iac    Crossplane managed resource                   pack/other-iac/crossp
 other-iac    Kubernetes cloud provider security group      pack/other-iac/kubernetes other-iac
 other-iac    AWS Load Balancer Controller load balancer    pack/other-iac/kubernetes other-iac
 other-iac    queue with a Name tag only                    rules/no-match
-derived      NAT gateway network interface                 pack/derived/requester-managed-eni derived
-derived      Lambda network interface                      pack/derived/requester-managed-eni derived
+derived      NAT gateway network interface                 pack/derived/service-eni derived
+derived      Lambda network interface                      pack/derived/service-eni derived
 derived      network interface someone created             rules/no-match
+derived      MSK broker network interface                  pack/derived/service-eni derived
+derived      network interface attached by amazon-aws      pack/derived/service-eni derived
+derived      QuickSight network interface                  pack/derived/service-eni derived
+derived      unattached Lambda network interface           pack/derived/service-eni derived
+derived      VPC CNI network interface                     pack/derived/service-eni derived
+derived      VPC CNI trunk network interface               pack/derived/service-eni derived
+derived      unattached network interface someone created  rules/no-match
+derived      primary network interface of an instance      rules/no-match
 derived      Auto Scaling instance                         pack/derived/autoscaled-instance derived
 derived      Karpenter node                                pack/derived/autoscaled-instance derived
 derived      hand-launched instance                        rules/no-match
