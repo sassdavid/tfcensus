@@ -1,0 +1,496 @@
+# L3 drift e2e (docs/plan/testing.md): real terragrunt and $TF with the aws provider against moto.
+# Run by TestSpec_drift_e2e once with terraform and once with tofu, each in its own account ($ACCOUNT).
+# Both runs compare with the same goldens.
+env TEST_NOW=2026-11-16T08:00:00Z
+
+# Apply both units one at a time, so init fills the provider cache without a race.
+cd repo/live/app-a
+exec terragrunt run --tf-path $TF -- apply -auto-approve -input=false -no-color
+cd ../app-b
+exec terragrunt run --tf-path $TF -- apply -auto-approve -input=false -no-color
+cd $WORK/repo
+
+# Freshly applied units have no drift, so the gate passes.
+exec tfcensus drift --tf-path $TF --fail-on drift --format json
+jsonschema drift-v1.json stdout
+stdout '"groups": 0'
+
+# Someone tags both buckets in the console and opens a port on one security group.
+tagbucket tfcensus-drift-${ACCOUNT}-app-a Owner=FIXTURE-SECRET-owner
+tagbucket tfcensus-drift-${ACCOUNT}-app-b Owner=FIXTURE-SECRET-owner
+openport tfcensus-drift-app-a 22
+
+# Run mode: the tag drift collapses into one group with both units as members. Only paths and
+# kinds are printed, never the values.
+exec tfcensus drift --tf-path $TF --format json -v
+jsonschema drift-v1.json stdout
+cmp stdout $WORK/golden/run.json
+! stdout FIXTURE-SECRET
+stderr 'unit started unit=live/app-a'
+stderr 'unit started unit=live/app-b'
+! stderr FIXTURE-SECRET
+exec tfcensus drift --tf-path $TF --format md
+! stdout FIXTURE-SECRET
+exec expect-exit 3 tfcensus drift --tf-path $TF --fail-on drift --format json
+stderr 'matched \(drift: 3\)'
+
+# Ingest mode reads the plans terragrunt itself wrote and gives the same report. terragrunt exits
+# 2 because the plans have changes.
+! exec terragrunt run --all --tf-path $TF --json-out-dir $WORK/plans --report-file $WORK/report.json --report-format json --no-color -- plan -refresh-only -lock=false -detailed-exitcode
+exec tfcensus drift --from-json-out-dir $WORK/plans --report-file $WORK/report.json --format json
+cmp stdout $WORK/golden/run.json
+
+# Full mode: the plan reverts every drift, and the new tag in app-b is a pending change.
+cp live/app-b/main.tf.full live/app-b/main.tf
+exec tfcensus drift --tf-path $TF --mode full --format json
+jsonschema drift-v1.json stdout
+cmp stdout $WORK/golden/full.json
+exec expect-exit 3 tfcensus drift --tf-path $TF --mode full --fail-on drift:reverts --format json
+stderr 'matched \(drift:reverts: 3\)'
+
+-- golden/run.json --
+{
+  "schema_version": "1",
+  "tool": "tfcensus",
+  "version": "dev",
+  "generated_at": "2026-11-16T08:00:00Z",
+  "data": {
+    "mode": "refresh-only",
+    "collapse": "shape",
+    "summary": {
+      "units": 2,
+      "drifted": 2,
+      "clean": 0,
+      "failed": 0,
+      "early_exit": 0,
+      "excluded": 0,
+      "resources": 3,
+      "reverts": 0,
+      "hidden": 0,
+      "groups": 2
+    },
+    "units": [
+      {
+        "path": "live/app-a",
+        "status": "drifted",
+        "drifted": 2,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/app-b",
+        "status": "drifted",
+        "drifted": 1,
+        "reverts": 0,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      }
+    ],
+    "groups": [
+      {
+        "id": "g1",
+        "type": "aws_s3_bucket",
+        "action": "update",
+        "attributes": [
+          {
+            "path": "tags.Owner",
+            "kind": "added"
+          },
+          {
+            "path": "tags_all.Owner",
+            "kind": "added"
+          }
+        ],
+        "members": [
+          {
+            "unit": "live/app-a",
+            "address": "aws_s3_bucket.data"
+          },
+          {
+            "unit": "live/app-b",
+            "address": "aws_s3_bucket.data"
+          }
+        ]
+      },
+      {
+        "id": "g2",
+        "type": "aws_security_group",
+        "action": "update",
+        "attributes": [
+          {
+            "path": "ingress[*]",
+            "kind": "added"
+          }
+        ],
+        "members": [
+          {
+            "unit": "live/app-a",
+            "address": "aws_security_group.web"
+          }
+        ]
+      }
+    ],
+    "changes": [
+      {
+        "unit": "live/app-a",
+        "address": "aws_s3_bucket.data",
+        "type": "aws_s3_bucket",
+        "action": "update",
+        "attributes": [
+          {
+            "path": "tags.Owner",
+            "kind": "added"
+          },
+          {
+            "path": "tags_all.Owner",
+            "kind": "added"
+          }
+        ],
+        "group": "g1"
+      },
+      {
+        "unit": "live/app-a",
+        "address": "aws_security_group.web",
+        "type": "aws_security_group",
+        "action": "update",
+        "attributes": [
+          {
+            "path": "ingress[1]",
+            "kind": "added"
+          }
+        ],
+        "group": "g2"
+      },
+      {
+        "unit": "live/app-b",
+        "address": "aws_s3_bucket.data",
+        "type": "aws_s3_bucket",
+        "action": "update",
+        "attributes": [
+          {
+            "path": "tags.Owner",
+            "kind": "added"
+          },
+          {
+            "path": "tags_all.Owner",
+            "kind": "added"
+          }
+        ],
+        "group": "g1"
+      }
+    ],
+    "warnings": []
+  },
+  "errors": []
+}
+-- golden/full.json --
+{
+  "schema_version": "1",
+  "tool": "tfcensus",
+  "version": "dev",
+  "generated_at": "2026-11-16T08:00:00Z",
+  "data": {
+    "mode": "full",
+    "collapse": "shape",
+    "summary": {
+      "units": 2,
+      "drifted": 2,
+      "clean": 0,
+      "failed": 0,
+      "early_exit": 0,
+      "excluded": 0,
+      "resources": 3,
+      "reverts": 3,
+      "hidden": 0,
+      "groups": 2
+    },
+    "units": [
+      {
+        "path": "live/app-a",
+        "status": "drifted",
+        "drifted": 2,
+        "reverts": 2,
+        "hidden": 0,
+        "pending": 0,
+        "outputs": []
+      },
+      {
+        "path": "live/app-b",
+        "status": "drifted",
+        "drifted": 1,
+        "reverts": 1,
+        "hidden": 0,
+        "pending": 1,
+        "outputs": []
+      }
+    ],
+    "groups": [
+      {
+        "id": "g1",
+        "type": "aws_s3_bucket",
+        "action": "update",
+        "revert": "update",
+        "attributes": [
+          {
+            "path": "tags.Owner",
+            "kind": "added"
+          },
+          {
+            "path": "tags_all.Owner",
+            "kind": "added"
+          }
+        ],
+        "members": [
+          {
+            "unit": "live/app-a",
+            "address": "aws_s3_bucket.data"
+          },
+          {
+            "unit": "live/app-b",
+            "address": "aws_s3_bucket.data"
+          }
+        ]
+      },
+      {
+        "id": "g2",
+        "type": "aws_security_group",
+        "action": "update",
+        "revert": "update",
+        "attributes": [
+          {
+            "path": "ingress[*]",
+            "kind": "added"
+          }
+        ],
+        "members": [
+          {
+            "unit": "live/app-a",
+            "address": "aws_security_group.web"
+          }
+        ]
+      }
+    ],
+    "changes": [
+      {
+        "unit": "live/app-a",
+        "address": "aws_s3_bucket.data",
+        "type": "aws_s3_bucket",
+        "action": "update",
+        "revert": "update",
+        "attributes": [
+          {
+            "path": "tags.Owner",
+            "kind": "added"
+          },
+          {
+            "path": "tags_all.Owner",
+            "kind": "added"
+          }
+        ],
+        "group": "g1"
+      },
+      {
+        "unit": "live/app-a",
+        "address": "aws_security_group.web",
+        "type": "aws_security_group",
+        "action": "update",
+        "revert": "update",
+        "attributes": [
+          {
+            "path": "ingress[1]",
+            "kind": "added"
+          }
+        ],
+        "group": "g2"
+      },
+      {
+        "unit": "live/app-b",
+        "address": "aws_s3_bucket.data",
+        "type": "aws_s3_bucket",
+        "action": "update",
+        "revert": "update",
+        "attributes": [
+          {
+            "path": "tags.Owner",
+            "kind": "added"
+          },
+          {
+            "path": "tags_all.Owner",
+            "kind": "added"
+          }
+        ],
+        "group": "g1"
+      }
+    ],
+    "warnings": []
+  },
+  "errors": []
+}
+-- repo/root.hcl --
+locals {
+  account_id = read_terragrunt_config(find_in_parent_folders("account.hcl")).locals.id
+  endpoint   = get_env("AWS_ENDPOINT_URL")
+}
+
+remote_state {
+  backend = "s3"
+  generate = {
+    path      = "backend.tf"
+    if_exists = "overwrite_terragrunt"
+  }
+  config = {
+    bucket                  = "tfcensus-e2e-drift-${local.account_id}"
+    key                     = "${path_relative_to_include()}/terraform.tfstate"
+    region                  = "us-east-1"
+    use_lockfile            = true
+    use_path_style          = true
+    skip_metadata_api_check = true
+    assume_role = {
+      role_arn = "arn:aws:iam::${local.account_id}:role/tfcensus-e2e"
+    }
+    endpoints = {
+      s3  = local.endpoint
+      sts = local.endpoint
+    }
+  }
+}
+
+generate "provider" {
+  path      = "provider.tf"
+  if_exists = "overwrite_terragrunt"
+  contents  = <<-EOF
+    terraform {
+      required_providers {
+        aws = {
+          source  = "hashicorp/aws"
+          version = "= 6.73.0"
+        }
+      }
+    }
+
+    provider "aws" {
+      region                      = "us-east-1"
+      s3_use_path_style           = true
+      skip_credentials_validation = true
+      skip_metadata_api_check     = true
+      assume_role {
+        role_arn = "arn:aws:iam::${local.account_id}:role/tfcensus-e2e"
+      }
+      endpoints {
+        ec2 = "${local.endpoint}"
+        s3  = "${local.endpoint}"
+        sts = "${local.endpoint}"
+      }
+    }
+  EOF
+}
+
+inputs = {
+  account_id = local.account_id
+  unit       = basename(get_terragrunt_dir())
+}
+-- repo/live/app-a/terragrunt.hcl --
+include "root" {
+  path = find_in_parent_folders("root.hcl")
+}
+-- repo/live/app-b/terragrunt.hcl --
+include "root" {
+  path = find_in_parent_folders("root.hcl")
+}
+-- repo/live/app-a/main.tf --
+variable "account_id" {
+  type = string
+}
+
+variable "unit" {
+  type = string
+}
+
+# moto 5.2.5 drops the tags the aws provider sends with CreateBucket, so the state and the bucket
+# start with none.
+resource "aws_s3_bucket" "data" {
+  bucket = "tfcensus-drift-${var.account_id}-${var.unit}"
+  tags = {
+    Team = "platform"
+  }
+}
+
+resource "aws_security_group" "web" {
+  name        = "tfcensus-drift-${var.unit}"
+  description = "tfcensus drift e2e"
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/8"]
+  }
+  tags = {
+    Team = "platform"
+  }
+}
+-- repo/live/app-b/main.tf.full --
+variable "account_id" {
+  type = string
+}
+
+variable "unit" {
+  type = string
+}
+
+# moto 5.2.5 drops the tags the aws provider sends with CreateBucket, so the state and the bucket
+# start with none.
+resource "aws_s3_bucket" "data" {
+  bucket = "tfcensus-drift-${var.account_id}-${var.unit}"
+  tags = {
+    Team = "platform"
+  }
+}
+
+resource "aws_security_group" "web" {
+  name        = "tfcensus-drift-${var.unit}"
+  description = "tfcensus drift e2e"
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/8"]
+  }
+  tags = {
+    Team = "platform"
+    Env  = "e2e"
+  }
+}
+-- repo/live/app-b/main.tf --
+variable "account_id" {
+  type = string
+}
+
+variable "unit" {
+  type = string
+}
+
+# moto 5.2.5 drops the tags the aws provider sends with CreateBucket, so the state and the bucket
+# start with none.
+resource "aws_s3_bucket" "data" {
+  bucket = "tfcensus-drift-${var.account_id}-${var.unit}"
+  tags = {
+    Team = "platform"
+  }
+}
+
+resource "aws_security_group" "web" {
+  name        = "tfcensus-drift-${var.unit}"
+  description = "tfcensus drift e2e"
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/8"]
+  }
+  tags = {
+    Team = "platform"
+  }
+}

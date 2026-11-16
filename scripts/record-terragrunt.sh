@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 # Records real terragrunt output for a fixture repo, for the fake terragrunt in tests to replay.
 # Every AWS credential source is blanked, so nothing can reach AWS. Run it again after a terragrunt
-# upgrade and review the diff.
-#   bash scripts/record-terragrunt.sh tg-live
+# upgrade and review the diff. A second argument writes the recording to another directory, which
+# scripts/terragrunt-contract-diff.sh compares with the checked-in one.
+#   bash scripts/record-terragrunt.sh tg-live [out-dir]
 set -euo pipefail
 
-name=${1:?usage: record-terragrunt.sh <fixture under testdata/repos>}
+name=${1:?usage: record-terragrunt.sh <fixture under testdata/repos> [out-dir]}
 src=testdata/repos/$name
-out=testdata/terragrunt/$name
+out=${2:-testdata/terragrunt/$name}
 # Terragrunt relativizes paths against the symlink-resolved directory, so resolve it first.
 work=$(cd "$(mktemp -d)" && pwd -P)
 trap 'rm -rf "$work"' EXIT

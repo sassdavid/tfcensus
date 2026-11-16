@@ -1,0 +1,8 @@
+# Binaries for the L3 e2e and the terragrunt contract test (docs/plan/testing.md), loaded with
+# MISE_ENV=e2e so other jobs and laptops never install them. Renovate updates the versions and
+# mise.e2e.lock.
+
+[tools]
+terraform = "1.17.2"
+terragrunt = "1.2.2"
+opentofu = "1.13.9"
