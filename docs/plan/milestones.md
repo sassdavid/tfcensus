@@ -315,10 +315,15 @@ identifiers map the organization. Trivy, Snyk, Steampipe and Infracost use the s
 ### M19: Package channels (shared, the owner picks the release)
 Scope: from the next release on, publish to Homebrew, Scoop and ghcr.io as well as GitHub.
 Earlier versions stay GitHub only; the tap and the bucket start at that version.
-- [ ] The tap and bucket tokens use `{{ .Env.HOMEBREW_TAP_TOKEN }}` and
+- [x] The tap and bucket tokens use `{{ .Env.HOMEBREW_TAP_TOKEN }}` and
   `{{ .Env.SCOOP_BUCKET_TOKEN }}`. goreleaser renders `repository.token` with
-  `ApplySingleEnvOnly` (`internal/client/client.go`), so the current `envOrDefault` form fails on
+  `ApplySingleEnvOnly` (`internal/client/client.go`), so the old `envOrDefault` form would have failed on
   the first real publish. Skipped runs never read the token, which is why nothing caught it.
+  Evidence (2026-11-16, goreleaser 2.20.2): `envOnlyRe` in `internal/tmpl/tmpl.go` accepts only
+  `{{ .Env.NAME }}`, and the cask and Scoop `doPublish` return on `skip_upload: true` before
+  `client.NewIfToken` reads the token. With both variables unset, `goreleaser check` validates
+  the file and `goreleaser release --snapshot --clean --skip=sign,sbom` renders the cask and the
+  manifest.
 - [ ] `sassdavid/homebrew-tap` and `sassdavid/scoop-bucket` have a first commit on their default
   branch, and the owner confirms both secrets exist.
 - [ ] `skip_upload` becomes

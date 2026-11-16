@@ -130,7 +130,7 @@ homebrew_casks:
     repository:
       owner: sassdavid
       name: homebrew-tap
-      token: '{{ envOrDefault "HOMEBREW_TAP_TOKEN" "" }}'
+      token: '{{ .Env.HOMEBREW_TAP_TOKEN }}'
     directory: Casks
     # Off until M19: goreleaser renders the cask into dist/ and release.yml keeps it as an artifact.
     skip_upload: true
@@ -158,7 +158,7 @@ scoops:
     repository:
       owner: sassdavid
       name: scoop-bucket
-      token: '{{ envOrDefault "SCOOP_BUCKET_TOKEN" "" }}'
+      token: '{{ .Env.SCOOP_BUCKET_TOKEN }}'
     directory: bucket
     # Off until M19: goreleaser renders the manifest into dist/ and release.yml keeps it as an artifact.
     skip_upload: true
