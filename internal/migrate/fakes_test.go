@@ -26,6 +26,7 @@ import (
 
 	"github.com/sassdavid/tfcensus/internal/discovery"
 	"github.com/sassdavid/tfcensus/internal/migrate"
+	"github.com/sassdavid/tfcensus/internal/tfstate"
 )
 
 const (
@@ -55,6 +56,7 @@ type fakeS3 struct {
 	objects   map[string][]objVersion
 	seq       int
 	writes    []string
+	copies    []string // CopySource values as sent
 }
 
 func newFakeS3() *fakeS3 { return &fakeS3{objects: map[string][]objVersion{}} }
@@ -177,6 +179,7 @@ func (f *fakeS3) CopyObject(
 ) (*s3.CopyObjectOutput, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
+	f.copies = append(f.copies, aws.ToString(in.CopySource))
 	src, version, _ := strings.Cut(aws.ToString(in.CopySource), "?versionId=")
 	src, _ = url.PathUnescape(src)
 	version, _ = url.QueryUnescape(version)
@@ -237,11 +240,20 @@ func (f *fakeTable) DeleteItem(
 	return &dynamodb.DeleteItemOutput{}, nil
 }
 
-// fakePlanner returns canned plans per unit directory and keeps the state copies it was given.
+// planKey names a workspace of a unit directory in the planner and pusher fakes.
+func planKey(dir, ws string) string {
+	if ws == tfstate.DefaultWorkspace {
+		return dir
+	}
+	return dir + ":" + ws
+}
+
+// fakePlanner returns canned plans per workspace of a unit directory and keeps the state copies it
+// was given.
 type fakePlanner struct {
 	mu     sync.Mutex
-	plans  map[string][]migrate.ResourceChange
-	states map[string][]byte
+	plans  map[string][]migrate.ResourceChange // by planKey
+	states map[string][]byte                   // by planKey
 	hook   func(dir string)
 }
 
@@ -249,7 +261,7 @@ func newFakePlanner() *fakePlanner {
 	return &fakePlanner{plans: map[string][]migrate.ResourceChange{}, states: map[string][]byte{}}
 }
 
-func (p *fakePlanner) Plan(_ context.Context, dir, stateFile string) ([]migrate.ResourceChange, error) {
+func (p *fakePlanner) Plan(_ context.Context, dir, ws, stateFile string) ([]migrate.ResourceChange, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if p.hook != nil {
@@ -260,21 +272,21 @@ func (p *fakePlanner) Plan(_ context.Context, dir, stateFile string) ([]migrate.
 		if err != nil {
 			return nil, err
 		}
-		p.states[dir] = b
+		p.states[planKey(dir, ws)] = b
 	}
-	return p.plans[dir], nil
+	return p.plans[planKey(dir, ws)], nil
 }
 
 // fakePusher acts like terraform state push: it refuses another lineage or an older serial and
 // writes the state re-encoded, as terraform does, so a rollback has to restore the exact bytes.
 type fakePusher struct {
 	s3    *fakeS3
-	units map[string]*migrate.Unit // by dir
+	units map[string]*migrate.Unit // by planKey
 	calls []string
 }
 
-func (p *fakePusher) Push(_ context.Context, dir, stateFile string) error {
-	u := p.units[dir]
+func (p *fakePusher) Push(_ context.Context, dir, ws, stateFile string) error {
+	u := p.units[planKey(dir, ws)]
 	b, err := os.ReadFile(stateFile)
 	if err != nil {
 		return err
@@ -308,7 +320,7 @@ func (p *fakePusher) Push(_ context.Context, dir, stateFile string) error {
 	if err != nil {
 		return err
 	}
-	p.calls = append(p.calls, u.Path)
+	p.calls = append(p.calls, u.Ref())
 	p.s3.put(u.Key, out)
 	return nil
 }
@@ -331,10 +343,12 @@ type rig struct {
 	table   *fakeTable
 	planner *fakePlanner
 	pusher  *fakePusher
-	units   map[string]*migrate.Unit
+	units   map[string]*migrate.Unit // by unit reference
 }
 
-func newRig(t *testing.T, paths ...string) *rig {
+// newRig makes a rig for units given as references, path or path:workspace. Workspaces use the
+// default env: prefix.
+func newRig(t *testing.T, refs ...string) *rig {
 	t.Helper()
 	r := &rig{
 		t:       t,
@@ -345,15 +359,17 @@ func newRig(t *testing.T, paths ...string) *rig {
 	}
 	r.pusher = &fakePusher{s3: r.s3, units: map[string]*migrate.Unit{}}
 	root := t.TempDir()
-	for _, p := range paths {
+	for _, ref := range refs {
+		p, ws := migrate.SplitRef(ref)
 		dir := filepath.Join(root, filepath.FromSlash(p))
 		require.NoError(t, os.MkdirAll(dir, 0o750))
 		u := &migrate.Unit{
-			Path: p, Dir: dir, Bucket: testBucket, Key: p + "/terraform.tfstate", Region: "eu-west-1",
+			Path: p, Workspace: ws, Dir: dir, Bucket: testBucket,
+			Key: tfstate.WorkspaceKey(nil, p+"/terraform.tfstate", ws), Region: "eu-west-1",
 			Lock: discovery.LockLockfile, Account: "111111111111",
 		}
-		r.units[p] = u
-		r.pusher.units[dir] = u
+		r.units[ref] = u
+		r.pusher.units[planKey(dir, ws)] = u
 	}
 	return r
 }
@@ -394,7 +410,8 @@ func (r *rig) engine(write bool) *migrate.Engine {
 
 func (r *rig) captured(path string) *migrate.State {
 	r.t.Helper()
-	b, ok := r.planner.states[r.units[path].Dir]
+	u := r.units[path]
+	b, ok := r.planner.states[planKey(u.Dir, u.Workspace)]
 	require.True(r.t, ok, "no plan against a state copy of %s", path)
 	st, err := migrate.ParseState(b)
 	require.NoError(r.t, err)

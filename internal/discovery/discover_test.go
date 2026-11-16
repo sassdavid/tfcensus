@@ -352,6 +352,38 @@ remote_state {
 	}
 }
 
+// TestWorkspaceKeyPrefix: an explicitly empty workspace_key_prefix is kept apart from an unset one,
+// because the s3 backend puts workspaces at <ws>/<key> for the first and env:/<ws>/<key> for the
+// second.
+func TestWorkspaceKeyPrefix(t *testing.T) {
+	t.Parallel()
+
+	empty, custom := "", "ws"
+	tests := []struct {
+		name   string
+		config string
+		want   *string
+	}{
+		{"unset", `bucket = "b", key = "k", region = "r"`, nil},
+		{"empty", `bucket = "b", key = "k", region = "r", workspace_key_prefix = ""`, &empty},
+		{"custom", `bucket = "b", key = "k", region = "r", workspace_key_prefix = "ws"`, &custom},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			root := t.TempDir()
+			writeTree(t, root, map[string]string{"u/terragrunt.hcl": "remote_state {\n  backend = \"s3\"\n" +
+				"  config  = { " + tt.config + " }\n}\n"})
+			d := discovery.New(unitsRunner{"u"}, slog.New(slog.DiscardHandler),
+				discovery.Options{Render: discovery.RenderNever})
+			res := d.Discover(t.Context(), []string{root})
+			require.Len(t, res.Units, 1)
+			require.NotNil(t, res.Units[0].Backend, res.Units[0].Reason)
+			assert.Equal(t, tt.want, res.Units[0].Backend.WorkspaceKeyPrefix)
+		})
+	}
+}
+
 func TestParseRenderMode(t *testing.T) {
 	t.Parallel()
 

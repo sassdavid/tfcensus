@@ -309,3 +309,44 @@ func writeLarge(pw interface {
 	_, err := pw.Write(buf.Bytes())
 	_ = pw.CloseWithError(err)
 }
+
+// TestReadWorkspacePrefix: workspaces are found and read where the s3 backend puts them, for an
+// unset, a custom and an explicitly empty workspace_key_prefix.
+func TestReadWorkspacePrefix(t *testing.T) {
+	t.Parallel()
+
+	const bucket = "acme-ws-tfstate"
+	empty, custom := "", "workspaces"
+	body := readFixture(t, "tf112-app.tfstate")
+	f := awstest.NewFake(t, lastModified())
+	f.CreateBucket(bucket)
+	for _, key := range []string{
+		"unset/terraform.tfstate", "env:/blue/unset/terraform.tfstate",
+		"custom/terraform.tfstate", "workspaces/green/custom/terraform.tfstate",
+		"empty/terraform.tfstate", "red/empty/terraform.tfstate",
+	} {
+		f.Put(bucket, key, body)
+	}
+	unit := func(path string, prefix *string) discovery.Unit {
+		return discovery.Unit{
+			Repo: fleetRepo, Path: path, Kind: discovery.KindTerraform,
+			Backend: &discovery.Backend{
+				Type: discovery.BackendS3, Bucket: bucket, Key: path + "/terraform.tfstate", Region: "eu-west-1",
+				WorkspaceKeyPrefix: prefix,
+			},
+		}
+	}
+	r := tfstate.NewReader(tfstate.Options{Client: fakeClients(f), WorkDir: reposDir})
+	got := map[string]string{}
+	for _, s := range r.Read(t.Context(), []discovery.Unit{
+		unit("unset", nil), unit("custom", &custom), unit("empty", &empty),
+	}) {
+		assert.Equal(t, tfstate.StatusOK, s.Status, s.Path+":"+s.Workspace)
+		got[s.Path+":"+s.Workspace] = s.Key
+	}
+	assert.Equal(t, map[string]string{
+		"unset:default": "unset/terraform.tfstate", "unset:blue": "env:/blue/unset/terraform.tfstate",
+		"custom:default": "custom/terraform.tfstate", "custom:green": "workspaces/green/custom/terraform.tfstate",
+		"empty:default": "empty/terraform.tfstate", "empty:red": "red/empty/terraform.tfstate",
+	}, got)
+}

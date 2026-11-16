@@ -103,12 +103,19 @@ func s3Backend(config map[string]any) (*Backend, error) {
 		}
 		return s
 	}
+	optStr := func(key string) *string {
+		if v, ok := config[key]; !ok || v == nil {
+			return nil
+		}
+		s := str(key)
+		return &s
+	}
 	b := &Backend{
 		Type:               BackendS3,
 		Bucket:             str("bucket"),
 		Key:                str("key"),
 		Region:             str("region"),
-		WorkspaceKeyPrefix: str("workspace_key_prefix"),
+		WorkspaceKeyPrefix: optStr("workspace_key_prefix"),
 		DynamoDBTable:      str("dynamodb_table"),
 		RoleARN:            str("role_arn"),
 		Profile:            str("profile"),

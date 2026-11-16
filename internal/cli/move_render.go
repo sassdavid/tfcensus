@@ -142,7 +142,7 @@ func writeMoveBlock(b *strings.Builder, command string, br *migrate.BlockReport)
 	tw := tabwriter.NewWriter(b, 0, 0, 2, ' ', 0) //nolint:mnd // two spaces between columns
 	for i := range br.Units {
 		u := &br.Units[i]
-		cols := []string{u.Path, u.Role}
+		cols := []string{u.Label(), u.Role}
 		switch moveCommand(command) {
 		case moveStatus:
 			cols = append(cols, u.Status, moveVersions(u.VersionIDs))
@@ -178,7 +178,7 @@ func movedLines(br *migrate.BlockReport) ([]string, []string) {
 			skipped = append(skipped, u.Skipped...)
 		case migrate.RoleDestination:
 			for _, m := range u.Moved {
-				moved = append(moved, m+" -> "+u.Path)
+				moved = append(moved, m+" -> "+u.Label())
 			}
 		default:
 			moved = append(moved, u.Moved...)

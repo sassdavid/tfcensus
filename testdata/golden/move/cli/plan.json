@@ -16,6 +16,7 @@
         "units": [
           {
             "path": "live/network-sg",
+            "workspace": "default",
             "role": "destination",
             "moved": [
               "aws_security_group.app",
@@ -30,6 +31,7 @@
           },
           {
             "path": "live/network-endpoints",
+            "workspace": "default",
             "role": "destination",
             "moved": [
               "module.endpoints.aws_vpc_endpoint.s3",
@@ -46,6 +48,7 @@
           },
           {
             "path": "live/network",
+            "workspace": "default",
             "role": "source",
             "moved": [
               "aws_security_group.app",
@@ -78,6 +81,7 @@
         "units": [
           {
             "path": "live/network",
+            "workspace": "default",
             "role": "in-place",
             "moved": [
               "aws_vpc.main -> aws_vpc.this"

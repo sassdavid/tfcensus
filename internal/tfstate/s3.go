@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"path"
 	"slices"
 	"strings"
 	"time"
@@ -81,20 +82,31 @@ func classify(err error, action, bucket, key string) error {
 	return fmt.Errorf("read %s: %w", loc, err)
 }
 
-// workspacePrefix returns the key prefix of non-default workspaces.
-func workspacePrefix(configured string) string {
-	if configured == "" {
+// workspacePrefix returns the key prefix of non-default workspaces; nil means the backend's
+// default.
+func workspacePrefix(configured *string) string {
+	if configured == nil {
 		return defaultWorkspacePrefix
 	}
-	return configured
+	return *configured
 }
 
-// WorkspaceKey returns the state key of workspace ws, the way the s3 backend lays it out.
-func WorkspaceKey(prefix, key, ws string) string {
+// workspaceListPrefix is what the s3 backend lists to find workspaces: the prefix and a slash, or
+// the whole bucket for an empty prefix.
+func workspaceListPrefix(configured *string) string {
+	if p := workspacePrefix(configured); p != "" {
+		return p + "/"
+	}
+	return ""
+}
+
+// WorkspaceKey returns the state key of workspace ws the way the s3 backend lays it out:
+// [path.Join] of workspace_key_prefix, ws and key. A nil prefix is the default, env:.
+func WorkspaceKey(prefix *string, key, ws string) string {
 	if ws == DefaultWorkspace || ws == "" {
 		return key
 	}
-	return workspacePrefix(prefix) + "/" + ws + "/" + key
+	return path.Join(workspacePrefix(prefix), ws, key)
 }
 
 // listKeys returns every key under prefix in bucket.
@@ -117,10 +129,10 @@ func listKeys(ctx context.Context, c Client, bucket, prefix string) ([]string, e
 }
 
 // workspacesIn picks the workspaces of key out of the keys listed under prefix/.
-func workspacesIn(keys []string, prefix, key string) []string {
+func workspacesIn(keys []string, prefix *string, key string) []string {
 	var out []string
 	for _, k := range keys {
-		rest, ok := strings.CutPrefix(k, workspacePrefix(prefix)+"/")
+		rest, ok := strings.CutPrefix(k, workspaceListPrefix(prefix))
 		if !ok {
 			continue
 		}

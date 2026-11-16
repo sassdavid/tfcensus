@@ -14,16 +14,18 @@ import (
 
 	"github.com/sassdavid/tfcensus/internal/discovery"
 	"github.com/sassdavid/tfcensus/internal/prompt"
+	"github.com/sassdavid/tfcensus/internal/tfstate"
 )
 
 // Errors that stop a run.
 var (
-	ErrRejected   = errors.New("verification rejected the migration")
-	ErrPartial    = errors.New("block is applied in some units only")
-	ErrManual     = errors.New("block was marked applied by hand")
-	ErrUnknown    = errors.New("unit not found")
-	ErrNoState    = errors.New("source state does not exist")
-	ErrNotApplied = errors.New("block is not applied")
+	ErrRejected    = errors.New("verification rejected the migration")
+	ErrPartial     = errors.New("block is applied in some units only")
+	ErrManual      = errors.New("block was marked applied by hand")
+	ErrUnknown     = errors.New("unit not found")
+	ErrNoState     = errors.New("source state does not exist")
+	ErrNoWorkspace = errors.New("workspace does not exist")
+	ErrNotApplied  = errors.New("block is not applied")
 )
 
 // Block statuses.
@@ -54,14 +56,14 @@ const (
 	RuleVersioning = "MV-VERSIONING"
 )
 
-// Planner plans a unit, against a local state copy when stateFile is set.
+// Planner plans a workspace of a unit, against a local state copy when stateFile is set.
 type Planner interface {
-	Plan(ctx context.Context, dir, stateFile string) ([]ResourceChange, error)
+	Plan(ctx context.Context, dir, workspace, stateFile string) ([]ResourceChange, error)
 }
 
-// Pusher pushes a state file to a unit's backend.
+// Pusher pushes a state file to a workspace of a unit's backend.
 type Pusher interface {
-	Push(ctx context.Context, dir, stateFile string) error
+	Push(ctx context.Context, dir, workspace, stateFile string) error
 }
 
 // ClientsFunc returns the backend clients of a unit.
@@ -69,7 +71,7 @@ type ClientsFunc func(ctx context.Context, u *Unit) (*Clients, error)
 
 // Options configures an [Engine].
 type Options struct {
-	Units   map[string]*Unit // by path
+	Units   map[string]*Unit // by unit reference: the path, or path:workspace
 	Clients ClientsFunc
 	Planner Planner
 	Pusher  Pusher // nil for read-only commands
@@ -100,6 +102,7 @@ type BlockReport struct {
 // ever reported.
 type UnitReport struct {
 	Path       string        `json:"path"`
+	Workspace  string        `json:"workspace"`
 	Role       string        `json:"role"`
 	Status     string        `json:"status,omitempty"`
 	Moved      []string      `json:"moved,omitempty"`
@@ -109,6 +112,9 @@ type UnitReport struct {
 	File       string        `json:"file,omitempty"`
 	VersionIDs *VersionIDs   `json:"version_ids,omitempty"`
 }
+
+// Label returns the unit reference: the path, with :workspace for a workspace other than default.
+func (r *UnitReport) Label() string { return unitRef(r.Path, r.Workspace) }
 
 // SerialChange is a state serial before and after a block.
 type SerialChange struct {
@@ -198,14 +204,14 @@ func (e *Engine) unit(path string) (*Unit, error) {
 }
 
 func (e *Engine) client(ctx context.Context, u *Unit) (*Clients, error) {
-	if c, ok := e.clients[u.Path]; ok {
+	if c, ok := e.clients[u.Ref()]; ok {
 		return c, nil
 	}
 	c, err := e.o.Clients(ctx, u)
 	if err != nil {
-		return nil, fmt.Errorf("backend credentials of %s: %w", u.Path, err)
+		return nil, fmt.Errorf("backend credentials of %s: %w", u.Ref(), err)
 	}
-	e.clients[u.Path] = c
+	e.clients[u.Ref()] = c
 	return c, nil
 }
 
@@ -291,14 +297,15 @@ func (e *Engine) status(ctx context.Context, f *File, b *Block) (string, map[str
 func newBlockReport(b *Block, status string) *BlockReport {
 	rep := &BlockReport{Name: b.Name, Strategy: b.Strategy, From: b.From, Status: status, Findings: []Finding{}}
 	for _, p := range b.Units() {
-		rep.Units = append(rep.Units, UnitReport{Path: p, Role: roleOf(b, p)})
+		unitPath, ws := SplitRef(p)
+		rep.Units = append(rep.Units, UnitReport{Path: unitPath, Workspace: ws, Role: roleOf(b, p)})
 	}
 	return rep
 }
 
 func (r *BlockReport) unit(path string) *UnitReport {
 	for i := range r.Units {
-		if r.Units[i].Path == path {
+		if r.Units[i].Label() == path {
 			return &r.Units[i]
 		}
 	}
@@ -327,6 +334,12 @@ func (e *Engine) planBlock(ctx context.Context, f *File, b *Block) (*BlockReport
 			return nil, nil, loadErr
 		}
 		p.snaps[path], p.roles[path] = c.snap, roleOf(b, path)
+		// terraform init fails for a workspace that doesn't exist, and workspace new writes a state
+		// with a lineage that the push would then be refused for.
+		if u := e.o.Units[path]; !c.snap.exists && u.Workspace != tfstate.DefaultWorkspace {
+			return nil, nil, fmt.Errorf("%w: %s (%s); create it with terraform workspace new %s in the unit first",
+				ErrNoWorkspace, path, u.location(), u.Workspace)
+		}
 	}
 	if e.cur[b.From].state == nil {
 		return nil, nil, fmt.Errorf("%w: %s", ErrNoState, b.From)
@@ -541,7 +554,7 @@ func (e *Engine) verify(ctx context.Context, b *Block, rep *BlockReport, p *pend
 		}
 		u := e.o.Units[path]
 		e.o.Logger.InfoContext(ctx, "verifying", "block", b.Name, "unit", path)
-		changes, err := e.o.Planner.Plan(ctx, u.Dir, file)
+		changes, err := e.o.Planner.Plan(ctx, u.Dir, u.Workspace, file)
 		if err != nil {
 			if errors.Is(err, ErrLeftover) || ctx.Err() != nil {
 				return err
@@ -623,7 +636,7 @@ func confirmMessage(b *Block, rep *BlockReport) string {
 	var sb strings.Builder
 	fmt.Fprintf(&sb, "Block %s pushes %d state(s):", b.Name, len(rep.Units))
 	for _, u := range rep.Units {
-		fmt.Fprintf(&sb, "\n  %s (%s, %d address(es))", u.Path, u.Role, len(u.Moved))
+		fmt.Fprintf(&sb, "\n  %s (%s, %d address(es))", u.Label(), u.Role, len(u.Moved))
 	}
 	return sb.String()
 }
@@ -676,7 +689,7 @@ func (e *Engine) pushUnit(ctx context.Context, f *File, b *Block, rep *BlockRepo
 		return err
 	}
 	e.o.Logger.InfoContext(ctx, "pushing state", "block", b.Name, "unit", path, "location", u.location())
-	if err = e.o.Pusher.Push(ctx, u.Dir, file); err != nil {
+	if err = e.o.Pusher.Push(ctx, u.Dir, u.Workspace, file); err != nil {
 		return fmt.Errorf("push %s: %w", path, err)
 	}
 	after, err := pull(ctx, c.Reader, u)
@@ -730,7 +743,8 @@ func (e *Engine) applyNative(ctx context.Context, b *Block, rep *BlockReport, p 
 	rep.Result = ResultWritten
 	for _, path := range p.order {
 		ur := rep.unit(path)
-		changes, err := e.o.Planner.Plan(ctx, e.o.Units[path].Dir, "")
+		u := e.o.Units[path]
+		changes, err := e.o.Planner.Plan(ctx, u.Dir, u.Workspace, "")
 		if err != nil {
 			if ctx.Err() != nil {
 				return err
@@ -766,7 +780,7 @@ func (e *Engine) Status(ctx context.Context, f *File, blocks []*Block) (*Report,
 		br := newBlockReport(b, status)
 		for i := range br.Units {
 			br.Units[i].Status = StatusPending
-			if r := recs[br.Units[i].Path]; r != nil {
+			if r := recs[br.Units[i].Label()]; r != nil {
 				br.Units[i].Status, br.Units[i].VersionIDs = StatusApplied, r.VersionIDs
 			}
 		}

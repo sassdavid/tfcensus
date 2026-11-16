@@ -28,8 +28,8 @@ commands that write to a backend, and none of them is available over MCP.
 
 Check each unit the migration touches:
 
-1. It has an `s3` backend that `tfcensus units` resolves (bucket, key and region shown). Only the
-   default workspace can be moved.
+1. It has an `s3` backend that `tfcensus units` resolves (bucket, key and region shown). For a
+   workspace other than default, the workspace already exists (`terraform workspace list`).
 2. Its terragrunt `remote_state` uses a `generate` block. Verification puts a local backend in
    front of the unit through `_tfcensus_override.tf`, and that only works with a generated backend.
 3. Its state bucket has versioning on. `tfcensus audit backend` reports it as S3-VER. Without it,
@@ -116,6 +116,33 @@ migration "units" "split_network" {
 
 History is kept per unit, so applying this file with `--var env=staging` doesn't mark it applied
 for `--var env=prod`.
+
+### Workspaces
+
+A unit path names the default workspace. For another workspace of the unit's s3 backend, add
+`:<workspace>`:
+
+```hcl
+migration "units" "split_network" {
+  from = "live/network:${var.ws}"
+  to   = { "live/network-sg:${var.ws}" = ["aws_security_group.app"] }
+}
+```
+
+tfcensus then reads and writes that workspace's state where terraform keeps it:
+`<workspace_key_prefix>/<workspace>/<key>`, with `env:` when the backend sets no prefix and no
+prefix at all when it sets `workspace_key_prefix = ""`. The lock, the DynamoDB digest and the
+history object follow the same key, and terragrunt runs with `TF_WORKSPACE`. `live/network:default`
+is the same as `live/network`. Apply's confirmation then asks for the reference with its
+workspace, such as `live/network-sg:blue`.
+
+- Two workspaces of one unit are two states, so a block can move resources from
+  `live/network:blue` to `live/network:green`.
+- The workspace must exist. tfcensus stops before planning (exit 2) when a workspace has no state;
+  run `terraform workspace new <name>` in the unit first. A new state in the default workspace is
+  still created by the push.
+- The native strategy works on the default workspace only. Its `moves_tfcensus_<block>.tf` files
+  are part of the unit's configuration, which every workspace of the directory applies.
 
 ## Run the move
 

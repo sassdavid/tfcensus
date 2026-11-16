@@ -23,6 +23,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/migrate"
 	"github.com/sassdavid/tfcensus/internal/prompt"
 	"github.com/sassdavid/tfcensus/internal/render"
+	"github.com/sassdavid/tfcensus/internal/tfstate"
 )
 
 const (
@@ -66,8 +67,11 @@ plan and status only read. apply, rollback and mark-applied are the only tfcensu
 write to a backend; each asks you to type the block's destination unit path first, or takes
 --yes. Without a terminal and without --yes they exit 2 and change nothing.
 
-Unit paths in the file are relative to --repo (default: the current directory). Only the default
-workspace of units with an s3 backend can be moved.`,
+Unit paths in the file are relative to --repo (default: the current directory) and name units
+with an s3 backend. Write path:workspace for a workspace other than default, such as
+live/app:blue; the state is then read from <workspace_key_prefix>/<workspace>/<key> (env: when
+the backend sets no prefix), and terragrunt runs with TF_WORKSPACE. The workspace must exist.
+The native strategy works on the default workspace only.`,
 	}
 	cmd.AddCommand(
 		newMoveSubCmd(d, g, movePlan, "Verify a migration file with plans, without writing anything",
@@ -292,7 +296,8 @@ func moveError(err error) error {
 	switch {
 	case err == nil:
 		return nil
-	case errors.Is(err, prompt.ErrNoInput), errors.Is(err, migrate.ErrFile), errors.Is(err, migrate.ErrUnknown):
+	case errors.Is(err, prompt.ErrNoInput), errors.Is(err, migrate.ErrFile), errors.Is(err, migrate.ErrUnknown),
+		errors.Is(err, migrate.ErrNoWorkspace):
 		return usageError(err)
 	case errors.Is(err, migrate.ErrRejected):
 		return &exitError{code: ExitFindings, err: err}
@@ -307,8 +312,8 @@ func readerIsTerminal(r io.Reader) bool {
 	return ok && app.IsTerminal(f)
 }
 
-// moveUnits discovers the repository and returns the units the blocks name, with the
-// credentials of their backends.
+// moveUnits discovers the repository and returns the units the blocks name, by unit reference,
+// with the credentials of their backends.
 func moveUnits(
 	cmd *cobra.Command, d *app.Deps, cfg *config.Config, loader *accounts.Loader, repo string, blocks []*migrate.Block,
 ) (map[string]*migrate.Unit, map[string]accounts.BackendRef, error) {
@@ -328,10 +333,11 @@ func moveUnits(
 	out := map[string]*migrate.Unit{}
 	var errs []error
 	for _, b := range blocks {
-		for _, p := range b.Units() {
-			if _, done := out[p]; done {
+		for _, ref := range b.Units() {
+			if _, done := out[ref]; done {
 				continue
 			}
+			p, ws := migrate.SplitRef(ref)
 			u, ok := byPath[p]
 			switch {
 			case !ok:
@@ -347,12 +353,13 @@ func moveUnits(
 				root = filepath.Join(cwd, root)
 			}
 			be := u.Backend
-			out[p] = &migrate.Unit{
-				Path: p, Dir: filepath.Join(root, filepath.FromSlash(u.Path)),
-				Bucket: be.Bucket, Key: be.Key, Region: cmp.Or(be.Region, u.Target.Region),
-				Table: be.DynamoDBTable, Lock: u.Lock, Account: u.Target.Account,
+			out[ref] = &migrate.Unit{
+				Path: p, Workspace: ws, Dir: filepath.Join(root, filepath.FromSlash(u.Path)),
+				Bucket: be.Bucket, Key: tfstate.WorkspaceKey(be.WorkspaceKeyPrefix, be.Key, ws),
+				Region: cmp.Or(be.Region, u.Target.Region), Table: be.DynamoDBTable, Lock: u.Lock,
+				Account: u.Target.Account,
 			}
-			refs[p] = backendRef(u)
+			refs[ref] = backendRef(u)
 		}
 	}
 	if len(errs) > 0 {
@@ -385,7 +392,7 @@ func moveClients(b *accounts.Backends, refs map[string]accounts.BackendRef, writ
 		return c
 	}
 	return func(ctx context.Context, u *migrate.Unit) (*migrate.Clients, error) {
-		acct, region, err := b.Credentials(ctx, refs[u.Path])
+		acct, region, err := b.Credentials(ctx, refs[u.Ref()])
 		if err != nil {
 			return nil, err
 		}

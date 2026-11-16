@@ -292,7 +292,7 @@ func (r *Reader) unitDir(u *discovery.Unit) string {
 
 // workspaces lists the non-default workspaces of b. Units in one bucket share one listing.
 func (r *Reader) workspaces(ctx context.Context, c Client, b *discovery.Backend) ([]string, error) {
-	prefix := workspacePrefix(b.WorkspaceKeyPrefix) + "/"
+	prefix := workspaceListPrefix(b.WorkspaceKeyPrefix)
 	r.mu.Lock()
 	l, ok := r.listings[b.Bucket+"\x00"+prefix]
 	if !ok {

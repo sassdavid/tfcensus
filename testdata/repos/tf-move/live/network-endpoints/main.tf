@@ -1,9 +1,10 @@
 terraform {
   backend "s3" {
-    bucket       = "fixture-tfstate-111111111111"
-    key          = "live/network-endpoints/terraform.tfstate"
-    region       = "eu-west-1"
-    use_lockfile = true
+    bucket               = "fixture-tfstate-111111111111"
+    key                  = "live/network-endpoints/terraform.tfstate"
+    region               = "eu-west-1"
+    workspace_key_prefix = "workspaces"
+    use_lockfile         = true
   }
 }
 

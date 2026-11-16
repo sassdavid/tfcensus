@@ -1,0 +1,13 @@
+move plan workspaces.hcl
+
+Block split_workspace (surgery): pending, verified
+  live/network-endpoints:blue  destination  +3  4 -> 5
+  live/network:blue            source       -3  12 -> 13
+  Moved
+    module.endpoints.aws_vpc_endpoint.s3 -> live/network-endpoints:blue
+    aws_route53_record.api[0] -> live/network-endpoints:blue
+    aws_route53_record.api[1] -> live/network-endpoints:blue
+  Data sources left in the source
+    module.endpoints.data.aws_iam_policy_document.s3
+  Notes
+    live/network-endpoints:blue: provider provider["registry.terraform.io/hashicorp/aws"].dns -> provider["registry.terraform.io/hashicorp/aws"]

@@ -180,6 +180,47 @@ func TestMoveRejectsUnversionedBucket(t *testing.T) {
 	assert.Contains(t, res.stdout, "MV-VERSIONING")
 }
 
+// TestMoveWorkspace plans a block between the blue workspaces of two units. network keeps the
+// default env: prefix and network-endpoints sets workspace_key_prefix; terragrunt runs with
+// TF_WORKSPACE.
+func TestMoveWorkspace(t *testing.T) {
+	t.Parallel()
+	fake := moveFake(t, false)
+	for key, file := range map[string]string{
+		"env:/blue/live/network/terraform.tfstate":                 "network.tfstate",
+		"workspaces/blue/live/network-endpoints/terraform.tfstate": "network-endpoints.tfstate",
+	} {
+		b, err := os.ReadFile(filepath.Join(moveStates, file))
+		require.NoError(t, err)
+		fake.Put(moveBucket, key, b)
+	}
+	plan, err := filepath.Abs("../../testdata/move/plans/noop.json")
+	require.NoError(t, err)
+	tg := fakebin.Install(t, "terragrunt", fakebin.Spec{RecordEnv: []string{"TF_WORKSPACE"}, Rules: []fakebin.Rule{
+		{Args: []string{"run", "--tf-path", "terraform", "--", "show"}, StdoutFile: plan},
+		{Args: []string{"run"}},
+	}})
+	res := runMove(t, fake, tg, "plan", "migrations/workspaces.hcl", "--var", "ws=blue", "--format", "json")
+	require.Equal(t, cli.ExitOK, res.code, res.stderr)
+	require.NoError(t, validateJSON("move-v1.json", []byte(res.stdout)))
+	testutil.Golden(t, filepath.Join(moveGolden, "workspace.json"), stableJSON(res.stdout))
+	assertNoMoveSecrets(t, "workspace", res.stdout+res.stderr)
+	calls := fakebin.Calls(t, tg)
+	require.NotEmpty(t, calls)
+	for _, c := range calls {
+		assert.Equal(t, "blue", c.Env["TF_WORKSPACE"], "%v", c.Args)
+	}
+
+	res = runMove(t, fake, tg, "plan", "migrations/workspaces.hcl", "--var", "ws=blue", "--format", "plain")
+	require.Equal(t, cli.ExitOK, res.code, res.stderr)
+	testutil.Golden(t, filepath.Join(moveGolden, "workspace.txt"), []byte(res.stdout))
+
+	res = runMove(t, fake, tg, "plan", "migrations/workspaces.hcl", "--var", "ws=green")
+	require.Equal(t, cli.ExitUsage, res.code, res.stderr)
+	assert.Contains(t, res.stderr, "terraform workspace new green")
+	assert.Contains(t, res.stderr, "s3://"+moveBucket+"/workspaces/green/live/network-endpoints/terraform.tfstate")
+}
+
 func TestMoveUsage(t *testing.T) {
 	t.Parallel()
 	tests := []struct {

@@ -12,8 +12,11 @@ plan and status only read. apply, rollback and mark-applied are the only tfcensu
 write to a backend; each asks you to type the block's destination unit path first, or takes
 --yes. Without a terminal and without --yes they exit 2 and change nothing.
 
-Unit paths in the file are relative to --repo (default: the current directory). Only the default
-workspace of units with an s3 backend can be moved.
+Unit paths in the file are relative to --repo (default: the current directory) and name units
+with an s3 backend. Write path:workspace for a workspace other than default, such as
+live/app:blue; the state is then read from <workspace_key_prefix>/<workspace>/<key> (env: when
+the backend sets no prefix), and terragrunt runs with TF_WORKSPACE. The workspace must exist.
+The native strategy works on the default workspace only.
 
 ### Options
 

@@ -169,9 +169,25 @@ func TestReadLockFile(t *testing.T) {
 func TestWorkspaceKey(t *testing.T) {
 	t.Parallel()
 
-	assert.Equal(t, "app/terraform.tfstate", tfstate.WorkspaceKey("", "app/terraform.tfstate", "default"))
-	assert.Equal(t, "env:/staging/app/terraform.tfstate", tfstate.WorkspaceKey("", "app/terraform.tfstate", "staging"))
-	assert.Equal(t, "workspaces/qa/app.tfstate", tfstate.WorkspaceKey("workspaces", "app.tfstate", "qa"))
+	empty, custom := "", "workspaces"
+	tests := []struct {
+		name   string
+		prefix *string
+		key    string
+		ws     string
+		want   string
+	}{
+		{"default workspace", nil, "app/terraform.tfstate", "default", "app/terraform.tfstate"},
+		{"unset prefix is env:", nil, "app/terraform.tfstate", "staging", "env:/staging/app/terraform.tfstate"},
+		{"custom prefix", &custom, "app.tfstate", "qa", "workspaces/qa/app.tfstate"},
+		{"empty prefix", &empty, "app/terraform.tfstate", "qa", "qa/app/terraform.tfstate"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			assert.Equal(t, tt.want, tfstate.WorkspaceKey(tt.prefix, tt.key, tt.ws))
+		})
+	}
 }
 
 func FuzzParse(f *testing.F) {
