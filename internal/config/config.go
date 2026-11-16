@@ -81,10 +81,10 @@ type Aggregator struct {
 // Scan configures the unmanaged-resource scan.
 type Scan struct {
 	Layers            string   `json:"layers"             jsonschema_description:"Inventory layers: auto, or a comma-separated list of re, config, cc and native."`
-	CloudControlTypes []string `json:"cloudcontrol_types" jsonschema_description:"CloudFormation types listed through Cloud Control."`
+	CloudControlTypes []string `json:"cloudcontrol_types" jsonschema_description:"CloudFormation types listed through Cloud Control, on top of the types only Cloud Control lists (the VPC Lattice resource gateways, resource configurations and service network associations)."`
 	CloudFormation    bool     `json:"cloudformation"     jsonschema_description:"List CloudFormation stack resources; a resource a stack lists and no state manages is other-iac."`
 	Packs             Packs    `json:"packs"`
-	NeverHide         []string `json:"never_hide"         jsonschema_description:"Categories that user rules can't give to guarded resources (IAM users)."                          jsonschema:"enum=other-iac,enum=aws-managed,enum=derived,enum=ignored"`
+	NeverHide         []string `json:"never_hide"         jsonschema_description:"Categories that user rules can't give to guarded resources (IAM users)."                                                                                                                        jsonschema:"enum=other-iac,enum=aws-managed,enum=derived,enum=ignored"`
 }
 
 // Rule is an ownership rule: a CEL expression over resource and unit.

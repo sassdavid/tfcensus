@@ -34,7 +34,7 @@ This is why the layer order is decided per account/region by the probe, not hard
 - `dynamodb:DescribeTable`, `dynamodb:DescribeContinuousBackups`, `dynamodb:Scan` (lock tables only, resource-scoped)
 - `kms:DescribeKey`, `kms:GetKeyPolicy`, `kms:ListAliases`
 - `resource-explorer-2:List*`/`Search`/`Get*`; `config:Describe*`/`Select*`/`List*`/`Get*`
-- `cloudformation:ListResources`/`GetResource`, `cloudformation:DescribeType` (Cloud Control)
+- `cloudformation:ListResources`/`GetResource`, `cloudformation:DescribeType` (Cloud Control), and `vpc-lattice:List*` plus `vpc-lattice:GetResourceConfiguration` for the handlers of the VPC Lattice types scan lists through it by default ([ADR-0017](../adr/0017-scan-accuracy.md))
 - `cloudformation:ListStacks`, `cloudformation:ListStackResources` (the CloudFormation source of scan, config `scan.cloudformation`)
 - read-only `Describe*`/`List*`/`Get*` for native enumerators (ec2, iam, route53, elasticloadbalancing, s3)
 - Equivalent to AWS-managed `ReadOnlyAccess` + `ViewOnlyAccess` combined. Docs say so.

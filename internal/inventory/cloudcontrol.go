@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"iter"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -165,10 +166,15 @@ func (l *cloudControl) page(
 			return yield(CloudResource{}, fmt.Errorf("cloudcontrol:ListResources %s: %w", cfn, err))
 		}
 		for _, d := range out.ResourceDescriptions {
-			if !yield(
-				l.resource(acct, region, cfn, aws.ToString(d.Identifier), aws.ToString(d.Properties), parent),
-				nil,
-			) {
+			id := aws.ToString(d.Identifier)
+			props, derr := l.properties(ctx, client, cfn, id, aws.ToString(d.Properties))
+			if derr != nil {
+				if !yield(CloudResource{}, derr) {
+					return false
+				}
+				continue
+			}
+			if !yield(l.resource(acct, region, cfn, id, props, parent), nil) {
 				return false
 			}
 		}
@@ -176,19 +182,60 @@ func (l *cloudControl) page(
 	return true
 }
 
-// resource builds a CloudResource from the identifier and, when the identifier isn't an ARN,
-// the Arn property. No other property is read.
+// cfnResourceConfig is the VPC Lattice resource configuration type, whose type and group the
+// layer reads so a CHILD configuration links to the configuration that created it.
+const cfnResourceConfig = "AWS::VpcLattice::ResourceConfiguration"
+
+// properties returns the listed properties, or reads them with GetResource for a resource
+// configuration whose list entry leaves out its type.
+func (l *cloudControl) properties(ctx context.Context, client *cloudcontrol.Client, cfn, id, listed string) (
+	string, error,
+) {
+	if cfn != cfnResourceConfig || strings.Contains(listed, `"ResourceConfigurationType"`) {
+		return listed, nil
+	}
+	return l.describe(ctx, client, cfn, id)
+}
+
+// describe reads one resource's properties with GetResource, for a list handler that returns
+// identifiers only.
+func (l *cloudControl) describe(ctx context.Context, client *cloudcontrol.Client, cfn, id string) (string, error) {
+	out, err := client.GetResource(
+		ctx,
+		&cloudcontrol.GetResourceInput{TypeName: aws.String(cfn), Identifier: aws.String(id)},
+	)
+	if err != nil {
+		return "", fmt.Errorf("cloudcontrol:GetResource %s: %w", cfn, err)
+	}
+	if out.ResourceDescription == nil {
+		return "", nil
+	}
+	return aws.ToString(out.ResourceDescription.Properties), nil
+}
+
+// ccProps are the only properties the layer reads. The others, which can hold values a user
+// wrote, are never decoded.
+type ccProps struct {
+	Arn                          string `json:"Arn"`
+	ResourceConfigurationType    string `json:"ResourceConfigurationType"`
+	ResourceConfigurationGroupID string `json:"ResourceConfigurationGroupId"`
+	AmazonManaged                *bool  `json:"AmazonManaged"`
+}
+
+// resource builds a CloudResource from the identifier, the Arn property when the identifier
+// isn't an ARN, and a resource configuration's type, group and AmazonManaged flag.
 func (l *cloudControl) resource(acct *accounts.Account, region, cfn, id, props string, parent *Ref) CloudResource {
 	r := CloudResource{Account: acct.ID, Region: region, CFNType: cfn, ID: id, Sources: []string{LayerCC}}
-	if strings.HasPrefix(id, "arn:") {
+	var p ccProps
+	_ = json.Unmarshal([]byte(props), &p) // a model that doesn't decode leaves only the identifier
+	switch {
+	case strings.HasPrefix(id, "arn:"):
 		r.ARN = typemap.NormalizeARN(id)
-	} else {
-		var p struct {
-			Arn string `json:"Arn"`
-		}
-		if json.Unmarshal([]byte(props), &p) == nil && strings.HasPrefix(p.Arn, "arn:") {
-			r.ARN = typemap.NormalizeARN(p.Arn)
-		}
+	case strings.HasPrefix(p.Arn, "arn:"):
+		r.ARN = typemap.NormalizeARN(p.Arn)
+	}
+	if cfn == cfnResourceConfig {
+		l.resourceConfig(acct, region, &r, &p)
 	}
 	if parent != nil {
 		r.Parents = []Ref{*parent}
@@ -197,4 +244,35 @@ func (l *cloudControl) resource(acct *accounts.Account, region, cfn, id, props s
 		}
 	}
 	return r
+}
+
+// resourceConfig keeps a resource configuration's type and AmazonManaged flag, and links a CHILD
+// configuration to its group, the configuration AWS created it for.
+func (*cloudControl) resourceConfig(acct *accounts.Account, region string, r *CloudResource, p *ccProps) {
+	if p.ResourceConfigurationType != "" {
+		r.setAttr("resource_configuration_type", p.ResourceConfigurationType)
+	}
+	if p.AmazonManaged != nil {
+		r.setAttr("amazon_managed", strconv.FormatBool(*p.AmazonManaged))
+	}
+	group := p.ResourceConfigurationGroupID
+	if p.ResourceConfigurationType != "CHILD" || group == "" {
+		return
+	}
+	ref := Ref{CFNType: cfnResourceConfig, ID: group}
+	if strings.HasPrefix(group, "arn:") {
+		ref.ARN = group
+		ref.ID = group[strings.LastIndex(group, "/")+1:]
+	} else {
+		ref.ARN = fmt.Sprintf(
+			"arn:%s:vpc-lattice:%s:%s:resourceconfiguration/%s",
+			acct.Partition,
+			region,
+			acct.ID,
+			group,
+		)
+	}
+	r.Parents = append(r.Parents, ref)
+	ref.Relationship = "Is a child of"
+	r.Relationships = append(r.Relationships, ref)
 }

@@ -265,7 +265,7 @@ how the next accounts show what is still missing.
    `cfn:` for the five renamed families.
 6. [x] Resource Explorer: an RE-only record of a Config-listed type is dropped and counted, an RE
    record has an `id`, the Kubernetes object types are skipped and counted.
-7. [ ] Cloud Control lists the `cc: true` types by default. A cassette lists a resource gateway
+7. [x] Cloud Control lists the `cc: true` types by default. A cassette lists a resource gateway
    and an `ARN` resource configuration with its `CHILD`, and the child is `derived`.
 8. [ ] `--explain-coverage` lists unmapped Config types with counts (cassette and golden).
 9. [ ] The validation fixtures for all 13 false-positive groups scan with no `unmanaged`

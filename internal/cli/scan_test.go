@@ -334,6 +334,9 @@ func scanStubs(r *awstest.Router, iamOnly, aggregated bool) {
 			1,
 		)+
 		`]}`))
+	// Cloud Control lists the VPC Lattice types by default; the account has none.
+	none := ok(`{"ResourceDescriptions":[]}`)
+	r.On("cloudcontrolapi", "ListResources", "AWS::VpcLattice::", none, none, none, none)
 	r.On("cloudcontrolapi", "ListResources", "ListenerArn", ok(`{"ResourceDescriptions":[{"Identifier":"`+
 		arnELB("listener-rule/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2/9683b2d02a6cabee")+`","Properties":"{}"}]}`))
 	r.On("ec2", "DescribeSecurityGroupRules", "", ok(`<DescribeSecurityGroupRulesResponse `+
