@@ -49,9 +49,21 @@ run = "go test -race -count=1 ./..."
 description = "Inventory layers against moto and Floci (needs TFCENSUS_MOTO_URL and TFCENSUS_FLOCI_URL; the live workflow runs it nightly)"
 run = "go test -tags emulator -count=1 -run TestSpec_inventory_5 -v ./internal/inventory/"
 
+# The e2e tasks take terraform, tofu and terragrunt from mise.e2e.toml and mise.e2e.lock.
 [tasks."test:move-e2e"]
 description = "move split, apply and rollback against moto with real terraform and terragrunt (needs Docker or TFCENSUS_MOTO_URL; the live workflow runs it nightly)"
-run = "mise exec terraform@1.17.1 terragrunt@1.2.1 -- go test -count=1 -run 'TestSpec_move_2$' -v ./internal/cli/"
+run = "MISE_ENV=e2e mise exec -- go test -count=1 -run 'TestSpec_move_2$' -v ./internal/cli/"
+
+[tasks."test:drift-e2e"]
+description = "drift in run, ingest and full mode against moto with real terragrunt, terraform and tofu (needs Docker or TFCENSUS_MOTO_URL, and the registry for the aws provider; TF_PLUGIN_CACHE_DIR keeps it; the live workflow runs it nightly)"
+run = "MISE_ENV=e2e mise exec -- go test -count=1 -run 'TestSpec_drift_e2e$' -v ./internal/cli/"
+
+[tasks."test:contract"]
+description = "terragrunt contract: a raw diff against testdata/terragrunt for information, then the pinned terragrunt must read tg-live into the same units as the recordings (the live workflow runs it nightly)"
+run = [
+  "MISE_ENV=e2e mise exec -- bash scripts/terragrunt-contract-diff.sh tg-live",
+  "MISE_ENV=e2e mise exec -- go test -tags contract -count=1 -run 'TestTerragruntContract$' -v ./internal/discovery/",
+]
 
 [tasks.fuzz]
 description = "Run every Go fuzz target for 60s each (mise run fuzz -- 10s sets another duration)"

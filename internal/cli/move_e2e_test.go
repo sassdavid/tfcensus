@@ -112,14 +112,7 @@ func seedMoto(t *testing.T, endpoint string) {
 // and every proxy variable points at a closed port, which only loopback traffic bypasses.
 func TestSpec_move_2(t *testing.T) {
 	t.Parallel()
-	var paths []string
-	for _, bin := range []string{"terraform", "terragrunt"} {
-		p, err := exec.LookPath(bin)
-		if err != nil {
-			t.Skipf("%s is not on PATH", bin)
-		}
-		paths = append(paths, filepath.Dir(p))
-	}
+	paths := e2eBinaries(t, "terraform", "terragrunt")
 	endpoint := motoEndpoint(t)
 	seedMoto(t, endpoint)
 
@@ -129,11 +122,9 @@ func TestSpec_move_2(t *testing.T) {
 		if err := setup(env); err != nil {
 			return err
 		}
-		env.Setenv("PATH", strings.Join(append([]string{env.Getenv("PATH")}, paths...), string(os.PathListSeparator)))
+		e2eEnv(env, endpoint, paths)
+		env.Setenv("TG_TF_PATH", "terraform")
 		for k, v := range map[string]string{
-			"AWS_ACCESS_KEY_ID": "test", "AWS_SECRET_ACCESS_KEY": "test", "AWS_REGION": e2eRegion,
-			"AWS_ENDPOINT_URL": endpoint, "TG_TF_PATH": "terraform",
-			"CHECKPOINT_DISABLE": "1", "TF_IN_AUTOMATION": "1",
 			"HTTP_PROXY": "http://127.0.0.1:9", "HTTPS_PROXY": "http://127.0.0.1:9", "NO_PROXY": "127.0.0.1,localhost",
 		} {
 			env.Setenv(k, v)
@@ -157,6 +148,31 @@ func TestSpec_move_2(t *testing.T) {
 		ts.Check(os.WriteFile(ts.MkAbs(args[2]), body, 0o600))
 	}
 	testscript.Run(t, p)
+}
+
+// e2eBinaries returns the directories of bins on PATH, and skips the test when one is missing.
+func e2eBinaries(t *testing.T, bins ...string) []string {
+	t.Helper()
+	var paths []string
+	for _, bin := range bins {
+		p, err := exec.LookPath(bin)
+		if err != nil {
+			t.Skipf("%s is not on PATH", bin)
+		}
+		paths = append(paths, filepath.Dir(p))
+	}
+	return paths
+}
+
+// e2eEnv points a script at moto with moto's default credentials and puts the e2e binaries on PATH.
+func e2eEnv(env *testscript.Env, endpoint string, paths []string) {
+	env.Setenv("PATH", strings.Join(append([]string{env.Getenv("PATH")}, paths...), string(os.PathListSeparator)))
+	for k, v := range map[string]string{
+		"AWS_ACCESS_KEY_ID": "test", "AWS_SECRET_ACCESS_KEY": "test", "AWS_REGION": e2eRegion,
+		"AWS_ENDPOINT_URL": endpoint, "CHECKPOINT_DISABLE": "1", "TF_IN_AUTOMATION": "1",
+	} {
+		env.Setenv(k, v)
+	}
 }
 
 func s3Get(ctx context.Context, endpoint, account, key string) ([]byte, error) {

@@ -309,7 +309,7 @@ identifiers map the organization. Trivy, Snyk, Steampipe and Infracost use the s
   [ADR-0016](adr/0016-own-move-suggest-engine.md)).
 - [x] `move` supports non-default workspaces of s3 backends (move.md).
 - [x] OpenTofu encrypted state is read through `tofu show -json` (risk R6, [ADR-0015](adr/0015-read-encrypted-state-with-tofu.md)).
-- [ ] An L3 drift e2e runs real terraform and terragrunt against moto, and a nightly terragrunt
+- [x] An L3 drift e2e runs real terraform and terragrunt against moto, and a nightly terragrunt
   contract test runs in `live.yml` (testing.md, risk R5).
 
 ### M19: Package channels (shared, the owner picks the release)
