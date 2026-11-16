@@ -14,7 +14,8 @@ is looked up across every type. --type narrows the lookup to TF types.
 When no state manages the resource, the ownership rules explain why (other-iac, aws-managed,
 ignored or unmanaged). Without --index, whois lists the resource's type in its account and region
 through the scan inventory layers, so the rules see its tags and relations. With --index the run
-stays offline and the rules see only what the ARN gives; --live lists anyway.
+stays offline and the rules see only what the ARN gives; --live lists anyway. An account that
+--account or --exclude-account leaves out is never listed, so its answers stay offline.
 
 --index reads an index written by tfcensus inventory --save-index instead of reading every state.
 
@@ -37,7 +38,9 @@ tfcensus whois <arn|id>... [flags]
 ### Options
 
 ```
+      --account stringArray            keep only this account ID (repeatable; config accounts.include)
       --concurrency int                states read at the same time (default 16)
+      --exclude-account stringArray    drop this account ID (repeatable; config accounts.exclude)
       --fail-on strings                exit 3 when answers are in these categories: unmanaged or double-managed
       --filter stringArray             terragrunt filter expression, passed to terragrunt find unchanged (repeatable)
       --generate-stacks[=true|false]   run terragrunt stack generate first, so units in stacks are listed (config discovery.generate_stacks)

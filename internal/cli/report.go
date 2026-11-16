@@ -35,7 +35,6 @@ const (
 	flagPath              = "path"
 	flagStatus            = "status"
 	flagUnit              = "unit"
-	flagAccount           = "account"
 	flagCategory          = "category"
 	flagTop               = "top"
 	flagSeverity          = "severity"

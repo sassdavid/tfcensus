@@ -315,3 +315,29 @@ func TestOrgAccountsState(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, []accounts.OrgAccount{{ID: "222222222222", Name: "acme-dev"}}, got)
 }
+
+func TestSelectionWants(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name             string
+		include, exclude []string
+		id               string
+		want             bool
+	}{
+		{name: "no filter", id: "111111111111", want: true},
+		{name: "included", include: []string{"111111111111"}, id: "111111111111", want: true},
+		{name: "not included", include: []string{"222222222222"}, id: "111111111111", want: false},
+		{name: "excluded", exclude: []string{"111111111111"}, id: "111111111111", want: false},
+		{
+			name: "exclude wins", include: []string{"111111111111"}, exclude: []string{"111111111111"},
+			id: "111111111111", want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			sel := accounts.Selection{Include: tt.include, Exclude: tt.exclude}
+			assert.Equal(t, tt.want, sel.Wants(tt.id))
+		})
+	}
+}

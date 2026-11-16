@@ -18,6 +18,7 @@ type Config struct {
 	Discovery     Discovery `json:"discovery"`
 	Accounts      Accounts  `json:"accounts"`
 	Regions       []string  `json:"regions"                            jsonschema_description:"Regions to scan. Empty means the regions found in the units' backends and providers."`
+	AllRegions    bool      `json:"all_regions"                        jsonschema_description:"Use every region each account has enabled (account:ListRegions) instead of regions."`
 	Scan          Scan      `json:"scan"`
 	Rules         []Rule    `json:"rules"                              jsonschema_description:"Ownership rules, tried in order after the built-in packs. The first rule that matches an unmanaged resource sets its category."`
 	Audit         Audit     `json:"audit"`
@@ -42,6 +43,8 @@ type Discovery struct {
 // Accounts configures where AWS accounts come from.
 type Accounts struct {
 	Profiles   []string              `json:"profiles"   jsonschema_description:"AWS profile globs from ~/.aws/config."`
+	Include    []string              `json:"include"    jsonschema_description:"Account IDs that doctor, scan and whois list resources in. Empty means every loaded account."          jsonschema:"pattern=^[0-9]{12}$"`
+	Exclude    []string              `json:"exclude"    jsonschema_description:"Account IDs that doctor, scan and whois skip. scan and whois still read state with their credentials." jsonschema:"pattern=^[0-9]{12}$"`
 	Org        Org                   `json:"org"`
 	Map        map[string]AccountRef `json:"map"        jsonschema_description:"Account ID to profile and display name, for when profile names don't match accounts."`
 	Aggregator Aggregator            `json:"aggregator"`
@@ -220,6 +223,8 @@ func Default() Config {
 		Discovery:     Discovery{Roots: []string{}, GenerateStacks: false, Render: "auto"},
 		Accounts: Accounts{
 			Profiles: []string{},
+			Include:  []string{},
+			Exclude:  []string{},
 			Org:      Org{Role: "OrganizationAccountAccessRole", OURoles: map[string]string{}},
 			Map:      map[string]AccountRef{},
 		},

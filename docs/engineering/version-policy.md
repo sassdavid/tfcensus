@@ -17,7 +17,7 @@ CI matrices.
 | **aws provider** (data, not exec) | — | identity is detected from `resource_identity_schemas` in the schema, **not** by provider version (identity shipped quietly in 6.0, per-resource from 6.5; list resources from 6.14). v5 is treated as identity-less, falling back to arn/id matching | typemap generated from the current 6.x | — |
 
 ## Rules for implementation
-- **Detect once per run:** `terragrunt --version`, `terraform version -json` (TF ≥1.17 also has `format_version`), `tofu version -json`. Cache the result in `Deps`, and have `doctor` print it with each gated feature's status.
+- **Detect once per run:** `terragrunt --version` and the plain `version` of the `--tf-path` binary, with `CHECKPOINT_DISABLE=1`. Its first line is `Terraform vX` or `OpenTofu vX`; `version -json` can't tell them apart because OpenTofu also writes `terraform_version`. `doctor` (`internal/toolcheck`) prints each version with its gated features and exits 1 below a minimum. Only `doctor` needs the result today, so it isn't cached in `Deps` (a file shared with the sibling repo).
 - **Parse JSON leniently:** branch on the `format_version` **major** (state JSON 1.x, plan JSON 1.x) and ignore unknown fields. Reject an unknown major with a clear message.
 - **Terragrunt `render` and `info print` aren't covered** by Terragrunt's 1.0 compatibility guarantees, so parse them leniently and keep the fast-path evaluator as the fallback ([tfcensus ADR-0001](../plan/adr/0001-shell-out-to-terragrunt.md)). `find` JSON and the run-report schema *are* guaranteed (fields only get added).
 - **Never pass `--hidden`.** It's the default since Terragrunt 1.0 and the flag is a deprecated no-op.

@@ -60,6 +60,22 @@
           "type": "array",
           "description": "AWS profile globs from ~/.aws/config."
         },
+        "include": {
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9]{12}$"
+          },
+          "type": "array",
+          "description": "Account IDs that doctor, scan and whois list resources in. Empty means every loaded account."
+        },
+        "exclude": {
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9]{12}$"
+          },
+          "type": "array",
+          "description": "Account IDs that doctor, scan and whois skip. scan and whois still read state with their credentials."
+        },
         "org": {
           "properties": {
             "enabled": {
@@ -127,6 +143,10 @@
       },
       "type": "array",
       "description": "Regions to scan. Empty means the regions found in the units' backends and providers."
+    },
+    "all_regions": {
+      "type": "boolean",
+      "description": "Use every region each account has enabled (account:ListRegions) instead of regions."
     },
     "scan": {
       "properties": {

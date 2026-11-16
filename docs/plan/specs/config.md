@@ -13,10 +13,13 @@ discovery:
   render: auto            # auto | always | never (fast path only)
 accounts:
   profiles: ["acme-*", "globex-*"]
+  include: []             # account IDs doctor, scan and whois list (--account); empty means all
+  exclude: []             # account IDs they skip (--exclude-account); scan and whois still read state there
   org: { enabled: false, management_profile: "", role: OrganizationAccountAccessRole }
   map: { "111111111111": { profile: acme-nonprod, name: acme-nonprod } }
   aggregator: { profile: audit, name: aws-controltower-GuardrailsComplianceAggregator, region: eu-central-1 }
 regions: [eu-west-1, eu-central-1, us-east-1]
+all_regions: false        # every region each account has enabled (account:ListRegions); not with regions
 scan:
   layers: auto
   cloudcontrol_types: ["AWS::ElasticLoadBalancingV2::Listener"]

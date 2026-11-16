@@ -25,6 +25,13 @@ type Selection struct {
 	OrgRole           string            // assumed in each member account; empty means [DefaultOrgRole]
 	OURoles           map[string]string // OU or root ID to the role assumed in its direct member accounts
 	Names             map[string]string // account ID to display name
+	Include           []string          // account IDs to keep; empty keeps every account
+	Exclude           []string          // account IDs to drop, after Include
+}
+
+// Wants reports whether the account with the given ID passes Include and Exclude.
+func (s Selection) Wants(id string) bool {
+	return (len(s.Include) == 0 || slices.Contains(s.Include, id)) && !slices.Contains(s.Exclude, id)
 }
 
 // SourceError is an account source that failed. The other sources are still loaded.
@@ -75,7 +82,7 @@ func (l *Loader) Resolve(ctx context.Context, sel Selection) (*Result, error) {
 		}
 		res.add(acct, err, SourceError{Source: string(KindDefault), Kind: KindDefault})
 	}
-	res.finish(sel.Names)
+	res.finish(sel)
 	return res, nil
 }
 
@@ -88,16 +95,16 @@ func (r *Result) add(acct *Account, err error, e SourceError) {
 	r.Accounts = append(r.Accounts, acct)
 }
 
-// finish keeps the first source for each account and sorts by account ID.
-func (r *Result) finish(names map[string]string) {
+// finish keeps the first source for each account that sel wants and sorts by account ID.
+func (r *Result) finish(sel Selection) {
 	seen := map[string]bool{}
 	accounts := r.Accounts[:0]
 	for _, a := range r.Accounts {
-		if seen[a.ID] {
+		if seen[a.ID] || !sel.Wants(a.ID) {
 			continue
 		}
 		seen[a.ID] = true
-		if n := names[a.ID]; n != "" {
+		if n := sel.Names[a.ID]; n != "" {
 			a.Name = n
 		}
 		accounts = append(accounts, a)
@@ -159,6 +166,8 @@ func (l *Loader) resolveOrg(ctx context.Context, sel Selection, res *Result) {
 		res.add(nil, err, SourceError{Source: "org", Kind: KindOrg})
 		return
 	}
+	// Filter before assuming roles, so an excluded account costs no STS call.
+	members = slices.DeleteFunc(members, func(m OrgAccount) bool { return !sel.Wants(m.ID) })
 	accts := make([]*Account, len(members))
 	errs := make([]error, len(members))
 	g := new(errgroup.Group)

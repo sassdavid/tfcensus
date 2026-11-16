@@ -171,7 +171,7 @@ func writeFiles(d *app.Deps, files []config.File) error {
 		case path == "":
 			path, state = "-", "none found"
 		case !f.Found:
-			state = "not found"
+			state = cellNotFound
 		}
 		if f.Explicit {
 			state += ", explicit"

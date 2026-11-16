@@ -2,8 +2,10 @@ package cli
 
 import (
 	"cmp"
+	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"slices"
 	"strconv"
 	"strings"
@@ -16,8 +18,10 @@ import (
 	"github.com/sassdavid/tfcensus/internal/app"
 	"github.com/sassdavid/tfcensus/internal/buildinfo"
 	"github.com/sassdavid/tfcensus/internal/config"
+	"github.com/sassdavid/tfcensus/internal/execx"
 	"github.com/sassdavid/tfcensus/internal/probe"
 	"github.com/sassdavid/tfcensus/internal/render"
+	"github.com/sassdavid/tfcensus/internal/toolcheck"
 )
 
 const (
@@ -28,14 +32,19 @@ const (
 	colStatus        = "STATUS"
 	cellDenied       = "denied"
 	cellError        = "error"
+	cellNotFound     = "not found"
 )
 
 func newDoctorCmd(d *app.Deps, g *globals) *cobra.Command {
 	var refresh bool
 	cmd := &cobra.Command{
 		Use:   "doctor",
-		Short: "Check AWS credentials and which inventory layers each account and region supports",
-		Long: `doctor loads the credentials of every selected account source and probes each account and
+		Short: "Check tool versions, AWS credentials and the inventory layers of each account and region",
+		Long: `doctor runs terragrunt --version and the --tf-path binary's version command, and compares
+them with the minimums: terragrunt 1.0.0, terraform 1.5.0 and tofu 1.6.0. It lists the features
+a found version is too old for. A tool that isn't installed is reported but doesn't fail the run.
+
+doctor then loads the credentials of every selected account source and probes each account and
 region for the inventory layers a scan can use:
 
   re      Resource Explorer: an index in the region and a view to search it with
@@ -45,14 +54,16 @@ region for the inventory layers a scan can use:
 
 Without --profile or --org, doctor uses the default AWS credentials (AWS_PROFILE, environment
 credentials or an instance role). Without --region, it probes the regions that have a Resource
-Explorer index and the profile's own region.
+Explorer index and the profile's own region. --all-regions probes every region the account has
+enabled (account:ListRegions). --account and --exclude-account keep or drop account IDs before
+doctor assumes any role in them.
 
 doctor is read-only: it never creates indexes, views or recorders. Its notes say what an admin
 could turn on. Results are cached for 24 hours under $XDG_CACHE_HOME/tfcensus/probe; --refresh
 probes again.
 
 A source whose credentials fail, such as a profile with an expired SSO token, is skipped with a
-warning. doctor exits 4 when every source fails.`,
+warning. doctor exits 4 when every source fails, and 1 when a tool is older than its minimum.`,
 		Example: `  tfcensus doctor --profile 'acme-*'
   tfcensus doctor --profile acme-nonprod --region eu-west-1 --region us-east-1
   tfcensus doctor --org --management-profile acme-mgmt --format json`,
@@ -67,16 +78,21 @@ warning. doctor exits 4 when every source fails.`,
 			if err != nil {
 				return err
 			}
+			if err = checkRegions(cmd, &res.Config); err != nil {
+				return err
+			}
 			return runDoctor(cmd, d, g.outFormat, &res.Config, refresh)
 		},
 	}
 	addAccountFlags(cmd, d)
-	addRegionFlag(cmd)
+	addAccountFilterFlags(cmd)
+	addAllRegionsFlags(cmd)
 	cmd.Flags().BoolVar(&refresh, "refresh", false, "probe again even when the cached result is fresh")
 	return cmd
 }
 
 type doctorData struct {
+	Tools      []toolcheck.Tool  `json:"tools"`
 	Sources    []doctorSource    `json:"sources"`
 	Accounts   []*probe.Report   `json:"accounts"`
 	Aggregator *doctorAggregator `json:"aggregator,omitempty"`
@@ -104,21 +120,38 @@ type doctorAggregator struct {
 func runDoctor(cmd *cobra.Command, d *app.Deps, format render.Format, cfg *config.Config, refresh bool) error {
 	ctx := cmd.Context()
 	loader := newLoader(d)
-	res, err := resolveAccounts(cmd, d, loader, cfg)
+	res, err := resolve(cmd, d, loader, targetSelection(cfg))
 	if err != nil {
 		return err
 	}
+	warnUnmatched(cmd, d, cfg, res)
 	prober, err := newProber(d, refresh)
 	if err != nil {
 		return err
 	}
-	data := doctorData{Sources: doctorSources(res), Accounts: make([]*probe.Report, len(res.Accounts))}
+	enabled, regionErrs := enabledRegions(cmd, cfg, res.Accounts)
+	for _, id := range slices.Sorted(maps.Keys(regionErrs)) {
+		d.Logger.WarnContext(ctx, "probing the default regions instead", "account", id, "error", regionErrs[id])
+	}
+	data := doctorData{
+		Tools:    checkTools(cmd, d, cfg),
+		Sources:  doctorSources(res),
+		Accounts: make([]*probe.Report, len(res.Accounts)),
+	}
 	eg, egctx := errgroup.WithContext(ctx)
 	eg.SetLimit(probeConcurrency)
 	for i, acct := range res.Accounts {
+		regions, listed := enabled[acct.ID]
+		if !listed {
+			regions = cfg.Regions
+		}
 		eg.Go(func() error {
-			var probeErr error
-			data.Accounts[i], probeErr = prober.Probe(egctx, acct, cfg.Regions)
+			rep, probeErr := prober.Probe(egctx, acct, regions)
+			if probeErr == nil && cfg.AllRegions && !listed {
+				rep.Notes = append(rep.Notes, "could not list the enabled regions (account:ListRegions); "+
+					"probed the default regions instead")
+			}
+			data.Accounts[i] = rep
 			return probeErr
 		})
 	}
@@ -134,7 +167,74 @@ func runDoctor(cmd *cobra.Command, d *app.Deps, format render.Format, cfg *confi
 	if len(res.Accounts) == 0 && len(res.Errors) > 0 {
 		return noAccountsError(res)
 	}
-	return nil
+	return tooOldError(data.Tools)
+}
+
+// checkTools finds the terragrunt and terraform or tofu versions. A missing binary is reported,
+// not an error: plain Terraform repos don't need terragrunt.
+func checkTools(cmd *cobra.Command, d *app.Deps, cfg *config.Config) []toolcheck.Tool {
+	runner := execx.NewRunner(d.Logger, execx.WithEnviron(func() []string { return d.Env }))
+	tools := toolcheck.Check(cmd.Context(), runner, cfg.Binaries.Terragrunt, cfg.Binaries.Terraform)
+	for _, t := range tools {
+		if t.Status == toolcheck.StatusError {
+			d.Logger.WarnContext(
+				cmd.Context(),
+				"cannot read the tool version",
+				"tool",
+				string(t.Tool),
+				"error",
+				t.Error,
+			)
+		}
+	}
+	return tools
+}
+
+// tooOldError fails doctor when a tool is below the minimum in version-policy.md.
+func tooOldError(tools []toolcheck.Tool) error {
+	var old []string
+	for _, t := range tools {
+		if t.Status == toolcheck.StatusTooOld {
+			old = append(old, fmt.Sprintf("%s %s is older than the minimum %s", t.Tool, t.Version, t.Minimum))
+		}
+	}
+	if len(old) == 0 {
+		return nil
+	}
+	return errors.New(strings.Join(old, "; "))
+}
+
+func toolColumns() []string { return []string{"TOOL", "PATH", "VERSION", "MINIMUM", colStatus} }
+
+func toolRow(t toolcheck.Tool) []string {
+	status := map[toolcheck.Status]string{
+		toolcheck.StatusOK:       "ok",
+		toolcheck.StatusTooOld:   "too old",
+		toolcheck.StatusNotFound: cellNotFound,
+		toolcheck.StatusError:    cellError,
+	}[t.Status]
+	return []string{string(t.Tool), t.Path, dash(t.Version), t.Minimum, status}
+}
+
+// toolNotes names the gated features each found tool lacks.
+func toolNotes(tools []toolcheck.Tool) []string {
+	var out []string
+	for _, t := range tools {
+		var missing []string
+		for _, f := range t.Features {
+			switch {
+			case f.Available:
+			case f.Needs == "":
+				missing = append(missing, f.Name+" (not in "+string(t.Tool)+")")
+			default:
+				missing = append(missing, f.Name+" (needs "+f.Needs+")")
+			}
+		}
+		if len(missing) > 0 {
+			out = append(out, string(t.Tool)+" "+t.Version+": unavailable: "+strings.Join(missing, ", "))
+		}
+	}
+	return out
 }
 
 func checkAggregator(cmd *cobra.Command, l *accounts.Loader, agg config.Aggregator) *doctorAggregator {
@@ -305,7 +405,7 @@ func aggregatorLine(a *doctorAggregator) string {
 	}
 	status := map[probe.Status]string{
 		probe.StatusAvailable:   "found",
-		probe.StatusUnavailable: "not found",
+		probe.StatusUnavailable: cellNotFound,
 		probe.StatusDenied:      cellDenied,
 		probe.StatusError:       cellError,
 	}[a.Status]
@@ -317,6 +417,17 @@ func aggregatorLine(a *doctorAggregator) string {
 
 func writeDoctorText(w io.Writer, data doctorData) error {
 	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0) //nolint:mnd // two spaces between columns
+	_, _ = fmt.Fprintln(tw, strings.Join(toolColumns(), "\t"))
+	for _, t := range data.Tools {
+		_, _ = fmt.Fprintln(tw, strings.Join(toolRow(t), "\t"))
+	}
+	if notes := toolNotes(data.Tools); len(notes) > 0 {
+		_, _ = fmt.Fprintln(tw)
+		for _, n := range notes {
+			_, _ = fmt.Fprintln(tw, n)
+		}
+	}
+	_, _ = fmt.Fprintln(tw)
 	_, _ = fmt.Fprintln(tw, strings.Join(sourceColumns(), "\t"))
 	for _, s := range data.Sources {
 		_, _ = fmt.Fprintln(tw, strings.Join(sourceRow(s), "\t"))
@@ -354,6 +465,14 @@ func writeDoctorText(w io.Writer, data doctorData) error {
 
 func writeDoctorMarkdown(w io.Writer, data doctorData) error {
 	var b strings.Builder
+	mdTable(&b, toolColumns(), len(data.Tools), func(i int) []string { return toolRow(data.Tools[i]) })
+	if notes := toolNotes(data.Tools); len(notes) > 0 {
+		b.WriteString("\n")
+		for _, n := range notes {
+			b.WriteString("- " + n + "\n")
+		}
+	}
+	b.WriteString("\n")
 	mdTable(&b, sourceColumns(), len(data.Sources), func(i int) []string { return sourceRow(data.Sources[i]) })
 	type row struct {
 		r   *probe.Report

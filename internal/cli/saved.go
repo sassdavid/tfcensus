@@ -1,11 +1,9 @@
 package cli
 
 import (
-	"cmp"
 	"errors"
 	"fmt"
 	"path/filepath"
-	"runtime"
 	"slices"
 	"time"
 
@@ -147,15 +145,11 @@ func (s *saved) scanSummary(f report.ScanFilter) (*result, error) {
 // cachedScan classifies the newest scan cache snapshot with the config's rules. A stale snapshot
 // is still used, with a warning, because collecting again needs AWS calls.
 func (s *saved) cachedScan() (*scan.Report, report.Source, []render.Error, error) {
-	dir, err := config.CacheDirPath(s.d.Env.Lookup, runtime.GOOS)
+	sc, err := newScanCache(s.d, s.cfg)
 	if err != nil {
-		return nil, report.Source{}, nil, fmt.Errorf("find cache directory: %w", err)
+		return nil, report.Source{}, nil, err
 	}
-	ttl, err := time.ParseDuration(cmp.Or(s.cfg.Cache.TTL, "1h"))
-	if err != nil {
-		return nil, report.Source{}, nil, usageError(fmt.Errorf("cache.ttl %q: %w", s.cfg.Cache.TTL, err))
-	}
-	snap, stale, err := (&scan.Cache{Dir: dir, TTL: ttl, Now: s.d.Clock}).Newest()
+	snap, stale, err := sc.Newest()
 	if err != nil {
 		return nil, report.Source{}, nil, usageError(fmt.Errorf("%w; or pass --scan with the output of "+
 			"tfcensus scan --format json", err))
@@ -183,7 +177,7 @@ func (s *saved) cachedScan() (*scan.Report, report.Source, []render.Error, error
 		rep.Warnings = append(
 			rep.Warnings,
 			fmt.Sprintf("the newest scan snapshot is from %s, older than cache.ttl %s; "+
-				"run tfcensus scan to collect again", src.Created.Format(time.RFC3339), ttl),
+				"run tfcensus scan to collect again", src.Created.Format(time.RFC3339), sc.TTL),
 		)
 	}
 	errs := []render.Error{}

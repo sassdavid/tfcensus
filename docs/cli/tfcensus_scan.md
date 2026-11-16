@@ -24,6 +24,11 @@ which layer listed each type in each account and region.
 Coverage is (managed + double-managed) / (managed + double-managed + unmanaged) per account.
 aws-managed, derived, other-iac, ignored and undetermined resources don't count.
 
+Resources are listed in the --region regions, else the regions of the units that target the
+account. --all-regions lists every region the account has enabled (account:ListRegions).
+--account and --exclude-account choose the accounts to list; the state of units in other
+accounts is still read with their credentials.
+
 scan caches the inventory and state index under $XDG_CACHE_HOME/tfcensus/scan for cache.ttl
 (default 1h), keyed by the accounts, regions, layers, types and units. A re-run with other rules
 makes no AWS calls. --refresh lists again.
@@ -47,7 +52,10 @@ tfcensus scan [paths...] [flags]
 ### Options
 
 ```
+      --account stringArray             keep only this account ID (repeatable; config accounts.include)
+      --all-regions[=true|false]        use every region each account has enabled, from account:ListRegions (config all_regions)
       --concurrency int                 states read at the same time (default 16)
+      --exclude-account stringArray     drop this account ID (repeatable; config accounts.exclude)
       --explain string                  print how the resource with this ARN or ID was categorized
       --explain-coverage[=true|false]   print which layer listed each type in each account and region
       --fail-on strings                 exit 3 when findings are in these categories: unmanaged or double-managed

@@ -548,3 +548,18 @@ func errorNote(msg string) string {
 	}
 	return msg
 }
+
+// Fresh reports whether the probe cache file at path holds a result younger than ttl at now.
+func Fresh(path string, ttl time.Duration, now time.Time) bool {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return false
+	}
+	var v struct {
+		ProbedAt time.Time `json:"probed_at"`
+	}
+	if json.Unmarshal(b, &v) != nil || v.ProbedAt.IsZero() {
+		return false
+	}
+	return now.Sub(v.ProbedAt) < ttl
+}

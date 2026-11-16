@@ -31,6 +31,9 @@ func flagKeys() map[string]string {
 		flagOrgRole:           "accounts.org.role",
 		flagManagementProfile: "accounts.org.management_profile",
 		flagRegion:            "regions",
+		flagAllRegions:        "all_regions",
+		flagAccount:           "accounts.include",
+		flagExcludeAccount:    "accounts.exclude",
 		flagDiscoverPattern:   "audit.discover_patterns",
 		flagLayers:            "scan.layers",
 		flagMode:              "drift.mode",
@@ -128,6 +131,7 @@ stdout carries data, stderr carries logs. Use --format json for scripting.`,
 	root.AddCommand(
 		newVersionCmd(d, g),
 		newConfigCmd(d, g),
+		newCacheCmd(d, g),
 		newUnitsCmd(d, g),
 		newDoctorCmd(d, g),
 		newInventoryCmd(d, g),
@@ -199,12 +203,16 @@ func (g *globals) loadConfig(cmd *cobra.Command, d *app.Deps) (*config.Result, e
 	if err != nil {
 		return nil, fmt.Errorf("get working directory: %w", err)
 	}
+	keys := flagKeys()
+	if cmd.Annotations[annotationTargets] == "" {
+		delete(keys, flagAccount)
+	}
 	res, err := config.Load(config.Options{
 		Environ:      d.Env,
 		Cwd:          cwd,
 		ExplicitFile: g.configFile,
 		Flags:        cmd.Flags(),
-		FlagKeys:     flagKeys(),
+		FlagKeys:     keys,
 	})
 	if err != nil {
 		return nil, err

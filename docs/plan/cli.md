@@ -2,7 +2,7 @@
 
 | Command | Purpose | Release |
 |---|---|---|
-| `tfcensus doctor` | check binaries and gated features per [version-policy](../engineering/version-policy.md) (terragrunt ≥ 1.0, terraform ≥ 1.5 / tofu ≥ 1.6), credentials per profile, and **capability probe** per account/region (Resource Explorer index/view, Config recorder/aggregator, Cloud Control) | v0.1 |
+| `tfcensus doctor` | check binaries and gated features per [version-policy](../engineering/version-policy.md) (terragrunt ≥ 1.0, terraform ≥ 1.5 / tofu ≥ 1.6; exit 1 below a minimum, a missing binary is only reported), credentials per profile, and **capability probe** per account/region (Resource Explorer index/view, Config recorder/aggregator, Cloud Control) | v0.1 |
 | `tfcensus units [paths…]` | discovered units with backend, account, region | v0.1 |
 | `tfcensus inventory [paths…]` | state inventory: resources by type, TF/provider versions, serial, lineage, size, last modified | v0.1 |
 | `tfcensus scan` | unmanaged detection across accounts/regions | v0.1 |
@@ -15,7 +15,7 @@
 | `tfcensus move suggest --from <unit> --to <unit>…` | auto-detect moves from plans (tfautomv engine) → draft migration file | v0.4 |
 | `tfcensus report html` | static single-file HTML from a scan/drift/audit JSON | v0.1 |
 | `tfcensus mcp` | stdio MCP server, read-only | v0.1 |
-| `tfcensus config show\|validate\|init`, `cache info\|clear`, `completion`, `version` | standard | v0.1 |
+| `tfcensus config show\|validate\|init`, `cache info\|clear` (the probe and scan caches, one row each; `clear` deletes both), `completion`, `version` | standard | v0.1 |
 
 ## Selection flags (shared by most commands)
 
@@ -23,8 +23,8 @@
 |---|---|
 | `--profile <glob>` (repeatable) | AWS profiles from `~/.aws/config`, e.g. `'acme-*'` |
 | `--org [--org-role OrganizationAccountAccessRole] [--management-profile p]` | enumerate accounts via Organizations |
-| `--account <id>` / `--exclude-account <id>` | filters |
-| `--region <r>` (repeatable) / `--all-regions` | default: regions found in the units' backends and providers; `--all-regions` = enabled regions |
+| `--account <id>` / `--exclude-account <id>` (repeatable) | `doctor`, `scan` and `whois`: the account IDs to list resources in (config `accounts.include` and `accounts.exclude`). `doctor` filters before it assumes any role; `scan` and `whois` still read state with the other accounts' credentials. `report`'s `--account` is a filter of the saved report instead |
+| `--region <r>` (repeatable) / `--all-regions` | default: regions found in the units' backends and providers; `--all-regions` (`doctor` and `scan`, config `all_regions`) = the regions each account has enabled, from `account:ListRegions`. `whois` has `--region` only: it lists the answer's own region |
 | `--filter <expr>` | passed through to `terragrunt --filter` for unit selection (paths, `name=`, git ranges) |
 | `--types <glob>` | resource type filter (TF or CFN names) |
 | `--layers re,config,cc,native` | force inventory layers (default: auto from capability probe) |

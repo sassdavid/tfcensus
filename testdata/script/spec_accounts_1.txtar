@@ -51,6 +51,10 @@ sso_registration_scopes = sso:account:access
 -- home/.aws/sso/cache/1d4ef536e6d16a617cfc56efbc85dc4d2827bc41.json --
 {"accessToken": "expired", "expiresAt": "2026-11-01T00:00:00Z", "region": "eu-west-1", "startUrl": "https://acme-legacy.awsapps.com/start"}
 -- want-partial.txt --
+TOOL        PATH        VERSION  MINIMUM  STATUS
+terragrunt  terragrunt  -        1.0.0    not found
+terraform   terraform   -        1.5.0    not found
+
 SOURCE        KIND     ACCOUNT       NAME          STATUS
 acme-legacy   profile  -             -             skipped: SSO login needed
 acme-nonprod  profile  111111111111  acme-nonprod  ok
@@ -62,6 +66,10 @@ ACCOUNT       REGION     RESOURCE EXPLORER    CONFIG                            
 111111111111 (acme-nonprod): Resource Explorer supports 649 resource types.
 111111111111 (acme-nonprod): Resource Explorer has local indexes only, so tfcensus searches each region on its own. An admin can promote one to an aggregator (`aws resource-explorer-2 update-index-type --type AGGREGATOR`).
 -- want-failed.txt --
+TOOL        PATH        VERSION  MINIMUM  STATUS
+terragrunt  terragrunt  -        1.0.0    not found
+terraform   terraform   -        1.5.0    not found
+
 SOURCE       KIND     ACCOUNT  NAME  STATUS
 acme-legacy  profile  -        -     skipped: SSO login needed
 acme-prod    profile  -        -     skipped: SSO login needed
