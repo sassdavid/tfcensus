@@ -240,7 +240,8 @@ func validationStubs(r *awstest.Router, groups []validationGroup) []string {
 			"</StackResourceSummaries></ListStackResourcesResult></ListStackResourcesResponse>"))
 	}
 	none := ok(`{"ResourceDescriptions":[]}`)
-	r.On("cloudcontrolapi", "ListResources", "AWS::VpcLattice::", none, none, none, none)
+	// VPC associations are listed per service network, and there is none.
+	r.On("cloudcontrolapi", "ListResources", "AWS::VpcLattice::", none, none, none)
 	return bucketStubs(r, f.buckets)
 }
 

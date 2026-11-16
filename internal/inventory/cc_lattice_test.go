@@ -15,9 +15,10 @@ import (
 	"github.com/sassdavid/tfcensus/internal/tfstate"
 )
 
-// TestSpec_scan_accuracy_7: Cloud Control lists the cc types, reads a resource configuration's
-// type (with GetResource when the list leaves it out), and links a CHILD configuration to the
-// ARN configuration it belongs to, so the child of a managed configuration is derived.
+// TestSpec_scan_accuracy_7: Cloud Control lists the cc types, VPC associations once per service
+// network an earlier layer found, reads a resource configuration's type (with GetResource when
+// the list leaves it out), and links a CHILD configuration to the ARN configuration it belongs
+// to, so the child of a managed configuration is derived.
 func TestSpec_scan_accuracy_7(t *testing.T) {
 	t.Parallel()
 
@@ -26,6 +27,7 @@ func TestSpec_scan_accuracy_7(t *testing.T) {
 	}
 	gw, parent, child := lattice("resourcegateway", "rgw-0a1"), lattice("resourceconfiguration", "rcfg-0a2"),
 		lattice("resourceconfiguration", "rcfg-0a3")
+	network, vpcAssoc := lattice("servicenetwork", "sn-0a4"), lattice("servicenetworkvpcassociation", "snva-0a5")
 	desc := func(arn, props string) string {
 		return fmt.Sprintf(`{"Identifier":%q,"Properties":%q}`, arn, props)
 	}
@@ -43,12 +45,20 @@ func TestSpec_scan_accuracy_7(t *testing.T) {
 			`"ResourceDescription":`+desc(child, `{"Arn":"`+child+`","ResourceConfigurationType":"CHILD",`+
 			`"ResourceConfigurationGroupId":"rcfg-0a2","AmazonManaged":true,"Name":"FIXTURE-SECRET"}`)+`}`))
 		r.On("cloudcontrolapi", "ListResources", "ServiceNetworkResourceAssociation", page())
-		r.On("cloudcontrolapi", "ListResources", "ServiceNetworkVpcAssociation", page())
+		// Resource Explorer finds the service network; its VPC associations are listed per network.
+		r.On("resource-explorer-2", "ListResources", "", ok(rePage("",
+			reResource(network, "vpc-lattice:servicenetwork", euWest))))
+		r.On("cloudcontrolapi", "ListResources", `ServiceNetworkIdentifier\":\"`+network, page(
+			desc(vpcAssoc, `{"Arn":"`+vpcAssoc+`"}`)))
 	})
-	res, err := inventory.NewCollector(inventory.Options{Env: e, Layers: []inventory.Layer{inventory.NewCloudControl(e)}}).
-		Collect(t.Context(), inventory.Request{Targets: []inventory.Target{{Account: account(rt), Report: oneRegion()}}})
+	res, err := inventory.NewCollector(inventory.Options{Env: e, Layers: []inventory.Layer{
+		inventory.NewResourceExplorer(e), inventory.NewCloudControl(e),
+	}}).Collect(t.Context(), inventory.Request{Targets: []inventory.Target{{Account: account(rt), Report: oneRegion()}}})
 	require.NoError(t, err)
-	require.Len(t, res.Resources, 3)
+	for _, run := range res.Runs {
+		assert.Empty(t, run.Errors, run.Layer)
+	}
+	require.Len(t, res.Resources, 5)
 	byARN := map[string]inventory.CloudResource{}
 	for _, r := range res.Resources {
 		byARN[r.ARN] = r
@@ -76,4 +86,6 @@ func TestSpec_scan_accuracy_7(t *testing.T) {
 	assert.Equal(t, match.CategoryDerived, got[child].Category, got[child].Reason)
 	assert.Equal(t, match.RuleParent, got[child].Rule)
 	assert.Equal(t, match.CategoryUnmatched, got[gw].Category)
+	require.Len(t, byARN[vpcAssoc].Parents, 1)
+	assert.Equal(t, network, byARN[vpcAssoc].Parents[0].ARN, "listed with its service network as parent")
 }

@@ -429,8 +429,9 @@
   id: ["{id}"]
 
 # VPC Lattice. AWS Config and Resource Explorer list only service networks; Cloud Control lists
-# the rest. AWS creates a CHILD resource configuration for each resource an ARN configuration
-# points at, so a CHILD of a managed configuration is derived.
+# the rest, VPC associations once per service network. AWS creates a CHILD resource configuration
+# for each resource an ARN configuration points at, so a CHILD of a managed configuration is
+# derived.
 - tf: aws_vpclattice_service_network
   cfn: AWS::VpcLattice::ServiceNetwork
   arn: "arn:{partition}:vpc-lattice:{region}:{account}:servicenetwork/{id}"
@@ -456,6 +457,7 @@
 - tf: aws_vpclattice_service_network_vpc_association
   cfn: AWS::VpcLattice::ServiceNetworkVpcAssociation
   cc: true
+  cc_parent: {type: AWS::VpcLattice::ServiceNetwork, property: ServiceNetworkIdentifier}
   arn: "arn:{partition}:vpc-lattice:{region}:{account}:servicenetworkvpcassociation/{id}"
   id: ["{id}"]
 
