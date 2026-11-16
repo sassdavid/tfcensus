@@ -30,7 +30,10 @@ Reading order:
    [whois-and-codify](specs/whois-and-codify.md) ·
    [move](specs/move.md) ·
    [notifications-and-reports](specs/notifications-and-reports.md) ·
-   [config](specs/config.md)
+   [config](specs/config.md) ·
+   [docs-site](specs/docs-site.md) ·
+   [docs-design](specs/docs-design.md) ·
+   [docs-content](specs/docs-content.md)
 5. [milestones.md](milestones.md): M0-M20. v0.1.0 is M0-M11; the release mapping is at the top
 6. [testing.md](testing.md) · [risks.md](risks.md) · [open-questions.md](open-questions.md) · [research.md](research.md)
 7. Tool ADRs:
