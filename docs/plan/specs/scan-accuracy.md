@@ -308,7 +308,7 @@ how the next accounts show what is still missing.
 9. [x] The validation fixtures for all 13 false-positive groups scan with no `unmanaged`
    finding, and `TestSpec_accounts_4` still passes, so no new IAM action is needed. Group 14,
    from the v0.4.0 rerun, scans clean too and adds `eks:ListPodIdentityAssociations`.
-10. [ ] A read-only rerun on the validation account with the same command gives under 5%
+10. [x] A read-only rerun on the validation account with the same command gives under 5%
     false positives among `unmanaged` findings, no `undetermined` finding of a curated type, and
     lists the VPC Lattice resources and ACM certificates that v0.3.0 missed.
     `docs/validation/nonprod-scan.md` records the before and after rows, and
