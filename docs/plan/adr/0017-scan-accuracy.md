@@ -1,6 +1,6 @@
 # tfcensus ADR-0017: Scan accuracy from the first real-account run
 
-- Status: proposed (2026-11-16). Accepted when M21 starts. Builds on
+- Status: accepted (2026-11-16, when M21 started). Builds on
   [ADR-0003](0003-capability-probed-layered-inventory.md) (inventory layers),
   [ADR-0004](0004-identity-arn-id-matching.md) (matching),
   [ADR-0005](0005-cel-ownership-rules.md) (rules),
@@ -54,6 +54,14 @@
   `CHILD` resource configuration need new parent links.
 - Scan makes more calls: one `GetDiscoveredResourceCounts` per account and region for the
   coverage report, one `DescribeNatGateways` per region, and one Cloud Control `ListResources` per
-  `cc: true` type and region. All are in the read-only policy.
+  `cc: true` type and region. The first two are in the read-only policy. Cloud Control calls the
+  list handler of each type with the caller's permissions, and the VPC Lattice handlers need
+  `vpc-lattice:ListResourceGateways`, `ListResourceConfigurations`,
+  `ListServiceNetworkResourceAssociations` and `ListServiceNetworkVpcAssociations` (the `handlers`
+  of each type's schema in the CloudFormation registry). The policy gets `vpc-lattice:List*`.
+- `SelectResourceConfig` and `SelectAggregateResourceConfig` take an expression of at most 4,096
+  characters (Config API reference). The curated Config types no longer fit in one `IN` list, so
+  the config layer splits them over as many queries as it needs, in a fixed order so cassettes
+  stay stable.
 - A user who relied on `unmanaged` children of `aws-managed` parents to see them now finds them
   under that category. `--explain` shows why.
