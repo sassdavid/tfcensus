@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.7.0](https://github.com/sassdavid/tfcensus/compare/v0.6.0...v0.7.0) (2026-11-17)
+
+
+### Features
+
+* **docs:** add getting started and the generated tool reference ([#89](https://github.com/sassdavid/tfcensus/issues/89)) ([2bcb6ba](https://github.com/sassdavid/tfcensus/commit/2bcb6ba0448d7620a27156db33847a193037bc75))
+
+
+### Bug Fixes
+
+* **httpx:** redact X-Api-Key in trace logs ([#87](https://github.com/sassdavid/tfcensus/issues/87)) ([70c00c9](https://github.com/sassdavid/tfcensus/commit/70c00c9a0b1c589edc7fb3b900d630363f93e57c))
+
 ## [0.6.0](https://github.com/sassdavid/tfcensus/compare/v0.5.0...v0.6.0) (2026-11-17)
 
 
