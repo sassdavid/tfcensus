@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/sassdavid/tfcensus/compare/v0.8.0...v0.9.0) (2026-11-17)
+
+
+### Features
+
+* **docs:** add social cards, icons and the accessibility checks (M26) ([#93](https://github.com/sassdavid/tfcensus/issues/93)) ([fdacb5f](https://github.com/sassdavid/tfcensus/commit/fdacb5f2008c549d7fe7a4e71d23651dda2cd331))
+
 ## [0.8.0](https://github.com/sassdavid/tfcensus/compare/v0.7.0...v0.8.0) (2026-11-17)
 
 
