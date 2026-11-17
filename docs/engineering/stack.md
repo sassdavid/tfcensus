@@ -25,15 +25,16 @@ goreleaser, chezmoi, k9s, golangci-lint.
 |---|---|---|
 | Go | **1.27.4** toolchain; `go 1.27.0` directive per [version-policy.md](version-policy.md) | same as relgap |
 | golangci-lint | **v2.15.0** | + golden config v2.15.0 ([ADR-0008](adr/0008-lint-config.md)) |
-| gofumpt | **v0.12.0** | golines **v0.13.0** + goimports come with the golden config |
+| gofumpt | built into golangci-lint | runs as a golangci-lint formatter (ADR-0008), with golines **v0.13.0** and goimports from the golden config; no separate binary |
 | govulncheck (`golang.org/x/vuln`) | **v1.9.0** | |
 | go-licenses (`github.com/google/go-licenses/v2`) | **v2.0.1** | collects third-party notices for the archives and fails on forbidden, restricted or unknown licenses ([ADR-0012](adr/0012-third-party-notices.md)); gh pins the same version |
-| goreleaser | **v2.20.0** | cosign **v3.1.4** |
+| goreleaser | **v2.20.0** | |
+| cosign | **v3.1.4** | pinned in `mise.ci.toml`, which the release job loads (`MISE_ENV=ci`) to sign `checksums.txt`; `mise run snapshot` skips signing, so mise installs no local copy |
 | syft | **v1.57.1** | SBOMs for goreleaser `sboms:`, locally and in CI (installed by mise, so `anchore/sbom-action` isn't needed) |
 | mise | **v2026.11.5** | pinned as `version:` of `jdx/mise-action` in workflows; `mise.lock` pins tool checksums |
 | zizmor | **v1.32.0** | local workflow audit (`mise x zizmor@1.32.0 -- zizmor .github/workflows`); CI uses `zizmor-action`. Every audit is on, `self-repository` included: same-repository workflows are called with `$/` |
 | jactionlint | **v2.5.0** | `mise run lint:actions`, with `profile: default` in `.github/jactionlint.yaml`. jdx's maintained fork of actionlint (MIT); mise deprecated `actionlint` in 2026.10.3 (jdx/mise#13960). It installs through the `packslip` backend, whose lock entry records the signing workflow. rhysd/actionlint has had no release since 1.7.12 (2026-03-30) |
-| shellcheck | **v0.11.0** | pinned in `mise.ci.toml`, which only the CI lint job loads (`MISE_ENV=ci`), so jactionlint checks `run:` scripts with a fixed version (the ubuntu runner ships 0.9.0). Locally jactionlint uses the system shellcheck (Homebrew), and mise installs no second copy |
+| shellcheck | **v0.11.0** | pinned in `mise.ci.toml`, which only CI jobs load (`MISE_ENV=ci`), so jactionlint checks `run:` scripts with a fixed version (the ubuntu runner ships 0.9.0). Locally jactionlint uses the system shellcheck (Homebrew), and mise installs no second copy |
 
 ## Docs site (pinned in `mise.docs.toml` and `docs/package.json`)
 
