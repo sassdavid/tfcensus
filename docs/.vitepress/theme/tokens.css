@@ -1,0 +1,89 @@
+/* Colours, fonts and the VitePress variable mapping for tfcensus (docs/plan/specs/docs-design.md).
+   The contrast test (contrast.test.mjs) reads this file: every token except paper, surface and
+   rule is text and needs 4.5:1 on paper and surface, control needs 3:1. */
+@import "@fontsource-variable/public-sans/wght.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/600.css";
+@import "./site.css";
+
+:root {
+  --tc-paper: #f2f5f4;
+  --tc-surface: #ffffff;
+  --tc-ink: #17302e;
+  --tc-ink-muted: #4a5f5c;
+  --tc-rule: #c9d3d1;
+  --tc-control: #6b7c79;
+  --tc-brand: #1d6b66;
+  --tc-managed: #1d6b66;
+  --tc-aws-managed: #5b6b82;
+  --tc-other-iac: #6a4fa3;
+  --tc-derived: #5c6b68;
+  --tc-unmanaged: #b43f2a;
+  --tc-undetermined: #8a5f00;
+}
+
+.dark {
+  --tc-paper: #0f1e1d;
+  --tc-surface: #162927;
+  --tc-ink: #e3ecea;
+  --tc-ink-muted: #9fb3af;
+  --tc-rule: #2a3f3c;
+  --tc-control: #7f9591;
+  --tc-brand: #5fc2b8;
+  --tc-managed: #5fc2b8;
+  --tc-aws-managed: #a3b3cc;
+  --tc-other-iac: #b9a3e8;
+  --tc-derived: #8fa09c;
+  --tc-unmanaged: #f08a70;
+  --tc-undetermined: #e2b44a;
+}
+
+:root,
+.dark {
+  --vp-font-family-base:
+    "Public Sans Variable", "Public Sans", ui-sans-serif, system-ui, sans-serif;
+  --vp-font-family-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --vp-c-brand-1: var(--tc-brand);
+  --vp-c-brand-2: var(--tc-ink);
+  --vp-c-brand-3: var(--tc-brand);
+  --vp-c-brand-soft: color-mix(in srgb, var(--tc-brand) 14%, transparent);
+
+  --vp-c-bg: var(--tc-paper);
+  --vp-c-bg-alt: var(--tc-paper);
+  --vp-c-bg-elv: var(--tc-surface);
+  --vp-c-bg-soft: var(--tc-surface);
+  --vp-c-text-1: var(--tc-ink);
+  --vp-c-text-2: var(--tc-ink-muted);
+  --vp-c-text-3: var(--tc-ink-muted);
+  --vp-c-divider: var(--tc-rule);
+  --vp-c-gutter: var(--tc-rule);
+  --vp-c-border: var(--tc-control);
+
+  --vp-code-block-bg: var(--tc-surface);
+  --vp-code-bg: var(--tc-surface);
+  --vp-code-color: var(--tc-ink);
+  --vp-code-copy-code-bg: var(--tc-surface);
+
+  --vp-button-brand-bg: var(--tc-brand);
+  --vp-button-brand-border: var(--tc-brand);
+  --vp-button-brand-text: var(--tc-paper);
+  --vp-button-brand-hover-bg: var(--tc-ink);
+  --vp-button-brand-hover-border: var(--tc-ink);
+  --vp-button-brand-hover-text: var(--tc-paper);
+  --vp-button-brand-active-bg: var(--tc-ink);
+  --vp-button-brand-active-border: var(--tc-ink);
+  --vp-button-brand-active-text: var(--tc-paper);
+  --vp-button-alt-bg: var(--tc-surface);
+  --vp-button-alt-border: var(--tc-control);
+  --vp-button-alt-text: var(--tc-ink);
+  --vp-button-alt-hover-bg: var(--tc-surface);
+  --vp-button-alt-hover-border: var(--tc-brand);
+  --vp-button-alt-hover-text: var(--tc-brand);
+
+  --vp-local-search-bg: var(--tc-paper);
+  --vp-local-search-result-bg: var(--tc-surface);
+  --vp-local-search-result-border: var(--tc-rule);
+  --vp-local-search-highlight-bg: var(--tc-brand);
+  --vp-local-search-highlight-text: var(--tc-paper);
+}

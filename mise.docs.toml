@@ -1,0 +1,9 @@
+# The docs site toolchain (engineering ADR-0016), loaded with MISE_ENV=docs so Go jobs and
+# laptops that don't build the site never install it. Renovate updates the versions and
+# mise.docs.lock.
+
+[tools]
+node = "26.13.1"
+aube = "2.10.1"
+lychee = "0.24.2"
+oxfmt = "0.78.0"

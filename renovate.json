@@ -38,6 +38,13 @@
       "groupName": "mise tools"
     },
     {
+      "description": "One PR for non-major updates of the exact versions in docs/package.json; aube-lock.yml commits docs/aube-lock.yaml on the branch (engineering ADR-0016)",
+      "matchManagers": ["npm"],
+      "matchFileNames": ["docs/package.json"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "docs site packages"
+    },
+    {
       "description": "golangci-lint and its golden config move together (ADR-0008); re-apply the local overrides",
       "groupName": "golangci-lint",
       "matchDepNames": ["golangci-lint", "maratori/golangci-lint-config"]

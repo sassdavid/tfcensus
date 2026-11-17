@@ -1,0 +1,4 @@
+{
+  "printWidth": 100,
+  "ignorePatterns": [".vitepress/dist/**", ".vitepress/cache/**", ".vitepress/theme/data/**"]
+}

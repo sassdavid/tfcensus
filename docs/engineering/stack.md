@@ -35,6 +35,21 @@ goreleaser, chezmoi, k9s, golangci-lint.
 | jactionlint | **v2.5.0** | `mise run lint:actions`, with `profile: default` in `.github/jactionlint.yaml`. jdx's maintained fork of actionlint (MIT); mise deprecated `actionlint` in 2026.10.3 (jdx/mise#13960). It installs through the `packslip` backend, whose lock entry records the signing workflow. rhysd/actionlint has had no release since 1.7.12 (2026-03-30) |
 | shellcheck | **v0.11.0** | pinned so jactionlint checks `run:` scripts with the same version locally and in CI (the ubuntu runner ships its own) |
 
+## Docs site (pinned in `mise.docs.toml` and `docs/package.json`)
+
+Checked on 2026-11-17 at M22 against the npm registry and GitHub releases, with the 3-day minimum
+age except where the docs-site spec names the version ([ADR-0016](adr/0016-docs-site.md)).
+
+| Item | Version | Note |
+|---|---|---|
+| node | **26.13.1** | current LTS line; only jobs with `MISE_ENV=docs` install it |
+| aube | **2.10.1** | installs `docs/` from `docs/aube-lock.yaml`; lifecycle scripts denied (`docs/aube-workspace.yaml`) |
+| lychee | **0.24.2** | `lychee --offline` on the built site |
+| oxfmt | **0.78.0** | formats `docs/.vitepress`; an npm tool, so its lockfile is under `.mise/locks/` |
+| VitePress | **1.6.4** | latest stable (2.0 is alpha) |
+| vue | **3.5.45** | the version VitePress resolves, pinned so Renovate updates it |
+| `@fontsource-variable/public-sans`, `@fontsource/ibm-plex-mono` | **5.3.0** | self-hosted OFL fonts ([docs-design](../plan/specs/docs-design.md)) |
+
 ## Libraries
 
 | Concern | Module | Latest | Why / alternatives rejected |

@@ -1,0 +1,104 @@
+name: docs
+
+# Builds the docs site and deploys it to GitHub Pages (engineering ADR-0016). Pull requests build
+# without deploying. release-please.yml calls this workflow after a release, so the site describes
+# the released binary. Actions > docs > Run workflow redeploys a ref, the latest release tag by
+# default. The custom domain and "Enforce HTTPS" live in the repository's Pages settings.
+on:
+  pull_request:
+    paths:
+      - docs/**
+      - scripts/gendocs/**
+      - scripts/gensite/**
+      - internal/cli/**
+      - schemas/**
+      - testdata/script/spec_scan_1.txtar
+      - testdata/golden/digest/kubectl.json
+      - mise.docs.toml
+      - mise.docs.lock
+      - .mise/locks/**
+      - .github/workflows/docs.yml
+  workflow_call:
+    inputs:
+      tag:
+        description: Release tag to build and deploy, e.g. v0.5.0
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Tag or branch to build and deploy (default the latest release tag)
+        required: false
+        type: string
+
+permissions: {}
+
+# One deploy at a time, and a deploy is never cancelled halfway. Pull request builds get their own
+# group so they don't wait for a deploy.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('docs-{0}', github.ref) || 'pages' }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    env:
+      MISE_ENV: docs
+    steps:
+      # A called workflow sees the caller's event, so the inputs tell the three triggers apart.
+      - name: resolve the ref to build
+        id: ref
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+          REF: ${{ inputs.ref }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          if [[ -n "$TAG" ]]; then
+            ref=$TAG
+          elif [[ "$EVENT" == workflow_dispatch ]]; then
+            ref=${REF:-$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)}
+          else
+            ref=$GITHUB_SHA
+          fi
+          echo "ref=$ref" >>"$GITHUB_OUTPUT"
+          echo "building $ref" >>"$GITHUB_STEP_SUMMARY"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ steps.ref.outputs.ref }}
+          fetch-depth: 0 # lastUpdated reads each page's last commit
+          persist-credentials: false
+      - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
+        with:
+          version: 2026.11.7
+          install_args: go node aube lychee oxfmt
+      - name: aube install
+        working-directory: docs
+        run: aube install --frozen-lockfile
+      - name: oxfmt
+        run: mise run lint:docs
+      - name: generators, tests, build and link check
+        run: mise run docs:build
+      - if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: docs/.vitepress/dist
+
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write # publish the Pages artifact
+      id-token: write # deploy-pages proves the run's identity with OIDC
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

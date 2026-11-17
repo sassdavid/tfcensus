@@ -20,12 +20,21 @@ cli_identical=(
   .claude/rules/writing.md
   .gitattributes
   .github/jactionlint.yaml
+  .github/workflows/aube-lock.yml
   .github/workflows/ci.yml
+  .github/workflows/docs.yml
   .github/workflows/renovate-config.yml
   .github/workflows/renovate.yml
   .github/workflows/security.yml
   .golangci.yml
   .gitignore
+  docs/.oxfmtrc.json
+  docs/.vitepress/contrast.test.mjs
+  docs/.vitepress/theme/index.ts
+  docs/.vitepress/tokens.mjs
+  docs/aube-workspace.yaml
+  mise.docs.lock
+  mise.docs.toml
   mise.lock
   release-please-config.json
   renovate.json
@@ -112,6 +121,7 @@ cli_identical=(
   scripts/licenses.sh
   scripts/proselint/doc.go
   scripts/proselint/main.go
+  scripts/proselint/main_test.go
   scripts/test-golden.sh
   testdata/script/completion.txtar
   testdata/script/root.txtar
@@ -140,6 +150,10 @@ cli_similar=(
   docs/engineering/adr/0008-lint-config.md
   docs/engineering/adr/0013-shell-completion-and-man-pages.md
   docs/install.md
+  docs/package.json
+  docs/.vitepress/config.mts
+  docs/.vitepress/sidebar.mts
+  docs/engineering/adr/0016-docs-site.md
 )
 
 action_identical=(

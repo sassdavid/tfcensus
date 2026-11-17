@@ -1,0 +1,108 @@
+/* Type scale, focus ring, tables and helpers for tfcensus (docs-design.md "Type", "Layout" and
+   "Accessibility"). Colours come from tokens.css. */
+
+body {
+  font-variant-numeric: tabular-nums;
+}
+
+.VPNavBarTitle .title {
+  font-weight: 750;
+  letter-spacing: 0;
+}
+
+.vp-doc {
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.vp-doc h1,
+.vp-doc h2,
+.vp-doc h3,
+.vp-doc h4 {
+  font-weight: 650;
+  letter-spacing: 0;
+}
+
+.vp-doc h1 {
+  font-size: 2.25rem;
+  line-height: 1.2;
+}
+
+.vp-doc h2 {
+  font-size: 1.75rem;
+  line-height: 1.3;
+}
+
+.vp-doc h3 {
+  font-size: 1.375rem;
+  line-height: 1.4;
+}
+
+.vp-doc h4 {
+  font-size: 1.125rem;
+}
+
+.vp-doc p,
+.vp-doc li {
+  max-width: 72ch;
+}
+
+.vp-doc strong {
+  font-weight: 600;
+}
+
+.vp-doc small,
+.vp-doc figcaption {
+  font-size: 0.875rem;
+}
+
+.vp-doc table {
+  border-collapse: collapse;
+}
+
+.vp-doc tr,
+.vp-doc tr:nth-child(2n) {
+  background-color: transparent;
+}
+
+.vp-doc th,
+.vp-doc td {
+  border: none;
+  border-bottom: 1px solid var(--tc-rule);
+}
+
+.vp-doc th {
+  background-color: transparent;
+  color: var(--tc-ink);
+  font-weight: 600;
+}
+
+.vp-doc td:first-child code {
+  font-size: 0.875rem;
+}
+
+.vp-doc a {
+  text-underline-offset: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--tc-brand);
+  outline-offset: 2px;
+}
+
+.VPButton.brand:focus-visible,
+.tc-button.brand:focus-visible {
+  outline-color: var(--tc-ink);
+}
+
+.tc-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

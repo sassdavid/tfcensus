@@ -1,0 +1,31 @@
+{
+  "source": "testdata/script/spec_scan_1.txtar (golden/scan.json)",
+  "caption": "Sample scan: 1 account, 2 regions",
+  "unit": 1,
+  "rows": [
+    {
+      "category": "managed",
+      "count": 6
+    },
+    {
+      "category": "aws-managed",
+      "count": 5
+    },
+    {
+      "category": "other-iac",
+      "count": 2
+    },
+    {
+      "category": "derived",
+      "count": 1
+    },
+    {
+      "category": "unmanaged",
+      "count": 5
+    },
+    {
+      "category": "undetermined",
+      "count": 1
+    }
+  ]
+}

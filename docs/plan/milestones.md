@@ -407,24 +407,26 @@ theme, fonts and home page, and serves the existing user docs. The CLI reference
 until M23. Decisions: engineering [ADR-0016](../engineering/adr/0016-docs-site.md) (proposed
 2026-11-17; this milestone accepts it in both repos). relgap does the same milestone with its own
 theme in the same session.
-- [ ] ADR-0016 is accepted in both repos and listed in `docs/engineering/README.md`.
-- [ ] `mise.docs.toml` pins node 26.13.1, aube 2.10.1, lychee and oxfmt, `mise.lock` has their
-  entries, and `MISE_ENV=docs mise install` works on a clean checkout.
-- [ ] `docs/package.json` (exact versions), `docs/aube-lock.yaml` and `docs/aube-workspace.yaml`
+- [x] ADR-0016 is accepted in both repos and listed in `docs/engineering/README.md`.
+- [x] `mise.docs.toml` pins node 26.13.1, aube 2.10.1, lychee and oxfmt, `mise.lock` has their
+  entries, and `MISE_ENV=docs mise install` works on a clean checkout. The entries are in
+  `mise.docs.lock`, as `mise.e2e.lock` is for the e2e tools, and oxfmt's npm lockfile is under
+  `.mise/locks/`.
+- [x] `docs/package.json` (exact versions), `docs/aube-lock.yaml` and `docs/aube-workspace.yaml`
   exist. `aube install --frozen-lockfile` passes with lifecycle scripts denied, or each allowed
   package is listed with a reason.
-- [ ] `docs/.vitepress/config.mts` follows docs-site.md "Site configuration": cleanUrls,
+- [x] `docs/.vitepress/config.mts` follows docs-site.md "Site configuration": cleanUrls,
   lastUpdated, sitemap, local search, editLink, srcExclude (including `cli/**` for now), the
   version nav item from `.release-please-manifest.json`, and the `description` check in
   `transformPageData`.
-- [ ] `theme/tokens.css` has every token in docs-design.md for both themes, fonts load from the
+- [x] `theme/tokens.css` has every token in docs-design.md for both themes, fonts load from the
   Fontsource packages, and the contrast check passes (docs-design criterion 1).
 - [ ] `HomeHero`, `CensusTally`, `CategoryMark`, `AnswerRows` and `SiteFooter` exist. The tally
   reads `home-tally.json`, written by a generator from a scan golden. The home page matches the
   wireframe at 1280 px and 400 px (screenshots in the PR).
-- [ ] The existing user pages (install, CI, IAM, runbooks) build and have a `description`. The
+- [x] The existing user pages (install, CI, IAM, runbooks) build and have a `description`. The
   build has no dead links.
-- [ ] mise tasks `docs:dev`, `docs:build`, `docs:preview` and `lint:docs` exist. `docs:build` runs
+- [x] mise tasks `docs:dev`, `docs:build`, `docs:preview` and `lint:docs` exist. `docs:build` runs
   the checks in docs-site.md "Checks" that exist at this point (stale check, unit tests, build,
   lychee). `mise run check` includes `lint:docs`.
 - [ ] `.github/workflows/docs.yml` builds on pull requests and deploys through `workflow_call`
@@ -434,8 +436,8 @@ theme in the same session.
 - [ ] `.github/workflows/aube-lock.yml` and the `aube-lock` environment exist. A test Renovate
   branch that bumps a docs dependency gets a lockfile commit and green CI. `renovate.json` covers
   `docs/package.json`, and `docs/ci/` stays out of scope as before.
-- [ ] `lint:prose` covers the published pages, with a test that it doesn't skip them.
-- [ ] `scripts/sibling-diff.sh` lists the new files as docs-site.md "Sibling sharing" says, and
+- [x] `lint:prose` covers the published pages, with a test that it doesn't skip them.
+- [x] `scripts/sibling-diff.sh` lists the new files as docs-site.md "Sibling sharing" says, and
   `mise run sibling:diff` passes in both repos.
 
 ### M23: Generated reference (shared) ([docs-site](specs/docs-site.md#generated-content-shared-generators))

@@ -14,3 +14,11 @@ third_party_licenses/
 # go build output
 /tfcensus
 /tfcensus.exe
+
+# docs site (engineering ADR-0016): packages and the VitePress cache; dist/ above covers the build
+docs/node_modules/
+docs/.vitepress/cache/
+
+# mise lock writes npm dependency graphs for npm tools here, and mise.docs.lock points at them
+.mise/*
+!.mise/locks/

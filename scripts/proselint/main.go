@@ -79,8 +79,9 @@ func checked(f string) bool {
 	if slices.Contains(excludedFiles, f) {
 		return false
 	}
+	// The docs site's Vue components, config and theme hold published text too.
 	switch filepath.Ext(f) {
-	case ".md", ".go", ".yml", ".yaml", ".toml", ".sh", ".txtar":
+	case ".md", ".go", ".yml", ".yaml", ".toml", ".sh", ".txtar", ".vue", ".mts", ".ts", ".mjs":
 		return true
 	}
 	return false
