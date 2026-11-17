@@ -37,6 +37,7 @@ jobs:
       id-token: write # cosign keyless signing + attestations
       attestations: write
     env:
+      MISE_ENV: ci # mise.ci.toml: the cosign that goreleaser signs checksums.txt with
       TAG: ${{ inputs.tag || github.ref_name }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

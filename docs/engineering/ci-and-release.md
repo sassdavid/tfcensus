@@ -2,8 +2,9 @@
 
 ## Local tasks (mise)
 
-`mise.toml` pins `go`, `golangci-lint`, `goreleaser`, `gofumpt`, `govulncheck`, `go-licenses`, `cosign` and `syft`
-(checksums in `mise.lock`), and defines these tasks:
+`mise.toml` pins `go`, `golangci-lint`, `goreleaser`, `govulncheck`, `go-licenses`, `syft` and `jactionlint`
+(checksums in `mise.lock`), and defines these tasks. `mise.ci.toml` pins `cosign` and `shellcheck`, which only
+CI installs (`MISE_ENV=ci`): `release.yml` signs with cosign, and local snapshots skip signing.
 
 | Task | Runs |
 |---|---|

@@ -1,7 +1,10 @@
-# Tools only CI needs, loaded with MISE_ENV=ci by the lint job. Locally they come from the system
-# (Homebrew), so mise never installs a second copy. jactionlint runs shellcheck on `run:` scripts,
-# and an action repo's lint:shell runs it on scripts/. CI pins it, and Renovate updates the pin and
-# mise.ci.lock.
+# Tools only CI needs, loaded with MISE_ENV=ci by the jobs that use them. Locally, mise never
+# installs them. shellcheck comes from the system (Homebrew): jactionlint runs it on `run:`
+# scripts, and an action repo's lint:shell runs it on scripts/. cosign signs checksums.txt in a
+# tool repo's release job (`mise run snapshot` skips signing), and an action repo's test job runs
+# the action's cosign check with it (without it, scripts/install.sh installs cosign through mise).
+# Renovate updates the pins and mise.ci.lock.
 
 [tools]
+cosign = "3.1.4"
 shellcheck = "0.11.0"
