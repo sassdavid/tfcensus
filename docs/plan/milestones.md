@@ -421,7 +421,7 @@ theme in the same session.
   `transformPageData`.
 - [x] `theme/tokens.css` has every token in docs-design.md for both themes, fonts load from the
   Fontsource packages, and the contrast check passes (docs-design criterion 1).
-- [ ] `HomeHero`, `CensusTally`, `CategoryMark`, `AnswerRows` and `SiteFooter` exist. The tally
+- [x] `HomeHero`, `CensusTally`, `CategoryMark`, `AnswerRows` and `SiteFooter` exist. The tally
   reads `home-tally.json`, written by a generator from a scan golden. The home page matches the
   wireframe at 1280 px and 400 px (screenshots in the PR).
 - [x] The existing user pages (install, CI, IAM, runbooks) build and have a `description`. The
@@ -429,13 +429,17 @@ theme in the same session.
 - [x] mise tasks `docs:dev`, `docs:build`, `docs:preview` and `lint:docs` exist. `docs:build` runs
   the checks in docs-site.md "Checks" that exist at this point (stale check, unit tests, build,
   lychee). `mise run check` includes `lint:docs`.
-- [ ] `.github/workflows/docs.yml` builds on pull requests and deploys through `workflow_call`
+- [x] `.github/workflows/docs.yml` builds on pull requests and deploys through `workflow_call`
   from `release-please.yml` and through `workflow_dispatch`. jactionlint passes. A dispatch run
   from the latest tag deployed the site: `curl -sI https://tfcensus.sasskovacs.dev/` shows 200 and
   the `http://` URL redirects. "Enforce HTTPS" is on.
+  The dispatch ran from `main` (run 44052711619), because v0.4.0 predates the site; the spec allows
+  `ref: main` for a manual deploy.
 - [ ] `.github/workflows/aube-lock.yml` and the `aube-lock` environment exist. A test Renovate
   branch that bumps a docs dependency gets a lockfile commit and green CI. `renovate.json` covers
   `docs/package.json`, and `docs/ci/` stays out of scope as before.
+  The workflow, the environment (branch rule, secret, variable) and the `renovate.json` rule are in
+  place; the test Renovate branch is still to come.
 - [x] `lint:prose` covers the published pages, with a test that it doesn't skip them.
 - [x] `scripts/sibling-diff.sh` lists the new files as docs-site.md "Sibling sharing" says, and
   `mise run sibling:diff` passes in both repos.
@@ -503,6 +507,7 @@ release.
 - [ ] The built site makes no third-party request. (docs-site criterion 10)
 - [ ] `docs/README.md` is the contributor guide for the site: tasks, where pages go, generated
   files, voice.
-- [ ] A release created by release-please deployed the site through `workflow_call`, with the run
-  ID in the evidence. (docs-site criterion 2)
+- [x] A release created by release-please deployed the site through `workflow_call`, with the run
+  ID in the evidence. (docs-site criterion 2) v0.5.0, release-please run 44053630046: the docs build
+  and deploy jobs passed, and the site answers 200.
 - [ ] `mise run sibling:diff` passes in both repos. (docs-site criterion 11)
