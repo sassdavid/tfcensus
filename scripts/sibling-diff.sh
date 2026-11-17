@@ -10,6 +10,7 @@
 set -euo pipefail
 
 verbatim=(
+  .claude/rules/renovate.md
   .claude/rules/siblings.md
   scripts/sibling-diff.sh
 )

@@ -10,7 +10,7 @@ then add it to both.
 
 `scripts/sibling-diff.sh` lists the shared files, with one list for the tool repos and one for
 the action repos. It takes the repo name from a `.sibling` file or the directory name. Files on its
-"verbatim" list (this file and the script) are byte-identical in all four repos. Files on an
+"verbatim" list (this file, the script and `.claude/rules/renovate.md`) are byte-identical in all four repos. Files on an
 "identical" list match once tfcensus/relgap, TFCENSUS/RELGAP and Tfcensus/Relgap are swapped. An
 action repo also compares the verbatim files and `.claude/rules/writing.md` with its tool's repo.
 Run `mise run sibling:diff` after changing any of them, and make the same change in the sibling

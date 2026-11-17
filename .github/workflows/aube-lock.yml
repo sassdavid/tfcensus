@@ -17,8 +17,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # No github.actor check: zizmor's bot-conditions audit flags it as spoofable. The branch filter
+  # and the environment's deployment branches limit the job, and a push by anyone else only
+  # refreshes the lockfile.
   lockfile:
-    if: github.actor == 'sassdavid-renovate[bot]'
     # The app key is a secret of this environment, whose deployment branches are
     # renovate-self-hosted/** only. The renovate environment allows main only.
     environment: aube-lock
