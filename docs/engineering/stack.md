@@ -33,7 +33,7 @@ goreleaser, chezmoi, k9s, golangci-lint.
 | mise | **v2026.11.5** | pinned as `version:` of `jdx/mise-action` in workflows; `mise.lock` pins tool checksums |
 | zizmor | **v1.32.0** | local workflow audit (`mise x zizmor@1.32.0 -- zizmor .github/workflows`); CI uses `zizmor-action`. Every audit is on, `self-repository` included: same-repository workflows are called with `$/` |
 | jactionlint | **v2.5.0** | `mise run lint:actions`, with `profile: default` in `.github/jactionlint.yaml`. jdx's maintained fork of actionlint (MIT); mise deprecated `actionlint` in 2026.10.3 (jdx/mise#13960). It installs through the `packslip` backend, whose lock entry records the signing workflow. rhysd/actionlint has had no release since 1.7.12 (2026-03-30) |
-| shellcheck | **v0.11.0** | pinned so jactionlint checks `run:` scripts with the same version locally and in CI (the ubuntu runner ships its own) |
+| shellcheck | **v0.11.0** | pinned in `mise.ci.toml`, which only the CI lint job loads (`MISE_ENV=ci`), so jactionlint checks `run:` scripts with a fixed version (the ubuntu runner ships 0.9.0). Locally jactionlint uses the system shellcheck (Homebrew), and mise installs no second copy |
 
 ## Docs site (pinned in `mise.docs.toml` and `docs/package.json`)
 

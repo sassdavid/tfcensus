@@ -1,0 +1,7 @@
+# Tools only CI needs, loaded with MISE_ENV=ci by the lint job. Locally they come from the system
+# (Homebrew), so mise never installs a second copy. jactionlint runs shellcheck on `run:` scripts,
+# and an action repo's lint:shell runs it on scripts/. CI pins it, and Renovate updates the pin and
+# mise.ci.lock.
+
+[tools]
+shellcheck = "0.11.0"

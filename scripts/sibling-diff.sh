@@ -43,6 +43,8 @@ cli_identical=(
   docs/.vitepress/third-party-check.test.mjs
   docs/.vitepress/tokens.mjs
   docs/aube-workspace.yaml
+  mise.ci.lock
+  mise.ci.toml
   mise.docs.lock
   mise.docs.toml
   mise.lock
@@ -193,6 +195,8 @@ action_identical=(
   .gitignore
   .shellcheckrc
   action.yml
+  mise.ci.lock
+  mise.ci.toml
   release-please-config.json
   renovate.json
   scripts/install.sh
