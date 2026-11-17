@@ -101,7 +101,10 @@ type generator struct {
 
 func (g *generator) add(name string, b []byte) { g.files[name] = b }
 
-var titleLine = regexp.MustCompile(`(?m)^title:\s*"?([^"\n]+)"?\s*$|^#\s+(.+)$`)
+var (
+	titleKey = regexp.MustCompile(`(?m)^title:\s*"?([^"\n]+)"?\s*$`)
+	heading1 = regexp.MustCompile(`(?m)^#\s+(.+)$`)
+)
 
 // pageTitle returns the title of the site page at link, from the generated files or the
 // Markdown source, or the link itself when the page has none.
@@ -116,11 +119,29 @@ func (g *generator) pageTitle(link string) string {
 				continue
 			}
 		}
-		if m := titleLine.FindSubmatch(b); m != nil {
-			return string(bytes.TrimSpace(append(m[1], m[2]...)))
+		if title := titleOf(b); title != "" {
+			return title
 		}
 	}
 	return link
+}
+
+// titleOf returns the title key of a page's frontmatter, else its first # heading after the
+// frontmatter. The comment line of a generated page's frontmatter also starts with #.
+func titleOf(b []byte) string {
+	body := b
+	if rest, ok := bytes.CutPrefix(b, []byte("---\n")); ok {
+		if front, after, found := bytes.Cut(rest, []byte("\n---\n")); found {
+			if m := titleKey.FindSubmatch(front); m != nil {
+				return string(bytes.TrimSpace(m[1]))
+			}
+			body = after
+		}
+	}
+	if m := heading1.FindSubmatch(body); m != nil {
+		return string(bytes.TrimSpace(m[1]))
+	}
+	return ""
 }
 
 // generate returns every generated file of the docs site.
