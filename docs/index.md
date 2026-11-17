@@ -7,10 +7,10 @@ headline: Count what your Terraform manages.
 lead: tfcensus lists every unit and state in a Terragrunt fleet and finds the AWS resources none of them manage. Read-only by default.
 install: mise use github:sassdavid/tfcensus
 actions:
+  - text: Get started
+    link: /getting-started
   - text: Install
     link: /install
-  - text: Read-only IAM policy
-    link: /iam/
     theme: alt
 answers:
   - question: Which resources does no unit manage?

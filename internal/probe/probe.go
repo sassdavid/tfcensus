@@ -643,7 +643,7 @@ func regionNotes(reg *Region, accountRE Status) []string {
 
 func errorNote(msg string) string {
 	if strings.HasPrefix(msg, "access denied") {
-		return msg + ". Grant the actions in the read-only policy: " + docsurl.Page("iam/")
+		return msg + ". Grant the actions in the read-only policy: " + docsurl.Page("reference/iam")
 	}
 	return msg
 }

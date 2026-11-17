@@ -27,7 +27,11 @@ function cliItem(node: CommandNode): DefaultTheme.SidebarItem {
 export const sidebar: DefaultTheme.SidebarItem[] = [
   {
     text: "Start",
-    items: [{ text: "Install", link: "/install" }],
+    items: [
+      { text: "Getting started", link: "/getting-started" },
+      { text: "Install", link: "/install" },
+      { text: "Supported versions", link: "/supported-versions" },
+    ],
   },
   {
     text: "Guides",
@@ -38,15 +42,28 @@ export const sidebar: DefaultTheme.SidebarItem[] = [
     ],
   },
   {
+    text: "Concepts",
+    items: [{ text: "Read-only by default", link: "/concepts/safety" }],
+  },
+  {
     text: "Reference",
     items: [
       { text: "Configuration", link: "/reference/config" },
       { text: "Environment variables", link: "/reference/environment" },
       { text: "Exit codes", link: "/reference/exit-codes" },
+      { text: "Output formats", link: "/reference/output" },
       { text: "Fail-on values", link: "/reference/fail-on" },
       { text: "JSON schemas", link: "/reference/schemas" },
+      { text: "Ownership rule packs", link: "/reference/rule-packs" },
+      { text: "CEL fields and functions", link: "/reference/cel" },
+      { text: "Matching and rule IDs", link: "/reference/rule-ids" },
+      { text: "Type mapping coverage", link: "/reference/type-coverage" },
+      { text: "Backend audit checks", link: "/reference/audit-checks" },
+      { text: "Drift noise presets", link: "/reference/drift-noise" },
+      { text: "Move file format", link: "/reference/move-file" },
       { text: "MCP tools and prompts", link: "/reference/mcp" },
-      { text: "Read-only IAM policy", link: "/iam/" },
+      { text: "IAM policies", link: "/reference/iam" },
+      { text: "Changelog", link: "/changelog" },
     ],
   },
   {

@@ -2,6 +2,7 @@ package accounts_test
 
 import (
 	"encoding/json"
+	"maps"
 	"net/http"
 	"net/url"
 	"os"
@@ -18,15 +19,55 @@ import (
 
 const policyFile = "../../docs/iam/tfcensus-readonly.json"
 
-// grantedElsewhere lists actions the policy leaves out on purpose, with docs/iam/README.md saying
+// grantedElsewhere lists actions the policy leaves out on purpose, with /reference/iam saying
 // why: sts:AssumeRole is granted per role, for exactly the org and backend roles in use.
 func grantedElsewhere() []string { return []string{"sts:AssumeRole"} }
 
+// calledForCaller lists policy actions that no cassette can show, because AWS makes the call on
+// the caller's behalf, with the reason. The reasons are on /reference/iam too.
+func calledForCaller() map[string]string {
+	return map[string]string{
+		"kms:Decrypt":                          "S3 calls it with the caller's permissions to read an SSE-KMS state object",
+		"vpc-lattice:List*":                    "Cloud Control's list handlers for the VPC Lattice types call it",
+		"vpc-lattice:GetResourceConfiguration": "Cloud Control's read handler for resource configurations calls it",
+	}
+}
+
 // TestSpec_accounts_4: every AWS action the code calls in tests, taken from the recorded HTTP
-// traffic, is allowed by the read-only IAM policy.
+// traffic, is allowed by the read-only IAM policy, and every action the policy allows is called
+// in a cassette or listed in calledForCaller.
 func TestSpec_accounts_4(t *testing.T) {
 	t.Parallel()
 	allowed := policyActions(t)
+	actions := cassetteActions(t)
+	t.Logf("actions in cassettes: %v", actions)
+	for _, a := range actions {
+		if slices.Contains(grantedElsewhere(), a) {
+			continue
+		}
+		assert.True(t, slices.ContainsFunc(allowed, func(p string) bool { return actionMatches(p, a) }),
+			"%s is not in %s", a, policyFile)
+	}
+	for _, p := range allowed {
+		if _, ok := calledForCaller()[p]; ok {
+			continue
+		}
+		assert.True(
+			t,
+			slices.ContainsFunc(actions, func(a string) bool { return actionMatches(p, a) }),
+			"%s in %s matches no call in the cassettes: drop it, or list it in calledForCaller with a reason",
+			p,
+			policyFile,
+		)
+	}
+	for p := range calledForCaller() {
+		assert.Contains(t, allowed, p, "calledForCaller lists %s, which %s doesn't grant", p, policyFile)
+	}
+}
+
+// cassetteActions returns the IAM action of every recorded request, sorted.
+func cassetteActions(t *testing.T) []string {
+	t.Helper()
 	files, err := filepath.Glob(filepath.Join(cassettes, "*.yaml"))
 	require.NoError(t, err)
 	require.NotEmpty(t, files)
@@ -39,19 +80,7 @@ func TestSpec_accounts_4(t *testing.T) {
 			seen[action] = true
 		}
 	}
-	actions := make([]string, 0, len(seen))
-	for a := range seen {
-		actions = append(actions, a)
-	}
-	slices.Sort(actions)
-	t.Logf("actions in cassettes: %v", actions)
-	for _, a := range actions {
-		if slices.Contains(grantedElsewhere(), a) {
-			continue
-		}
-		assert.True(t, slices.ContainsFunc(allowed, func(p string) bool { return actionMatches(p, a) }),
-			"%s is not in %s", a, policyFile)
-	}
+	return slices.Sorted(maps.Keys(seen))
 }
 
 func policyActions(t *testing.T) []string {

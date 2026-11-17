@@ -44,6 +44,9 @@ const (
 	PackEphemeral   = "ephemeral"
 )
 
+// GuardPack holds the guards: resources a user rule whose category is in never_hide can't hide.
+const GuardPack = "guards"
+
 // PackOrder returns the built-in packs in the order they run.
 func PackOrder() []string {
 	return []string{PackAWSDefaults, PackAWSService, PackOtherIaC, PackDerived, PackEphemeral}
@@ -194,15 +197,11 @@ func New(opts Options) (*Engine, error) {
 // returned.
 func (e *Engine) compileBuiltins(env *cel.Env) error {
 	for _, pack := range PackOrder() {
-		rules, err := packRules(pack)
+		rules, err := PackRules(pack)
 		if err != nil {
 			return err
 		}
 		for _, r := range rules {
-			r.Category = packCategory(pack)
-			if r.Owner == "" && r.Category != CategoryIgnored && r.Category != CategoryOtherIaC {
-				r.Owner = "aws"
-			}
 			c, cerr := compile(env, r, "pack/"+pack+"/"+r.Name, pack)
 			if cerr != nil {
 				return fmt.Errorf("built-in pack %s: %w", pack, cerr)
@@ -210,18 +209,35 @@ func (e *Engine) compileBuiltins(env *cel.Env) error {
 			e.rules = append(e.rules, c)
 		}
 	}
-	guards, err := packRules("guards")
+	guards, err := packRules(GuardPack)
 	if err != nil {
 		return err
 	}
 	for _, g := range guards {
-		c, cerr := compile(env, g, "guard/"+g.Name, "guards")
+		c, cerr := compile(env, g, "guard/"+g.Name, GuardPack)
 		if cerr != nil {
 			return fmt.Errorf("built-in guards: %w", cerr)
 		}
 		e.guards = append(e.guards, c)
 	}
 	return nil
+}
+
+// PackRules returns the rules of a built-in pack, or of [GuardPack], as the engine runs them:
+// with the pack's category and, for an AWS category, the owner aws.
+func PackRules(pack string) ([]Rule, error) {
+	rules, err := packRules(pack)
+	if err != nil || pack == GuardPack {
+		return rules, err
+	}
+	for i := range rules {
+		r := &rules[i]
+		r.Category = packCategory(pack)
+		if r.Owner == "" && r.Category != CategoryIgnored && r.Category != CategoryOtherIaC {
+			r.Owner = "aws"
+		}
+	}
+	return rules, nil
 }
 
 func packRules(name string) ([]Rule, error) {
@@ -270,7 +286,7 @@ func compile(env *cel.Env, r Rule, id, pack string) (*compiled, error) {
 		return nil, &RuleError{Rule: r.Name, Msg: "match is empty"}
 	case strings.TrimSpace(r.Reason) == "":
 		return nil, &RuleError{Rule: r.Name, Msg: "reason is empty"}
-	case pack != "guards" && !slices.Contains(Categories(), r.Category):
+	case pack != GuardPack && !slices.Contains(Categories(), r.Category):
 		return nil, &RuleError{
 			Rule: r.Name,
 			Msg:  fmt.Sprintf("category %q: want one of %s", r.Category, categoryList()),

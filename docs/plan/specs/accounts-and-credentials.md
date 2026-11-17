@@ -28,19 +28,22 @@ For each (account, region), cached 24 h:
 This is why the layer order is decided per account/region by the probe, not hard-coded ([adr/0003](../adr/0003-capability-probed-layered-inventory.md)).
 
 ## Read-only IAM policy (shipped as `docs/iam/tfcensus-readonly.json`)
-- `sts:GetCallerIdentity`, `organizations:List*`/`Describe*`
+- `sts:GetCallerIdentity`, `organizations:List*`
 - `account:ListRegions` (`--all-regions`: the regions each account has enabled)
 - `s3:ListBucket`, `s3:GetObject` (state buckets), `s3:GetBucket*`, `s3:GetEncryptionConfiguration`, `s3:GetLifecycleConfiguration`, `s3:GetReplicationConfiguration`, `s3:GetBucketPolicy`, `s3:GetBucketPublicAccessBlock`, `s3:GetBucketOwnershipControls`, `s3:GetBucketLogging`, `s3:GetBucketVersioning`, `s3:GetAccountPublicAccessBlock`
 - `dynamodb:DescribeTable`, `dynamodb:DescribeContinuousBackups`, `dynamodb:Scan` (lock tables only, resource-scoped)
-- `kms:DescribeKey`, `kms:GetKeyPolicy`, `kms:ListAliases`
-- `resource-explorer-2:List*`/`Search`/`Get*`; `config:Describe*`/`Select*`/`List*`/`Get*`
-- `cloudformation:ListResources`/`GetResource`, `cloudformation:DescribeType` (Cloud Control), and `vpc-lattice:List*` plus `vpc-lattice:GetResourceConfiguration` for the handlers of the VPC Lattice types scan lists through it by default ([ADR-0017](../adr/0017-scan-accuracy.md))
+- `kms:DescribeKey`, `kms:GetKeyPolicy`, and `kms:Decrypt` through S3 only (`kms:ViaService`)
+- `resource-explorer-2:List*`/`Get*`; `config:Describe*`/`Select*`/`Get*`
+- `cloudformation:ListResources`/`GetResource` (Cloud Control), and `vpc-lattice:List*` plus `vpc-lattice:GetResourceConfiguration` for the handlers of the VPC Lattice types scan lists through it by default ([ADR-0017](../adr/0017-scan-accuracy.md))
 - `cloudformation:ListStacks`, `cloudformation:ListStackResources` (the CloudFormation source of scan, config `scan.cloudformation`)
-- read-only `Describe*`/`List*`/`Get*` for native enumerators (ec2, iam, route53, elasticloadbalancing, s3)
+- the native enumerators: `ec2:Describe*`, `iam:GetAccountAuthorizationDetails`, `route53:List*`,
+  `eks:ListPodIdentityAssociations`, and the S3 bucket reads above
+- Nothing else: `TestSpec_accounts_4` also fails on a granted action that no cassette calls,
+  unless AWS calls it on the caller's behalf (`kms:Decrypt`, the VPC Lattice handler actions)
 - Equivalent to AWS-managed `ReadOnlyAccess` + `ViewOnlyAccess` combined. Docs say so.
 
 ## Acceptance criteria
 - [x] An expired-SSO fixture (stubbed credential provider error) produces one clear message per profile, the run continues, and exit 4 only when all fail.
 - [x] `doctor` golden output from stubbed responses, mirroring the real-world check facts above.
 - [x] Org mode: 3 stubbed accounts, one AccessDenied on assume-role → reported, the others scanned.
-- [x] Every AWS action the code can call (extracted from recorded HTTP traffic in tests) is covered by the IAM policy JSON (a static test). Optional, manual: `aws accessanalyzer validate-policy` and a read-only real-account run.
+- [x] Every AWS action the code can call (extracted from recorded HTTP traffic in tests) is covered by the IAM policy JSON (a static test), and every granted action has a caller or a written reason (the reverse check). Optional, manual: `aws accessanalyzer validate-policy` and a read-only real-account run.

@@ -250,3 +250,20 @@ func assertNoMoveSecrets(t *testing.T, label, out string) {
 		assert.NotContains(t, out, s, "%s contains an attribute value", label)
 	}
 }
+
+// TestAnnotations_writes checks that the commands that can write to S3 or DynamoDB, and only
+// those, record it for the warning on their docs page.
+func TestAnnotations_writes(t *testing.T) {
+	t.Parallel()
+	got := map[string]string{}
+	for _, c := range runnable(t) {
+		if v, ok := c.Annotations[cli.AnnotationWrites]; ok {
+			got[strings.Join(path(c), " ")] = v
+		}
+	}
+	assert.Equal(t, map[string]string{
+		"move apply":        "S3,DynamoDB",
+		"move rollback":     "S3,DynamoDB",
+		"move mark-applied": "S3",
+	}, got)
+}

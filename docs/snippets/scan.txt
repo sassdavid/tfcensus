@@ -1,0 +1,31 @@
+ACCOUNT       REGION     MANAGED  DOUBLE-MANAGED  UNMANAGED  OTHER-IAC  AWS-MANAGED  DERIVED  IGNORED  UNDETERMINED  COVERAGE
+111111111111  global     1        1               2          0          1            0        0        0             50.0%
+111111111111  eu-west-1  5        0               3          2          4            1        2        1             62.5%
+111111111111  total      6        1               5          2          5            1        2        1             58.3%
+
+Unmanaged (5)
+AWS::EC2::SecurityGroup (1)
+  clickops-debug  arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0c11c0b5000000003  owner=alice  40d
+AWS::ElasticLoadBalancingV2::ListenerRule (1)
+  -  arn:aws:elasticloadbalancing:eu-west-1:111111111111:listener-rule/app/web/50dc6c495c0c9188/f2f7dc8efc522ab2/9683b2d02a6cabee  -  -
+AWS::IAM::Role (1)
+  clickops-admin  arn:aws:iam::111111111111:role/clickops-admin  created-by=bob  89d
+AWS::IAM::User (1)
+  sandbox-user  arn:aws:iam::111111111111:user/sandbox-user  owner=sandbox  -
+AWS::S3::Bucket (1)
+  acme-growth-experiments  arn:aws:s3:::acme-growth-experiments  -  -
+
+Double-managed (1)
+  AWS::IAM::Role arn:aws:iam::111111111111:role/acme-shared: tf-scan/iam (aws_iam_role.shared) and tf-scan/iam-dup (aws_iam_role.shared)
+
+CloudFormation stacks (2)
+  billing: 2 resources
+  billing-AlarmsStack-1ABCDEF (nested in billing): 1 resource
+
+Undetermined (1)
+  no type mapping for AWS::EC2::KeyPair: 1
+
+warning: AWS::Lambda::Function arn:aws:lambda:eu-west-1:111111111111:function:acme-api is in a state and in CloudFormation stack billing as Api
+warning: rule "growth-trial" is past its expires date and no longer matches
+
+23 resources: 6 managed, 1 double-managed, 5 unmanaged, 2 other-iac, 5 aws-managed, 1 derived, 2 ignored, 1 undetermined; coverage 58.3%

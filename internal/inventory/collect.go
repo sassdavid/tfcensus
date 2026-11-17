@@ -283,7 +283,7 @@ func (c *Collector) selected(names []string) ([]Layer, error) {
 	}
 	var out []Layer
 	for _, n := range names {
-		n = cmp.Or(layerAliases()[n], n)
+		n = cmp.Or(LayerAliases()[n], n)
 		found := false
 		for _, l := range c.opts.Layers {
 			if l.Name() == n || (n == LayersNative && strings.HasPrefix(l.Name(), LayersNative+":")) {

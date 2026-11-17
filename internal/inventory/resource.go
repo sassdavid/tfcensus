@@ -41,8 +41,8 @@ func LayerOrder() []string {
 	}
 }
 
-// layerAliases are the short names --layers accepts.
-func layerAliases() map[string]string {
+// LayerAliases returns the short names --layers accepts, with the layer each stands for.
+func LayerAliases() map[string]string {
 	return map[string]string{"re": LayerRE, "cc": LayerCC}
 }
 

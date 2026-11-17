@@ -125,6 +125,11 @@ applied, pending or partial (applied in some units only).`),
 	return cmd
 }
 
+// setWrites records the stores cmd writes to, so its docs page carries a warning.
+func setWrites(cmd *cobra.Command, stores ...string) {
+	annotate(cmd, AnnotationWrites, stores)
+}
+
 func newMoveSubCmd(d *app.Deps, g *globals, which moveCommand, short, long string) *cobra.Command {
 	a := moveArgs{}
 	cmd := &cobra.Command{
@@ -158,9 +163,13 @@ func newMoveSubCmd(d *app.Deps, g *globals, which moveCommand, short, long strin
 	switch which {
 	case moveApply:
 		f.BoolVar(&a.force, flagForce, false, "overwrite moves_tfcensus_<block>.tf files of native blocks")
+		setWrites(cmd, "S3", "DynamoDB")
 	case moveRollback:
 		f.BoolVar(&a.force, flagForce, false, "restore even when a state changed after the push")
-	case movePlan, moveMarkApplied, moveStatus:
+		setWrites(cmd, "S3", "DynamoDB")
+	case moveMarkApplied:
+		setWrites(cmd, "S3")
+	case movePlan, moveStatus:
 	}
 	registerCompletions(cmd, map[string]cobra.CompletionFunc{
 		flagBlock: complete.NoFiles,

@@ -4,7 +4,9 @@
 
 ## Start
 
-- [Install](https://tfcensus.sasskovacs.dev/install): Install tfcensus from a release archive, with mise or with go install, verify the signature, and set up shell completion and man pages.
+- [Getting started](https://tfcensus.sasskovacs.dev/getting-started): A first read-only run of tfcensus: check the setup with doctor, list units, read their state with inventory, and find unmanaged AWS resources with scan.
+- [Install](https://tfcensus.sasskovacs.dev/install): Install tfcensus from a release archive, with mise or with go install, verify the release signature, and set up man pages and shell completion.
+- [Supported versions](https://tfcensus.sasskovacs.dev/supported-versions): The terragrunt, terraform and OpenTofu versions tfcensus runs with, the features that need newer ones, and the state versions it reads.
 
 ## Guides
 
@@ -12,15 +14,28 @@
 - [Publish reports with notify](https://tfcensus.sasskovacs.dev/runbooks/notify): Send drift, unmanaged resources and backend audit findings to Slack, GitHub issues, pull request comments or files with tfcensus notify.
 - [AI summary of drift in CI](https://tfcensus.sasskovacs.dev/ci/ai-summary): Add an opt-in job to the drift workflow that sends the drift report to a model your organization picks and appends its answer to the job summary.
 
+## Concepts
+
+- [Read-only by default](https://tfcensus.sasskovacs.dev/concepts/safety): What tfcensus reads, the three commands that write, why it prints identifiers and never state values, and what reaches child processes, agents and models.
+
 ## Reference
 
 - [Configuration](https://tfcensus.sasskovacs.dev/reference/config): Every tfcensus config key with its type, default, environment variable and flag.
 - [Environment variables](https://tfcensus.sasskovacs.dev/reference/environment): The environment variables tfcensus reads, and the ones it passes to child processes.
 - [Exit codes](https://tfcensus.sasskovacs.dev/reference/exit-codes): What each tfcensus exit code means, and which commands return it.
+- [Output formats](https://tfcensus.sasskovacs.dev/reference/output): The output formats of each tfcensus command, the --out flag, and the JSON envelope that every --format json output shares.
 - [Fail-on values](https://tfcensus.sasskovacs.dev/reference/fail-on): The --fail-on values of each tfcensus command, which make it exit 3.
 - [JSON schemas](https://tfcensus.sasskovacs.dev/reference/schemas): The JSON schemas of tfcensus's config file and JSON output, with the URL each is served at.
+- [Ownership rule packs](https://tfcensus.sasskovacs.dev/reference/rule-packs): Every rule of the built-in ownership packs and the guards: what each matches, the category it sets and why.
+- [CEL fields and functions](https://tfcensus.sasskovacs.dev/reference/cel): The fields and functions an ownership rule's match expression can use, with the CEL syntax for tags, attributes and related resources.
+- [Matching and rule IDs](https://tfcensus.sasskovacs.dev/reference/rule-ids): Every rule ID a scan, whois or drift finding can carry, with the category it sets and what it means.
+- [Type mapping coverage](https://tfcensus.sasskovacs.dev/reference/type-coverage): Which Terraform resource types tfcensus maps to a CloudFormation type, which inventory layer lists each, and which types stay undetermined.
+- [Backend audit checks](https://tfcensus.sasskovacs.dev/reference/audit-checks): Every check of tfcensus audit backend with its severity, what passes and how to fix a finding.
+- [Drift noise presets](https://tfcensus.sasskovacs.dev/reference/drift-noise): The built-in drift noise rules, what each hides and the drift.noise entry that turns it on.
+- [Move file format](https://tfcensus.sasskovacs.dev/reference/move-file): The migration file that tfcensus move runs, every attribute of a migration block, the address and action syntax, the history object, and the findings that reject a block.
 - [MCP tools and prompts](https://tfcensus.sasskovacs.dev/reference/mcp): The tools and prompts that tfcensus mcp serves, with their input schemas.
-- [Read-only IAM policy](https://tfcensus.sasskovacs.dev/iam/): The read-only IAM policy for every tfcensus command except move apply, rollback and mark-applied, and how to narrow it.
+- [IAM policies](https://tfcensus.sasskovacs.dev/reference/iam): The read-only IAM policy for every tfcensus command except move apply, rollback and mark-applied, what each statement is for, and the permissions of the move commands.
+- [Changelog](https://tfcensus.sasskovacs.dev/changelog): What changed in each tfcensus release, from the release notes that release-please writes.
 
 ## CLI
 

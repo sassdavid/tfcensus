@@ -94,7 +94,7 @@ dir = "docs"
 run = "MISE_ENV=docs mise exec -- aube exec vitepress dev ."
 
 [tasks."docs:build"]
-description = "Stale checks, llms.txt, the snippet check, unit tests, VitePress build, docs URL check and the offline link check"
+description = "Stale checks, llms.txt, the snippet check, unit tests, VitePress build, docs URL check, the never-on-the-site check and the offline link check"
 run = [
   "mise run docs",
   "MISE_ENV=docs mise exec -- node docs/.vitepress/llms.mts",
@@ -102,6 +102,7 @@ run = [
   "MISE_ENV=docs mise exec -- node --test 'docs/.vitepress/*.test.mjs'",
   "cd docs && MISE_ENV=docs mise exec -- aube exec vitepress build .",
   "DOCS_DIST=\"$PWD/docs/.vitepress/dist\" go test -count=1 -run TestPaths ./internal/docsurl",
+  "DOCS_DIST=\"$PWD/docs/.vitepress/dist\" go test -count=1 -run TestNeverOnSite ./scripts/gensite",
   "MISE_ENV=docs mise exec -- lychee --offline --include-fragments --no-progress --root-dir \"$PWD/docs/.vitepress/dist\" --fallback-extensions html --index-files index.html docs/.vitepress/dist",
 ]
 

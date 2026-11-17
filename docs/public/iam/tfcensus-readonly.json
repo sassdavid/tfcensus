@@ -1,0 +1,111 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Identity",
+      "Effect": "Allow",
+      "Action": ["sts:GetCallerIdentity"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "Organizations",
+      "Effect": "Allow",
+      "Action": ["organizations:List*"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "EnabledRegions",
+      "Effect": "Allow",
+      "Action": ["account:ListRegions"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "StateBucketsAndAudit",
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListAllMyBuckets",
+        "s3:ListBucket",
+        "s3:GetBucket*",
+        "s3:GetEncryptionConfiguration",
+        "s3:GetLifecycleConfiguration",
+        "s3:GetReplicationConfiguration",
+        "s3:GetAccountPublicAccessBlock"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ReadStateObjects",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject"],
+      "Resource": "arn:aws:s3:::*/*"
+    },
+    {
+      "Sid": "DecryptStateViaS3Only",
+      "Effect": "Allow",
+      "Action": ["kms:Decrypt"],
+      "Resource": "*",
+      "Condition": {
+        "StringLike": { "kms:ViaService": "s3.*.amazonaws.com" }
+      }
+    },
+    {
+      "Sid": "KeyAudit",
+      "Effect": "Allow",
+      "Action": ["kms:DescribeKey", "kms:GetKeyPolicy"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "StateAccessLogging",
+      "Effect": "Allow",
+      "Action": ["cloudtrail:DescribeTrails", "cloudtrail:GetEventSelectors"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "LockTables",
+      "Effect": "Allow",
+      "Action": ["dynamodb:DescribeTable", "dynamodb:DescribeContinuousBackups", "dynamodb:Scan"],
+      "Resource": "arn:aws:dynamodb:*:*:table/*"
+    },
+    {
+      "Sid": "ResourceExplorer",
+      "Effect": "Allow",
+      "Action": ["resource-explorer-2:Get*", "resource-explorer-2:List*"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "Config",
+      "Effect": "Allow",
+      "Action": ["config:Describe*", "config:Get*", "config:Select*"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "CloudControlRead",
+      "Effect": "Allow",
+      "Action": ["cloudformation:ListResources", "cloudformation:GetResource"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "CloudControlHandlers",
+      "Effect": "Allow",
+      "Action": ["vpc-lattice:List*", "vpc-lattice:GetResourceConfiguration"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "CloudFormationStacks",
+      "Effect": "Allow",
+      "Action": ["cloudformation:ListStacks", "cloudformation:ListStackResources"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "NativeEnumerators",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:Describe*",
+        "iam:GetAccountAuthorizationDetails",
+        "route53:List*",
+        "eks:ListPodIdentityAssociations"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
