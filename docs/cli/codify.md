@@ -83,6 +83,10 @@ All codes are listed on the [exit codes](/reference/exit-codes) page.
 ```sh
 tfcensus scan --format json > scan.json
 tfcensus codify --from scan.json --into live/prod/eu-west-1/network --types 'AWS::EC2::*'
-tfcensus codify --from scan.json --into live/prod/iam --select 'resource.tags["team"] == "platform"'
+tfcensus codify --from scan.json --into live/prod/iam --select 'resource.tags.?team.orValue("") == "platform"'
 tfcensus codify --from scan.json --into iam --target terraform@1.14.0 --query
 ```
+
+## Related
+
+- [Adopt unmanaged resources with codify](/guides/codify)

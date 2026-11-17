@@ -5,18 +5,41 @@
 ## Start
 
 - [Getting started](https://tfcensus.sasskovacs.dev/getting-started): A first read-only run of tfcensus: check the setup with doctor, list units, read their state with inventory, and find unmanaged AWS resources with scan.
-- [Install](https://tfcensus.sasskovacs.dev/install): Install tfcensus from a release archive, with mise or with go install, verify the release signature, and set up man pages and shell completion.
+- [Install](https://tfcensus.sasskovacs.dev/install): Install tfcensus from a release archive, with mise or with go install, verify the release signature, and install the man pages and completion scripts.
 - [Supported versions](https://tfcensus.sasskovacs.dev/supported-versions): The terragrunt, terraform and OpenTofu versions tfcensus runs with, the features that need newer ones, and the state versions it reads.
 
 ## Guides
 
-- [Move resources between units](https://tfcensus.sasskovacs.dev/runbooks/move): Move resources between Terragrunt units with tfcensus move. Plan, apply, roll back from S3 object versions, or use the native strategy.
-- [Publish reports with notify](https://tfcensus.sasskovacs.dev/runbooks/notify): Send drift, unmanaged resources and backend audit findings to Slack, GitHub issues, pull request comments or files with tfcensus notify.
-- [AI summary of drift in CI](https://tfcensus.sasskovacs.dev/ci/ai-summary): Add an opt-in job to the drift workflow that sends the drift report to a model your organization picks and appends its answer to the job summary.
+- [Choose accounts](https://tfcensus.sasskovacs.dev/guides/accounts): Pick the AWS accounts tfcensus reads: profiles and globs, an AWS Organization with one role or a role per OU, accounts.map for odd profile names, and include and exclude lists.
+- [Speed up scans with the aggregator](https://tfcensus.sasskovacs.dev/guides/aggregator): Make scan faster across many accounts: read AWS Config through an organization aggregator, turn on Resource Explorer views, and narrow layers, types and regions.
+- [Find unmanaged resources](https://tfcensus.sasskovacs.dev/guides/scan): Find the AWS resources no Terraform or OpenTofu state manages, find out why one landed in its category, and fail a CI job on unmanaged or double-managed resources.
+- [Write and test ownership rules](https://tfcensus.sasskovacs.dev/guides/rules): Write an ownership rule for resources that are unmanaged on purpose, test it offline with rules test, and keep it honest with reasons, expiry dates, guards and never_hide.
+- [Audit state backends](https://tfcensus.sasskovacs.dev/guides/audit): Check state buckets, lock tables and the fleet of states with audit backend, set the policy thresholds, suppress accepted findings with a reason and an expiry date, and gate CI on severity.
+- [Check drift in CI](https://tfcensus.sasskovacs.dev/guides/drift-ci): Check drift on a schedule and on pull requests with tfcensus-action, upload SARIF to code scanning and keep one drift comment per pull request.
+- [Hide drift noise](https://tfcensus.sasskovacs.dev/guides/drift-noise): Hide drift you have decided to live with, such as tags_all updates and computed hashes, with drift.noise presets and rules that carry a reason and an expiry date.
+- [Find who manages an ARN](https://tfcensus.sasskovacs.dev/guides/whois): Find which units and state addresses manage an AWS ARN or ID, check a batch from a file or a scan report, and answer offline from a saved state index.
+- [Adopt resources with codify](https://tfcensus.sasskovacs.dev/guides/codify): Turn the unmanaged findings of a scan report into import blocks for one unit, pick findings by type or CEL expression, and generate the config with terraform plan.
+- [Move resources between units](https://tfcensus.sasskovacs.dev/guides/move): Move resources between Terragrunt units with tfcensus move. Draft the file from plans, verify it, apply it, roll back from S3 object versions, or use the native strategy.
+- [Publish reports with notify](https://tfcensus.sasskovacs.dev/guides/notify): Send drift, unmanaged resources and backend audit findings to Slack, GitHub issues, a GitHub or Bitbucket pull request comment, or files with tfcensus notify.
+- [Build the HTML report](https://tfcensus.sasskovacs.dev/guides/html-report): Turn saved scan, drift and audit JSON into one self-contained HTML file with tfcensus report html, with a coverage trend from several scans.
+- [Use tfcensus from an MCP client](https://tfcensus.sasskovacs.dev/guides/mcp): Register tfcensus mcp in Claude Code or another MCP client, give it saved reports, and ask about units, unmanaged resources, whois, audit findings and drift.
+- [Add an AI summary to CI](https://tfcensus.sasskovacs.dev/guides/ai-summary): Add an opt-in job to the drift workflow that sends the drift report to a model your organization picks and appends its answer to the job summary.
+- [Read OpenTofu encrypted state](https://tfcensus.sasskovacs.dev/guides/encrypted-state): Read OpenTofu states that use client-side encryption with --decrypt-with-tofu, which runs tofu init and tofu show -json in each unit with the unit's own key configuration.
+- [Emulators and proxies](https://tfcensus.sasskovacs.dev/guides/endpoints): Point tfcensus at an AWS emulator with AWS_ENDPOINT_URL, and run it behind an HTTPS proxy or a TLS-inspecting proxy with its own CA certificate.
+- [Shell completion](https://tfcensus.sasskovacs.dev/guides/completion): Set up tab completion for tfcensus in bash, zsh, fish, PowerShell, nushell, elvish, xonsh, tcsh, oil and clink, and debug it when it offers nothing.
 
 ## Concepts
 
 - [Read-only by default](https://tfcensus.sasskovacs.dev/concepts/safety): What tfcensus reads, the three commands that write, why it prints identifiers and never state values, and what reaches child processes, agents and models.
+- [Units, repos and workspaces](https://tfcensus.sasskovacs.dev/concepts/units): How tfcensus finds Terragrunt units and plain Terraform root modules, how it resolves each one's state backend and target account, and when it runs terragrunt render.
+- [How state is read](https://tfcensus.sasskovacs.dev/concepts/state): How tfcensus reads Terraform and OpenTofu state from S3 backends, with which credentials, without a lock, and what each read status means.
+- [Inventory layers](https://tfcensus.sasskovacs.dev/concepts/inventory-layers): The sources a scan lists live AWS resources from, which one wins when two report the same resource, and how to see the blind spots with --explain-coverage.
+- [Matching](https://tfcensus.sasskovacs.dev/concepts/matching): How scan and whois join a live AWS resource to a resource in state, by identity, then ARN, then normalized ID, and why an unmapped type is undetermined instead of managed.
+- [Scan categories](https://tfcensus.sasskovacs.dev/concepts/categories): The eight categories a scan puts each live AWS resource in, how a child resource takes its parent's category, and how the coverage percentage is counted.
+- [Ownership rules model](https://tfcensus.sasskovacs.dev/concepts/rules): How ownership rules decide who owns a resource no state manages, with built-in packs, your own CEL rules, guards and never_hide, where the first rule that matches wins.
+- [Terragrunt and terraform](https://tfcensus.sasskovacs.dev/concepts/terragrunt): Which terragrunt, terraform and tofu commands tfcensus runs, which environment variables reach them, how it reads TFCENSUS_* variables, and how logs and Ctrl-C work.
+- [Caches](https://tfcensus.sasskovacs.dev/concepts/caches): The probe and scan caches tfcensus keeps, what they hold, how long they stay fresh, which commands read them, and how to inspect or clear them.
+- [Why there is no built-in LLM](https://tfcensus.sasskovacs.dev/concepts/no-llm): Why tfcensus makes no call to a language model, and the two ways to use one with its reports anyway, an MCP agent or an opt-in CI job, with you choosing the provider.
 
 ## Reference
 
@@ -78,3 +101,11 @@
 - [tfcensus units](https://tfcensus.sasskovacs.dev/cli/units): List units with their state backend, target account and region
 - [tfcensus version](https://tfcensus.sasskovacs.dev/cli/version): Print version and build information
 - [tfcensus whois](https://tfcensus.sasskovacs.dev/cli/whois): Show which units manage an AWS resource
+
+## Help
+
+- [Troubleshooting](https://tfcensus.sasskovacs.dev/troubleshooting): Fixes for common tfcensus failures, from expired credentials and unreadable states to scan false positives, a move that stopped halfway and notify errors.
+- [FAQ](https://tfcensus.sasskovacs.dev/faq): Short answers about what tfcensus changes, which tools and backends it needs, how it treats secrets, and how it fits into CI and agents.
+- [Scan accuracy](https://tfcensus.sasskovacs.dev/accuracy): How often scan calls a resource unmanaged when something else owns it, measured on three real non-production AWS accounts, with aggregate counts only.
+- [Security and verification](https://tfcensus.sasskovacs.dev/security): How to report a vulnerability in tfcensus, how to verify a release's signature and provenance, and where the third-party license notices are.
+- [Contributing](https://tfcensus.sasskovacs.dev/contributing): How to build and test tfcensus from source, the checks a pull request must pass, and how to work on this docs site.

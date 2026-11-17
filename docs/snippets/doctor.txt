@@ -12,7 +12,6 @@ ACCOUNT       REGION        RESOURCE EXPLORER    CONFIG                         
 111111111111  us-east-1     local, default view  no recorder                            none         re, cc, native
 
 111111111111 (acme-nonprod): Resource Explorer supports 649 resource types.
-111111111111 (acme-nonprod): Resource Explorer has local indexes only, so tfcensus searches each region on its own. An admin can promote one to an aggregator (`aws resource-explorer-2 update-index-type --type AGGREGATOR`).
 111111111111 (acme-nonprod): eu-north-1: the Resource Explorer index has no view, and tfcensus never creates one. An admin can create a default view (`aws resource-explorer-2 create-view`, then `associate-default-view`).
 111111111111 (acme-nonprod): eu-north-1: no AWS Config recorder, so the config layer is off here.
 111111111111 (acme-nonprod): us-east-1: no AWS Config recorder, so the config layer is off here.

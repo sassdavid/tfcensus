@@ -515,15 +515,54 @@ reference page. Rerun the audit for the pages this milestone writes before writi
 ### M25: Guides and concepts (tfcensus only) ([docs-content](specs/docs-content.md))
 Scope: every guide, concept, help and project page in docs-content.md, and every gap closed.
 If one session can't finish, the open pages carry over to a follow-up session before M26.
-- [ ] The runbooks, CI examples and AI summary are ported, and the old files are removed or
+- [x] The runbooks, CI examples and AI summary are ported, and the old files are removed or
   reduced to a link to the site.
-- [ ] Every guide and concept page in docs-content.md exists with a `description` and passes the
+  `docs/runbooks/move.md`, `docs/runbooks/notify.md` and `docs/ci/ai-summary.md` are one-line pages
+  (`search: false`) that link `/guides/move`, `/guides/notify` and `/guides/ai-summary`, so the URLs
+  in released binaries and in siblings.md still resolve. `/guides/drift-ci` includes
+  `docs/ci/drift.yml` and `drift-pr.yml` and has the tfcensus-action inputs and outputs. The move
+  file format stays on `/reference/move-file`, and the move and notify troubleshooting moved to
+  `/troubleshooting`. `docsurl` and the related links in `move`, `mcp`, `notify`, `drift` and
+  `migrate/file.go` point at the guides; `scan`, `whois`, `codify`, `audit backend`, `rules test`,
+  `report html`, `inventory`, `units`, `doctor` and `cache` link their guide or concept page.
+- [x] Every guide and concept page in docs-content.md exists with a `description` and passes the
   snippet check. (docs-content criteria 1 and 2)
-- [ ] Every row in "wrong or stale statements" is fixed, each with its commit in the evidence.
+  `TestContentPages` in `scripts/gensite` reads the structure tables of docs-content.md and fails
+  for a page without a file, a `description` or a sidebar entry. Every item under "features with
+  no user doc" is on a hand page (environment rules on `/concepts/terragrunt`). The whois and
+  codify outputs come from their test scripts through `docs/snippets/` with a stale check.
+- [x] Every row in "wrong or stale statements" is fixed, each with its commit in the evidence.
   (docs-content criterion 3)
-- [ ] README is reduced to the introduction, install and links. (docs-content criterion 5)
-- [ ] Troubleshooting, FAQ, scan accuracy (aggregates only), security and contributing pages
+  Help texts (inventory, move, notify exit codes; `config` env rule; `whois --live`) in 48d24f7
+  (M23). The config template, the repo paths in help and runtime messages (`docsurl`) in 48d24f7,
+  and the M25 commit moves them to `/guides/rules`, `/guides/move` and `/guides/ai-summary`. IAM
+  actions in 2bcb6ba (M24). README and install.md "milestone M19" in 2bcb6ba. The M25 commit fixes
+  README's env var link (README now links the site), engineering-standards.md (`--fail-fast`, the
+  format list) and plan/cli.md (`-o`, `--out sarif=`, `move suggest` in 0.3, `codify --from`,
+  `config path`). `docs/dogfood.md` stays unpublished as the spec says.
+- [x] README is reduced to the introduction, install and links. (docs-content criterion 5)
+- [x] Troubleshooting, FAQ, scan accuracy (aggregates only), security and contributing pages
   exist, and relgap's `drift --from-tfcensus` guide and this site link to each other.
+  The five pages exist. `/concepts/state#feed-relgap` and `/faq` link relgap's
+  `/guides/from-tfcensus`, which links `/concepts/state#feed-relgap` back (relgap #74, merged).
+
+Found while writing M25 and fixed in the M25 PR, each with a test:
+- `scan`'s native S3 bucket lister now uses path-style addressing under `AWS_ENDPOINT_URL` or
+  `AWS_ENDPOINT_URL_S3`, from the same `accounts.PathStyle` that state reads use
+  (`TestPathStyle`).
+- The scan cache key includes `state.decrypt_with_tofu`, so turning decryption on collects again
+  (`TestSpec_scan_4`).
+- `scan` and `whois` warn about each state that is still encrypted, because a resource only it
+  manages shows as unmanaged (`TestEncryptedStates`, `spec_whois_and_codify_1.txtar`). The exit
+  code stays 0, as ADR-0015 says for a run without `--decrypt-with-tofu`.
+- `doctor` no longer suggests promoting a Resource Explorer index to an aggregator. The `re` layer
+  searches each region in its own index, and AWS fills an aggregator index in the background
+  (UpdateIndexType API reference), so an aggregator makes it neither faster nor fresher.
+  `/guides/aggregator` says so.
+- The snippet check (`checkValue` in `scripts/gendocs/snippets.go`, shared with relgap) splits
+  values on commas for every flag that completes a comma-separated list, so
+  `--layers config,native` passes (`TestCheckValue`).
+- `SECURITY.md` is in both tool repos, with the same text once the tool name is swapped.
 
 ### M26: Polish and launch (shared) ([docs-site](specs/docs-site.md), [docs-design](specs/docs-design.md))
 Scope: social cards, icons, accessibility and performance, then the first deploy by a real

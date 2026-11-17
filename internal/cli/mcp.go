@@ -54,7 +54,7 @@ and ARNs: triage_drift [unit] sorts drift into revert, adopt and investigate, an
 explain_unmanaged [account] [type] explains the unmanaged resources of the last scan.
 Claude Code offers them as /mcp__tfcensus__triage_drift and /mcp__tfcensus__explain_unmanaged.
 Neither asks for attribute values. tfcensus has no built-in LLM call; for a summary in CI see
-` + docsurl.Page("ci/ai-summary") + `.
+` + docsurl.Page("guides/ai-summary") + `.
 
 A result over --max-result-bytes (default 50,000, Claude Code's limit for showing a result
 to the model) is split. The envelope then has a page field, and the agent passes
@@ -91,7 +91,7 @@ and high-severity findings come first. A cursor lasts 15 minutes after its last 
 		flagDrift:          savedFiles(),
 		"max-result-bytes": complete.NoFiles,
 	})
-	setRelated(cmd, "reference/mcp", "ci/ai-summary")
+	setRelated(cmd, "guides/mcp", "reference/mcp", "guides/ai-summary")
 	setFormats(cmd)
 	setExitCodes(cmd)
 	return cmd

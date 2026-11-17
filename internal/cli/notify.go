@@ -110,7 +110,7 @@ refused token, and 1 for any other failure.`,
 		flagNotify: complete.List(notifierChoices()),
 	})
 	f.BoolVar(&a.dryRun, flagDryRunNotify, false, "print what would change; read with GET only and write nothing")
-	setRelated(cmd, "runbooks/notify")
+	setRelated(cmd, "guides/notify")
 	setFormats(cmd, textFormats()...)
 	setExitCodes(cmd, ExitAuth)
 	return cmd

@@ -137,7 +137,7 @@ is 1 when a unit or a repo failed and no gate matched, and 0 otherwise. terrafor
 		flagMinCount:       complete.NoFiles,
 	})
 	setExitCodes(cmd, ExitFindings)
-	setRelated(cmd, "ci/ai-summary", "reference/fail-on")
+	setRelated(cmd, "guides/drift-ci", "guides/drift-noise", "guides/ai-summary", "reference/fail-on")
 	return cmd
 }
 

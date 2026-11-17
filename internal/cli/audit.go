@@ -134,6 +134,7 @@ run, and 4 when every failure was a credential problem.`,
 		flagFailOn:          complete.Enum(severityChoices()),
 	})
 	setExitCodes(cmd, ExitFindings, ExitAuth)
+	setRelated(cmd, "guides/audit", "reference/audit-checks")
 	return cmd
 }
 

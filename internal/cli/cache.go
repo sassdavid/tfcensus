@@ -39,6 +39,7 @@ and scan --refresh ignore them for one run.`,
 		Args: noArgs,
 	}
 	cmd.AddCommand(newCacheInfoCmd(d, g), newCacheClearCmd(d, g))
+	setRelated(cmd, "concepts/caches")
 	return cmd
 }
 

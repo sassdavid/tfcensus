@@ -54,3 +54,7 @@ All codes are listed on the [exit codes](/reference/exit-codes) page.
 tfcensus report html --from scan.json -o census.html
 tfcensus report html --from scan-2026-11-01.json --from scan.json --from drift.json --from audit.json -o census.html
 ```
+
+## Related
+
+- [Build the HTML report](/guides/html-report)

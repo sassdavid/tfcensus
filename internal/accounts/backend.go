@@ -34,13 +34,19 @@ type Backends struct {
 // res holds the resolved --profile and --org accounts and may be nil. lookup reads the
 // environment: a custom AWS endpoint switches S3 to path-style addressing.
 func NewBackends(l *Loader, res *Result, mapping map[string]string, lookup func(string) (string, bool)) *Backends {
+	return &Backends{
+		loader: l, res: res, mapping: mapping, pathStyle: PathStyle(lookup),
+		clients: map[string]*s3.Client{},
+	}
+}
+
+// PathStyle reports whether lookup sets a custom S3 endpoint (AWS_ENDPOINT_URL or
+// AWS_ENDPOINT_URL_S3), whose S3 clients must use path-style addressing.
+func PathStyle(lookup func(string) (string, bool)) bool {
 	// A custom endpoint (an emulator) can't serve virtual-hosted bucket names.
 	_, custom := lookup("AWS_ENDPOINT_URL")
 	_, customS3 := lookup("AWS_ENDPOINT_URL_S3")
-	return &Backends{
-		loader: l, res: res, mapping: mapping, pathStyle: custom || customS3,
-		clients: map[string]*s3.Client{},
-	}
+	return custom || customS3
 }
 
 // PathStyle reports whether S3 clients must use path-style addressing.

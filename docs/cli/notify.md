@@ -83,4 +83,4 @@ GITHUB_TOKEN=... tfcensus notify --from drift.json --notify github-issues,slack
 
 ## Related
 
-- [Publish tfcensus reports with notify](/runbooks/notify)
+- [Publish reports with notify](/guides/notify)

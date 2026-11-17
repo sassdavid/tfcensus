@@ -49,8 +49,11 @@ manages is other-iac with rule source/cloudformation; the finding names the stac
 state manages stays managed, and the report warns that a stack lists it too.
 
 scan caches the inventory and state index under $XDG\_CACHE\_HOME/tfcensus/scan for cache.ttl
-(default 1h), keyed by the accounts, regions, layers, types, units and scan.cloudformation. A re-run with other rules
-makes no AWS calls. --refresh lists again.
+(default 1h), keyed by the accounts, regions, layers, types, units, scan.cloudformation and
+state.decrypt\_with\_tofu. A re-run with other rules makes no AWS calls. --refresh lists again.
+
+scan warns about each state that is still OpenTofu-encrypted, because a resource only it manages
+shows as unmanaged. --decrypt-with-tofu reads those states.
 
 The exit code is 3 when --fail-on finds at least --min-count findings, 1 when a layer, a state
 read, a stack listing or discovery failed, 4 when every failure was a credential problem, and 0 otherwise.
@@ -135,4 +138,6 @@ tfcensus scan --explain arn:aws:ec2:eu-west-1:111111111111:security-group/sg-012
 
 ## Related
 
+- [Find unmanaged resources and gate CI with --fail-on](/guides/scan)
+- [Scan categories](/concepts/categories)
 - [Fail-on values](/reference/fail-on)

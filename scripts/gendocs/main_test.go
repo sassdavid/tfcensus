@@ -14,10 +14,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/sassdavid/tfcensus/internal/cli"
+	"github.com/sassdavid/tfcensus/internal/complete"
 	"github.com/sassdavid/tfcensus/internal/config"
 	"github.com/sassdavid/tfcensus/internal/docsurl"
 	"github.com/sassdavid/tfcensus/schemas"
@@ -385,6 +387,36 @@ func TestCheckCommand(t *testing.T) {
 	assert.NotEmpty(t, checkCommand(root, name+" --format yaml"))
 	assert.NotEmpty(t, checkCommand(root, name+" no-such-command"))
 	assert.NotEmpty(t, checkCommand(root, "X=1 "+name+" "+sub.Name()+" --nope"))
+}
+
+// TestCheckValue splits a value on commas for a stringSlice flag and for a flag that completes a
+// comma-separated list, and checks each part.
+func TestCheckValue(t *testing.T) {
+	t.Parallel()
+	cs := []complete.Choice{{Value: "a"}, {Value: "b"}, {Value: "c"}}
+	c := &cobra.Command{Use: "x"}
+	c.Flags().String("list", "", "")
+	c.Flags().String("enum", "", "")
+	c.Flags().StringSlice("slice", nil, "")
+	require.NoError(t, c.RegisterFlagCompletionFunc("list", complete.List(cs)))
+	require.NoError(t, c.RegisterFlagCompletionFunc("enum", complete.Enum(cs)))
+	require.NoError(t, c.RegisterFlagCompletionFunc("slice", complete.Enum(cs)))
+	tests := []struct {
+		flag, value string
+		ok          bool
+	}{
+		{"list", "a", true},
+		{"list", "a,c", true},
+		{"list", "a,z", false},
+		{"slice", "b,c", true},
+		{"slice", "b,z", false},
+		{"enum", "a", true},
+		{"enum", "a,b", false},
+	}
+	for _, tt := range tests {
+		got := checkValue(c, c.Flags().Lookup(tt.flag), tt.value)
+		assert.Equal(t, tt.ok, got == "", "--%s %s: %s", tt.flag, tt.value, got)
+	}
 }
 
 func TestKnownKey(t *testing.T) {

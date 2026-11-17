@@ -1,6 +1,7 @@
 # Drift detection with an opt-in AI summary: drift.yml plus two jobs that send the drift summary
-# to a model your organization picks. docs/ci/ai-summary.md explains the setup, the cost and the
-# identifiers that leave the runner. Copy this file to .github/workflows/ instead of drift.yml.
+# to a model your organization picks. https://tfcensus.sasskovacs.dev/guides/ai-summary explains
+# the setup, the cost and the identifiers that leave the runner. Copy this file to
+# .github/workflows/ instead of drift.yml.
 #
 # The AI jobs run only when the repository variable AI_SUMMARY is bedrock or copilot. They get
 # `tfcensus report drift --format json`, which has unit paths, addresses and attribute paths but

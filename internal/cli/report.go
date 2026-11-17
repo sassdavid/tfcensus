@@ -115,6 +115,7 @@ The same input files always give the same bytes.`,
 	})
 	setFormats(cmd)
 	setExitCodes(cmd)
+	setRelated(cmd, "guides/html-report")
 	return cmd
 }
 

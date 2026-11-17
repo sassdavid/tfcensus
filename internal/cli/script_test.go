@@ -324,7 +324,7 @@ func TestSpec_drift_2(t *testing.T) {
 }
 
 // TestSpec_whois_and_codify_1: whois goldens for single, double-managed and unmanaged resources,
-// offline from a saved index and live over a stubbed account.
+// offline from a saved index and live over a stubbed account, and the warning for an encrypted state.
 func TestSpec_whois_and_codify_1(t *testing.T) {
 	t.Parallel()
 	testscript.Run(t, scriptParams(t, filepath.Join(scriptDir, "spec_whois_and_codify_1.txtar")))

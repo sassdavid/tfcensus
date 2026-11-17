@@ -81,3 +81,9 @@ tfcensus doctor --profile 'acme-*'
 tfcensus doctor --profile acme-nonprod --region eu-west-1 --region us-east-1
 tfcensus doctor --org --management-profile acme-mgmt --format json
 ```
+
+## Related
+
+- [Choose accounts](/guides/accounts)
+- [Speed up scans with the Config aggregator and Resource Explorer](/guides/aggregator)
+- [Troubleshooting](/troubleshooting)

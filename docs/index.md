@@ -27,7 +27,7 @@ answers:
     link: /cli/whois
   - question: How do I move resources between units?
     command: tfcensus move
-    link: /runbooks/move
+    link: /guides/move
 ---
 
 <HomeHero />

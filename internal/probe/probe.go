@@ -594,12 +594,6 @@ func notes(r *Report) []string {
 		if re.SupportedTypes > 0 {
 			out = append(out, fmt.Sprintf("Resource Explorer supports %d resource types.", re.SupportedTypes))
 		}
-		if !slices.ContainsFunc(re.Indexes, func(ix Index) bool {
-			return ix.Type == IndexAggregator
-		}) {
-			out = append(out, "Resource Explorer has local indexes only, so tfcensus searches each region on its own. "+
-				"An admin can promote one to an aggregator (`aws resource-explorer-2 update-index-type --type AGGREGATOR`).")
-		}
 	case StatusDenied, StatusError:
 	}
 	if re.Error != "" {

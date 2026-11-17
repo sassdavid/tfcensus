@@ -10,6 +10,7 @@ import (
 
 	"github.com/sassdavid/tfcensus/internal/scan"
 	"github.com/sassdavid/tfcensus/internal/testutil"
+	"github.com/sassdavid/tfcensus/internal/tfstate"
 	"github.com/sassdavid/tfcensus/internal/typemap"
 )
 
@@ -104,4 +105,20 @@ func TestGate(t *testing.T) {
 	assert.Equal(t, 2, scan.Gate(findings, []scan.Category{scan.CategoryUnmanaged, scan.CategoryDoubleManaged},
 		scan.TypeMatcher{"AWS::IAM::*"}))
 	assert.Zero(t, scan.Gate(findings, nil, nil))
+}
+
+func TestEncryptedStates(t *testing.T) {
+	t.Parallel()
+	ix := &tfstate.Index{Units: []tfstate.IndexedUnit{
+		{Unit: "live/app", Workspace: tfstate.DefaultWorkspace, Status: tfstate.StatusOK},
+		{Unit: "live/vault", Workspace: tfstate.DefaultWorkspace, Status: tfstate.StatusEncrypted},
+		{Unit: "live/vault", Workspace: "blue", Status: tfstate.StatusEncrypted},
+		{Unit: "live/old", Workspace: tfstate.DefaultWorkspace, Status: tfstate.StatusAbsent},
+	}}
+	got := scan.EncryptedStates(ix)
+	require.Len(t, got, 2)
+	assert.Contains(t, got[0], "state live/vault is encrypted")
+	assert.Contains(t, got[0], "--decrypt-with-tofu")
+	assert.Contains(t, got[1], "state live/vault:blue is encrypted")
+	assert.Empty(t, scan.EncryptedStates(nil))
 }

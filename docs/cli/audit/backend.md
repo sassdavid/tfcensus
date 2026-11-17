@@ -100,3 +100,8 @@ tfcensus audit backend ~/src/infra/acme-live
 tfcensus audit backend --fail-on high --format sarif > audit.sarif
 tfcensus audit backend --profile 'acme-*' --discover --format json
 ```
+
+## Related
+
+- [Audit state backends and suppress findings](/guides/audit)
+- [Backend audit checks](/reference/audit-checks)

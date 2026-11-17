@@ -78,7 +78,7 @@ codify refuses to overwrite a file unless --force is set. The exit code is 2 for
 input and 1 when a file can't be written.`,
 		Example: `  tfcensus scan --format json > scan.json
   tfcensus codify --from scan.json --into live/prod/eu-west-1/network --types 'AWS::EC2::*'
-  tfcensus codify --from scan.json --into live/prod/iam --select 'resource.tags["team"] == "platform"'
+  tfcensus codify --from scan.json --into live/prod/iam --select 'resource.tags.?team.orValue("") == "platform"'
   tfcensus codify --from scan.json --into iam --target terraform@1.14.0 --query`,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			if a.importBy != "auto" && a.importBy != codify.ByID {
@@ -116,6 +116,7 @@ input and 1 when a file can't be written.`,
 	cmd.ValidArgsFunction = complete.NoFiles
 	setFormats(cmd, textFormats()...)
 	setExitCodes(cmd)
+	setRelated(cmd, "guides/codify")
 	return cmd
 }
 

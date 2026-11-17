@@ -1,0 +1,11 @@
+Wrote 5 import block(s) (5 by identity, 0 by id) for terraform 1.14.0 (--target) into unit:
+  imports_tfcensus_20261112.tf
+  query_tfcensus_20261112.tfquery.hcl
+
+note: --query: aws_lb_listener_rule needs list config listener_arn: no list block
+
+Next steps
+  cd unit
+  terragrunt run -- plan -generate-config-out=$PWD/generated.tf
+  or, for config of every resource of the listed types: terragrunt run -- query -generate-config-out=$PWD/generated_query.tf
+  review generated.tf, move the resources into your config, then plan until it shows no changes

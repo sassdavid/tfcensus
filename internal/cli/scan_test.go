@@ -419,7 +419,7 @@ func (c *countingTransport) RoundTrip(req *http.Request) (*http.Response, error)
 }
 
 // TestSpec_scan_4: a re-run with different --rules reads the inventory and state index from the
-// cache and makes no AWS calls.
+// cache and makes no AWS calls. --refresh and turning decryption on collect again.
 func TestSpec_scan_4(t *testing.T) {
 	t.Parallel()
 
@@ -448,6 +448,11 @@ func TestSpec_scan_4(t *testing.T) {
 	require.Equal(t, cli.ExitOK, third.code, third.stderr)
 	assert.Positive(t, calls, "--refresh lists again")
 	assert.NotContains(t, third.stdout, "(inventory from cache)")
+
+	fourth, calls := run("--rules", rules, "--format", "tty", "--decrypt-with-tofu")
+	require.Equal(t, cli.ExitOK, fourth.code, fourth.stderr)
+	assert.Positive(t, calls, "turning decryption on reads the states again")
+	assert.NotContains(t, fourth.stdout, "(inventory from cache)")
 }
 
 // TestScanAttributeValues greps every scan output, the debug log, the explain trace and the

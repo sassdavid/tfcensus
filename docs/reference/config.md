@@ -698,7 +698,7 @@ schema_version: 1
 #     txt_prefix: ""               # --txt-prefix; empty tries no prefix, then external-dns-
 #     txt_suffix: ""               # --txt-suffix
 #
-# rules: []                        # ownership rules, see https://tfcensus.sasskovacs.dev/reference/config#rules
+# rules: []                        # ownership rules, see https://tfcensus.sasskovacs.dev/guides/rules
 #
 # audit:
 #   policy:

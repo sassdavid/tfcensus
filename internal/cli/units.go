@@ -70,6 +70,7 @@ the config, or the working directory.`,
 	addDiscoveryFlags(cmd, &filters)
 	addOutputFlags(cmd, g, formats...)
 	setExitCodes(cmd)
+	setRelated(cmd, "concepts/units", "concepts/terragrunt")
 	return cmd
 }
 

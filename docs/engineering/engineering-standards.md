@@ -25,7 +25,7 @@ schemas/                  # JSON Schemas for config and report output (versioned
 
 - `main` creates `ctx` with `signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)`. Every I/O call takes `ctx`.
 - Fan-out uses `errgroup.WithContext` + `SetLimit(n)`, with nested limits: accounts → regions → API pages. Limits are configurable (`--concurrency`) and have sane defaults.
-- A failure in one target (one repo, account, unit) does not abort the run. It becomes a per-target error in the report, and the exit code reflects it. `--fail-fast` opts in to aborting.
+- A failure in one target (one repo, account, unit) does not abort the run. It becomes a per-target error in the report, and the exit code reflects it. No flag aborts on the first failure.
 - External processes (`terragrunt`, `terraform`, `tofu`) go through one `execx` package. It handles ctx cancellation, captured stderr, a timeout, the env allowlist and a logged command line with secrets redacted.
 
 ## Errors & exit codes
@@ -48,7 +48,7 @@ cobra/POSIX usage-error code. Docs explain the mapping.
 ## Output contract
 
 - **stdout = data, stderr = logs and progress.** Piping must never capture spinners or log lines.
-- `--format tty|plain|md|json|sarif` (not every command supports sarif). Default: `tty` when stdout is a TTY, otherwise `plain`.
+- `--format tty|plain|md|json|csv|sarif|github`. Each command accepts the subset in its `formats` annotation, and the root rejects the others before the command runs. Default: `tty` when stdout is a TTY, otherwise `plain`. Report commands take a repeatable `--out <format>=<path>` that writes more formats from the same run.
 - JSON output is an envelope: `{"schema_version": "1", "tool": "...", "version": "...", "generated_at": "...", "data": {...}, "errors": [...]}`. A JSON Schema lives in `schemas/` and is tested. Breaking a schema bumps `schema_version`.
 - Colors follow `NO_COLOR`, `CLICOLOR_FORCE`, `--color auto|always|never` and TTY detection.
 - Nothing ever prints secrets. Terraform state attributes are never printed, except identifiers (id, arn, identity), unless `--show-attributes` is passed. Tokens are redacted in logs and debug HTTP dumps.

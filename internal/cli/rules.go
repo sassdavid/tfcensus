@@ -92,6 +92,7 @@ the config's. rules test makes no AWS calls. Expired rules show as expired.`,
 	cmd.ValidArgsFunction = complete.Files("yaml", "yml")
 	setFormats(cmd, textFormats()...)
 	setExitCodes(cmd)
+	setRelated(cmd, "guides/rules", "concepts/rules")
 	return cmd
 }
 

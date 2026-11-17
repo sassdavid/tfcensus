@@ -104,5 +104,7 @@ tfcensus drift --from-json-out-dir out --report-file out/report.json --format gi
 
 ## Related
 
-- [AI summary of drift in CI](/ci/ai-summary)
+- [Check drift in CI with tfcensus-action](/guides/drift-ci)
+- [Hide drift noise](/guides/drift-noise)
+- [Add an AI summary to CI](/guides/ai-summary)
 - [Fail-on values](/reference/fail-on)

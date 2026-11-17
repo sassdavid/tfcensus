@@ -38,3 +38,7 @@ tfcensus cache clear
 |---|---|
 | [tfcensus cache clear](/cli/cache/clear) | Delete every entry of both caches |
 | [tfcensus cache info](/cli/cache/info) | Show each cache's directory, entry count, size and freshness |
+
+## Related
+
+- [Caches](/concepts/caches)
