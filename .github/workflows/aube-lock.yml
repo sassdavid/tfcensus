@@ -1,0 +1,75 @@
+name: aube-lock
+
+# Renovate's npm manager updates docs/package.json but has no aube support yet
+# (renovatebot/renovate#44428), so docs/aube-lock.yaml would go stale and
+# `aube install --frozen-lockfile` would fail. This workflow runs aube install on the Renovate
+# branch and commits the lockfile through the API as the sassdavid-renovate app, so the commit is
+# signed and CI runs on it. Delete it once Renovate ships an aube manager (engineering ADR-0016).
+on:
+  push:
+    branches: ["renovate-self-hosted/**"]
+    paths: [docs/package.json]
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # No github.actor check: zizmor's bot-conditions audit flags it as spoofable. The branch filter
+  # and the environment's deployment branches limit the job, and a push by anyone else only
+  # refreshes the lockfile.
+  lockfile:
+    # The app key is a secret of this environment, whose deployment branches are
+    # renovate-self-hosted/** only. The renovate environment allows main only.
+    environment: aube-lock
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      MISE_ENV: docs
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
+        with:
+          version: 2026.11.7
+          install_args: node aube
+      # Lifecycle scripts stay denied: only packages allowed in aube-workspace.yaml may build.
+      - name: aube install
+        working-directory: docs
+        run: aube install
+      - name: changed
+        id: changed
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- docs/aube-lock.yaml; then
+            echo "docs/aube-lock.yaml is up to date" >>"$GITHUB_STEP_SUMMARY"
+            echo "changed=false" >>"$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >>"$GITHUB_OUTPUT"
+          fi
+      # Installation token for this repository only, expiring after 1 hour.
+      - if: steps.changed.outputs.changed == 'true'
+        name: Create GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.RENOVATE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RENOVATE_APP_PRIVATE_KEY }}
+          permission-contents: write # commit the lockfile
+      - if: steps.changed.outputs.changed == 'true'
+        name: commit docs/aube-lock.yaml
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          sha=$(git rev-parse "HEAD:docs/aube-lock.yaml")
+          gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/docs/aube-lock.yaml" \
+            -f message="chore(deps): update docs/aube-lock.yaml" \
+            -f content="$(base64 -w0 docs/aube-lock.yaml)" \
+            -f sha="$sha" -f branch="$BRANCH" --jq .commit.html_url >>"$GITHUB_STEP_SUMMARY"

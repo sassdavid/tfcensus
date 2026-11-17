@@ -1,0 +1,9 @@
+# aube settings for the docs site (engineering ADR-0016). The release age matches
+# minimumReleaseAge in renovate.json: 3 days in minutes.
+minimumReleaseAge: 4320
+
+# Dependency lifecycle scripts stay denied. esbuild is on aube's built-in trusted list, so it is
+# denied here by name: its postinstall only checks the platform binary, which comes from an
+# optional dependency, and vitepress build works without it.
+allowBuilds:
+  esbuild: false

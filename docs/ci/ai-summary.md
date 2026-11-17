@@ -1,9 +1,13 @@
+---
+description: Add an opt-in job to the drift workflow that sends the drift report to a model your organization picks and appends its answer to the job summary.
+---
+
 # AI summary of drift in CI
 
-tfcensus has no built-in LLM call ([plan ADR-0013](../plan/adr/0013-no-built-in-llm.md)). Its
+tfcensus has no built-in LLM call ([plan ADR-0013](https://github.com/sassdavid/tfcensus/blob/main/docs/plan/adr/0013-no-built-in-llm.md)). Its
 findings are already exact, and its identifiers map your organization, so sending them to a model
-is your decision. [ai-summary.yml](ai-summary.yml) is the drift workflow from
-[drift.yml](drift.yml) with two opt-in jobs. One of them sends `tfcensus report drift --format json`
+is your decision. [ai-summary.yml](https://github.com/sassdavid/tfcensus/blob/main/docs/ci/ai-summary.yml) is the drift workflow from
+[drift.yml](https://github.com/sassdavid/tfcensus/blob/main/docs/ci/drift.yml) with two opt-in jobs. One of them sends `tfcensus report drift --format json`
 to a model your organization picks and appends the answer to the job summary.
 
 Copy `ai-summary.yml` to `.github/workflows/drift.yml` in your live repository, in place of

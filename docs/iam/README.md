@@ -1,8 +1,12 @@
+---
+description: The read-only IAM policy for every tfcensus command except move apply, rollback and mark-applied, and how to narrow it.
+---
+
 # Read-only IAM policy
 
-[`tfcensus-readonly.json`](tfcensus-readonly.json) grants everything tfcensus calls, except
-`move apply|rollback|mark-applied` (the only commands that write, and only to state; [ADR-0007](../plan/adr/0007-read-only-by-default.md)).
-It is the action list from the [accounts spec](../plan/specs/accounts-and-credentials.md#read-only-iam-policy).
+[`tfcensus-readonly.json`](https://github.com/sassdavid/tfcensus/blob/main/docs/iam/tfcensus-readonly.json) grants everything tfcensus calls, except
+`move apply|rollback|mark-applied` (the only commands that write, and only to state; [ADR-0007](https://github.com/sassdavid/tfcensus/blob/main/docs/plan/adr/0007-read-only-by-default.md)).
+It is the action list from the [accounts spec](https://github.com/sassdavid/tfcensus/blob/main/docs/plan/specs/accounts-and-credentials.md#read-only-iam-policy).
 Together it is roughly the AWS-managed `ReadOnlyAccess` and `ViewOnlyAccess` combined, so a role with those two managed
 policies (plus `kms:Decrypt` for SSE-KMS state) works as well.
 

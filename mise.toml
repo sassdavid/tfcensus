@@ -19,7 +19,7 @@ depends = ["lint", "test", "vuln"]
 
 [tasks.lint]
 description = "All linters: Go, prose, GitHub workflows, dependency licenses and go.mod tidiness"
-depends = ["lint:go", "lint:prose", "lint:actions", "lint:licenses", "lint:tidy"]
+depends = ["lint:go", "lint:prose", "lint:actions", "lint:licenses", "lint:tidy", "lint:docs"]
 
 [tasks."lint:go"]
 description = "golangci-lint with the golden config (ADR-0008)"
@@ -36,6 +36,11 @@ run = "jactionlint ${GITHUB_ACTIONS:+--format github}"
 [tasks."lint:licenses"]
 description = "Fail on forbidden, restricted or unknown licenses compiled into the release binaries"
 run = "bash scripts/licenses.sh -check"
+
+[tasks."lint:docs"]
+description = "oxfmt --check on the docs site's config, theme and components (tools from mise.docs.toml)"
+dir = "docs"
+run = "MISE_ENV=docs mise exec -- oxfmt --check '.vitepress/**/*.{mts,ts,vue,css,mjs}'"
 
 [tasks."lint:tidy"]
 description = "Fail when go.mod or go.sum differ from what go mod tidy would write"
@@ -78,8 +83,29 @@ description = "Known vulnerabilities in reachable code"
 run = "govulncheck ./..."
 
 [tasks.docs]
-description = "Regenerate docs/cli; fails if the checked-in copy was stale"
-run = "go run ./scripts/gendocs -out docs/cli"
+description = "Regenerate docs/cli and the site data files; fails if a checked-in copy was stale"
+run = ["go run ./scripts/gendocs -out docs/cli", "go run ./scripts/gensite"]
+
+# The docs:* tasks take node, aube, lychee and oxfmt from mise.docs.toml and expect
+# `MISE_ENV=docs mise install` and `aube install --frozen-lockfile` in docs/ first (engineering ADR-0016).
+[tasks."docs:dev"]
+description = "Serve the docs site with live reload"
+dir = "docs"
+run = "MISE_ENV=docs mise exec -- aube exec vitepress dev ."
+
+[tasks."docs:build"]
+description = "Stale check, contrast and unit tests, VitePress build and the offline link check"
+run = [
+  "mise run docs",
+  "MISE_ENV=docs mise exec -- node --test 'docs/.vitepress/*.test.mjs'",
+  "cd docs && MISE_ENV=docs mise exec -- aube exec vitepress build .",
+  "MISE_ENV=docs mise exec -- lychee --offline --include-fragments --no-progress --root-dir \"$PWD/docs/.vitepress/dist\" --fallback-extensions html --index-files index.html docs/.vitepress/dist",
+]
+
+[tasks."docs:preview"]
+description = "Serve the built site from docs/.vitepress/dist"
+dir = "docs"
+run = "MISE_ENV=docs mise exec -- aube exec vitepress preview ."
 
 [tasks."typemap:gen"]
 description = "Regenerate internal/typemap/data/generated.yaml from the aws and awscc provider checkouts (TFCENSUS_PROVIDER_AWS_DIR, TFCENSUS_PROVIDER_AWSCC_DIR)"

@@ -1,3 +1,7 @@
+---
+description: Send drift, unmanaged resources and backend audit findings to Slack, GitHub issues, pull request comments or files with tfcensus notify.
+---
+
 # Publish tfcensus reports with notify
 
 This runbook sets up `tfcensus notify` in CI, so that drift, unmanaged resources and backend
@@ -118,7 +122,7 @@ steps:
 ```
 
 `GITHUB_REPOSITORY` and `GITHUB_API_URL` come from the runner, so no repository setting is needed.
-[docs/ci/drift.yml](../ci/drift.yml) is a full drift workflow.
+[drift.yml](https://github.com/sassdavid/tfcensus/blob/main/docs/ci/drift.yml) is a full drift workflow.
 
 ## GitHub issue lifecycle
 

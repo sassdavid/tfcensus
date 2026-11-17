@@ -1,3 +1,7 @@
+---
+description: Move resources between Terragrunt units with tfcensus move. Plan, apply, roll back from S3 object versions, or use the native strategy.
+---
+
 # Move resources between Terragrunt units
 
 This runbook moves resources from one unit's state to other units' states, in the same account or

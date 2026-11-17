@@ -1,6 +1,6 @@
 # ADR-0016: Documentation site with VitePress, aube and GitHub Pages
 
-- Status: proposed (2026-11-17)
+- Status: accepted (2026-11-17)
 
 ## Context
 The user docs are Markdown files in `docs/` that GitHub renders one by one, next to the cobra
@@ -77,7 +77,8 @@ Not adopted:
 - The docs job needs node and aube. Go jobs and goreleaser don't.
 - VitePress 2.0 will need a migration once it is stable. jdx's sites face the same change.
 - `docs/package.json`, `docs/aube-lock.yaml`, `mise.docs.toml` and the new workflows join the
-  sibling lists. Theme colours, fonts and home components differ per tool on purpose.
+  sibling lists. `mise.docs.lock` holds the tool checksums, and oxfmt, an npm tool, also has its
+  aube lockfile under `.mise/locks/`. Theme colours, fonts and home components differ per tool on purpose.
 - Help texts and runtime messages link to site URLs instead of repo paths.
 - The `aube-lock` environment holds a second copy of the Renovate App key, limited to
   `renovate-self-hosted/**` branches, because the `renovate` environment only allows `main`.
