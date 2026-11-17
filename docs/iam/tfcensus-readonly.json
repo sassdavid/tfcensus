@@ -10,7 +10,7 @@
     {
       "Sid": "Organizations",
       "Effect": "Allow",
-      "Action": ["organizations:Describe*", "organizations:List*"],
+      "Action": ["organizations:List*"],
       "Resource": "*"
     },
     {
@@ -25,7 +25,6 @@
       "Action": [
         "s3:ListAllMyBuckets",
         "s3:ListBucket",
-        "s3:ListBucketVersions",
         "s3:GetBucket*",
         "s3:GetEncryptionConfiguration",
         "s3:GetLifecycleConfiguration",
@@ -37,7 +36,7 @@
     {
       "Sid": "ReadStateObjects",
       "Effect": "Allow",
-      "Action": ["s3:GetObject", "s3:GetObjectVersion"],
+      "Action": ["s3:GetObject"],
       "Resource": "arn:aws:s3:::*/*"
     },
     {
@@ -52,7 +51,7 @@
     {
       "Sid": "KeyAudit",
       "Effect": "Allow",
-      "Action": ["kms:DescribeKey", "kms:GetKeyPolicy", "kms:ListAliases"],
+      "Action": ["kms:DescribeKey", "kms:GetKeyPolicy"],
       "Resource": "*"
     },
     {
@@ -70,19 +69,19 @@
     {
       "Sid": "ResourceExplorer",
       "Effect": "Allow",
-      "Action": ["resource-explorer-2:Get*", "resource-explorer-2:List*", "resource-explorer-2:Search"],
+      "Action": ["resource-explorer-2:Get*", "resource-explorer-2:List*"],
       "Resource": "*"
     },
     {
       "Sid": "Config",
       "Effect": "Allow",
-      "Action": ["config:Describe*", "config:Get*", "config:List*", "config:Select*"],
+      "Action": ["config:Describe*", "config:Get*", "config:Select*"],
       "Resource": "*"
     },
     {
       "Sid": "CloudControlRead",
       "Effect": "Allow",
-      "Action": ["cloudformation:ListResources", "cloudformation:GetResource", "cloudformation:DescribeType"],
+      "Action": ["cloudformation:ListResources", "cloudformation:GetResource"],
       "Resource": "*"
     },
     {
@@ -102,11 +101,8 @@
       "Effect": "Allow",
       "Action": [
         "ec2:Describe*",
-        "iam:Get*",
-        "iam:List*",
-        "route53:Get*",
+        "iam:GetAccountAuthorizationDetails",
         "route53:List*",
-        "elasticloadbalancing:Describe*",
         "eks:ListPodIdentityAssociations"
       ],
       "Resource": "*"

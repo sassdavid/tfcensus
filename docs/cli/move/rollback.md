@@ -7,6 +7,8 @@ editLink: false
 
 # tfcensus move rollback
 
+<WritesState stores="S3,DynamoDB" />
+
 rollback restores every unit of each applied block to the S3 object version it had before
 apply pushed it, byte for byte, newest block first and the source before its destinations. It takes
 the backend lock, copies the old version over the current one, fixes the DynamoDB digest, and marks

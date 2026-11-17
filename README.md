@@ -45,7 +45,7 @@ mise use github:sassdavid/tfcensus
 go install github.com/sassdavid/tfcensus/cmd/tfcensus@latest   # unsigned
 ```
 
-Homebrew, Scoop and the ghcr.io image come later (milestone M19). Each archive carries shell
+Homebrew, Scoop and the ghcr.io image are not published yet. Each archive carries shell
 completion scripts and man pages; [docs/install.md](docs/install.md) sets them up for each shell.
 
 Release checksums are signed with cosign (keyless) and carry GitHub build-provenance attestations:
@@ -57,7 +57,7 @@ cosign verify-blob --bundle checksums.txt.sigstore.json \
 gh attestation verify --owner sassdavid tfcensus_<version>_<os>_<arch>.tar.gz
 ```
 
-The read-only IAM policy tfcensus needs is in [docs/iam](docs/iam/).
+The read-only IAM policy tfcensus needs is on the [IAM reference](https://tfcensus.sasskovacs.dev/reference/iam).
 
 ## HTML report
 

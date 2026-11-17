@@ -7,6 +7,8 @@ editLink: false
 
 # tfcensus move mark-applied
 
+<WritesState stores="S3" />
+
 mark-applied writes a history record for each block in every unit it touches and changes no
 state. Use it after a native block's apply, or for a migration done by hand. Such records can't be
 rolled back by tfcensus.

@@ -20,6 +20,33 @@ const (
 // Presets lists the preset names.
 func Presets() []string { return []string{PresetAWSTagsAll, PresetComputedHashes} }
 
+// PresetDoc describes a preset for the docs site: what it hides and why.
+type PresetDoc struct {
+	Name       string
+	Rule       string // the rule ID a hidden change carries
+	Reason     string
+	Types      string   // resource type glob, empty for every type
+	Attributes []string // attribute names whose changes it hides
+	Action     Action   // the change action it hides
+}
+
+// PresetDocs describes every preset in [Presets] order.
+func PresetDocs() []PresetDoc {
+	out := make([]PresetDoc, 0, len(Presets()))
+	for _, name := range Presets() {
+		r, _ := preset(name, "") // every name in Presets has a preset
+		d := PresetDoc{Name: name, Rule: r.id, Reason: r.reason}
+		for _, s := range r.selectors {
+			d.Types, d.Action = s.typ, s.action
+			for _, step := range s.attr {
+				d.Attributes = append(d.Attributes, step.glob)
+			}
+		}
+		out = append(out, d)
+	}
+	return out
+}
+
 // computedHashAttributes are the attributes the computed-hashes preset hides on updates.
 func computedHashAttributes() []string {
 	return []string{

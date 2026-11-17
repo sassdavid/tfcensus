@@ -1,47 +1,6 @@
----
-description: The read-only IAM policy for every tfcensus command except move apply, rollback and mark-applied, and how to narrow it.
----
+# IAM policy
 
-# Read-only IAM policy
-
-[`tfcensus-readonly.json`](https://github.com/sassdavid/tfcensus/blob/main/docs/iam/tfcensus-readonly.json) grants everything tfcensus calls, except
-`move apply|rollback|mark-applied` (the only commands that write, and only to state; [ADR-0007](https://github.com/sassdavid/tfcensus/blob/main/docs/plan/adr/0007-read-only-by-default.md)).
-It is the action list from the [accounts spec](https://github.com/sassdavid/tfcensus/blob/main/docs/plan/specs/accounts-and-credentials.md#read-only-iam-policy).
-Together it is roughly the AWS-managed `ReadOnlyAccess` and `ViewOnlyAccess` combined, so a role with those two managed
-policies (plus `kms:Decrypt` for SSE-KMS state) works as well.
-
-Narrow it before use:
-- `ReadStateObjects`: replace `arn:aws:s3:::*/*` with your state buckets (`arn:aws:s3:::my-tfstate-*/*`). State files
-  contain secrets. tfcensus prints only identifiers, but the role can read everything in those objects.
-- `DecryptStateViaS3Only`: limit `Resource` to the KMS keys that encrypt state. The `kms:ViaService` condition already
-  restricts decryption to requests made through S3.
-- `LockTables`: limit to your lock tables (`arn:aws:dynamodb:*:*:table/terraform-locks*`). `dynamodb:Scan` is used only
-  to look for stale locks and orphaned digests. Lock items hold lock metadata, not state.
-- `EnabledRegions`: `account:ListRegions` runs only for `--all-regions` (config `all_regions`). Drop it if you never
-  use that flag.
-- `CloudFormationStacks`: `scan` lists stack resources to find what CloudFormation owns. It reads stack and resource
-  identifiers only, never templates or outputs. Drop it if you set `scan.cloudformation: false`.
-- `CloudControlHandlers`: Cloud Control runs each type's list and read handlers with the caller's permissions.
-  `scan` lists the VPC Lattice resource gateways, resource configurations and service network associations through
-  Cloud Control by default, because neither AWS Config nor Resource Explorer lists them. It reads a resource
-  configuration with `GetResource` when the list leaves out its type. Types you add to `scan.cloudcontrol_types`
-  need their own handler permissions (the `handlers` of the type's schema in the CloudFormation registry).
-- `NativeEnumerators`: `eks:ListPodIdentityAssociations` runs once per EKS cluster that AWS Config or Resource
-  Explorer found. It reads which add-on owns an association (`ownerArn`), so scan reports that association as derived.
-- `StateAccessLogging`: `audit backend` reads trail event selectors to see whether CloudTrail logs S3 data events
-  for a state bucket that has no server access logging (S3-LOG).
-
-Org mode (`--org`) also needs `sts:AssumeRole` on the member-account role (default `OrganizationAccountAccessRole`,
-or the roles in `accounts.org.ou_roles`). So does a backend whose `remote_state` names a `role_arn`. Grant it on the
-scanning principal for exactly those roles. It is not part of this policy, because what an assumed role may do is
-defined in its own account.
-
-`TestSpec_accounts_4` in `internal/accounts` takes every AWS action from the test cassettes in
-`testdata/cassettes/aws/` and fails when this policy doesn't allow one (`sts:AssumeRole` excepted).
-
-Optional validation (manual, needs an AWS account):
-
-```sh
-aws accessanalyzer validate-policy --policy-type IDENTITY_POLICY \
-  --policy-document file://docs/iam/tfcensus-readonly.json
-```
+[`tfcensus-readonly.json`](tfcensus-readonly.json) is the read-only IAM policy for every tfcensus
+command except `move apply`, `move rollback` and `move mark-applied`. The
+[IAM reference](https://tfcensus.sasskovacs.dev/reference/iam) explains each statement, how to
+narrow it and what the move commands need.

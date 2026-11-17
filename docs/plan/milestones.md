@@ -479,16 +479,38 @@ generators are shared with relgap; tool-specific catalogues wait for M24.
 ### M24: Getting started and tool reference (tfcensus only) ([docs-content](specs/docs-content.md))
 Scope: the tutorial, install, supported versions, safety model and every tfcensus-specific
 reference page. Rerun the audit for the pages this milestone writes before writing them.
-- [ ] `scripts/gensite` generates rule packs, CEL fields, audit checks, drift noise presets, rule
+- [x] `scripts/gensite` generates rule packs, CEL fields, audit checks, drift noise presets, rule
   IDs, inventory layers, type mapping coverage (data JSON plus a filterable table component) and
   supported versions, each with a stale check in `mise run docs`.
-- [ ] `/reference/iam` embeds the policy JSON. `TestSpec_accounts_4` gets the reverse check, and
+  Pages: `/reference/rule-packs`, `/reference/audit-checks`, `/reference/drift-noise`,
+  `/reference/rule-ids`; parts included by hand pages in `docs/parts/` (CEL fields, inventory
+  layers, supported versions, output formats, move rules); `theme/data/type-coverage.json` with
+  `TypeCoverage.vue`. `TestGenerated` in `scripts/gensite` fails on a stale file, and
+  `TestRuleIDs`, `TestCELDocs`, `TestLayerDocs` and `TestMoveRules` fail when code gains an ID,
+  field, layer or rule without a description. Also written: `/reference/cel`, `/reference/output`,
+  `/reference/type-coverage` and `/reference/move-file`.
+- [x] `/reference/iam` embeds the policy JSON. `TestSpec_accounts_4` gets the reverse check, and
   `kms:ListAliases` and `elasticloadbalancing:Describe*` are dropped or kept with a reason.
-- [ ] Getting started runs doctor, units, inventory and scan against the fixtures, with every
+  The reverse check dropped every granted action no cassette calls: `kms:ListAliases`,
+  `elasticloadbalancing:Describe*`, `organizations:Describe*`, `s3:ListBucketVersions`,
+  `s3:GetObjectVersion` (move apply only), `resource-explorer-2:Search`, `config:List*`,
+  `cloudformation:DescribeType`, `iam:List*` and `route53:Get*`; `iam:Get*` narrowed to
+  `iam:GetAccountAuthorizationDetails`. Kept with a reason (AWS calls them for the caller):
+  `kms:Decrypt`, `vpc-lattice:List*`, `vpc-lattice:GetResourceConfiguration`. The site serves the
+  JSON at `/iam/tfcensus-readonly.json`; `docs/iam/README.md` points to the page.
+- [x] Getting started runs doctor, units, inventory and scan against the fixtures, with every
   output included from goldens. Install, supported versions, `/concepts/safety` and the
   changelog page are written.
-- [ ] `WritesState` appears on the three writing commands through `Annotations["docs.writes"]`.
-- [ ] The never-on-the-site checks pass. (docs-content criterion 4)
+  Units and inventory include `testdata/golden/...` directly; doctor and scan live in test script
+  archives, so gensite copies those sections to `docs/snippets/` with a stale check.
+- [x] `WritesState` appears on the three writing commands through `Annotations["docs.writes"]`.
+  `TestAnnotations_writes` pins the set; the shared `AnnotationWrites` constant and the gendocs
+  block are in relgap too.
+- [x] The never-on-the-site checks pass. (docs-content criterion 4)
+  `TestNeverOnSite` in `scripts/gensite` greps the published sources and, in `docs:build`, the
+  built site: fixture state values and tokens, account IDs other than the fixture ones, the
+  profile names of the validation notes (read from those notes), links into internal docs,
+  milestone names (the changelog excepted) and test internals.
 
 ### M25: Guides and concepts (tfcensus only) ([docs-content](specs/docs-content.md))
 Scope: every guide, concept, help and project page in docs-content.md, and every gap closed.

@@ -93,6 +93,10 @@ func (g *generator) commandPage(c *cobra.Command) string {
 	var b strings.Builder
 	b.WriteString(frontmatter(c.CommandPath(), c.Short))
 	b.WriteString("# " + c.CommandPath() + "\n\n")
+	if stores := cli.SplitAnnotation(c, cli.AnnotationWrites); len(stores) > 0 {
+		// WritesState is a theme component of the sites whose tool has writing commands.
+		b.WriteString(`<WritesState stores="` + strings.Join(stores, ",") + `" />` + "\n\n")
+	}
 	b.WriteString(prose(cmpOr(c.Long, c.Short)) + "\n\n")
 	b.WriteString("## Usage\n\n```sh\n" + usageLine(c) + "\n```\n\n")
 	if len(c.Aliases) > 0 {

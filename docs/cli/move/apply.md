@@ -7,6 +7,8 @@ editLink: false
 
 # tfcensus move apply
 
+<WritesState stores="S3,DynamoDB" />
+
 apply plans and verifies each pending block like plan, then asks you to type the block's last
 destination unit path (its from path for an in-place block). It checks that no state changed since
 it was read, pushes the destinations and then the source with terragrunt run -- state push (so

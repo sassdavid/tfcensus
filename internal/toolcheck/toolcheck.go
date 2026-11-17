@@ -64,12 +64,13 @@ const timeout = 30 * time.Second
 // state encryption.
 const release17 = "1.7.0"
 
-func minimum(k Kind) string {
+// Minimum returns the oldest version of k that tfcensus runs.
+func Minimum(k Kind) string {
 	return map[Kind]string{KindTerragrunt: "1.0.0", KindTerraform: "1.5.0", KindTofu: "1.6.0"}[k]
 }
 
-// gated lists each tool's gated features with the version that has them.
-func gated(k Kind) []Feature {
+// Gated returns the features of k that need a newer version than [Minimum], with that version.
+func Gated(k Kind) []Feature {
 	switch k {
 	case KindTerraform:
 		return []Feature{
@@ -103,7 +104,7 @@ func CheckTofu(ctx context.Context, r Runner, path string) Tool {
 	t := terraform(ctx, r, path)
 	if t.Version != "" && t.Tool != KindTofu {
 		return Tool{
-			Tool: KindTofu, Path: path, Version: t.Version, Minimum: minimum(KindTofu), Status: StatusError,
+			Tool: KindTofu, Path: path, Version: t.Version, Minimum: Minimum(KindTofu), Status: StatusError,
 			Error: path + " is " + string(t.Tool) + ", not tofu",
 		}
 	}
@@ -116,7 +117,7 @@ var (
 )
 
 func terragrunt(ctx context.Context, r Runner, path string) Tool {
-	t := Tool{Tool: KindTerragrunt, Path: path, Minimum: minimum(KindTerragrunt)}
+	t := Tool{Tool: KindTerragrunt, Path: path, Minimum: Minimum(KindTerragrunt)}
 	out, err := run(ctx, r, path, "--version")
 	if err != nil {
 		return failed(t, err)
@@ -133,7 +134,7 @@ func terraform(ctx context.Context, r Runner, path string) Tool {
 	if strings.TrimSuffix(filepath.Base(path), ".exe") == string(KindTofu) {
 		kind = KindTofu
 	}
-	t := Tool{Tool: kind, Path: path, Minimum: minimum(kind)}
+	t := Tool{Tool: kind, Path: path, Minimum: Minimum(kind)}
 	// version -json says terraform_version for tofu too, so the first line of the plain output
 	// is what tells them apart.
 	out, err := run(ctx, r, path, "version")
@@ -150,7 +151,7 @@ func terraform(ctx context.Context, r Runner, path string) Tool {
 	} else {
 		t.Tool = KindTerraform
 	}
-	t.Minimum = minimum(t.Tool)
+	t.Minimum = Minimum(t.Tool)
 	return judge(t, m[2])
 }
 
@@ -186,7 +187,7 @@ func judge(t Tool, v string) Tool {
 	if core.LessThan(version.Must(version.NewVersion(t.Minimum))) {
 		t.Status = StatusTooOld
 	}
-	for _, f := range gated(t.Tool) {
+	for _, f := range Gated(t.Tool) {
 		f.Available = f.Needs != "" && !core.LessThan(version.Must(version.NewVersion(f.Needs)))
 		t.Features = append(t.Features, f)
 	}

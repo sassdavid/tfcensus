@@ -19,6 +19,7 @@ const (
 	AnnotationFailOn    = "fail-on"      // --fail-on values
 	AnnotationExitCodes = "exit-codes"   // exit codes the command returns
 	AnnotationRelated   = "docs.related" // site paths of related guides and concepts
+	AnnotationWrites    = "docs.writes"  // the stores the command writes to, such as S3; unset when it writes nothing
 )
 
 // FlagKeys maps each flag that sets a config key to that key.

@@ -6,10 +6,12 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 
-	"github.com/rogpeppe/go-internal/txtar"
+	"github.com/sassdavid/tfcensus/internal/typemap"
 )
 
 const (
@@ -31,7 +33,11 @@ func main() {
 func run() int {
 	root := flag.String("root", ".", "repository root")
 	flag.Parse()
-	stale, err := writeTally(*root)
+	files, err := generate(*root)
+	var stale []string
+	if err == nil {
+		stale, err = writeAll(*root, files)
+	}
 	switch {
 	case err != nil:
 		_, _ = fmt.Fprintf(os.Stderr, "gensite: %v\n", err)
@@ -46,20 +52,76 @@ func run() int {
 	}
 }
 
-// writeTally writes the home page tally from the scan golden and returns the paths it changed.
-func writeTally(root string) ([]string, error) {
-	archive, err := txtar.ParseFile(filepath.Join(root, tallySource))
+// generate returns every file gensite writes, keyed by its path under the repository root.
+func generate(root string) (map[string][]byte, error) {
+	files := map[string][]byte{}
+	tally, err := tallyJSON(root)
 	if err != nil {
-		return nil, fmt.Errorf("read %s: %w", tallySource, err)
+		return nil, err
 	}
-	var golden []byte
-	for _, f := range archive.Files {
-		if f.Name == tallyFile {
-			golden = f.Data
+	files["docs/.vitepress/theme/data/home-tally.json"] = tally
+	m, err := typemap.Load()
+	if err != nil {
+		return nil, err //nolint:wrapcheck // the error says what failed
+	}
+	if files["docs/.vitepress/theme/data/type-coverage.json"], err = typeCoverage(m); err != nil {
+		return nil, err
+	}
+	if files["docs/parts/inventory-layers.md"], err = layersPart(m); err != nil {
+		return nil, err
+	}
+	if files["docs/reference/rule-packs.md"], err = rulePacksPage(root); err != nil {
+		return nil, err
+	}
+	if files["docs/parts/cel-fields.md"], err = celPart(); err != nil {
+		return nil, err
+	}
+	if files["docs/reference/audit-checks.md"], err = auditChecksPage(); err != nil {
+		return nil, err
+	}
+	if files["docs/parts/output-formats.md"], err = formatsPart(); err != nil {
+		return nil, err
+	}
+	files["docs/reference/drift-noise.md"] = driftNoisePage()
+	files["docs/reference/rule-ids.md"] = ruleIDsPage()
+	files["docs/parts/move-rules.md"] = moveRulesPart()
+	if files["docs/parts/supported-versions.md"], err = versionsPart(root); err != nil {
+		return nil, err
+	}
+	for _, g := range goldenParts() {
+		if files[g.out], err = archiveFile(root, g.archive, g.file); err != nil {
+			return nil, err
 		}
 	}
-	if golden == nil {
-		return nil, fmt.Errorf("%s has no %s", tallySource, tallyFile)
+	policy, err := os.ReadFile(filepath.Join(root, iamPolicy))
+	if err != nil {
+		return nil, fmt.Errorf("read %s: %w", iamPolicy, err)
+	}
+	files["docs/public/iam/tfcensus-readonly.json"] = policy
+	return files, nil
+}
+
+// iamPolicy is the read-only policy, which the site serves for download and embeds on /reference/iam.
+const iamPolicy = "docs/iam/tfcensus-readonly.json"
+
+// writeAll writes files and returns the paths it changed, sorted.
+func writeAll(root string, files map[string][]byte) ([]string, error) {
+	var stale []string
+	for _, rel := range slices.Sorted(maps.Keys(files)) {
+		changed, err := writeIfChanged(root, rel, files[rel])
+		if err != nil {
+			return nil, err
+		}
+		stale = append(stale, changed...)
+	}
+	return stale, nil
+}
+
+// tallyJSON returns the home page tally from the scan golden.
+func tallyJSON(root string) ([]byte, error) {
+	golden, err := archiveFile(root, tallySource, tallyFile)
+	if err != nil {
+		return nil, err
 	}
 	t, err := buildTally(golden)
 	if err != nil {
@@ -69,7 +131,7 @@ func writeTally(root string) ([]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("encode tally: %w", err)
 	}
-	return writeIfChanged(root, "docs/.vitepress/theme/data/home-tally.json", append(b, '\n'))
+	return append(b, '\n'), nil
 }
 
 type tally struct {

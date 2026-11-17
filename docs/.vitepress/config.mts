@@ -31,9 +31,16 @@ export default defineConfig({
   cleanUrls: true,
   lastUpdated: true,
   sitemap: { hostname: site },
-  srcExclude: ["plan/**", "engineering/**", "validation/**", "dogfood.md", "README.md"],
-  // The IAM folder keeps README.md so GitHub shows it in the folder view.
-  rewrites: { "iam/README.md": "iam/index.md" },
+  // parts/ holds generated tables that pages include; iam/README.md points GitHub readers here.
+  srcExclude: [
+    "plan/**",
+    "engineering/**",
+    "validation/**",
+    "dogfood.md",
+    "README.md",
+    "iam/README.md",
+    "parts/**",
+  ],
   head: [["link", { rel: "icon", type: "image/svg+xml", href: "/glyph.svg" }]],
   markdown: {
     theme: { light: "github-light", dark: "github-dark" },
@@ -56,11 +63,14 @@ export default defineConfig({
     logo: { light: "/glyph.svg", dark: "/glyph-dark.svg", alt: "" },
     siteTitle: tool,
     nav: [
-      { text: "Guide", link: "/install", activeMatch: "^/(install|runbooks|ci)/?" },
-      { text: "Reference", link: "/reference/config", activeMatch: "^/(reference|iam)/" },
+      {
+        text: "Guide",
+        link: "/getting-started",
+        activeMatch: "^/(getting-started|install|supported-versions|concepts|runbooks|ci)(/|$)",
+      },
+      { text: "Reference", link: "/reference/config", activeMatch: "^/reference/" },
       { text: "CLI", link: "/cli/", activeMatch: "^/cli/" },
-      // M24 points this at /changelog.
-      { text: `v${version}`, link: `${repo}/releases/tag/v${version}` },
+      { text: `v${version}`, link: "/changelog" },
     ],
     sidebar,
     socialLinks: [{ icon: "github", link: repo, ariaLabel: `${tool} on GitHub` }],
