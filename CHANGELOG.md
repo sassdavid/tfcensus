@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/sassdavid/tfcensus/compare/v0.4.0...v0.5.0) (2026-11-17)
+
+
+### Features
+
+* **docs:** build the docs site foundation (M22) ([#77](https://github.com/sassdavid/tfcensus/issues/77)) ([12bba52](https://github.com/sassdavid/tfcensus/commit/12bba5249b57df79c1d8e66b3f0e74dec664157e))
+
 ## [0.4.0](https://github.com/sassdavid/tfcensus/compare/v0.3.0...v0.4.0) (2026-11-16)
 
 
