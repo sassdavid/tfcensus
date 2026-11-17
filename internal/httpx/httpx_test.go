@@ -6,11 +6,13 @@ import (
 	"errors"
 	"io"
 	"log/slog"
+	"maps"
 	"net"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -327,4 +329,39 @@ func TestSecretPathHostsAreRedacted(t *testing.T) {
 	_ = resp.Body.Close()
 	assert.NotContains(t, logs.String(), "secret")
 	assert.Contains(t, logs.String(), "[redacted]")
+}
+
+// TestTraceRedactsCredentials checks that the trace log of a request shows no credential header:
+// tokens, AWS session tokens, cookies and API keys sent as X-Api-Key.
+func TestTraceRedactsCredentials(t *testing.T) {
+	t.Parallel()
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Set-Cookie", "id=cookie-from-server")
+		_, _ = io.WriteString(w, "ok")
+	}))
+	t.Cleanup(srv.Close)
+	var logs strings.Builder
+	c := httpx.New(httpx.Options{
+		Logger:    slog.New(slog.NewTextHandler(&logs, &slog.HandlerOptions{Level: app.LevelTrace})),
+		Transport: srv.Client().Transport,
+	})
+	secrets := map[string]string{
+		"Authorization":        "Bearer token-secret",
+		"Proxy-Authorization":  "Basic proxy-secret",
+		"Cookie":               "id=cookie-secret",
+		"X-Amz-Security-Token": "session-secret",
+		"X-Api-Key":            "api-key-secret",
+	}
+	req, err := http.NewRequestWithContext(t.Context(), http.MethodGet, srv.URL, nil)
+	require.NoError(t, err)
+	for k, v := range secrets {
+		req.Header.Set(k, v)
+	}
+	resp, err := c.Do(req)
+	require.NoError(t, err)
+	_ = resp.Body.Close()
+	require.Contains(t, logs.String(), "http exchange")
+	for _, v := range append(slices.Collect(maps.Values(secrets)), "cookie-from-server") {
+		assert.NotContains(t, logs.String(), v)
+	}
 }

@@ -379,7 +379,7 @@ func redact(h http.Header) map[string]string {
 	for k, vs := range h {
 		v := fmt.Sprint(vs)
 		switch http.CanonicalHeaderKey(k) {
-		case "Authorization", "Proxy-Authorization", "Cookie", "Set-Cookie", "X-Amz-Security-Token":
+		case "Authorization", "Proxy-Authorization", "Cookie", "Set-Cookie", "X-Amz-Security-Token", "X-Api-Key":
 			v = "[redacted]"
 		}
 		out[k] = v
