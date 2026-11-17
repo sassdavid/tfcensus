@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.0](https://github.com/sassdavid/tfcensus/compare/v0.5.0...v0.6.0) (2026-11-17)
+
+
+### Features
+
+* **docs:** generate the CLI and reference pages from code ([#86](https://github.com/sassdavid/tfcensus/issues/86)) ([48d24f7](https://github.com/sassdavid/tfcensus/commit/48d24f7ca67a14938bc2a90edfe499d93467758b))
+
+
+### Bug Fixes
+
+* **deps:** update aws-sdk-go-v2 monorepo ([#83](https://github.com/sassdavid/tfcensus/issues/83)) ([6b4bac2](https://github.com/sassdavid/tfcensus/commit/6b4bac2d94dd1fcb50fe104f7d4d76d702a17918))
+* **deps:** update module github.com/carapace-sh/carapace to v1.18.2 ([#81](https://github.com/sassdavid/tfcensus/issues/81)) ([0b394db](https://github.com/sassdavid/tfcensus/commit/0b394db5e1e47459fde764a28969a36c0ada9559))
+
 ## [0.5.0](https://github.com/sassdavid/tfcensus/compare/v0.4.0...v0.5.0) (2026-11-17)
 
 
