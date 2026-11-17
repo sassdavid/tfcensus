@@ -81,9 +81,6 @@ input and 1 when a file can't be written.`,
   tfcensus codify --from scan.json --into live/prod/iam --select 'resource.tags["team"] == "platform"'
   tfcensus codify --from scan.json --into iam --target terraform@1.14.0 --query`,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			if err := g.outFormat.Check(render.FormatTTY, render.FormatPlain, render.FormatJSON); err != nil {
-				return usageError(err)
-			}
 			if a.importBy != "auto" && a.importBy != codify.ByID {
 				return usageError(fmt.Errorf("--%s %q: want auto or id", flagImportBy, a.importBy))
 			}
@@ -117,6 +114,8 @@ input and 1 when a file can't be written.`,
 		flagImportBy: complete.Enum(importByChoices()),
 	})
 	cmd.ValidArgsFunction = complete.NoFiles
+	setFormats(cmd, textFormats()...)
+	setExitCodes(cmd)
 	return cmd
 }
 

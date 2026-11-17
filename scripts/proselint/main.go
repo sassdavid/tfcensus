@@ -30,6 +30,9 @@ func run() int {
 			continue
 		}
 		data, readErr := os.ReadFile(f)
+		if os.IsNotExist(readErr) {
+			continue // deleted in the work tree, not yet in the index
+		}
 		if readErr != nil {
 			_, _ = fmt.Fprintf(os.Stderr, "proselint: %v\n", readErr)
 			return 1
@@ -46,7 +49,8 @@ func run() int {
 	return 0
 }
 
-// trackedFiles lists files git would commit, including new untracked ones.
+// trackedFiles lists files git would commit, including new untracked ones and deleted files
+// that are still in the index.
 func trackedFiles(ctx context.Context) ([]string, error) {
 	out, err := exec.CommandContext(ctx, "git", "ls-files", "-z", "--cached", "--others", "--exclude-standard").Output()
 	if err != nil {

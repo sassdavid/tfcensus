@@ -86,9 +86,6 @@ the layout of terragrunt run --all --json-out-dir.`,
 			"--draft migrations/app.hcl",
 		Args: exactArgs(0),
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			if err := g.outFormat.Check(render.FormatTTY, render.FormatPlain, render.FormatJSON); err != nil {
-				return usageError(err)
-			}
 			res, err := g.loadConfig(cmd, d)
 			if err != nil {
 				return err
@@ -116,6 +113,8 @@ the layout of terragrunt run --all --json-out-dir.`,
 		flagDraft:   complete.Files("hcl"),
 		flagRepo:    complete.Dirs(),
 	})
+	setFormats(cmd, textFormats()...)
+	setExitCodes(cmd)
 	return cmd
 }
 

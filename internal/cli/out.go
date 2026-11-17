@@ -16,8 +16,10 @@ const (
 	flagMDMaxChars = "md-max-chars"
 )
 
-// addOutputFlags adds --out and --md-max-chars to a command that writes a report in formats.
+// addOutputFlags adds --out and --md-max-chars to a command that writes a report in formats, and
+// records formats with [setFormats].
 func addOutputFlags(cmd *cobra.Command, g *globals, formats ...render.Format) {
+	setFormats(cmd, formats...)
 	choices := outChoices(formats)
 	f := cmd.Flags()
 	f.StringArrayVar(&g.outSpecs, flagOut, nil, complete.Usage(
@@ -38,8 +40,8 @@ func outChoices(formats []render.Format) []complete.Choice {
 	})
 }
 
-// checkFormats checks --format and every --out format against allowed, and parses --out. Its
-// errors are usage errors.
+// checkFormats checks --format and every --out format against allowed, and parses --out.
+// [globals.checkAnnotated] calls it with the formats the command recorded.
 func (g *globals) checkFormats(allowed ...render.Format) error {
 	if err := g.outFormat.Check(allowed...); err != nil {
 		return err //nolint:wrapcheck // the caller wraps it as a usage error

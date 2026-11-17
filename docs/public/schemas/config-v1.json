@@ -1,0 +1,686 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tfcensus.sasskovacs.dev/schemas/config-v1.json",
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "enum": [
+        1
+      ],
+      "description": "Config file format version."
+    },
+    "binaries": {
+      "properties": {
+        "terragrunt": {
+          "type": "string",
+          "minLength": 1,
+          "description": "terragrunt binary, a name on PATH or a path."
+        },
+        "terraform": {
+          "type": "string",
+          "minLength": 1,
+          "description": "terraform or tofu binary, passed to terragrunt as --tf-path."
+        },
+        "tofu": {
+          "type": "string",
+          "minLength": 1,
+          "description": "tofu binary that reads OpenTofu encrypted state when state.decrypt_with_tofu is on."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "discovery": {
+      "properties": {
+        "roots": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Directories to discover units in."
+        },
+        "generate_stacks": {
+          "type": "boolean",
+          "description": "Run terragrunt stack generate before discovery."
+        },
+        "render": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "always",
+            "never"
+          ],
+          "description": "Use terragrunt render: auto, always or never (fast path only)."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "accounts": {
+      "properties": {
+        "profiles": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "AWS profile globs from ~/.aws/config."
+        },
+        "include": {
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9]{12}$"
+          },
+          "type": "array",
+          "description": "Account IDs that doctor, scan and whois list resources in. Empty means every loaded account."
+        },
+        "exclude": {
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9]{12}$"
+          },
+          "type": "array",
+          "description": "Account IDs that doctor, scan and whois skip. scan and whois still read state with their credentials."
+        },
+        "org": {
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "List the accounts of the organization and assume a role in each."
+            },
+            "management_profile": {
+              "type": "string",
+              "description": "Profile that lists the accounts. Empty means the default AWS credentials."
+            },
+            "role": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Role assumed in each member account."
+            },
+            "ou_roles": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object",
+              "description": "OU or root ID to the role assumed in the accounts directly under it, instead of role."
+            }
+          },
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "map": {
+          "additionalProperties": {
+            "properties": {
+              "profile": {
+                "type": "string",
+                "description": "AWS profile whose credentials reach the account."
+              },
+              "name": {
+                "type": "string",
+                "description": "Name shown for the account in reports."
+              }
+            },
+            "additionalProperties": false,
+            "type": "object"
+          },
+          "type": "object",
+          "description": "Account ID to profile and display name, for when profile names don't match accounts."
+        },
+        "aggregator": {
+          "properties": {
+            "profile": {
+              "type": "string",
+              "description": "AWS profile for the aggregator's account. Empty means the default credentials."
+            },
+            "name": {
+              "type": "string",
+              "description": "Name of the AWS Config aggregator. Empty turns the aggregator off."
+            },
+            "region": {
+              "type": "string",
+              "description": "Region the aggregator is in."
+            }
+          },
+          "additionalProperties": false,
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "state": {
+      "properties": {
+        "decrypt_with_tofu": {
+          "type": "boolean",
+          "description": "Read OpenTofu encrypted state with tofu init and tofu show -json in the unit, which downloads and runs its providers. The key configuration comes from the unit or TF_ENCRYPTION."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "regions": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "description": "Regions to scan. Empty means the regions found in the units' backends and providers."
+    },
+    "all_regions": {
+      "type": "boolean",
+      "description": "Use every region each account has enabled (account:ListRegions) instead of regions."
+    },
+    "scan": {
+      "properties": {
+        "layers": {
+          "type": "string",
+          "description": "Inventory layers: auto, or a comma-separated list of re, config, cc and native."
+        },
+        "cloudcontrol_types": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "CloudFormation types listed through Cloud Control, on top of the types only Cloud Control lists (the VPC Lattice resource gateways, resource configurations and service network associations)."
+        },
+        "cloudformation": {
+          "type": "boolean",
+          "description": "List CloudFormation stack resources; a resource a stack lists and no state manages is other-iac."
+        },
+        "packs": {
+          "properties": {
+            "aws-defaults": {
+              "type": "boolean",
+              "description": "Run the pack for resources AWS creates in every account and region, such as the default VPC."
+            },
+            "aws-service": {
+              "type": "boolean",
+              "description": "Run the pack for resources that AWS services, IAM Identity Center, Control Tower, StackSets and CDK bootstrap create."
+            },
+            "other-iac": {
+              "type": "boolean",
+              "description": "Run the pack for resources another IaC tool or a Kubernetes controller manages, found by its tags."
+            },
+            "derived": {
+              "type": "boolean",
+              "description": "Run the pack for resources AWS creates as children of another resource."
+            },
+            "ephemeral": {
+              "type": "boolean",
+              "description": "Run the pack for short-lived or by-product resources that nobody manages on purpose."
+            }
+          },
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "never_hide": {
+          "items": {
+            "type": "string",
+            "enum": [
+              "other-iac",
+              "aws-managed",
+              "derived",
+              "ignored"
+            ]
+          },
+          "type": "array",
+          "description": "Categories that user rules can't give to guarded resources (IAM users)."
+        },
+        "external_dns": {
+          "properties": {
+            "txt_prefix": {
+              "type": "string",
+              "description": "external-dns --txt-prefix; may hold %{record_type}. Empty tries no prefix, then external-dns-."
+            },
+            "txt_suffix": {
+              "type": "string",
+              "description": "external-dns --txt-suffix; may hold %{record_type}."
+            }
+          },
+          "additionalProperties": false,
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "rules": {
+      "items": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+            "description": "Rule name, shown in findings as user/\u003cname\u003e."
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "other-iac",
+              "aws-managed",
+              "derived",
+              "ignored"
+            ],
+            "description": "Category of the resources the rule matches."
+          },
+          "owner": {
+            "type": "string",
+            "description": "Who owns the matched resources, such as datadog."
+          },
+          "match": {
+            "type": "string",
+            "minLength": 1,
+            "description": "CEL expression that returns a bool, over resource and unit."
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Why the matched resources aren't unmanaged."
+          },
+          "expires": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+            "description": "Last day the rule applies, as a quoted \"YYYY-MM-DD\" date (UTC). After it the rule stops matching and scan warns."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "category",
+          "match",
+          "reason"
+        ]
+      },
+      "type": "array",
+      "description": "Ownership rules, tried in order after the built-in packs. The first rule that matches an unmanaged resource sets its category."
+    },
+    "audit": {
+      "properties": {
+        "policy": {
+          "properties": {
+            "min_terraform_version": {
+              "type": "string",
+              "minLength": 1,
+              "description": "FL-TFVER flags states written by an older terraform or tofu."
+            },
+            "min_provider_versions": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object",
+              "description": "FL-PROV: provider source (hashicorp/aws) to the oldest version allowed in .terraform.lock.hcl."
+            },
+            "noncurrent_days": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "S3-LC: noncurrent state versions must be kept at least this many days."
+            },
+            "stale_lock_hours": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "LK-STALE flags locks older than this."
+            },
+            "max_state_mb": {
+              "type": "number",
+              "minimum": 0,
+              "description": "FL-SIZE flags states larger than this many MiB."
+            }
+          },
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "discover_patterns": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Bucket name globs that audit backend --discover audits, matched against every bucket of each account."
+        },
+        "suppress": {
+          "items": {
+            "properties": {
+              "check": {
+                "type": "string",
+                "description": "Check ID or glob, such as S3-MFA or LK-*."
+              },
+              "bucket": {
+                "type": "string",
+                "description": "Bucket name glob."
+              },
+              "unit": {
+                "type": "string",
+                "description": "Unit glob, repo/path."
+              },
+              "key": {
+                "type": "string",
+                "description": "State key or lock table glob."
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Why the finding is accepted."
+              },
+              "expires": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "description": "Last day the suppression applies, as a quoted \"YYYY-MM-DD\" date (UTC). After it the finding comes back with a warning."
+              }
+            },
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "reason"
+            ]
+          },
+          "type": "array",
+          "description": "Suppressions. A finding matching every set field of an entry is suppressed until expires."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "drift": {
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "refresh-only",
+            "full"
+          ],
+          "description": "refresh-only reports drift; full also tells drift the plan reverts from drift it keeps."
+        },
+        "collapse": {
+          "type": "string",
+          "enum": [
+            "shape",
+            "strict",
+            "none"
+          ],
+          "description": "How identical changes in several units become one group."
+        },
+        "never_hide": {
+          "items": {
+            "type": "string",
+            "enum": [
+              "create",
+              "update",
+              "delete",
+              "replace"
+            ]
+          },
+          "type": "array",
+          "description": "Drift actions that no noise rule can hide."
+        },
+        "noise": {
+          "items": {
+            "properties": {
+              "preset": {
+                "type": "string",
+                "enum": [
+                  "aws-tags-all",
+                  "computed-hashes"
+                ],
+                "description": "A built-in rule. A preset entry takes no other key."
+              },
+              "name": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+                "description": "Rule name, shown on hidden drift as user/\u003cname\u003e."
+              },
+              "unit": {
+                "type": "string",
+                "description": "Unit path glob; * matches any characters, / included."
+              },
+              "type": {
+                "type": "string",
+                "description": "Resource type glob, such as aws_s3_*."
+              },
+              "address": {
+                "type": "string",
+                "description": "Resource address glob, such as module.tags.*."
+              },
+              "attribute": {
+                "type": "string",
+                "description": "Attribute path such as tags_all or ingress[*].cidr_blocks. It also matches everything below it."
+              },
+              "action": {
+                "type": "string",
+                "enum": [
+                  "create",
+                  "update",
+                  "delete",
+                  "replace"
+                ],
+                "description": "Drift action."
+              },
+              "reason": {
+                "type": "string",
+                "description": "Why the drift is noise. Required for rules."
+              },
+              "expires": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "description": "Last day the rule applies, as a quoted \"YYYY-MM-DD\" date (UTC). After it the rule stops hiding drift and drift warns."
+              }
+            },
+            "additionalProperties": false,
+            "type": "object"
+          },
+          "type": "array",
+          "description": "Noise rules, tried in order. A rule hides the matching attribute changes, or the whole change when it has no attribute."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "notify": {
+      "properties": {
+        "enabled": {
+          "items": {
+            "type": "string",
+            "enum": [
+              "slack",
+              "github-issues",
+              "github-pr-comment",
+              "bitbucket-pr-comment",
+              "file"
+            ]
+          },
+          "type": "array",
+          "description": "Notifiers tfcensus notify runs when --notify isn't given."
+        },
+        "categories": {
+          "items": {
+            "type": "string",
+            "enum": [
+              "double-managed",
+              "unmanaged",
+              "undetermined"
+            ]
+          },
+          "type": "array",
+          "description": "Scan categories the notifiers report."
+        },
+        "min_severity": {
+          "type": "string",
+          "enum": [
+            "info",
+            "low",
+            "medium",
+            "high"
+          ],
+          "description": "Lowest backend audit severity the notifiers report."
+        },
+        "top": {
+          "type": "integer",
+          "maximum": 50,
+          "minimum": 1,
+          "description": "Findings listed in a Slack message."
+        },
+        "slack": {
+          "properties": {
+            "webhook_env": {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+              "description": "Environment variable that holds the incoming webhook URL."
+            },
+            "when": {
+              "type": "string",
+              "enum": [
+                "findings",
+                "always"
+              ],
+              "description": "findings sends only when there is something to report; always sends every run."
+            },
+            "link": {
+              "type": "string",
+              "pattern": "^(https://.*)?$",
+              "description": "URL of the full report, such as a CI artifact, shown in the message."
+            }
+          },
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "github_issues": {
+          "properties": {
+            "repo": {
+              "type": "string",
+              "pattern": "^([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?$",
+              "description": "owner/name. Empty means GITHUB_REPOSITORY."
+            },
+            "api_url": {
+              "type": "string",
+              "pattern": "^(https?://.*)?$",
+              "description": "REST API base URL. Empty means GITHUB_API_URL, else https://api.github.com."
+            },
+            "token_env": {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+              "description": "Environment variable that holds the token (issues: write)."
+            },
+            "labels": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "description": "Labels added to new issues, besides tfcensus and tfcensus:\u003ckind\u003e."
+            },
+            "max_open": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Most open issues per report kind. Further scopes are listed in the run output and the summary issue."
+            },
+            "close_resolved": {
+              "type": "boolean",
+              "description": "Close an issue when a run covers its scope and finds nothing."
+            },
+            "summary": {
+              "type": "boolean",
+              "description": "Keep one summary issue per report kind."
+            }
+          },
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "github_pr_comment": {
+          "properties": {
+            "repo": {
+              "type": "string",
+              "pattern": "^([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?$",
+              "description": "owner/name. Empty means GITHUB_REPOSITORY."
+            },
+            "api_url": {
+              "type": "string",
+              "pattern": "^(https?://.*)?$",
+              "description": "REST API base URL. Empty means GITHUB_API_URL, else https://api.github.com."
+            },
+            "pull_request": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Pull request number. 0 means the pull request of the GITHUB_EVENT_PATH event."
+            },
+            "token_env": {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+              "description": "Environment variable that holds the token (pull-requests: write)."
+            }
+          },
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "bitbucket_pr_comment": {
+          "properties": {
+            "workspace": {
+              "type": "string",
+              "description": "Workspace. Empty means BITBUCKET_WORKSPACE."
+            },
+            "repo": {
+              "type": "string",
+              "description": "Repository slug. Empty means BITBUCKET_REPO_SLUG."
+            },
+            "pull_request": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Pull request ID. 0 means BITBUCKET_PR_ID."
+            },
+            "api_url": {
+              "type": "string",
+              "pattern": "^https?://",
+              "description": "REST API base URL."
+            },
+            "token_env": {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+              "description": "Environment variable that holds an access token or API token."
+            },
+            "email_env": {
+              "type": "string",
+              "pattern": "^([A-Za-z_][A-Za-z0-9_]*)?$",
+              "description": "Environment variable that holds the Atlassian account email. Set it to send an API token with basic auth; empty sends the token as a bearer token."
+            }
+          },
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "file": {
+          "properties": {
+            "dir": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Directory for tfcensus-\u003ckind\u003e.md and .json."
+            },
+            "formats": {
+              "items": {
+                "type": "string",
+                "enum": [
+                  "md",
+                  "json"
+                ]
+              },
+              "type": "array",
+              "description": "Files to write."
+            }
+          },
+          "additionalProperties": false,
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "cache": {
+      "properties": {
+        "ttl": {
+          "type": "string",
+          "pattern": "^([0-9]+(\\.[0-9]+)?(ns|us|µs|ms|s|m|h))+$",
+          "description": "How long cached inventory stays fresh, as a Go duration such as 1h."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "title": "tfcensus configuration",
+  "description": "Schema for $XDG_CONFIG_HOME/tfcensus/config.yaml and .tfcensus.yaml. Generated from internal/config by `mise run test:golden -- -update`; do not edit."
+}

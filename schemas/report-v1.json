@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/sassdavid/tfcensus/schemas/report-v1.json",
+  "$id": "https://tfcensus.sasskovacs.dev/schemas/report-v1.json",
   "title": "tfcensus JSON output envelope",
   "description": "Every --format json output is wrapped in this envelope. data is command-specific; its schemas are added per command.",
   "type": "object",

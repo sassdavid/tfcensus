@@ -85,7 +85,7 @@ extension filter.
 ## nushell, elvish, xonsh, tcsh, oil and clink
 
 carapace, built into tfcensus, writes these scripts. Nothing else needs installing. Each script
-calls `tfcensus _carapace` back, so tfcensus must be on `PATH`.
+calls tfcensus back to get the completions, so tfcensus must be on `PATH`.
 
 | Shell | Setup |
 |---|---|

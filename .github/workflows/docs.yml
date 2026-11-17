@@ -10,7 +10,8 @@ on:
       - docs/**
       - scripts/gendocs/**
       - scripts/gensite/**
-      - internal/cli/**
+      - internal/**
+      - mise.toml
       - schemas/**
       - testdata/script/spec_scan_1.txtar
       - testdata/golden/digest/kubectl.json

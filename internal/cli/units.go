@@ -51,9 +51,6 @@ the config, or the working directory.`,
   tfcensus units --filter './live/prod/**' --format json
   tfcensus units --render never --generate-stacks`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := g.checkFormats(formats...); err != nil {
-				return usageError(err)
-			}
 			res, err := g.loadConfig(cmd, d)
 			if err != nil {
 				return err
@@ -72,6 +69,7 @@ the config, or the working directory.`,
 	}
 	addDiscoveryFlags(cmd, &filters)
 	addOutputFlags(cmd, g, formats...)
+	setExitCodes(cmd)
 	return cmd
 }
 

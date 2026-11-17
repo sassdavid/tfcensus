@@ -119,9 +119,6 @@ func newScanCmd(d *app.Deps, g *globals) *cobra.Command {
   tfcensus scan --rules extra-rules.yaml --format md > scan.md
   tfcensus scan --explain arn:aws:ec2:eu-west-1:111111111111:security-group/sg-0123456789abcdef0`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := g.checkFormats(formats...); err != nil {
-				return usageError(err)
-			}
 			if a.minCount < 1 {
 				return usageError(fmt.Errorf("--%s must be at least 1, got %d", flagMinCount, a.minCount))
 			}
@@ -166,6 +163,7 @@ func newScanCmd(d *app.Deps, g *globals) *cobra.Command {
 		"instead of reading states")
 	f.IntVar(&a.concurrency, flagConcurrency, tfstate.DefaultConcurrency, "states read at the same time")
 	cmd.MarkFlagsMutuallyExclusive(flagExplain, flagExplainCoverage)
+	setFailOn(cmd, findingGateChoices())
 	registerCompletions(cmd, map[string]cobra.CompletionFunc{
 		flagTypes:       complete.DynamicList(complete.Timeout, complete.Types()),
 		flagLayers:      complete.List(layerChoices()),
@@ -176,6 +174,8 @@ func newScanCmd(d *app.Deps, g *globals) *cobra.Command {
 		flagIndex:       savedFiles(),
 		flagConcurrency: complete.NoFiles,
 	})
+	setExitCodes(cmd, ExitFindings, ExitAuth)
+	setRelated(cmd, "reference/fail-on")
 	return cmd
 }
 

@@ -1,0 +1,242 @@
+{
+  "name": "tfcensus",
+  "path": "/cli/",
+  "short": "Take a census of Terraform/OpenTofu and Terragrunt fleets on AWS",
+  "hidden": false,
+  "children": [
+    {
+      "name": "audit",
+      "path": "/cli/audit/",
+      "short": "Audit state backends",
+      "hidden": false,
+      "children": [
+        {
+          "name": "backend",
+          "path": "/cli/audit/backend",
+          "short": "Check state buckets, lock tables and the fleet of states",
+          "hidden": false
+        }
+      ]
+    },
+    {
+      "name": "cache",
+      "path": "/cli/cache/",
+      "short": "Inspect or clear the probe and scan caches",
+      "hidden": false,
+      "children": [
+        {
+          "name": "clear",
+          "path": "/cli/cache/clear",
+          "short": "Delete every entry of both caches",
+          "hidden": false
+        },
+        {
+          "name": "info",
+          "path": "/cli/cache/info",
+          "short": "Show each cache's directory, entry count, size and freshness",
+          "hidden": false
+        }
+      ]
+    },
+    {
+      "name": "codify",
+      "path": "/cli/codify",
+      "short": "Write import blocks for unmanaged resources from a scan report",
+      "hidden": false
+    },
+    {
+      "name": "completion",
+      "path": "/cli/completion",
+      "short": "Generate the autocompletion script for the specified shell",
+      "hidden": false
+    },
+    {
+      "name": "config",
+      "path": "/cli/config/",
+      "short": "Inspect and validate configuration",
+      "hidden": false,
+      "children": [
+        {
+          "name": "init",
+          "path": "/cli/config/init",
+          "short": "Write a commented config file",
+          "hidden": false
+        },
+        {
+          "name": "path",
+          "path": "/cli/config/path",
+          "short": "Print the config file locations tfcensus reads",
+          "hidden": false
+        },
+        {
+          "name": "show",
+          "path": "/cli/config/show",
+          "short": "Print the effective configuration",
+          "hidden": false
+        },
+        {
+          "name": "validate",
+          "path": "/cli/config/validate",
+          "short": "Validate config files against the schema",
+          "hidden": false
+        }
+      ]
+    },
+    {
+      "name": "doctor",
+      "path": "/cli/doctor",
+      "short": "Check tool versions, AWS credentials and the inventory layers of each account and region",
+      "hidden": false
+    },
+    {
+      "name": "drift",
+      "path": "/cli/drift",
+      "short": "Find drift between the units' state and AWS",
+      "hidden": false
+    },
+    {
+      "name": "inventory",
+      "path": "/cli/inventory",
+      "short": "Read each unit's state: versions, providers, resource counts, serial and lineage",
+      "hidden": false
+    },
+    {
+      "name": "mcp",
+      "path": "/cli/mcp",
+      "short": "Serve units, inventory, whois, scan_summary, audit_findings and drift_summary to an MCP client over stdio",
+      "hidden": false
+    },
+    {
+      "name": "move",
+      "path": "/cli/move/",
+      "short": "Move resources between the states of Terragrunt units",
+      "hidden": false,
+      "children": [
+        {
+          "name": "apply",
+          "path": "/cli/move/apply",
+          "short": "Apply a migration file to the units' states",
+          "hidden": false
+        },
+        {
+          "name": "mark-applied",
+          "path": "/cli/move/mark-applied",
+          "short": "Record migration blocks as applied without changing state",
+          "hidden": false
+        },
+        {
+          "name": "plan",
+          "path": "/cli/move/plan",
+          "short": "Verify a migration file with plans, without writing anything",
+          "hidden": false
+        },
+        {
+          "name": "rollback",
+          "path": "/cli/move/rollback",
+          "short": "Restore the states a migration file changed",
+          "hidden": false
+        },
+        {
+          "name": "status",
+          "path": "/cli/move/status",
+          "short": "Show whether each migration block is applied in each unit",
+          "hidden": false
+        },
+        {
+          "name": "suggest",
+          "path": "/cli/move/suggest",
+          "short": "Draft a migration file from the moves that plans show",
+          "hidden": false
+        }
+      ]
+    },
+    {
+      "name": "notify",
+      "path": "/cli/notify",
+      "short": "Publish saved scan, drift and audit reports to Slack, GitHub, Bitbucket or files",
+      "hidden": false
+    },
+    {
+      "name": "report",
+      "path": "/cli/report/",
+      "short": "Render saved scan, drift, audit and index files without collecting again",
+      "hidden": false,
+      "children": [
+        {
+          "name": "audit",
+          "path": "/cli/report/audit",
+          "short": "List the findings of a saved backend audit, highest severity first",
+          "hidden": false
+        },
+        {
+          "name": "drift",
+          "path": "/cli/report/drift",
+          "short": "Summarize a saved drift run: unit statuses and drifted resources",
+          "hidden": false
+        },
+        {
+          "name": "html",
+          "path": "/cli/report/html",
+          "short": "Write a static HTML report from scan, drift and audit JSON",
+          "hidden": false
+        },
+        {
+          "name": "inventory",
+          "path": "/cli/report/inventory",
+          "short": "Count the managed resources of a saved state index per unit and type",
+          "hidden": false
+        },
+        {
+          "name": "scan",
+          "path": "/cli/report/scan",
+          "short": "Summarize a saved scan: counts and the top unmanaged resources",
+          "hidden": false
+        },
+        {
+          "name": "units",
+          "path": "/cli/report/units",
+          "short": "List the units of a saved state index",
+          "hidden": false
+        }
+      ]
+    },
+    {
+      "name": "rules",
+      "path": "/cli/rules/",
+      "short": "Work with ownership rules",
+      "hidden": false,
+      "children": [
+        {
+          "name": "test",
+          "path": "/cli/rules/test",
+          "short": "Compile ownership rules and evaluate them against sample resources, offline",
+          "hidden": false
+        }
+      ]
+    },
+    {
+      "name": "scan",
+      "path": "/cli/scan",
+      "short": "Find AWS resources that no unit manages",
+      "hidden": false
+    },
+    {
+      "name": "units",
+      "path": "/cli/units",
+      "short": "List units with their state backend, target account and region",
+      "hidden": false
+    },
+    {
+      "name": "version",
+      "path": "/cli/version",
+      "short": "Print version and build information",
+      "hidden": false
+    },
+    {
+      "name": "whois",
+      "path": "/cli/whois",
+      "short": "Show which units manage an AWS resource",
+      "hidden": false
+    }
+  ]
+}

@@ -128,6 +128,9 @@ func DynamicList(timeout time.Duration, src Source) cobra.CompletionFunc {
 
 func dynamic(timeout time.Duration, src Source, list bool) cobra.CompletionFunc {
 	return func(cmd *cobra.Command, _ []string, toComplete string) ([]cobra.Completion, cobra.ShellCompDirective) {
+		if ctx := cmd.Context(); ctx != nil && ctx.Value(staticKey{}) != nil {
+			return nil, cobra.ShellCompDirectiveError
+		}
 		done, last := "", toComplete
 		if i := strings.LastIndex(toComplete, ","); list && i >= 0 {
 			done, last = toComplete[:i+1], toComplete[i+1:]
@@ -187,6 +190,36 @@ func withPrefix(cs []Choice, done, prefix string) []cobra.Completion {
 		default:
 			out = append(out, cobra.CompletionWithDesc(done+c.Value, c.Desc))
 		}
+	}
+	return out
+}
+
+type staticKey struct{}
+
+// WithoutDynamic returns a context in which [Dynamic] and [DynamicList] offer nothing, so a
+// caller can read the fixed choices of every flag without touching local files.
+func WithoutDynamic(ctx context.Context) context.Context {
+	return context.WithValue(ctx, staticKey{}, true)
+}
+
+// StaticValues returns the fixed values that f offers for an empty word: the choices of an enum
+// or list flag, or the keys of an assign flag. It returns nil for files, directories, free-form
+// and dynamic flags.
+func StaticValues(cmd *cobra.Command, f cobra.CompletionFunc) []Choice {
+	ctx := cmd.Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	cmd.SetContext(WithoutDynamic(ctx))
+	defer cmd.SetContext(ctx)
+	comps, directive := f(cmd, nil, "")
+	if directive&(cobra.ShellCompDirectiveFilterFileExt|cobra.ShellCompDirectiveFilterDirs|cobra.ShellCompDirectiveError) != 0 {
+		return nil
+	}
+	var out []Choice
+	for _, c := range comps {
+		value, desc, _ := strings.Cut(c, "\t")
+		out = append(out, Choice{Value: strings.TrimSuffix(value, "="), Desc: desc})
 	}
 	return out
 }

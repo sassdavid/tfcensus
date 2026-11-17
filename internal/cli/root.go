@@ -12,6 +12,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/app"
 	"github.com/sassdavid/tfcensus/internal/complete"
 	"github.com/sassdavid/tfcensus/internal/config"
+	"github.com/sassdavid/tfcensus/internal/docsurl"
 	"github.com/sassdavid/tfcensus/internal/render"
 )
 
@@ -91,7 +92,13 @@ func newRoot(d *app.Deps) (*cobra.Command, *globals) {
 		Long: `tfcensus lists Terraform/OpenTofu and Terragrunt units and their state, finds AWS
 resources that no unit manages, and audits state backends. It is read-only by default.
 
-stdout carries data, stderr carries logs. Use --format json for scripting.`,
+stdout carries data, stderr carries logs. Use --format json for scripting.
+
+Docs: ` + docsurl.Base + `.`,
+		Example: `  tfcensus doctor --profile 'acme-*'
+  tfcensus units
+  tfcensus scan --profile 'acme-*' --fail-on unmanaged
+  tfcensus audit backend --format md`,
 		SilenceErrors:     true,
 		SilenceUsage:      true,
 		DisableAutoGenTag: true,
@@ -200,6 +207,9 @@ func (g *globals) setup(cmd *cobra.Command, d *app.Deps) error {
 		Color:   render.UseColor(colorMode, d.Env.Lookup, logTTY) && app.EnableVirtualTerminal(logW),
 	})
 	g.outFormat = format.Resolve(app.IsTerminal(d.Stdout))
+	if err = g.checkAnnotated(cmd); err != nil {
+		return err
+	}
 	g.started = true
 	d.Logger.DebugContext(cmd.Context(), "starting", "command", cmd.CommandPath(), "format", string(g.outFormat))
 	return nil

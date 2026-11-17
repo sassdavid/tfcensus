@@ -70,11 +70,6 @@ warning. doctor exits 4 when every source fails, and 1 when a tool is older than
   tfcensus doctor --org --management-profile acme-mgmt --format json`,
 		Args: noArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			if err := g.outFormat.Check(
-				render.FormatTTY, render.FormatPlain, render.FormatMD, render.FormatJSON,
-			); err != nil {
-				return usageError(err)
-			}
 			res, err := g.loadConfig(cmd, d)
 			if err != nil {
 				return err
@@ -90,6 +85,8 @@ warning. doctor exits 4 when every source fails, and 1 when a tool is older than
 	addAccountFilterFlags(cmd)
 	addAllRegionsFlags(cmd)
 	cmd.Flags().BoolVar(&refresh, "refresh", false, "probe again even when the cached result is fresh")
+	setFormats(cmd, render.FormatTTY, render.FormatPlain, render.FormatMD, render.FormatJSON)
+	setExitCodes(cmd, ExitAuth)
 	return cmd
 }
 

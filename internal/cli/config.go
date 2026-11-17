@@ -18,6 +18,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/buildinfo"
 	"github.com/sassdavid/tfcensus/internal/complete"
 	"github.com/sassdavid/tfcensus/internal/config"
+	"github.com/sassdavid/tfcensus/internal/docsurl"
 	"github.com/sassdavid/tfcensus/internal/render"
 )
 
@@ -31,12 +32,18 @@ func newConfigCmd(d *app.Deps, g *globals) *cobra.Command {
 
 User file:    $XDG_CONFIG_HOME/tfcensus/config.yaml (~/.config/tfcensus/config.yaml)
 Project file: .tfcensus.yaml, found by walking up from the working directory to the git root
-Env vars:     TFCENSUS_<KEY> with dots as underscores, e.g. TFCENSUS_CACHE_TTL=30m.
+Env vars:     TFCENSUS_<KEY> with dots and dashes as underscores, e.g. TFCENSUS_CACHE_TTL=30m.
               Use __ to mark nesting explicitly (TFCENSUS_DISCOVERY__GENERATE_STACKS=true).
-              Lists are comma-separated.
+              Only scalars and string lists can be set; lists are comma-separated.
+              Maps and lists of objects need a file. An unknown TFCENSUS_* variable is
+              ignored with a warning.
 
 Unknown keys and wrong types are errors (exit 2), reported with file:line:column.
-'tfcensus config init' writes a commented file to start from.`,
+'tfcensus config init' writes a commented file to start from. Every key, its default and
+its variable are listed at ` + docsurl.Page("reference/config") + `.`,
+		Example: `  tfcensus config init
+  tfcensus config show --sources
+  tfcensus config validate .tfcensus.yaml`,
 		Args: noArgs,
 	}
 	cmd.AddCommand(
@@ -45,6 +52,7 @@ Unknown keys and wrong types are errors (exit 2), reported with file:line:column
 		newConfigValidateCmd(d, g),
 		newConfigInitCmd(d),
 	)
+	setRelated(cmd, "reference/config", "reference/environment")
 	return cmd
 }
 
@@ -53,14 +61,14 @@ func newConfigShowCmd(d *app.Deps, g *globals) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "show",
 		Short: "Print the effective configuration",
+		Long: `show merges the defaults, the user file, the project file, TFCENSUS_* variables and flags,
+and prints the result. --sources adds the layer each value came from, and for env and flag values
+the variable or flag that set it.`,
 		Example: `  tfcensus config show
   tfcensus config show --sources
   TFCENSUS_CACHE_TTL=30m tfcensus config show --sources --format json`,
 		Args: noArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			if err := g.outFormat.Check(render.FormatTTY, render.FormatPlain, render.FormatJSON); err != nil {
-				return usageError(err)
-			}
 			res, err := g.loadConfig(cmd, d)
 			if err != nil {
 				return err
@@ -76,6 +84,8 @@ func newConfigShowCmd(d *app.Deps, g *globals) *cobra.Command {
 		},
 	}
 	cmd.Flags().BoolVar(&sources, "sources", false, "show where each value comes from")
+	setFormats(cmd, textFormats()...)
+	setExitCodes(cmd)
 	return cmd
 }
 
@@ -138,14 +148,15 @@ func displayValue(v any) string {
 }
 
 func newConfigPathCmd(d *app.Deps, g *globals) *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "path",
 		Short: "Print the config file locations tfcensus reads",
-		Args:  noArgs,
+		Long: `path prints the user file and the project file that tfcensus would read from the working
+directory, and whether each one exists. --config or TFCENSUS_CONFIG replaces the project file.`,
+		Example: `  tfcensus config path
+  tfcensus config path --config ci/tfcensus.yaml --format json`,
+		Args: noArgs,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			if err := g.outFormat.Check(render.FormatTTY, render.FormatPlain, render.FormatJSON); err != nil {
-				return usageError(err)
-			}
 			cwd, err := d.Getwd()
 			if err != nil {
 				return fmt.Errorf("get working directory: %w", err)
@@ -161,6 +172,9 @@ func newConfigPathCmd(d *app.Deps, g *globals) *cobra.Command {
 			return writeFiles(d, files)
 		},
 	}
+	setFormats(cmd, textFormats()...)
+	setExitCodes(cmd)
+	return cmd
 }
 
 func writeFiles(d *app.Deps, files []config.File) error {
@@ -185,7 +199,7 @@ func writeFiles(d *app.Deps, files []config.File) error {
 }
 
 func newConfigValidateCmd(d *app.Deps, g *globals) *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:               "validate [file...]",
 		Short:             "Validate config files against the schema",
 		ValidArgsFunction: complete.Files("yaml", "yml"),
@@ -196,9 +210,6 @@ Exits 2 and prints every problem with file:line:column when something is invalid
 		Example: `  tfcensus config validate
   tfcensus config validate .tfcensus.yaml ~/.config/tfcensus/config.yaml`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := g.outFormat.Check(render.FormatTTY, render.FormatPlain, render.FormatJSON); err != nil {
-				return usageError(err)
-			}
 			valid, err := validateConfig(cmd, d, g, args)
 			if err != nil {
 				return err
@@ -210,6 +221,9 @@ Exits 2 and prints every problem with file:line:column when something is invalid
 			return writeValid(d, valid)
 		},
 	}
+	setFormats(cmd, textFormats()...)
+	setExitCodes(cmd)
+	return cmd
 }
 
 func writeValid(d *app.Deps, valid []string) error {
@@ -297,6 +311,8 @@ to stderr.`,
 	}
 	cmd.Flags().BoolVar(&force, "force", false, "replace an existing file")
 	cmd.Flags().BoolVar(&user, "user", false, "write the user file instead of "+config.ProjectFileName)
+	setFormats(cmd)
+	setExitCodes(cmd)
 	return cmd
 }
 

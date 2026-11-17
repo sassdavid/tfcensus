@@ -8,6 +8,7 @@ import (
 	"github.com/invopop/jsonschema"
 
 	"github.com/sassdavid/tfcensus/internal/config"
+	"github.com/sassdavid/tfcensus/internal/docsurl"
 	"github.com/sassdavid/tfcensus/internal/testutil"
 	"github.com/sassdavid/tfcensus/schemas"
 )
@@ -21,7 +22,7 @@ func generateSchema(t *testing.T) []byte {
 		Anonymous:                  true,
 	}
 	s := r.Reflect(&config.Config{})
-	s.ID = "https://github.com/sassdavid/tfcensus/schemas/" + schemas.ConfigV1
+	s.ID = jsonschema.ID(docsurl.Schema(schemas.ConfigV1))
 	s.Title = "tfcensus configuration"
 	s.Description = "Schema for $XDG_CONFIG_HOME/tfcensus/config.yaml and .tfcensus.yaml. " +
 		"Generated from internal/config by `mise run test:golden -- -update`; do not edit."

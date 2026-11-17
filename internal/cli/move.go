@@ -24,6 +24,8 @@ import (
 	"github.com/sassdavid/tfcensus/internal/prompt"
 	"github.com/sassdavid/tfcensus/internal/render"
 	"github.com/sassdavid/tfcensus/internal/tfstate"
+
+	"github.com/sassdavid/tfcensus/internal/docsurl"
 )
 
 const (
@@ -60,18 +62,24 @@ func newMoveCmd(d *app.Deps, g *globals) *cobra.Command {
 		Use:   "move",
 		Short: "Move resources between the states of Terragrunt units",
 		Long: `move runs migration files: migration "units" blocks that move resources from one unit's state
-to others, or run tfmigrate-style mv, xmv and rm actions inside one state. See
-docs/runbooks/move.md for the file format and a full walkthrough.
+to others, or run tfmigrate-style mv, xmv and rm actions inside one state. The file format and a full
+walkthrough are at ` + docsurl.Page("runbooks/move") + `.
 
 suggest drafts a migration file from plans. plan and status only read. apply, rollback and mark-applied are the only tfcensus commands that
 write to a backend; each asks you to type the block's destination unit path first, or takes
 --yes. Without a terminal and without --yes they exit 2 and change nothing.
+
+Exit codes: 3 when a block is rejected, 4 when the backend credentials fail, 2 for a file or flag
+error or a missing confirmation, and 1 for any other failure.
 
 Unit paths in the file are relative to --repo (default: the current directory) and name units
 with an s3 backend. Write path:workspace for a workspace other than default, such as
 live/app:blue; the state is then read from <workspace_key_prefix>/<workspace>/<key> (env: when
 the backend sets no prefix), and terragrunt runs with TF_WORKSPACE. The workspace must exist.
 The native strategy works on the default workspace only.`,
+		Example: `  tfcensus move suggest --from live/network --to live/vpc --draft migrations/split_network.hcl
+  tfcensus move plan migrations/split_network.hcl
+  tfcensus move apply migrations/split_network.hcl --yes`,
 	}
 	cmd.AddCommand(
 		newMoveSuggestCmd(d, g),
@@ -83,7 +91,8 @@ changes don't count. Blocks run in order, so a later block sees an earlier one's
 
 A native block only lists the files apply would write.
 
-The exit code is 3 when a block is rejected (MV-VERIFY, MV-PLAN, MV-ACCOUNT or MV-VERSIONING).`),
+Exit codes: 3 when a block is rejected (MV-VERIFY, MV-PLAN, MV-ACCOUNT or MV-VERSIONING), 4 when
+the backend credentials fail, and 2 for a file or flag error.`),
 		newMoveSubCmd(d, g, moveApply, "Apply a migration file to the units' states",
 			`apply plans and verifies each pending block like plan, then asks you to type the block's last
 destination unit path (its from path for an in-place block). It checks that no state changed since
@@ -95,7 +104,8 @@ A native block writes moves_tfcensus_<block>.tf into each unit (import blocks in
 removed blocks in the source), then plans each unit to check the files. It changes no state and
 no history; run mark-applied after your normal apply.
 
-apply needs bucket versioning (S3-VER). The exit code is 3 when a block is rejected.`),
+apply needs bucket versioning (S3-VER). Exit codes: 3 when a block is rejected, 4 when the backend
+credentials fail, and 2 for a file or flag error, or with no terminal and no --yes.`),
 		newMoveSubCmd(d, g, moveRollback, "Restore the states a migration file changed",
 			`rollback restores every unit of each applied block to the S3 object version it had before
 apply pushed it, byte for byte, newest block first and the source before its destinations. It takes
@@ -111,6 +121,7 @@ rolled back by tfcensus.`),
 			`status reads the history object next to each involved unit's state and shows each block as
 applied, pending or partial (applied in some units only).`),
 	)
+	setRelated(cmd, "runbooks/move")
 	return cmd
 }
 
@@ -124,13 +135,6 @@ func newMoveSubCmd(d *app.Deps, g *globals, which moveCommand, short, long strin
 		Example: fmt.Sprintf("  tfcensus move %s migrations/split_network.hcl\n"+
 			"  tfcensus move %s migrations/split_network.hcl --block split_network --var env=prod", which, which),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			allowed := []render.Format{render.FormatTTY, render.FormatPlain, render.FormatJSON}
-			if which == movePlan || which == moveApply {
-				allowed = append(allowed, render.FormatSARIF)
-			}
-			if err := g.outFormat.Check(allowed...); err != nil {
-				return usageError(err)
-			}
 			res, err := g.loadConfig(cmd, d)
 			if err != nil {
 				return err
@@ -138,6 +142,12 @@ func newMoveSubCmd(d *app.Deps, g *globals, which moveCommand, short, long strin
 			return runMove(cmd, d, g, &res.Config, which, args[0], a)
 		},
 	}
+	formats := textFormats()
+	if which == movePlan || which == moveApply {
+		formats = append(formats, render.FormatSARIF)
+	}
+	setFormats(cmd, formats...)
+	setExitCodes(cmd, ExitFindings, ExitAuth)
 	f := cmd.Flags()
 	f.StringSliceVar(&a.blocks, flagBlock, nil, "run only these blocks (default: all, in file order)")
 	f.StringArrayVar(&a.vars, flagVar, nil, "set var.NAME in the migration file, as NAME=VALUE")

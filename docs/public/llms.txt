@@ -1,0 +1,65 @@
+# tfcensus
+
+> Count what your Terraform manages: units, states and the AWS resources no unit manages.
+
+## Start
+
+- [Install](https://tfcensus.sasskovacs.dev/install): Install tfcensus from a release archive, with mise or with go install, verify the signature, and set up shell completion and man pages.
+
+## Guides
+
+- [Move resources between units](https://tfcensus.sasskovacs.dev/runbooks/move): Move resources between Terragrunt units with tfcensus move. Plan, apply, roll back from S3 object versions, or use the native strategy.
+- [Publish reports with notify](https://tfcensus.sasskovacs.dev/runbooks/notify): Send drift, unmanaged resources and backend audit findings to Slack, GitHub issues, pull request comments or files with tfcensus notify.
+- [AI summary of drift in CI](https://tfcensus.sasskovacs.dev/ci/ai-summary): Add an opt-in job to the drift workflow that sends the drift report to a model your organization picks and appends its answer to the job summary.
+
+## Reference
+
+- [Configuration](https://tfcensus.sasskovacs.dev/reference/config): Every tfcensus config key with its type, default, environment variable and flag.
+- [Environment variables](https://tfcensus.sasskovacs.dev/reference/environment): The environment variables tfcensus reads, and the ones it passes to child processes.
+- [Exit codes](https://tfcensus.sasskovacs.dev/reference/exit-codes): What each tfcensus exit code means, and which commands return it.
+- [Fail-on values](https://tfcensus.sasskovacs.dev/reference/fail-on): The --fail-on values of each tfcensus command, which make it exit 3.
+- [JSON schemas](https://tfcensus.sasskovacs.dev/reference/schemas): The JSON schemas of tfcensus's config file and JSON output, with the URL each is served at.
+- [MCP tools and prompts](https://tfcensus.sasskovacs.dev/reference/mcp): The tools and prompts that tfcensus mcp serves, with their input schemas.
+- [Read-only IAM policy](https://tfcensus.sasskovacs.dev/iam/): The read-only IAM policy for every tfcensus command except move apply, rollback and mark-applied, and how to narrow it.
+
+## CLI
+
+- [tfcensus](https://tfcensus.sasskovacs.dev/cli/): Take a census of Terraform/OpenTofu and Terragrunt fleets on AWS
+- [Global flags](https://tfcensus.sasskovacs.dev/cli/global-flags): Flags that every tfcensus command accepts.
+- [tfcensus audit](https://tfcensus.sasskovacs.dev/cli/audit/): Audit state backends
+- [tfcensus audit backend](https://tfcensus.sasskovacs.dev/cli/audit/backend): Check state buckets, lock tables and the fleet of states
+- [tfcensus cache](https://tfcensus.sasskovacs.dev/cli/cache/): Inspect or clear the probe and scan caches
+- [tfcensus cache clear](https://tfcensus.sasskovacs.dev/cli/cache/clear): Delete every entry of both caches
+- [tfcensus cache info](https://tfcensus.sasskovacs.dev/cli/cache/info): Show each cache's directory, entry count, size and freshness
+- [tfcensus codify](https://tfcensus.sasskovacs.dev/cli/codify): Write import blocks for unmanaged resources from a scan report
+- [tfcensus completion](https://tfcensus.sasskovacs.dev/cli/completion): Generate the autocompletion script for the specified shell
+- [tfcensus config](https://tfcensus.sasskovacs.dev/cli/config/): Inspect and validate configuration
+- [tfcensus config init](https://tfcensus.sasskovacs.dev/cli/config/init): Write a commented config file
+- [tfcensus config path](https://tfcensus.sasskovacs.dev/cli/config/path): Print the config file locations tfcensus reads
+- [tfcensus config show](https://tfcensus.sasskovacs.dev/cli/config/show): Print the effective configuration
+- [tfcensus config validate](https://tfcensus.sasskovacs.dev/cli/config/validate): Validate config files against the schema
+- [tfcensus doctor](https://tfcensus.sasskovacs.dev/cli/doctor): Check tool versions, AWS credentials and the inventory layers of each account and region
+- [tfcensus drift](https://tfcensus.sasskovacs.dev/cli/drift): Find drift between the units' state and AWS
+- [tfcensus inventory](https://tfcensus.sasskovacs.dev/cli/inventory): Read each unit's state: versions, providers, resource counts, serial and lineage
+- [tfcensus mcp](https://tfcensus.sasskovacs.dev/cli/mcp): Serve units, inventory, whois, scan_summary, audit_findings and drift_summary to an MCP client over stdio
+- [tfcensus move](https://tfcensus.sasskovacs.dev/cli/move/): Move resources between the states of Terragrunt units
+- [tfcensus move apply](https://tfcensus.sasskovacs.dev/cli/move/apply): Apply a migration file to the units' states
+- [tfcensus move mark-applied](https://tfcensus.sasskovacs.dev/cli/move/mark-applied): Record migration blocks as applied without changing state
+- [tfcensus move plan](https://tfcensus.sasskovacs.dev/cli/move/plan): Verify a migration file with plans, without writing anything
+- [tfcensus move rollback](https://tfcensus.sasskovacs.dev/cli/move/rollback): Restore the states a migration file changed
+- [tfcensus move status](https://tfcensus.sasskovacs.dev/cli/move/status): Show whether each migration block is applied in each unit
+- [tfcensus move suggest](https://tfcensus.sasskovacs.dev/cli/move/suggest): Draft a migration file from the moves that plans show
+- [tfcensus notify](https://tfcensus.sasskovacs.dev/cli/notify): Publish saved scan, drift and audit reports to Slack, GitHub, Bitbucket or files
+- [tfcensus report](https://tfcensus.sasskovacs.dev/cli/report/): Render saved scan, drift, audit and index files without collecting again
+- [tfcensus report audit](https://tfcensus.sasskovacs.dev/cli/report/audit): List the findings of a saved backend audit, highest severity first
+- [tfcensus report drift](https://tfcensus.sasskovacs.dev/cli/report/drift): Summarize a saved drift run: unit statuses and drifted resources
+- [tfcensus report html](https://tfcensus.sasskovacs.dev/cli/report/html): Write a static HTML report from scan, drift and audit JSON
+- [tfcensus report inventory](https://tfcensus.sasskovacs.dev/cli/report/inventory): Count the managed resources of a saved state index per unit and type
+- [tfcensus report scan](https://tfcensus.sasskovacs.dev/cli/report/scan): Summarize a saved scan: counts and the top unmanaged resources
+- [tfcensus report units](https://tfcensus.sasskovacs.dev/cli/report/units): List the units of a saved state index
+- [tfcensus rules](https://tfcensus.sasskovacs.dev/cli/rules/): Work with ownership rules
+- [tfcensus rules test](https://tfcensus.sasskovacs.dev/cli/rules/test): Compile ownership rules and evaluate them against sample resources, offline
+- [tfcensus scan](https://tfcensus.sasskovacs.dev/cli/scan): Find AWS resources that no unit manages
+- [tfcensus units](https://tfcensus.sasskovacs.dev/cli/units): List units with their state backend, target account and region
+- [tfcensus version](https://tfcensus.sasskovacs.dev/cli/version): Print version and build information
+- [tfcensus whois](https://tfcensus.sasskovacs.dev/cli/whois): Show which units manage an AWS resource

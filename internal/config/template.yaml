@@ -51,7 +51,7 @@ schema_version: 1
 #     txt_prefix: ""               # --txt-prefix; empty tries no prefix, then external-dns-
 #     txt_suffix: ""               # --txt-suffix
 #
-# rules: []                        # ownership rules, see docs/plan/specs/ownership-rules.md
+# rules: []                        # ownership rules, see {{docs}}/reference/config#rules
 #
 # audit:
 #   policy:

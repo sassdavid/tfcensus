@@ -447,25 +447,33 @@ theme in the same session.
 ### M23: Generated reference (shared) ([docs-site](specs/docs-site.md#generated-content-shared-generators))
 Scope: every fact the code can state reaches the site from code, with a test per page. The
 generators are shared with relgap; tool-specific catalogues wait for M24.
-- [ ] `scripts/gendocs` writes the nested CLI reference with frontmatter, flag tables, formats,
+- [x] `scripts/gendocs` writes the nested CLI reference with frontmatter, flag tables, formats,
   `--fail-on` values, exit codes, examples, subcommands and related links; one global flags page;
   one completion page; escaped `Long` text with indented blocks as fences; `commands.json`. The
   flat `tfcensus_*.md` files are gone, links to them are updated, and `cli/**` leaves
   `srcExclude`. (docs-site criterion 4)
-- [ ] `Annotations["formats"]`, `["fail-on"]` and `["exit-codes"]` are set on every command, with
+- [x] `Annotations["formats"]`, `["fail-on"]` and `["exit-codes"]` are set on every command, with
   tests that run the commands and compare. The stale help texts in docs-content.md (inventory,
   move and notify exit codes, `config` env rule, `whois --live` default) are fixed.
-- [ ] A test fails for a non-hidden command without `Long` or `Example` outside the allowlist,
+  Every runnable command has the annotations; group commands run nothing. The root checks
+  `--format`, `--out` and `--fail-on` against them before the command runs. The exit-code test
+  reads the code behind each RunE (`TestAnnotations_exitCodes`); `mcp` is the one exception, with
+  its reason in the test.
+- [x] A test fails for a non-hidden command without `Long` or `Example` outside the allowlist,
   and the missing texts listed in docs-content.md are written.
-- [ ] `/reference/config`, `/reference/environment`, `/reference/exit-codes`,
+- [x] `/reference/config`, `/reference/environment`, `/reference/exit-codes`,
   `/reference/schemas` and `/reference/mcp` are generated, each with the test docs-site.md names.
   Schemas are served at `/schemas/<name>.json` and their `$id` matches. (docs-site criterion 5)
-- [ ] `internal/docsurl` exists, and help texts, runtime messages and the config template use it.
+  The tests: `TestConfigSchema`, `TestEnvironment`, `TestAnnotations_exitCodes`, `TestSchemaIDs`
+  and the MCP page in `TestGenerated`. Every schema's `$id` moved to the site URL.
+  `/reference/fail-on` is generated here too, because the generator is shared.
+- [x] `internal/docsurl` exists, and help texts, runtime messages and the config template use it.
   A test checks every path against the built site. (docs-site criterion 6)
-- [ ] The snippet check runs in `docs:build` and finds nothing. (docs-site criterion 7)
-- [ ] `sidebar.mts` builds the CLI section from `commands.json`, and `llms.txt` is generated and
+  `docs:build` runs `TestPaths` in `internal/docsurl` with `DOCS_DIST` set, which also checks anchors.
+- [x] The snippet check runs in `docs:build` and finds nothing. (docs-site criterion 7)
+- [x] `sidebar.mts` builds the CLI section from `commands.json`, and `llms.txt` is generated and
   stale-checked.
-- [ ] `mise run docs` regenerates everything and exits 1 on any change. A PR that changes a flag
+- [x] `mise run docs` regenerates everything and exits 1 on any change. A PR that changes a flag
   without regenerating fails CI. (docs-site criterion 3)
 
 ### M24: Getting started and tool reference (tfcensus only) ([docs-content](specs/docs-content.md))

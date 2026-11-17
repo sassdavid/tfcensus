@@ -26,7 +26,12 @@ func newRulesCmd(d *app.Deps, g *globals) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "rules",
 		Short: "Work with ownership rules",
-		Args:  noArgs,
+		Long: `Ownership rules sort the resources no unit manages into categories such as aws-managed,
+other-iac or derived. The built-in packs run first, then the rules under rules: in the config and
+in --rules files. rules test shows which rule matches a sample resource without calling AWS.`,
+		Example: `  tfcensus rules test rules.yaml
+  tfcensus rules test rules.yaml --resource samples.json --format json`,
+		Args: noArgs,
 	}
 	cmd.AddCommand(newRulesTestCmd(d, g))
 	return cmd
@@ -57,9 +62,6 @@ the config's. rules test makes no AWS calls. Expired rules show as expired.`,
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := g.outFormat.Check(render.FormatTTY, render.FormatPlain, render.FormatJSON); err != nil {
-				return usageError(err)
-			}
 			res, err := g.loadConfig(cmd, d)
 			if err != nil {
 				return err
@@ -88,6 +90,8 @@ the config's. rules test makes no AWS calls. Expired rules show as expired.`,
 	cmd.Flags().StringVar(&resource, flagResource, "", "JSON file with a resource or an array of resources to evaluate")
 	_ = cmd.RegisterFlagCompletionFunc(flagResource, complete.Files("json"))
 	cmd.ValidArgsFunction = complete.Files("yaml", "yml")
+	setFormats(cmd, textFormats()...)
+	setExitCodes(cmd)
 	return cmd
 }
 

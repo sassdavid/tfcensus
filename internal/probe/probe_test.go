@@ -70,10 +70,10 @@ func TestProbeEdgeCases(t *testing.T) {
 		"Resource Explorer supports 3 resource types.",
 		"eu-north-1: no Resource Explorer index. An admin can create one (`aws resource-explorer-2 create-index --region eu-north-1`).",
 		"eu-north-1: no AWS Config recorder, so the config layer is off here.",
-		"eu-west-1: access denied for resource-explorer-2:ListViews. Grant the actions in docs/iam/tfcensus-readonly.json.",
+		"eu-west-1: access denied for resource-explorer-2:ListViews. Grant the actions in the read-only policy: https://tfcensus.sasskovacs.dev/iam/",
 		"eu-west-1: AWS Config recorder default is stopped, so the config layer is off here.",
-		"us-east-1: access denied for config:DescribeConfigurationRecorders. Grant the actions in docs/iam/tfcensus-readonly.json.",
-		"us-east-1: access denied for config:DescribeConfigurationAggregators. Grant the actions in docs/iam/tfcensus-readonly.json.",
+		"us-east-1: access denied for config:DescribeConfigurationRecorders. Grant the actions in the read-only policy: https://tfcensus.sasskovacs.dev/iam/",
+		"us-east-1: access denied for config:DescribeConfigurationAggregators. Grant the actions in the read-only policy: https://tfcensus.sasskovacs.dev/iam/",
 	}, r.Notes)
 }
 
@@ -86,8 +86,11 @@ func TestProbeDenied(t *testing.T) {
 	require.Len(t, r.Regions, 1)
 	assert.Equal(t, "eu-west-1", r.Regions[0].Region)
 	assert.Equal(t, []probe.Layer{probe.LayerCC, probe.LayerNative}, r.Regions[0].Layers)
-	assert.Contains(t, r.Notes,
-		"access denied for resource-explorer-2:ListIndexes. Grant the actions in docs/iam/tfcensus-readonly.json.")
+	assert.Contains(
+		t,
+		r.Notes,
+		"access denied for resource-explorer-2:ListIndexes. Grant the actions in the read-only policy: https://tfcensus.sasskovacs.dev/iam/",
+	)
 }
 
 type countingTransport struct{ calls atomic.Int32 }

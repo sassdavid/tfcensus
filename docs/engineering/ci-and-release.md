@@ -12,9 +12,9 @@
 | `mise run test` | `go test -race -count=1 ./...` |
 | `mise run test:golden -- -update` | regenerates golden files (review the diff!). Sets `GOLDEN_UPDATE=1`, which `internal/testutil.Golden` and testscript's `UpdateScripts` honour |
 | `mise run fuzz` | runs every Go fuzz target (`func FuzzXxx`) for 60 s each; `mise run fuzz -- 10s` sets another duration. Passes when a repo has no targets |
-| `mise run docs` | regenerates `docs/cli/` via cobra/doc and the site data files (`scripts/gensite`), and fails if a checked-in copy differs |
+| `mise run docs` | regenerates the CLI reference (`docs/cli/`), the generated `docs/reference/` pages and `docs/public/schemas/` with `scripts/gendocs`, and the site data files with `scripts/gensite`, and fails if a checked-in copy differs |
 | `mise run lint:docs` | `oxfmt --check` on the docs site's config, theme and components (part of `lint`; tools from `mise.docs.toml`) |
-| `mise run docs:build` | the docs site checks in order: `mise run docs`, the contrast and unit tests (`node --test`), `vitepress build` and `lychee --offline`. Needs `MISE_ENV=docs mise install` and `aube install --frozen-lockfile` in `docs/` first. `docs:dev` and `docs:preview` serve the site |
+| `mise run docs:build` | the docs site checks in order: `mise run docs`, the `llms.txt` stale check, the snippet check (`gendocs -snippets`), the contrast and unit tests (`node --test`), `vitepress build`, the docs URL check against the built site and `lychee --offline`. Needs `MISE_ENV=docs mise install` and `aube install --frozen-lockfile` in `docs/` first. `docs:dev` and `docs:preview` serve the site |
 | `mise run snapshot` | `goreleaser release --snapshot --clean --skip=sign`. Keyless cosign needs CI's OIDC token, and goreleaser OSS can't make `signs:` conditional, so local snapshots skip signing. The snapshot builds the container image once per platform into the local Docker daemon, so it needs Docker |
 | `mise run sibling:diff` | compares the files shared with relgap ([.claude/rules/siblings.md](../../.claude/rules/siblings.md)) |
 

@@ -1,0 +1,395 @@
+package main
+
+import (
+	"encoding/json"
+	"go/ast"
+	"go/parser"
+	"go/token"
+	"io/fs"
+	"os"
+	"path/filepath"
+	"regexp"
+	"slices"
+	"strconv"
+	"strings"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"github.com/sassdavid/tfcensus/internal/cli"
+	"github.com/sassdavid/tfcensus/internal/config"
+	"github.com/sassdavid/tfcensus/internal/docsurl"
+	"github.com/sassdavid/tfcensus/schemas"
+)
+
+const (
+	repoRoot = "../.."
+	docsDir  = repoRoot + "/docs"
+)
+
+// TestGenerated checks that the committed pages match what gendocs writes now, so a flag or
+// schema change without mise run docs fails go test as well as the docs task.
+func TestGenerated(t *testing.T) {
+	t.Parallel()
+	files, err := generate(t.Context(), docsDir)
+	require.NoError(t, err)
+	for name, want := range files {
+		have, rerr := os.ReadFile(filepath.Join(docsDir, name))
+		if assert.NoError(t, rerr, "%s is missing; run mise run docs", name) {
+			assert.Equal(t, string(want), string(have), "%s is stale; run mise run docs", name)
+		}
+	}
+	for _, dir := range ownedDirs() {
+		_ = filepath.WalkDir(filepath.Join(docsDir, dir), func(p string, e fs.DirEntry, err error) error {
+			if err == nil && !e.IsDir() {
+				rel, _ := filepath.Rel(docsDir, p)
+				_, ok := files[filepath.ToSlash(rel)]
+				assert.True(t, ok, "%s is not generated any more; run mise run docs", rel)
+			}
+			return nil
+		})
+	}
+}
+
+// TestCLIPages checks what docs-site.md says no CLI page may show.
+func TestCLIPages(t *testing.T) {
+	t.Parallel()
+	files, err := generate(t.Context(), docsDir)
+	require.NoError(t, err)
+	rawTag := regexp.MustCompile(`<[a-z][a-z0-9|.-]*>`)
+	for name, b := range files {
+		if !strings.HasPrefix(name, "cli/") || !strings.HasSuffix(name, ".md") {
+			continue
+		}
+		text := string(b)
+		assert.NotContains(t, text, "[=true|false]", name)
+		assert.Contains(t, text, "\ndescription: \"", name)
+		assert.Contains(t, text, "editLink: false", name)
+		if name != "cli/global-flags.md" {
+			assert.Contains(t, text, "(/cli/global-flags)", name)
+		}
+		inFence := false
+		for i, line := range strings.Split(text, "\n") {
+			if strings.HasPrefix(line, "```") {
+				inFence = !inFence
+				continue
+			}
+			if inFence {
+				continue
+			}
+			outside := regexp.MustCompile("`[^`]*`").ReplaceAllString(line, "")
+			outside = strings.ReplaceAll(outside, "<br>", "")
+			outside = regexp.MustCompile(`<span v-pre>[^<]*</span>`).ReplaceAllString(outside, "")
+			assert.False(t, rawTag.MatchString(outside), "%s:%d: raw tag outside code: %s", name, i+1, line)
+			assert.NotContains(t, outside, "{{", "%s:%d", name, i+1)
+		}
+	}
+}
+
+func TestProse(t *testing.T) {
+	t.Parallel()
+	tests := []struct{ in, want string }{
+		{"read <file> and {{ x }}", "read &lt;file&gt; and <span v-pre>{{</span> x <span v-pre>}}</span>"},
+		{"globs such as 'acme-*' and a_b", `globs such as 'acme-\*' and a\_b`},
+		{"keep `a <b>` as code", "keep `a <b>` as code"},
+		{"intro:\n\n  a  one\n  b  two\n\nafter", "intro:\n\n```text\na  one\nb  two\n```\n\nafter"},
+		{"Env:   X\n       Y", "```text\nEnv:   X\n       Y\n```"},
+		{"#### Linux:\n\n\tsource x", "**Linux**\n\n```text\nsource x\n```"},
+		{"- not a list", `\- not a list`},
+	}
+	for _, tt := range tests {
+		assert.Equal(t, tt.want, prose(tt.in), tt.in)
+	}
+}
+
+func TestSlug(t *testing.T) {
+	t.Parallel()
+	assert.Equal(t, "accounts-org-role", slug("accounts.org.role"))
+	assert.Equal(t, "state-decrypt-with-tofu", slug("state.decrypt_with_tofu"))
+	assert.Equal(t, "scan-packs-aws-defaults", slug("scan.packs.aws-defaults"))
+}
+
+// TestConfigSchema checks the config reference's sources: every key and field has a
+// description, and every flag that sets a config key names a key of the schema.
+func TestConfigSchema(t *testing.T) {
+	t.Parallel()
+	root, err := loadConfigSchema()
+	require.NoError(t, err)
+	keys := map[string]bool{}
+	var walk func(n *schemaNode, prefix string)
+	walk = func(n *schemaNode, prefix string) {
+		for _, name := range n.Properties.names {
+			child := n.Properties.nodes[name]
+			key := strings.TrimPrefix(prefix+"."+name, ".")
+			keys[key] = true
+			if child.isObject() {
+				walk(child, key)
+				continue
+			}
+			assert.NotEmpty(t, child.Description, "config key %s has no jsonschema_description", key)
+			for _, item := range []*schemaNode{child.Items, child.AdditionalProperties} {
+				if item != nil && item.isObject() {
+					walk(item, key+"[]")
+				}
+			}
+		}
+	}
+	walk(root, "")
+	for flag, key := range cli.FlagKeys() {
+		assert.True(t, keys[key], "--%s sets %s, which is not a config key", flag, key)
+	}
+}
+
+// TestSchemaIDs checks that each schema's $id is the URL the site serves it at.
+func TestSchemaIDs(t *testing.T) {
+	t.Parallel()
+	require.NotEmpty(t, schemas.Names())
+	for _, name := range schemas.Names() {
+		b, err := schemas.Read(name)
+		require.NoError(t, err)
+		var s struct {
+			ID string `json:"$id"`
+		}
+		require.NoError(t, json.Unmarshal(b, &s), name)
+		assert.Equal(t, docsurl.Schema(name), s.ID, name)
+	}
+}
+
+// testOnlyEnv are variables that only tests, recordings and dev tasks read, so the site leaves
+// them out.
+func testOnlyEnv() []string {
+	return []string{"TEST_CASSETTE", "GOLDEN_UPDATE", "VCR_RECORD"}
+}
+
+// envCallees are the functions whose string arguments name environment variables.
+func envCallees() []string {
+	return []string{"getenv", "lookupenv", "lookup", "get", "env", "envvalue", "basedir"}
+}
+
+var envName = regexp.MustCompile(`^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$`)
+
+// readEnv returns the environment variables that the binary's code reads: string constants and
+// literals passed to [os.Getenv], [os.LookupEnv] and the injected lookup functions.
+func readEnv(t *testing.T) map[string]string {
+	t.Helper()
+	fset := token.NewFileSet()
+	files := goSources(t, fset)
+	consts := map[string]string{}
+	for _, f := range files {
+		stringConsts(f, consts)
+	}
+	found := map[string]string{}
+	add := func(e ast.Expr) {
+		if v := stringValue(e, consts); envName.MatchString(v) {
+			found[v] = fset.Position(e.Pos()).String()
+		}
+	}
+	for _, f := range files {
+		ast.Inspect(f, func(n ast.Node) bool {
+			for _, e := range envNames(n) {
+				add(e)
+			}
+			return true
+		})
+	}
+	return found
+}
+
+// envNames returns the expressions in n that name an environment variable the code reads: the
+// arguments of an env call, or the list a range loop passes to one, as in
+// for _, k := range []string{"A", "B"} { lookup(k) }.
+func envNames(n ast.Node) []ast.Expr {
+	switch n := n.(type) {
+	case *ast.CallExpr:
+		if readsEnv(n) {
+			return n.Args
+		}
+	case *ast.RangeStmt:
+		if list, ok := n.X.(*ast.CompositeLit); ok && rangeReadsEnv(n) {
+			return list.Elts
+		}
+	}
+	return nil
+}
+
+// readsEnv reports whether call reads the environment: it calls an env function, or passes a
+// lookup function along with the names to look up.
+func readsEnv(call *ast.CallExpr) bool {
+	if slices.Contains(envCallees(), strings.ToLower(calleeName(call))) {
+		return true
+	}
+	return slices.ContainsFunc(call.Args, func(arg ast.Expr) bool {
+		switch a := arg.(type) {
+		case *ast.Ident:
+			return strings.EqualFold(a.Name, "lookup")
+		case *ast.SelectorExpr:
+			return strings.EqualFold(a.Sel.Name, "lookup")
+		}
+		return false
+	})
+}
+
+// rangeReadsEnv reports whether the body of a range loop passes its value to an env function.
+func rangeReadsEnv(r *ast.RangeStmt) bool {
+	v, ok := r.Value.(*ast.Ident)
+	if !ok {
+		return false
+	}
+	found := false
+	ast.Inspect(r.Body, func(n ast.Node) bool {
+		call, isCall := n.(*ast.CallExpr)
+		if isCall && readsEnv(call) {
+			found = found || slices.ContainsFunc(call.Args, func(a ast.Expr) bool {
+				id, isIdent := a.(*ast.Ident)
+				return isIdent && id.Name == v.Name
+			})
+		}
+		return !found
+	})
+	return found
+}
+
+// goSources parses the non-test Go files of the binary.
+func goSources(t *testing.T, fset *token.FileSet) []*ast.File {
+	t.Helper()
+	var files []*ast.File
+	for _, dir := range []string{"cmd", "internal"} {
+		err := filepath.WalkDir(filepath.Join(repoRoot, dir), func(p string, e fs.DirEntry, err error) error {
+			switch {
+			case err != nil:
+				return err
+			case e.IsDir() && (e.Name() == "testutil" || e.Name() == "testdata"):
+				return filepath.SkipDir
+			case e.IsDir() || !strings.HasSuffix(p, ".go") || strings.HasSuffix(p, "_test.go"):
+				return nil
+			}
+			f, perr := parser.ParseFile(fset, p, nil, 0)
+			require.NoError(t, perr)
+			files = append(files, f)
+			return nil
+		})
+		require.NoError(t, err)
+	}
+	return files
+}
+
+// stringConsts adds the string constants that f declares to consts, by name.
+func stringConsts(f *ast.File, consts map[string]string) {
+	for _, d := range f.Decls {
+		gd, ok := d.(*ast.GenDecl)
+		if !ok || gd.Tok != token.CONST {
+			continue
+		}
+		for _, spec := range gd.Specs {
+			vs, isValue := spec.(*ast.ValueSpec)
+			if !isValue {
+				continue
+			}
+			for i, v := range vs.Values {
+				if lit, isLit := v.(*ast.BasicLit); isLit && lit.Kind == token.STRING && i < len(vs.Names) {
+					consts[vs.Names[i].Name], _ = strconv.Unquote(lit.Value)
+				}
+			}
+		}
+	}
+}
+
+// stringValue returns the string a literal or a constant argument holds, or "".
+func stringValue(arg ast.Expr, consts map[string]string) string {
+	switch a := arg.(type) {
+	case *ast.BasicLit:
+		v, _ := strconv.Unquote(a.Value)
+		return v
+	case *ast.Ident:
+		return consts[a.Name]
+	case *ast.SelectorExpr:
+		return consts[a.Sel.Name]
+	}
+	return ""
+}
+
+func calleeName(call *ast.CallExpr) string {
+	switch fn := call.Fun.(type) {
+	case *ast.Ident:
+		return fn.Name
+	case *ast.SelectorExpr:
+		return fn.Sel.Name
+	}
+	return ""
+}
+
+// TestEnvironment checks /reference/environment against the code: every variable the code reads
+// is on the page or is test-only, and every variable on the page is read.
+func TestEnvironment(t *testing.T) {
+	t.Parallel()
+	found := readEnv(t)
+	require.NotEmpty(t, found)
+	listed := map[string]bool{config.EnvConfigFile: true}
+	for _, v := range config.EnvVars() {
+		listed[v.Name] = true
+	}
+	for name, where := range found {
+		if !slices.Contains(testOnlyEnv(), name) {
+			assert.True(t, listed[name], "%s: %s is read but not in config.EnvVars", where, name)
+		}
+	}
+	for name := range listed {
+		if strings.Contains(name, "*") || name == config.EnvConfigFile {
+			continue
+		}
+		if _, ok := found[name]; !ok && !configDefault(name) {
+			t.Errorf("config.EnvVars lists %s, which no code reads", name)
+		}
+	}
+}
+
+// configDefault reports whether name is a config default that names a variable, such as the
+// token variable of a notifier.
+func configDefault(name string) bool {
+	b, err := json.Marshal(config.Default())
+	if err != nil {
+		return false
+	}
+	return strings.Contains(string(b), `"`+name+`"`)
+}
+
+// TestSnippets runs the snippet check on the site's Markdown.
+func TestSnippets(t *testing.T) {
+	t.Parallel()
+	problems, err := checkSnippets(docsDir, newRoot())
+	require.NoError(t, err)
+	assert.Empty(t, problems)
+}
+
+func TestCheckCommand(t *testing.T) {
+	t.Parallel()
+	root := newRoot()
+	name := root.Name()
+	sub := documented(root)[0]
+	assert.Empty(t, checkCommand(root, name+" "+sub.Name()+" --help"))
+	assert.Empty(t, checkCommand(root, "echo "+name+" --nope"))
+	assert.Empty(t, checkCommand(root, "$ "+name+" --format json | jq ."))
+	assert.Empty(t, checkCommand(root, name+" --format <format>"))
+	assert.NotEmpty(t, checkCommand(root, name+" --nope"))
+	assert.NotEmpty(t, checkCommand(root, name+" --format yaml"))
+	assert.NotEmpty(t, checkCommand(root, name+" no-such-command"))
+	assert.NotEmpty(t, checkCommand(root, "X=1 "+name+" "+sub.Name()+" --nope"))
+}
+
+func TestKnownKey(t *testing.T) {
+	t.Parallel()
+	keys, err := schemaKeys()
+	require.NoError(t, err)
+	var nested []string
+	for k := range keys {
+		if strings.Contains(k, ".") && !strings.HasSuffix(k, "*") {
+			nested = append(nested, k)
+		}
+	}
+	require.NotEmpty(t, nested)
+	slices.Sort(nested)
+	assert.True(t, knownKey(keys, nested[0]))
+	assert.True(t, knownKey(keys, "release-please-config.json"), "not a config key")
+	assert.False(t, knownKey(keys, "schema_version.no_such_key"))
+}

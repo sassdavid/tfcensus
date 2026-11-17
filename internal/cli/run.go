@@ -12,7 +12,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/config"
 )
 
-// Exit codes, as listed in docs/engineering/engineering-standards.md.
+// Exit codes. [ExitCodes] describes each one for the docs site.
 const (
 	ExitOK          = 0
 	ExitError       = 1
@@ -21,6 +21,33 @@ const (
 	ExitAuth        = 4
 	ExitInterrupted = 130
 )
+
+// ExitCode is one exit code and what it means.
+type ExitCode struct {
+	Code int
+	Name string
+	Desc string
+}
+
+// ExitCodes returns every exit code in ascending order.
+func ExitCodes() []ExitCode {
+	return []ExitCode{
+		{ExitOK, "ok", "The command finished. With --fail-on, nothing matched."},
+		{ExitError, "error", "The command failed: a read, a write, a child process or a check failed."},
+		{
+			ExitUsage,
+			"usage",
+			"Wrong usage: an unknown command or flag, a bad value or argument, an invalid config file, " +
+				"or a prompt with no terminal.",
+		},
+		{ExitFindings, "findings", "A --fail-on gate matched. The report is still written."},
+		{ExitAuth, "auth", "Credentials were missing or rejected for every source the command needed."},
+		{ExitInterrupted, "interrupted", "Interrupted by Ctrl-C (SIGINT) or a cancelled context."},
+	}
+}
+
+// universalExitCodes are the codes every runnable command can return.
+func universalExitCodes() []int { return []int{ExitOK, ExitError, ExitUsage, ExitInterrupted} }
 
 // Run is the process entry point. args includes the program name, as [os.Args] does.
 func Run(ctx context.Context, args []string, stdout, stderr io.Writer) int {

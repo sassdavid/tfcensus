@@ -4,6 +4,7 @@ import (
 	"embed"
 	"fmt"
 	"io/fs"
+	"slices"
 )
 
 // Embedded schema file names.
@@ -22,4 +23,11 @@ func Read(name string) ([]byte, error) {
 		return nil, fmt.Errorf("read embedded schema %s: %w", name, err)
 	}
 	return b, nil
+}
+
+// Names returns the file names of every embedded schema, sorted.
+func Names() []string {
+	names, _ := fs.Glob(files, "*.json") // the pattern is valid, so Glob cannot fail
+	slices.Sort(names)
+	return names
 }

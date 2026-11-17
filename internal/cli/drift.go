@@ -90,9 +90,6 @@ is 1 when a unit or a repo failed and no gate matched, and 0 otherwise. terrafor
   tfcensus drift --from-json-out-dir out --report-file out/report.json --format github \
     --out sarif=drift.sarif --out md=drift.md --fail-on drift`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := g.checkFormats(formats...); err != nil {
-				return usageError(err)
-			}
 			if a.minCount < 1 {
 				return usageError(fmt.Errorf("--%s must be at least 1, got %d", flagMinCount, a.minCount))
 			}
@@ -130,6 +127,7 @@ is 1 when a unit or a repo failed and no gate matched, and 0 otherwise. terrafor
 	addOutputFlags(cmd, g, formats...)
 	cmd.MarkFlagsMutuallyExclusive(flagFromJSONOutDir, flagFilter)
 	cmd.MarkFlagsMutuallyExclusive(flagFromJSONOutDir, flagGenerateStacks)
+	setFailOn(cmd, driftGateChoices())
 	registerCompletions(cmd, map[string]cobra.CompletionFunc{
 		flagMode:           complete.Enum(driftModeChoices()),
 		flagCollapse:       complete.Enum(collapseChoices()),
@@ -138,6 +136,8 @@ is 1 when a unit or a repo failed and no gate matched, and 0 otherwise. terrafor
 		flagFailOn:         complete.List(driftGateChoices()),
 		flagMinCount:       complete.NoFiles,
 	})
+	setExitCodes(cmd, ExitFindings)
+	setRelated(cmd, "ci/ai-summary", "reference/fail-on")
 	return cmd
 }
 

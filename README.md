@@ -18,7 +18,8 @@ with plans and rolled back from S3 object versions ([docs/runbooks/move.md](docs
 `notify` publishes saved scan, drift and audit reports to Slack, GitHub issues, a GitHub or
 Bitbucket pull request comment, or files ([docs/runbooks/notify.md](docs/runbooks/notify.md)),
 `report` renders them offline, and `mcp` serves them read-only to agents such as Claude Code. The
-plan is in [docs/plan](docs/plan/) and the CLI reference in [docs/cli](docs/cli/tfcensus.md).
+plan is in [docs/plan](docs/plan/) and the CLI reference at
+[tfcensus.sasskovacs.dev/cli](https://tfcensus.sasskovacs.dev/cli/).
 
 ## CI
 
@@ -81,8 +82,10 @@ The same input files always give the same bytes, so the file can be compared or 
 `tfcensus config show --sources` prints every effective setting and where it came from.
 Layers, lowest to highest: defaults, `~/.config/tfcensus/config.yaml`, `.tfcensus.yaml` (nearest, up
 to the git root), `TFCENSUS_*` env vars, flags. Unknown keys are errors. Schema:
-[schemas/config-v1.json](schemas/config-v1.json). The env var names are in
-[docs/cli/tfcensus_config.md](docs/cli/tfcensus_config.md). `tfcensus config init` writes a
+[schemas/config-v1.json](schemas/config-v1.json). Every key, its default and its env var are at
+[tfcensus.sasskovacs.dev/reference/config](https://tfcensus.sasskovacs.dev/reference/config), and
+the other variables at
+[tfcensus.sasskovacs.dev/reference/environment](https://tfcensus.sasskovacs.dev/reference/environment). `tfcensus config init` writes a
 `.tfcensus.yaml` with every key commented out at its default.
 
 ## Development
