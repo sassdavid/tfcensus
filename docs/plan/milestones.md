@@ -582,8 +582,9 @@ release.
   `mise run docs:a11y` (`a11y.mjs`: `@axe-core/playwright` 4.14.0 in headless Chrome driven by
   playwright-core 1.65.1, WCAG 2.0 to 2.2 A and AA plus best practices) reports 0 violations on
   `/`, `/guides/scan`, `/cli/audit/backend` and `/reference/config` in light and dark, and the
-  home page has 7 animations with motion and 0 with `prefers-reduced-motion: reduce`. `docs.yml`
-  runs it after `docs:build`. Lighthouse 13.6.0, run by hand against `vitepress preview`
+  home page has 6 or 7 animations with motion (by load timing) and 0 with
+  `prefers-reduced-motion: reduce`. `docs.yml` runs it after `docs:build`, where it passed on the
+  runner's Chrome. Lighthouse 13.6.0, run by hand against `vitepress preview`
   (2026-11-17, chrome-headless-shell), gives accessibility 100 and best practices 100 on `/` and
   `/cli/audit/backend`, desktop and mobile. Fixed on the way, in both repos: the search button's K
   key moved into CSS (axe `label-content-name-mismatch`), the CLI sidebar group links `/cli/`

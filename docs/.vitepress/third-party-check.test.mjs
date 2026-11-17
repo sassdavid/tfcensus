@@ -1,6 +1,6 @@
 // Unit tests for third-party-check.mjs and the helpers in a11y.mjs.
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -55,8 +55,15 @@ test("jsProblems reports fetches to other hosts only", () => {
   ]);
 });
 
-test("resolveFile serves clean URLs like GitHub Pages", () => {
-  const dist = mkdtempSync(join(tmpdir(), "a11y-dist-"));
+// tempDir makes a directory that is removed when the test ends.
+function tempDir(t, prefix) {
+  const dir = mkdtempSync(join(tmpdir(), prefix));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  return dir;
+}
+
+test("resolveFile serves clean URLs like GitHub Pages", (t) => {
+  const dist = tempDir(t, "a11y-dist-");
   mkdirSync(join(dist, "cli"));
   for (const f of ["index.html", "guide.html", "cli/index.html", "a.css"]) {
     writeFileSync(join(dist, f), "x");
@@ -78,9 +85,9 @@ test("foreign keeps requests that leave the origin", () => {
   assert.deepEqual(got, ["https://cdn.test/x.js"]);
 });
 
-test("findChrome prefers CHROME_PATH, then PATH", () => {
+test("findChrome prefers CHROME_PATH, then PATH", (t) => {
   assert.equal(findChrome({ CHROME_PATH: "/opt/chrome" }), "/opt/chrome");
-  const dir = mkdtempSync(join(tmpdir(), "a11y-bin-"));
+  const dir = tempDir(t, "a11y-bin-");
   writeFileSync(join(dir, "chromium"), "");
   assert.equal(findChrome({ PATH: dir }), join(dir, "chromium"));
 });
