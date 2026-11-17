@@ -8,6 +8,9 @@ import (
 // SchemaVersion is the config schema_version this binary reads.
 const SchemaVersion = 1
 
+// githubTokenEnv is the default variable the GitHub notifiers read their token from.
+const githubTokenEnv = "GITHUB_TOKEN" //nolint:gosec // a variable name, not a credential
+
 // Config defines every configuration key. The JSON tags are the key names, and
 // schemas/config-v1.json is generated from this type.
 //
@@ -67,15 +70,15 @@ type Org struct {
 
 // AccountRef maps an account ID to a profile and a display name.
 type AccountRef struct {
-	Profile string `json:"profile"`
-	Name    string `json:"name"`
+	Profile string `json:"profile" jsonschema_description:"AWS profile whose credentials reach the account."`
+	Name    string `json:"name"    jsonschema_description:"Name shown for the account in reports."`
 }
 
 // Aggregator locates the AWS Config aggregator.
 type Aggregator struct {
-	Profile string `json:"profile"`
-	Name    string `json:"name"`
-	Region  string `json:"region"`
+	Profile string `json:"profile" jsonschema_description:"AWS profile for the aggregator's account. Empty means the default credentials."`
+	Name    string `json:"name"    jsonschema_description:"Name of the AWS Config aggregator. Empty turns the aggregator off."`
+	Region  string `json:"region"  jsonschema_description:"Region the aggregator is in."`
 }
 
 // Scan configures the unmanaged-resource scan.
@@ -107,11 +110,11 @@ type Rule struct {
 
 // Packs turns the built-in ownership rule packs on or off.
 type Packs struct {
-	AWSDefaults bool `json:"aws-defaults"`
-	AWSService  bool `json:"aws-service"`
-	OtherIaC    bool `json:"other-iac"`
-	Derived     bool `json:"derived"`
-	Ephemeral   bool `json:"ephemeral"`
+	AWSDefaults bool `json:"aws-defaults" jsonschema_description:"Run the pack for resources AWS creates in every account and region, such as the default VPC."`
+	AWSService  bool `json:"aws-service"  jsonschema_description:"Run the pack for resources that AWS services, IAM Identity Center, Control Tower, StackSets and CDK bootstrap create."`
+	OtherIaC    bool `json:"other-iac"    jsonschema_description:"Run the pack for resources another IaC tool or a Kubernetes controller manages, found by its tags."`
+	Derived     bool `json:"derived"      jsonschema_description:"Run the pack for resources AWS creates as children of another resource."`
+	Ephemeral   bool `json:"ephemeral"    jsonschema_description:"Run the pack for short-lived or by-product resources that nobody manages on purpose."`
 }
 
 // Audit configures the backend audit.
@@ -279,10 +282,10 @@ func Default() Config {
 			MinSeverity: "low",
 			Top:         defaultNotifyTop,
 			Slack:       SlackNotify{WebhookEnv: "SLACK_WEBHOOK_URL", When: "findings"},
-			GitHubIssues: GitHubNotify{ //nolint:gosec // TokenEnv names a variable; it holds no secret
-				TokenEnv: "GITHUB_TOKEN", Labels: []string{}, MaxOpen: defaultMaxOpen, CloseResolved: true,
+			GitHubIssues: GitHubNotify{
+				TokenEnv: githubTokenEnv, Labels: []string{}, MaxOpen: defaultMaxOpen, CloseResolved: true,
 			},
-			GitHubPRComment:    GitHubPRNotify{TokenEnv: "GITHUB_TOKEN"}, //nolint:gosec // TokenEnv names a variable
+			GitHubPRComment:    GitHubPRNotify{TokenEnv: githubTokenEnv},
 			BitbucketPRComment: BitbucketNotify{APIURL: "https://api.bitbucket.org/2.0", TokenEnv: "BITBUCKET_TOKEN"},
 			File:               FileNotify{Dir: ".", Formats: []string{"md", "json"}},
 		},

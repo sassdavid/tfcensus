@@ -34,6 +34,8 @@ func newCacheCmd(d *app.Deps, g *globals) *cobra.Command {
 
 They hold identifiers, tags and probe results, never state attribute values. doctor --refresh
 and scan --refresh ignore them for one run.`,
+		Example: `  tfcensus cache info
+  tfcensus cache clear`,
 		Args: noArgs,
 	}
 	cmd.AddCommand(newCacheInfoCmd(d, g), newCacheClearCmd(d, g))
@@ -63,10 +65,15 @@ type cacheStats struct {
 }
 
 func newCacheInfoCmd(d *app.Deps, g *globals) *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "info",
 		Short: "Show each cache's directory, entry count, size and freshness",
-		Args:  noArgs,
+		Long: `info walks both caches and prints, for each one, its directory, the number of entries, their
+size in bytes, how many are still fresh and how many are stale, and the time to live. It reads
+only file names and times, never the cached data.`,
+		Example: `  tfcensus cache info
+  tfcensus cache info --format json`,
+		Args: noArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			dir, kinds, err := g.caches(cmd, d)
 			if err != nil {
@@ -89,13 +96,20 @@ func newCacheInfoCmd(d *app.Deps, g *globals) *cobra.Command {
 				})
 		},
 	}
+	setFormats(cmd, textFormats()...)
+	setExitCodes(cmd)
+	return cmd
 }
 
 func newCacheClearCmd(d *app.Deps, g *globals) *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "clear",
 		Short: "Delete every entry of both caches",
-		Args:  noArgs,
+		Long: `clear deletes every file in the probe and scan caches and prints how many entries and bytes it
+removed. The next doctor or scan probes and collects again.`,
+		Example: `  tfcensus cache clear
+  tfcensus cache clear --format json`,
+		Args: noArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			dir, kinds, err := g.caches(cmd, d)
 			if err != nil {
@@ -119,13 +133,13 @@ func newCacheClearCmd(d *app.Deps, g *globals) *cobra.Command {
 				})
 		},
 	}
+	setFormats(cmd, textFormats()...)
+	setExitCodes(cmd)
+	return cmd
 }
 
 // caches loads the config and returns the cache directory and the caches in it.
 func (g *globals) caches(cmd *cobra.Command, d *app.Deps) (string, []cacheKind, error) {
-	if err := g.outFormat.Check(render.FormatTTY, render.FormatPlain, render.FormatJSON); err != nil {
-		return "", nil, usageError(err)
-	}
 	res, err := g.loadConfig(cmd, d)
 	if err != nil {
 		return "", nil, err

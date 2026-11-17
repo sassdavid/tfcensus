@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/sassdavid/tfcensus/schemas/move-v1.json",
+  "$id": "https://tfcensus.sasskovacs.dev/schemas/move-v1.json",
   "title": "tfcensus move --format json",
   "description": "The report envelope (report-v1.json) with what a move command did to each block and unit of a migration file. Addresses are identifiers; no attribute value appears.",
   "type": "object",

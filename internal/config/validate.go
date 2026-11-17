@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/sassdavid/tfcensus/internal/docsurl"
 	"github.com/sassdavid/tfcensus/internal/yamlschema"
 	"github.com/sassdavid/tfcensus/schemas"
 )
@@ -42,18 +43,25 @@ const (
 	typeString = "string"
 )
 
-const configSchemaURL = "https://github.com/sassdavid/tfcensus/schemas/" + schemas.ConfigV1
-
 func loadSchema() (*yamlschema.Schema, error) {
 	b, err := schemas.Read(schemas.ConfigV1)
 	if err != nil {
 		return nil, err
 	}
-	s, err := yamlschema.Compile(configSchemaURL, b)
+	s, err := yamlschema.Compile(docsurl.Schema(schemas.ConfigV1), b)
 	if err != nil {
 		return nil, fmt.Errorf("load config schema: %w", err)
 	}
 	return s, nil
+}
+
+// EnvKeys returns the config keys that environment variables can set: scalars and string lists.
+func EnvKeys() ([]string, error) {
+	s, err := loadSchema()
+	if err != nil {
+		return nil, err
+	}
+	return envLeaves(s), nil
 }
 
 // envLeaves lists keys that env vars can set: scalars and string arrays.

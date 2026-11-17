@@ -1,0 +1,241 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tfcensus.sasskovacs.dev/schemas/scan-v1.json",
+  "title": "tfcensus scan --format json",
+  "description": "The report envelope (report-v1.json) with the scan payload. Findings carry identifiers, tags and state addresses, never state attribute values. codify and report html read this file.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "tool", "version", "generated_at", "data", "errors"],
+  "properties": {
+    "schema_version": { "const": "1" },
+    "tool": { "const": "tfcensus" },
+    "version": { "type": "string", "minLength": 1 },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "errors": {
+      "description": "Repos that failed discovery, account sources that failed, and states that couldn't be read.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["message"],
+        "properties": {
+          "target": { "type": "string" },
+          "message": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["regions", "accounts", "findings", "runs", "coverage", "warnings", "cached"],
+      "properties": {
+        "regions": {
+          "description": "Counts per account and region; account-wide resources count under the region global.",
+          "type": ["array", "null"],
+          "items": { "$ref": "#/$defs/summary" }
+        },
+        "accounts": {
+          "description": "Counts per account. coverage is the IaC coverage KPI.",
+          "type": ["array", "null"],
+          "items": { "$ref": "#/$defs/summary" }
+        },
+        "findings": {
+          "description": "Every live resource with its category, sorted by account, region, category, type and ARN.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/finding" }
+        },
+        "runs": {
+          "description": "Each inventory layer's listing of one account and region, and each CloudFormation stack listing (layer cloudformation).",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["account", "layer", "status", "count"],
+            "properties": {
+              "account": { "$ref": "#/$defs/account" },
+              "region": { "type": "string" },
+              "layer": { "type": "string", "minLength": 1 },
+              "status": { "enum": ["ok", "partial", "denied", "error", "unsupported", "skipped"] },
+              "count": { "type": "integer", "minimum": 0 },
+              "errors": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "coverage": {
+          "description": "Which layers listed each type in each account and region. An empty cell is a blind spot; a mark ending in ! is a layer that failed.",
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["columns", "rows"],
+          "properties": {
+            "columns": {
+              "type": ["array", "null"],
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["account", "region"],
+                "properties": {
+                  "account": { "$ref": "#/$defs/account" },
+                  "region": { "type": "string", "minLength": 1 }
+                }
+              }
+            },
+            "rows": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["cfn_type", "global", "cells"],
+                "properties": {
+                  "cfn_type": { "type": "string", "minLength": 1 },
+                  "global": { "type": "boolean" },
+                  "cells": {
+                    "type": "array",
+                    "items": { "type": ["array", "null"], "items": { "type": "string" } }
+                  }
+                }
+              }
+            },
+            "notes": {
+              "description": "Records a run left out of the inventory, and why: Kubernetes objects that Resource Explorer indexes, and records only Resource Explorer listed of a type AWS Config records.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["account", "layer", "reason", "count"],
+                "properties": {
+                  "account": { "$ref": "#/$defs/account" },
+                  "region": { "type": "string" },
+                  "layer": { "type": "string", "minLength": 1 },
+                  "reason": { "type": "string", "minLength": 1 },
+                  "count": { "type": "integer", "minimum": 1 }
+                }
+              }
+            },
+            "unmapped": {
+              "description": "AWS Config types recorded in an account and region that scan doesn't map, most resources first (config:GetDiscoveredResourceCounts).",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["account", "region", "type", "count"],
+                "properties": {
+                  "account": { "$ref": "#/$defs/account" },
+                  "region": { "type": "string", "minLength": 1 },
+                  "type": { "type": "string", "minLength": 1 },
+                  "count": { "type": "integer", "minimum": 0 }
+                }
+              }
+            },
+            "errors": {
+              "description": "Account and region pairs whose AWS Config resource counts failed.",
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "warnings": {
+          "description": "Expired ownership rules.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "cached": {
+          "description": "The inventory and state index came from the scan cache.",
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "account": { "type": "string", "pattern": "^[0-9]{12}$" },
+    "category": {
+      "enum": ["managed", "double-managed", "unmanaged", "other-iac", "aws-managed", "derived", "ignored", "undetermined"]
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["account", "counts", "coverage"],
+      "properties": {
+        "account": { "$ref": "#/$defs/account" },
+        "region": { "type": "string" },
+        "counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["managed", "double-managed", "unmanaged", "other-iac", "aws-managed", "derived", "ignored", "undetermined"],
+          "patternProperties": { "^[a-z-]+$": { "type": "integer", "minimum": 0 } }
+        },
+        "coverage": {
+          "description": "(managed + double-managed) / (managed + double-managed + unmanaged) in percent; null when the denominator is 0.",
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["account", "category", "sources", "reason", "rule"],
+      "properties": {
+        "account": { "$ref": "#/$defs/account" },
+        "region": { "type": "string" },
+        "category": { "$ref": "#/$defs/category" },
+        "cfn_type": { "type": "string" },
+        "source_type": { "type": "string" },
+        "tf_types": { "type": "array", "items": { "type": "string" } },
+        "arn": { "type": "string" },
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "tags": { "type": "object", "additionalProperties": { "type": "string" } },
+        "created": { "type": "string", "format": "date-time" },
+        "sources": { "type": ["array", "null"], "items": { "type": "string" } },
+        "owner": { "type": "string" },
+        "reason": { "type": "string", "minLength": 1 },
+        "rule": {
+          "description": "The match rule (match/...), the CloudFormation source (source/cloudformation) or ownership rule (pack/<pack>/<name>, user/<name>, rules/no-match), or inherit/<category> for a child that took its parent's category.",
+          "type": "string",
+          "minLength": 1
+        },
+        "managed_by": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["unit", "workspace", "address"],
+            "properties": {
+              "unit": { "type": "string" },
+              "workspace": { "type": "string" },
+              "address": { "type": "string" }
+            }
+          }
+        },
+        "stack": {
+          "description": "The CloudFormation stack that lists the resource. A resource no state manages is then other-iac; one a state manages keeps its category and the report warns.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "id", "logical_id"],
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "id": { "type": "string" },
+            "root": { "type": "string", "description": "The top-level stack, for a nested stack." },
+            "logical_id": { "type": "string" }
+          }
+        },
+        "parent": { "$ref": "#/$defs/parent" }
+      }
+    },
+    "parent": {
+      "description": "The resource a child took its category from (rule inherit/<category>), with that resource's own parent when it inherited too.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cfn_type", "key", "category", "rule"],
+      "properties": {
+        "cfn_type": { "type": "string" },
+        "key": { "type": "string", "minLength": 1 },
+        "category": { "$ref": "#/$defs/category" },
+        "owner": { "type": "string" },
+        "rule": { "type": "string", "minLength": 1 },
+        "parent": { "$ref": "#/$defs/parent" }
+      }
+    }
+  }
+}

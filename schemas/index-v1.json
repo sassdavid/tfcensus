@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/sassdavid/tfcensus/schemas/index-v1.json",
+  "$id": "https://tfcensus.sasskovacs.dev/schemas/index-v1.json",
   "title": "tfcensus identifier index (inventory --save-index)",
   "description": "The report envelope (report-v1.json) with every managed, current resource instance and its identifiers. It holds no other attribute values.",
   "type": "object",

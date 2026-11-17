@@ -66,7 +66,7 @@ the default credentials), with the backend's role_arn assumed from it. The bucke
 the role's account, or the unit's target account when there is no role.
 
 A state that can't be read (access denied, a parse error) is reported for its unit and the run
-continues; inventory then exits 1. An OpenTofu state with client-side encryption shows only its
+continues; inventory then exits 1, or 4 when every read failed on credentials. An OpenTofu state with client-side encryption shows only its
 serial and lineage, unless --decrypt-with-tofu is set: then tofu init and tofu show -json run in
 the unit with the unit's key configuration or TF_ENCRYPTION, and a state they can't read fails
 its unit. --save-index writes the identifier index that whois and scan read, compressed
@@ -75,9 +75,6 @@ with zstd for a .zst name and gzip for .gz.`,
   tfcensus inventory --profile 'acme-*' --format json > inventory.json
   tfcensus inventory --format csv --save-index index.json.zst`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := g.checkFormats(formats...); err != nil {
-				return usageError(err)
-			}
 			if concurrency < 1 {
 				return usageError(fmt.Errorf("--%s must be at least 1, got %d", flagConcurrency, concurrency))
 			}
@@ -102,6 +99,7 @@ with zstd for a .zst name and gzip for .gz.`,
 		flagSaveIndex:   savedFiles(),
 		flagConcurrency: complete.NoFiles,
 	})
+	setExitCodes(cmd, ExitAuth)
 	return cmd
 }
 

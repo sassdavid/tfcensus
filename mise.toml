@@ -83,8 +83,8 @@ description = "Known vulnerabilities in reachable code"
 run = "govulncheck ./..."
 
 [tasks.docs]
-description = "Regenerate docs/cli and the site data files; fails if a checked-in copy was stale"
-run = ["go run ./scripts/gendocs -out docs/cli", "go run ./scripts/gensite"]
+description = "Regenerate the CLI and reference pages, the schema copies and the site data files; fails if a checked-in copy was stale"
+run = ["go run ./scripts/gendocs", "go run ./scripts/gensite"]
 
 # The docs:* tasks take node, aube, lychee and oxfmt from mise.docs.toml and expect
 # `MISE_ENV=docs mise install` and `aube install --frozen-lockfile` in docs/ first (engineering ADR-0016).
@@ -94,11 +94,14 @@ dir = "docs"
 run = "MISE_ENV=docs mise exec -- aube exec vitepress dev ."
 
 [tasks."docs:build"]
-description = "Stale check, contrast and unit tests, VitePress build and the offline link check"
+description = "Stale checks, llms.txt, the snippet check, unit tests, VitePress build, docs URL check and the offline link check"
 run = [
   "mise run docs",
+  "MISE_ENV=docs mise exec -- node docs/.vitepress/llms.mts",
+  "go run ./scripts/gendocs -snippets",
   "MISE_ENV=docs mise exec -- node --test 'docs/.vitepress/*.test.mjs'",
   "cd docs && MISE_ENV=docs mise exec -- aube exec vitepress build .",
+  "DOCS_DIST=\"$PWD/docs/.vitepress/dist\" go test -count=1 -run TestPaths ./internal/docsurl",
   "MISE_ENV=docs mise exec -- lychee --offline --include-fragments --no-progress --root-dir \"$PWD/docs/.vitepress/dist\" --fallback-extensions html --index-files index.html docs/.vitepress/dist",
 ]
 

@@ -48,6 +48,8 @@ func newReportCmd(d *app.Deps, g *globals) *cobra.Command {
 		Long: `report reads JSON files that earlier runs wrote and renders them, offline: no AWS call, no
 terragrunt and no state read. report html builds one static HTML page. The other subcommands
 print the same summaries as the tools of tfcensus mcp, with the same filters.`,
+		Example: `  tfcensus report scan --from scan.json --category unmanaged
+  tfcensus report html --from scan.json --from drift.json -o census.html`,
 		Args: noArgs,
 	}
 	cmd.AddCommand(
@@ -111,6 +113,8 @@ The same input files always give the same bytes.`,
 		flagFrom:   savedFiles(),
 		flagOutput: complete.Files("html"),
 	})
+	setFormats(cmd)
+	setExitCodes(cmd)
 	return cmd
 }
 
@@ -152,13 +156,6 @@ func writeSaved(d *app.Deps, format render.Format, res *result, table func(io.Wr
 	return table(d.Stdout)
 }
 
-func checkTextOrJSON(g *globals) error {
-	if err := g.outFormat.Check(render.FormatTTY, render.FormatPlain, render.FormatJSON); err != nil {
-		return usageError(err)
-	}
-	return nil
-}
-
 func newReportUnitsCmd(d *app.Deps, g *globals) *cobra.Command {
 	var f report.UnitsFilter
 	var index string
@@ -170,9 +167,6 @@ accounts and regions of their resources. It is what the units tool of tfcensus m
 		Example: `  tfcensus report units --index index.json.zst --path 'acme-live/prod/*'`,
 		Args:    noArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			if err := checkTextOrJSON(g); err != nil {
-				return err
-			}
 			cfg, err := g.loadConfig(cmd, d)
 			if err != nil {
 				return err
@@ -207,6 +201,8 @@ accounts and regions of their resources. It is what the units tool of tfcensus m
 		flagPath:   complete.Dynamic(complete.Timeout, complete.Units(flagIndex)),
 		flagStatus: complete.Enum(stateStatusChoices()),
 	})
+	setFormats(cmd, textFormats()...)
+	setExitCodes(cmd)
 	return cmd
 }
 
@@ -222,9 +218,6 @@ what the inventory tool of tfcensus mcp returns.`,
 		Example: `  tfcensus report inventory --index index.json.zst --account 111111111111 --type 'aws_iam_*'`,
 		Args:    noArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			if err := checkTextOrJSON(g); err != nil {
-				return err
-			}
 			cfg, err := g.loadConfig(cmd, d)
 			if err != nil {
 				return err
@@ -262,6 +255,8 @@ what the inventory tool of tfcensus mcp returns.`,
 		flagRegion:  complete.Enum(complete.Regions()),
 		flagType:    complete.Dynamic(complete.Timeout, complete.TFTypes()),
 	})
+	setFormats(cmd, textFormats()...)
+	setExitCodes(cmd)
 	return cmd
 }
 
@@ -282,9 +277,6 @@ tool of tfcensus mcp returns.`,
   tfcensus report scan --category undetermined`,
 		Args: noArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			if err := checkTextOrJSON(g); err != nil {
-				return err
-			}
 			cfg, err := g.loadConfig(cmd, d)
 			if err != nil {
 				return err
@@ -314,6 +306,8 @@ tool of tfcensus mcp returns.`,
 		flagType:     complete.Dynamic(complete.Timeout, complete.CFNTypes()),
 		flagTop:      complete.NoFiles,
 	})
+	setFormats(cmd, textFormats()...)
+	setExitCodes(cmd)
 	return cmd
 }
 
@@ -365,9 +359,6 @@ first. It is what the audit_findings tool of tfcensus mcp returns.`,
 		Example: `  tfcensus report audit --from audit.json --severity medium`,
 		Args:    noArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			if err := checkTextOrJSON(g); err != nil {
-				return err
-			}
 			cfg, err := g.loadConfig(cmd, d)
 			if err != nil {
 				return err
@@ -397,6 +388,8 @@ first. It is what the audit_findings tool of tfcensus mcp returns.`,
 		flagAccount:  complete.NoFiles,
 	})
 	cmd.Flags().BoolVar(&f.IncludeSuppressed, flagIncludeSuppressed, false, "list suppressed findings too")
+	setFormats(cmd, textFormats()...)
+	setExitCodes(cmd)
 	return cmd
 }
 
@@ -412,9 +405,6 @@ drift_summary tool of tfcensus mcp returns.`,
 		Example: `  tfcensus report drift --from drift.json --unit 'acme-live/prod/*'`,
 		Args:    noArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			if err := checkTextOrJSON(g); err != nil {
-				return err
-			}
 			cfg, err := g.loadConfig(cmd, d)
 			if err != nil {
 				return err
@@ -445,6 +435,8 @@ drift_summary tool of tfcensus mcp returns.`,
 		flagUnit:   complete.NoFiles,
 		flagStatus: complete.Enum(driftStatusChoices()),
 	})
+	setFormats(cmd, textFormats()...)
+	setExitCodes(cmd)
 	return cmd
 }
 

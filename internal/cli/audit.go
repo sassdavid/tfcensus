@@ -37,10 +37,11 @@ func newAuditCmd(d *app.Deps, g *globals) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "audit",
 		Short: "Audit state backends",
-		Args:  noArgs,
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			return cmd.Help()
-		},
+		Long: `audit checks the S3 buckets and DynamoDB lock tables that hold the units' state against a
+list of checks: versioning, encryption, public access, lock table settings and stale locks.
+audit backend runs them.`,
+		Example: `  tfcensus audit backend
+  tfcensus audit backend --fail-on high --out sarif=audit.sarif`,
 	}
 	cmd.AddCommand(newAuditBackendCmd(d, g))
 	return cmd
@@ -96,9 +97,6 @@ run, and 4 when every failure was a credential problem.`,
   tfcensus audit backend --fail-on high --format sarif > audit.sarif
   tfcensus audit backend --profile 'acme-*' --discover --format json`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := g.checkFormats(formats...); err != nil {
-				return usageError(err)
-			}
 			if a.concurrency < 1 {
 				return usageError(fmt.Errorf("--%s must be at least 1, got %d", flagConcurrency, a.concurrency))
 			}
@@ -129,11 +127,13 @@ run, and 4 when every failure was a credential problem.`,
 		"bucket name glob for --discover (repeatable; config audit.discover_patterns)")
 	f.StringVar(&failOn, flagFailOn, "",
 		complete.Usage("exit 3 when a finding is at least this severe: {values}", severityChoices()))
+	setFailOn(cmd, severityChoices())
 	registerCompletions(cmd, map[string]cobra.CompletionFunc{
 		flagConcurrency:     complete.NoFiles,
 		flagDiscoverPattern: complete.NoFiles,
 		flagFailOn:          complete.Enum(severityChoices()),
 	})
+	setExitCodes(cmd, ExitFindings, ExitAuth)
 	return cmd
 }
 

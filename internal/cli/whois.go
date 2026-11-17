@@ -79,9 +79,6 @@ state read or a layer failed, 4 when every failure was a credential problem, and
   jq -r '.data.findings[].arn // empty' scan.json | tfcensus whois --stdin --index index.json.zst
   tfcensus whois --index index.json.zst --fail-on double-managed arn:aws:s3:::acme-assets`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := g.checkFormats(formats...); err != nil {
-				return usageError(err)
-			}
 			if a.minCount < 1 {
 				return usageError(fmt.Errorf("--%s must be at least 1, got %d", flagMinCount, a.minCount))
 			}
@@ -115,7 +112,7 @@ state read or a layer failed, 4 when every failure was a credential problem, and
 	f.StringVar(&a.index, flagIndex, "", "read the state index from this file (from inventory --save-index) "+
 		"instead of reading states")
 	f.BoolVar(&a.live, flagLive, true, "list an unmanaged resource's type live so the rules see its tags "+
-		"(default true, false with --index)")
+		"(false with --index)")
 	f.StringArrayVar(&a.repos, flagRepo, nil, "repository to discover units in (repeatable; config discovery.roots, "+
 		"else the working directory)")
 	f.StringArrayVar(&a.rules, flagRules, nil, "YAML file with more ownership rules under rules: (repeatable)")
@@ -128,6 +125,7 @@ state read or a layer failed, 4 when every failure was a credential problem, and
 	f.IntVar(&a.minCount, flagMinCount, 1, "answers --fail-on needs before it exits 3")
 	f.IntVar(&a.concurrency, flagConcurrency, tfstate.DefaultConcurrency, "states read at the same time")
 	cmd.MarkFlagsMutuallyExclusive(flagIndex, flagRepo)
+	setFailOn(cmd, findingGateChoices())
 	registerCompletions(cmd, map[string]cobra.CompletionFunc{
 		flagType:        complete.DynamicList(complete.Timeout, complete.TFTypes()),
 		flagIndex:       savedFiles(),
@@ -138,6 +136,7 @@ state read or a layer failed, 4 when every failure was a credential problem, and
 		flagConcurrency: complete.NoFiles,
 	})
 	cmd.ValidArgsFunction = complete.NoFiles
+	setExitCodes(cmd, ExitFindings, ExitAuth)
 	return cmd
 }
 

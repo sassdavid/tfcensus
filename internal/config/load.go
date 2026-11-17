@@ -327,6 +327,12 @@ func (l *loader) loadEnv() error {
 	return nil
 }
 
+// EnvVar is an environment variable that the binary reads, other than the config keys.
+type EnvVar struct {
+	Name string
+	Desc string
+}
+
 // EnvVarName returns the environment variable for a dotted key: "." and "-" become "_", so
 // cache.ttl is TFCENSUS_CACHE_TTL.
 func EnvVarName(key string) string {

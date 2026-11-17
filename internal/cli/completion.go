@@ -59,6 +59,9 @@ func addCompletionShells(root *cobra.Command) {
 	if comp == nil {
 		return
 	}
+	comp.Example = "  " + root.Name() + " completion bash > /etc/bash_completion.d/" + root.Name() + "\n" +
+		"  " + root.Name() + " completion zsh > \"${fpath[1]}/_" + root.Name() + "\"\n" +
+		"  " + root.Name() + " completion fish > ~/.config/fish/completions/" + root.Name() + ".fish"
 	for _, sh := range carapaceShells() {
 		comp.AddCommand(&cobra.Command{
 			Use:   sh.name,
@@ -77,6 +80,10 @@ func addCompletionShells(root *cobra.Command) {
 				return err //nolint:wrapcheck // a write error on stdout needs no context
 			},
 		})
+	}
+	for _, sh := range comp.Commands() {
+		setFormats(sh)
+		setExitCodes(sh)
 	}
 }
 

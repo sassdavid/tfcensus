@@ -78,17 +78,15 @@ logged; -vvv shows request headers with Authorization redacted.
 --dry-run-notify reads the existing issues and comments with GET requests and prints what
 would change, writing nothing.
 
-Exit codes: 0 when every notifier succeeded, 4 when every failure was a refused token, and 1
-for any other failure.`,
+Exit codes: 0 when every notifier succeeded, 2 when no notifier is enabled, a notifier is
+unknown or not configured, or a --from file is not a tfcensus report, 4 when every failure was a
+refused token, and 1 for any other failure.`,
 		Example: `  tfcensus drift --format json > drift.json; tfcensus notify --from drift.json --notify github-issues
   tfcensus notify --from scan.json --from audit.json --dry-run-notify
   tfcensus notify --from drift.json --notify github-pr-comment   # in a pull_request workflow
   GITHUB_TOKEN=... tfcensus notify --from drift.json --notify github-issues,slack`,
 		Args: noArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			if err := g.outFormat.Check(render.FormatTTY, render.FormatPlain, render.FormatJSON); err != nil {
-				return usageError(err)
-			}
 			if len(a.from) == 0 {
 				return usageError(fmt.Errorf("pass at least one --%s file", flagFrom))
 			}
@@ -112,6 +110,9 @@ for any other failure.`,
 		flagNotify: complete.List(notifierChoices()),
 	})
 	f.BoolVar(&a.dryRun, flagDryRunNotify, false, "print what would change; read with GET only and write nothing")
+	setRelated(cmd, "runbooks/notify")
+	setFormats(cmd, textFormats()...)
+	setExitCodes(cmd, ExitAuth)
 	return cmd
 }
 

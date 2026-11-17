@@ -15,16 +15,16 @@ actions:
 answers:
   - question: Which resources does no unit manage?
     command: tfcensus scan
-    link: https://github.com/sassdavid/tfcensus/blob/v0.4.0/docs/cli/tfcensus_scan.md
+    link: /cli/scan
   - question: Are the state buckets and lock tables safe?
     command: tfcensus audit backend
-    link: https://github.com/sassdavid/tfcensus/blob/v0.4.0/docs/cli/tfcensus_audit_backend.md
+    link: /cli/audit/backend
   - question: What drifted, and in how many units?
     command: tfcensus drift
-    link: https://github.com/sassdavid/tfcensus/blob/v0.4.0/docs/cli/tfcensus_drift.md
+    link: /cli/drift
   - question: Which unit manages this ARN?
     command: tfcensus whois
-    link: https://github.com/sassdavid/tfcensus/blob/v0.4.0/docs/cli/tfcensus_whois.md
+    link: /cli/whois
   - question: How do I move resources between units?
     command: tfcensus move
     link: /runbooks/move

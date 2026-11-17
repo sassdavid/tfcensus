@@ -31,15 +31,7 @@ export default defineConfig({
   cleanUrls: true,
   lastUpdated: true,
   sitemap: { hostname: site },
-  srcExclude: [
-    "plan/**",
-    "engineering/**",
-    "validation/**",
-    "dogfood.md",
-    "README.md",
-    // M23 replaces the cobra pages with the nested reference and removes this line.
-    "cli/**",
-  ],
+  srcExclude: ["plan/**", "engineering/**", "validation/**", "dogfood.md", "README.md"],
   // The IAM folder keeps README.md so GitHub shows it in the folder view.
   rewrites: { "iam/README.md": "iam/index.md" },
   head: [["link", { rel: "icon", type: "image/svg+xml", href: "/glyph.svg" }]],
@@ -65,9 +57,8 @@ export default defineConfig({
     siteTitle: tool,
     nav: [
       { text: "Guide", link: "/install", activeMatch: "^/(install|runbooks|ci)/?" },
-      { text: "Reference", link: "/iam/", activeMatch: "^/iam/" },
-      // M23 points this at /cli/ once the nested reference is published.
-      { text: "CLI", link: `${repo}/tree/v${version}/docs/cli` },
+      { text: "Reference", link: "/reference/config", activeMatch: "^/(reference|iam)/" },
+      { text: "CLI", link: "/cli/", activeMatch: "^/cli/" },
       // M24 points this at /changelog.
       { text: `v${version}`, link: `${repo}/releases/tag/v${version}` },
     ],

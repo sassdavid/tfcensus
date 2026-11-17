@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/sassdavid/tfcensus/schemas/whois-v1.json",
+  "$id": "https://tfcensus.sasskovacs.dev/schemas/whois-v1.json",
   "title": "tfcensus whois --format json",
   "description": "The report envelope (report-v1.json) with one answer per query. Answers carry identifiers, tags and state addresses, never state attribute values.",
   "type": "object",

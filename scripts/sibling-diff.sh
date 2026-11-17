@@ -31,6 +31,8 @@ cli_identical=(
   .gitignore
   docs/.oxfmtrc.json
   docs/.vitepress/contrast.test.mjs
+  docs/.vitepress/llms.mts
+  docs/.vitepress/llms.test.mjs
   docs/.vitepress/theme/index.ts
   docs/.vitepress/tokens.mjs
   docs/aube-workspace.yaml
@@ -47,6 +49,8 @@ cli_identical=(
   internal/app/vt_windows.go
   internal/buildinfo/buildinfo.go
   internal/buildinfo/doc.go
+  internal/cli/annotations.go
+  internal/cli/annotations_test.go
   internal/cli/completion.go
   internal/cli/completion_test.go
   internal/cli/out.go
@@ -59,7 +63,11 @@ cli_identical=(
   internal/config/load.go
   internal/config/paths.go
   internal/config/schema_test.go
+  internal/config/template.go
   internal/config/validate.go
+  internal/docsurl/doc.go
+  internal/docsurl/docsurl.go
+  internal/docsurl/docsurl_test.go
   internal/execx/doc.go
   internal/execx/execx.go
   internal/execx/execx_test.go
@@ -117,8 +125,14 @@ cli_identical=(
   scripts/completion-shells.sh
   scripts/completions.sh
   scripts/fuzz.sh
+  scripts/gendocs/cli.go
   scripts/gendocs/doc.go
   scripts/gendocs/main.go
+  scripts/gendocs/main_test.go
+  scripts/gendocs/markdown.go
+  scripts/gendocs/mcp.go
+  scripts/gendocs/reference.go
+  scripts/gendocs/snippets.go
   scripts/licenses.sh
   scripts/proselint/doc.go
   scripts/proselint/main.go
@@ -144,6 +158,7 @@ cli_similar=(
   internal/cli/script_test.go
   internal/config/config.go
   internal/config/doc.go
+  internal/config/env.go
   internal/config/load_test.go
   docs/engineering/ci-and-release.md
   docs/engineering/stack.md

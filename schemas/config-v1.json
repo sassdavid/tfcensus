@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/sassdavid/tfcensus/schemas/config-v1.json",
+  "$id": "https://tfcensus.sasskovacs.dev/schemas/config-v1.json",
   "properties": {
     "schema_version": {
       "type": "integer",
@@ -111,10 +111,12 @@
           "additionalProperties": {
             "properties": {
               "profile": {
-                "type": "string"
+                "type": "string",
+                "description": "AWS profile whose credentials reach the account."
               },
               "name": {
-                "type": "string"
+                "type": "string",
+                "description": "Name shown for the account in reports."
               }
             },
             "additionalProperties": false,
@@ -126,13 +128,16 @@
         "aggregator": {
           "properties": {
             "profile": {
-              "type": "string"
+              "type": "string",
+              "description": "AWS profile for the aggregator's account. Empty means the default credentials."
             },
             "name": {
-              "type": "string"
+              "type": "string",
+              "description": "Name of the AWS Config aggregator. Empty turns the aggregator off."
             },
             "region": {
-              "type": "string"
+              "type": "string",
+              "description": "Region the aggregator is in."
             }
           },
           "additionalProperties": false,
@@ -183,19 +188,24 @@
         "packs": {
           "properties": {
             "aws-defaults": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Run the pack for resources AWS creates in every account and region, such as the default VPC."
             },
             "aws-service": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Run the pack for resources that AWS services, IAM Identity Center, Control Tower, StackSets and CDK bootstrap create."
             },
             "other-iac": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Run the pack for resources another IaC tool or a Kubernetes controller manages, found by its tags."
             },
             "derived": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Run the pack for resources AWS creates as children of another resource."
             },
             "ephemeral": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Run the pack for short-lived or by-product resources that nobody manages on purpose."
             }
           },
           "additionalProperties": false,

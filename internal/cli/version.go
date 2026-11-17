@@ -12,19 +12,21 @@ import (
 )
 
 func newVersionCmd(d *app.Deps, g *globals) *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "version",
 		Short: "Print version and build information",
+		Long: `version prints the version, the commit and date it was built from, the Go version and the
+platform. With --format json it writes the JSON envelope that every report uses.`,
 		Example: `  tfcensus version
   tfcensus version --format json`,
 		Args: noArgs,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			if err := g.outFormat.Check(render.FormatTTY, render.FormatPlain, render.FormatJSON); err != nil {
-				return usageError(err)
-			}
 			return writeVersion(d, g.outFormat, buildinfo.Get())
 		},
 	}
+	setFormats(cmd, textFormats()...)
+	setExitCodes(cmd)
+	return cmd
 }
 
 func writeVersion(d *app.Deps, format render.Format, info buildinfo.Info) error {
