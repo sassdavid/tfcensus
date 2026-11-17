@@ -6,34 +6,9 @@ reports drift. It tells which unit manages a resource, writes import blocks for 
 manages, and moves resources between units. It is read-only by default: only `move apply`,
 `move rollback` and `move mark-applied` write.
 
-tfcensus is pre-release, and its commands and output can still change before 1.0. `units` lists
-units and their backends, `doctor` checks credentials and inventory layers, `inventory` reads each
-unit's state from S3 and prints identifiers and counts, never attribute values, and `audit backend`
-checks state buckets, lock tables and the fleet of states, with SARIF output. `scan` finds AWS
-resources that no unit manages, and `drift` runs a refresh-only plan in every unit and groups
-identical drift across units. `whois` names the units that manage an ARN or id, offline from a
-saved index too, and `codify` turns a scan report into import blocks for one unit. `move` runs
-migration files that move resources between the states of units, in other accounts too, verified
-with plans and rolled back from S3 object versions ([docs/runbooks/move.md](docs/runbooks/move.md)).
-`notify` publishes saved scan, drift and audit reports to Slack, GitHub issues, a GitHub or
-Bitbucket pull request comment, or files ([docs/runbooks/notify.md](docs/runbooks/notify.md)),
-`report` renders them offline, and `mcp` serves them read-only to agents such as Claude Code. The
-plan is in [docs/plan](docs/plan/) and the CLI reference at
-[tfcensus.sasskovacs.dev/cli](https://tfcensus.sasskovacs.dev/cli/).
+tfcensus is pre-release, and its commands and output can still change before 1.0.
 
-## CI
-
-Report commands take a repeatable `--out <format>=<path>`, so one run writes JSON, SARIF, Markdown
-and GitHub annotations with the exit code of its `--fail-on` gate. Markdown is cut at a table row
-or section once it reaches `--md-max-chars` (60,000 characters, under GitHub's 65,536-character
-comment limit), with a footer that says what was cut. [docs/ci/drift.yml](docs/ci/drift.yml)
-checks drift on a schedule with [tfcensus-action](https://github.com/sassdavid/tfcensus-action)
-and uploads SARIF; [docs/ci/drift-pr.yml](docs/ci/drift-pr.yml) keeps
-one drift comment on each pull request.
-
-tfcensus has no built-in LLM call. `tfcensus mcp` offers the prompts `triage_drift` and
-`explain_unmanaged` to your agent, and [docs/ci/ai-summary.md](docs/ci/ai-summary.md) shows an
-opt-in CI job that sends the drift summary to Bedrock or Copilot and lists what leaves the runner.
+The documentation is at [tfcensus.sasskovacs.dev](https://tfcensus.sasskovacs.dev).
 
 ## Install
 
@@ -45,59 +20,25 @@ mise use github:sassdavid/tfcensus
 go install github.com/sassdavid/tfcensus/cmd/tfcensus@latest   # unsigned
 ```
 
-Homebrew, Scoop and the ghcr.io image are not published yet. Each archive carries shell
-completion scripts and man pages; [docs/install.md](docs/install.md) sets them up for each shell.
+Homebrew, Scoop and the ghcr.io image are not published yet. The
+[install page](https://tfcensus.sasskovacs.dev/install) sets up completion and man pages, and
+[security and verification](https://tfcensus.sasskovacs.dev/security) checks a release's signature
+and provenance.
 
-Release checksums are signed with cosign (keyless) and carry GitHub build-provenance attestations:
+## Links
 
-```sh
-cosign verify-blob --bundle checksums.txt.sigstore.json \
-  --certificate-identity-regexp '^https://github.com/sassdavid/tfcensus/\.github/workflows/release\.yml@' \
-  --certificate-oidc-issuer https://token.actions.githubusercontent.com checksums.txt
-gh attestation verify --owner sassdavid tfcensus_<version>_<os>_<arch>.tar.gz
-```
-
-The read-only IAM policy tfcensus needs is on the [IAM reference](https://tfcensus.sasskovacs.dev/reference/iam).
-
-## HTML report
-
-`tfcensus report html` turns the JSON that `scan`, `drift` and `audit` print with `--format json`
-into one HTML file. The CSS and JavaScript are inside the file, and its Content-Security-Policy
-blocks every network request, so it opens offline and can be kept as a CI artifact.
-
-```sh
-tfcensus scan --format json > scan.json
-tfcensus drift --format json > drift.json
-tfcensus audit backend --format json > audit.json
-tfcensus report html --from scan.json --from drift.json --from audit.json -o census.html
-```
-
-The scan section has per-account counts and a findings table you can filter by account, category
-and type. Pass two or more scan files from different days to get a coverage trend. Drift shows
-attribute paths, never values, even when the drift JSON was written with `--show-attributes`.
-The same input files always give the same bytes, so the file can be compared or committed.
-
-## Configuration
-
-`tfcensus config show --sources` prints every effective setting and where it came from.
-Layers, lowest to highest: defaults, `~/.config/tfcensus/config.yaml`, `.tfcensus.yaml` (nearest, up
-to the git root), `TFCENSUS_*` env vars, flags. Unknown keys are errors. Schema:
-[schemas/config-v1.json](schemas/config-v1.json). Every key, its default and its env var are at
-[tfcensus.sasskovacs.dev/reference/config](https://tfcensus.sasskovacs.dev/reference/config), and
-the other variables at
-[tfcensus.sasskovacs.dev/reference/environment](https://tfcensus.sasskovacs.dev/reference/environment). `tfcensus config init` writes a
-`.tfcensus.yaml` with every key commented out at its default.
-
-## Development
-
-```sh
-mise install                         # pinned toolchain (mise.toml)
-mise run check                       # linters (Go, prose, workflows) + go test -race + govulncheck
-mise run test:golden -- -update      # regenerate golden files, then review the diff
-mise run docs                        # regenerate docs/cli
-mise run snapshot                    # local goreleaser build into dist/
-mise run sibling:diff                # compare the files shared with relgap
-```
+- [Getting started](https://tfcensus.sasskovacs.dev/getting-started): a first read-only run with
+  `doctor`, `units`, `inventory` and `scan`.
+- [Guides](https://tfcensus.sasskovacs.dev/guides/scan): scans, ownership rules, backend audits,
+  drift in CI, `whois`, `codify`, moves, `notify`, the HTML report and the MCP server.
+- [Read-only by default](https://tfcensus.sasskovacs.dev/concepts/safety): what tfcensus reads,
+  writes and prints.
+- [CLI reference](https://tfcensus.sasskovacs.dev/cli/) and
+  [configuration](https://tfcensus.sasskovacs.dev/reference/config).
+- [IAM policy](https://tfcensus.sasskovacs.dev/reference/iam) for the read-only role.
+- [tfcensus-action](https://github.com/sassdavid/tfcensus-action) runs tfcensus in GitHub Actions.
+- [Contributing](https://tfcensus.sasskovacs.dev/contributing) and the
+  [changelog](CHANGELOG.md).
 
 ## License
 

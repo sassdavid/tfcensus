@@ -33,7 +33,7 @@ and ARNs: triage\_drift \[unit\] sorts drift into revert, adopt and investigate,
 explain\_unmanaged \[account\] \[type\] explains the unmanaged resources of the last scan.
 Claude Code offers them as /mcp\_\_tfcensus\_\_triage\_drift and /mcp\_\_tfcensus\_\_explain\_unmanaged.
 Neither asks for attribute values. tfcensus has no built-in LLM call; for a summary in CI see
-https://tfcensus.sasskovacs.dev/ci/ai-summary.
+https://tfcensus.sasskovacs.dev/guides/ai-summary.
 
 A result over --max-result-bytes (default 50,000, Claude Code's limit for showing a result
 to the model) is split. The envelope then has a page field, and the agent passes
@@ -83,5 +83,6 @@ tfcensus mcp --index index.json.zst --scan scan.json --audit audit.json --drift 
 
 ## Related
 
+- [Use tfcensus from Claude Code or another MCP client](/guides/mcp)
 - [MCP tools and prompts](/reference/mcp)
-- [AI summary of drift in CI](/ci/ai-summary)
+- [Add an AI summary to CI](/guides/ai-summary)

@@ -63,7 +63,7 @@ func newMoveCmd(d *app.Deps, g *globals) *cobra.Command {
 		Short: "Move resources between the states of Terragrunt units",
 		Long: `move runs migration files: migration "units" blocks that move resources from one unit's state
 to others, or run tfmigrate-style mv, xmv and rm actions inside one state. The file format and a full
-walkthrough are at ` + docsurl.Page("runbooks/move") + `.
+walkthrough are at ` + docsurl.Page("guides/move") + `.
 
 suggest drafts a migration file from plans. plan and status only read. apply, rollback and mark-applied are the only tfcensus commands that
 write to a backend; each asks you to type the block's destination unit path first, or takes
@@ -121,7 +121,7 @@ rolled back by tfcensus.`),
 			`status reads the history object next to each involved unit's state and shows each block as
 applied, pending or partial (applied in some units only).`),
 	)
-	setRelated(cmd, "runbooks/move")
+	setRelated(cmd, "guides/move", "reference/move-file")
 	return cmd
 }
 

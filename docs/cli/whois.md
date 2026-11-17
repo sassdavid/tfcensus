@@ -100,3 +100,7 @@ tfcensus whois --index index.json.zst sg-0123456789abcdef0 --type aws_security_g
 jq -r '.data.findings[].arn // empty' scan.json | tfcensus whois --stdin --index index.json.zst
 tfcensus whois --index index.json.zst --fail-on double-managed arn:aws:s3:::acme-assets
 ```
+
+## Related
+
+- [Find who manages an ARN, offline too](/guides/whois)

@@ -74,4 +74,4 @@ account IDs, ARNs, bucket and role names. Sending them to a model provider is yo
 decision, so tfcensus doesn't make it for you.
 
 An agent can use the MCP prompts `triage_drift` and `explain_unmanaged`. To summarize drift in CI,
-[AI summary of drift in CI](/ci/ai-summary) shows an opt-in job and lists what leaves the runner.
+[Add an AI summary to CI](/guides/ai-summary) shows an opt-in job and lists what leaves the runner.

@@ -100,6 +100,7 @@ with zstd for a .zst name and gzip for .gz.`,
 		flagConcurrency: complete.NoFiles,
 	})
 	setExitCodes(cmd, ExitAuth)
+	setRelated(cmd, "concepts/state", "concepts/inventory-layers", "guides/encrypted-state")
 	return cmd
 }
 

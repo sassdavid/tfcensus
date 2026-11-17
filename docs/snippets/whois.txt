@@ -1,0 +1,20 @@
+arn:aws:iam::111111111111:role/acme-app: managed by identity
+  tf-scan/iam  aws_iam_role.app  111111111111  global
+
+arn:aws:iam::111111111111:role/acme-shared: double-managed by identity
+  warning: 2 states manage it; keep it in one
+  tf-scan/iam      aws_iam_role.shared  111111111111  global
+  tf-scan/iam-dup  aws_iam_role.shared  111111111111  global
+
+arn:aws:iam::111111111111:role/clickops-admin: unmanaged
+  no state manages it and no rule matches (rules/no-match); live: found
+
+arn:aws:iam::111111111111:role/legacy-stack-role: other-iac (owner cloudformation)
+  tagged by a CloudFormation stack (CloudFormation, CDK, StackSets, Control Tower) (pack/other-iac/cloudformation); live: found
+
+arn:aws:iam::111111111111:role/deleted-last-week: undetermined
+  the live inventory of its account and region doesn't have it (whois/not-found); live: not-found
+
+warning: rule "growth-trial" is past its expires date and no longer matches
+
+5 queries: 1 managed, 1 double-managed, 1 unmanaged, 1 other-iac, 1 undetermined

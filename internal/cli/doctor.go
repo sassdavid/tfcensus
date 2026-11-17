@@ -87,6 +87,7 @@ warning. doctor exits 4 when every source fails, and 1 when a tool is older than
 	cmd.Flags().BoolVar(&refresh, "refresh", false, "probe again even when the cached result is fresh")
 	setFormats(cmd, render.FormatTTY, render.FormatPlain, render.FormatMD, render.FormatJSON)
 	setExitCodes(cmd, ExitAuth)
+	setRelated(cmd, "guides/accounts", "guides/aggregator", "troubleshooting")
 	return cmd
 }
 

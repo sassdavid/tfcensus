@@ -60,3 +60,8 @@ All codes are listed on the [exit codes](/reference/exit-codes) page.
 tfcensus rules test rules.yaml
 tfcensus rules test rules.yaml --resource sample.json
 ```
+
+## Related
+
+- [Write and test ownership rules](/guides/rules)
+- [Ownership rules model](/concepts/rules)

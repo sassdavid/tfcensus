@@ -82,3 +82,9 @@ tfcensus inventory ~/src/infra/acme-live
 tfcensus inventory --profile 'acme-*' --format json > inventory.json
 tfcensus inventory --format csv --save-index index.json.zst
 ```
+
+## Related
+
+- [How state is read](/concepts/state)
+- [Inventory layers and coverage](/concepts/inventory-layers)
+- [Read OpenTofu encrypted state](/guides/encrypted-state)

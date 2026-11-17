@@ -175,7 +175,7 @@ func newScanCmd(d *app.Deps, g *globals) *cobra.Command {
 		flagConcurrency: complete.NoFiles,
 	})
 	setExitCodes(cmd, ExitFindings, ExitAuth)
-	setRelated(cmd, "reference/fail-on")
+	setRelated(cmd, "guides/scan", "concepts/categories", "reference/fail-on")
 	return cmd
 }
 

@@ -130,7 +130,7 @@ func stringMap(m map[string]string) cty.Value {
 func parseBlock(hb *hcl.Block, ctx *hcl.EvalContext) (*Block, error) {
 	if hb.Labels[0] != blockType {
 		return nil, fmt.Errorf("migration type %q is not supported; tfcensus reads migration \"units\" blocks "+
-			"(see %s for translating tfmigrate files)", hb.Labels[0], docsurl.Page("runbooks/move#translate-a-tfmigrate-file"))
+			"(see %s for translating tfmigrate files)", hb.Labels[0], docsurl.Page("guides/move#translate-a-tfmigrate-file"))
 	}
 	b := &Block{Name: hb.Labels[1], Line: hb.DefRange.Start.Line, Strategy: StrategySurgery}
 	if !blockNameRe.MatchString(b.Name) {

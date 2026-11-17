@@ -80,6 +80,8 @@ func goldenParts() []goldenPart {
 	return []goldenPart{
 		{"testdata/script/spec_accounts_2.txtar", "want-doctor.txt", "docs/snippets/doctor.txt"},
 		{"testdata/script/spec_scan_1.txtar", "golden/scan.txt", "docs/snippets/scan.txt"},
+		{"testdata/script/spec_whois_and_codify_1.txtar", "golden/live.txt", "docs/snippets/whois.txt"},
+		{"testdata/script/codify.txtar", "golden/codify.txt", "docs/snippets/codify.txt"},
 	}
 }
 

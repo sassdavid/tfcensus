@@ -67,3 +67,8 @@ tfcensus units ~/src/infra/acme-live
 tfcensus units --filter './live/prod/**' --format json
 tfcensus units --render never --generate-stacks
 ```
+
+## Related
+
+- [Units, repos and workspaces](/concepts/units)
+- [Terragrunt and terraform](/concepts/terragrunt)

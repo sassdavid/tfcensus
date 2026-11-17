@@ -135,4 +135,6 @@ tfcensus scan --explain arn:aws:ec2:eu-west-1:111111111111:security-group/sg-012
 
 ## Related
 
+- [Find unmanaged resources and gate CI with --fail-on](/guides/scan)
+- [Scan categories](/concepts/categories)
 - [Fail-on values](/reference/fail-on)

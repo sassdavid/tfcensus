@@ -137,6 +137,7 @@ state read or a layer failed, 4 when every failure was a credential problem, and
 	})
 	cmd.ValidArgsFunction = complete.NoFiles
 	setExitCodes(cmd, ExitFindings, ExitAuth)
+	setRelated(cmd, "guides/whois")
 	return cmd
 }
 

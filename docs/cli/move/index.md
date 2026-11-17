@@ -9,7 +9,7 @@ editLink: false
 
 move runs migration files: migration "units" blocks that move resources from one unit's state
 to others, or run tfmigrate-style mv, xmv and rm actions inside one state. The file format and a full
-walkthrough are at https://tfcensus.sasskovacs.dev/runbooks/move.
+walkthrough are at https://tfcensus.sasskovacs.dev/guides/move.
 
 suggest drafts a migration file from plans. plan and status only read. apply, rollback and mark-applied are the only tfcensus commands that
 write to a backend; each asks you to type the block's destination unit path first, or takes
@@ -53,4 +53,5 @@ tfcensus move apply migrations/split_network.hcl --yes
 
 ## Related
 
-- [Move resources between Terragrunt units](/runbooks/move)
+- [Move resources between units](/guides/move)
+- [Move file format](/reference/move-file)
