@@ -207,7 +207,7 @@ func runWhois(cmd *cobra.Command, d *app.Deps, sink render.Sink, cfg *config.Con
 		return err
 	}
 	problems = append(problems, more...)
-	rep := &whoisReport{Answers: answers, Warnings: []string{}}
+	rep := &whoisReport{Answers: answers, Warnings: append([]string{}, scan.EncryptedStates(ix)...)}
 	for _, name := range eng.Expired() {
 		rep.Warnings = append(rep.Warnings, fmt.Sprintf("rule %q is past its expires date and no longer matches", name))
 	}

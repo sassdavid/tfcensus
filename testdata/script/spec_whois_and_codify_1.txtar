@@ -28,6 +28,10 @@ stdin $WORK/queries.txt
 exec tfcensus whois --index $WHOIS/index.json --config tf-scan/tfcensus.yaml --stdin --type aws_security_group,aws_iam_role
 cmp stdout $WORK/golden/stdin.txt
 
+# A state that is still encrypted gets a warning: whois can't see what it manages.
+exec tfcensus whois --index $WORK/encrypted-index.json --config tf-scan/tfcensus.yaml arn:aws:iam::111111111111:role/clickops-admin
+stdout 'warning: state tf-fleet/secure is encrypted and wasn''t read, so a resource only it manages shows as unmanaged; --decrypt-with-tofu reads it'
+
 # Live: no index, so whois reads the states and lists the unmanaged roles' type in the account.
 env TEST_CASSETTE=$CASSETTES/aws/whois-live
 exec tfcensus whois --repo tf-scan --config tf-scan/tfcensus.yaml arn:aws:iam::111111111111:role/acme-app arn:aws:iam::111111111111:role/acme-shared arn:aws:iam::111111111111:role/clickops-admin arn:aws:iam::111111111111:role/legacy-stack-role arn:aws:iam::111111111111:role/deleted-last-week --format tty
@@ -40,6 +44,29 @@ acme-shared
 
 arn:aws:iam::111111111111:role/aws-service-role/support.amazonaws.com/AWSServiceRoleForSupport
 sg-0aa11bb22cc33dd44
+-- encrypted-index.json --
+{
+    "schema_version": "1",
+    "tool": "tfcensus",
+    "version": "dev",
+    "generated_at": "2026-11-10T12:00:00Z",
+    "data": {
+        "units": [
+            {
+                "unit": "tf-fleet/secure",
+                "workspace": "default",
+                "bucket": "acme-fleet-tfstate",
+                "key": "secure/terraform.tfstate",
+                "status": "encrypted",
+                "serial": 12,
+                "lineage": "8d3f4b5a-6c7d-4e8f-9a01-b2c3d4e5f6a7",
+                "instances": 0
+            }
+        ],
+        "entries": [],
+        "double_managed": []
+    }
+}
 -- aws/config --
 [default]
 region = eu-west-1

@@ -35,11 +35,12 @@ skips any of those types that an earlier layer already listed in the same accoun
 
 `--layers` also takes a comma-separated list of layer names, such as `config,native`. `native`
 stands for every `native:*` layer, and a single one is named in full, such as
-`native:route53-records`. `scan.layers` sets the same value in the config file. This scan runs the
-native listers only:
+`native:route53-records`. `scan.layers` sets the same value in the config file. The first scan
+runs the native listers only, and the second reads AWS Config as well:
 
 ```sh
 tfcensus scan --profile acme-nonprod --layers native
+tfcensus scan --profile acme-nonprod --layers config,native
 ```
 
 `native:eks-pod-identity` reads the clusters another layer found, so it runs after the others and

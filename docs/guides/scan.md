@@ -133,6 +133,7 @@ message, an issue or a pull request comment, pass the JSON to `tfcensus notify`
 ## Run it again without AWS calls
 
 `scan` caches the inventory and the state index for `cache.ttl`, one hour by default, keyed by the
-accounts, regions, layers, types, units and `scan.cloudformation`. A second run with other rules or
-another format reads the cache and makes no AWS calls. `--refresh` lists again. In CI, `tfcensus inventory --save-index` writes the state index once, and
+accounts, regions, layers, types, units, `scan.cloudformation` and whether state decryption is on.
+A second run with other rules or another format reads the cache and makes no AWS calls.
+`--refresh` lists again. In CI, `tfcensus inventory --save-index` writes the state index once, and
 `scan --index` reads it in place of the states. [Caches](/concepts/caches) explains what is kept.

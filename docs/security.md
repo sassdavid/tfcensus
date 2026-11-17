@@ -15,7 +15,8 @@ repository. Don't open a public issue for a vulnerability. Include the version
 (`tfcensus version`), the command you ran, and what it printed, with account IDs, ARNs and other
 identifiers replaced.
 
-A fix ships in a new release, and the [changelog](/changelog) lists it.
+A fix ships in a new release, and the [changelog](/changelog) lists it. The repository's
+[SECURITY.md](https://github.com/sassdavid/tfcensus/blob/main/SECURITY.md) has the same policy.
 
 ## What the project checks
 

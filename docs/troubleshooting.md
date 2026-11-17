@@ -130,7 +130,9 @@ state key.
 ### Many resources show as `unmanaged` that a state manages
 
 Look at the notes first. A state that couldn't be read leaves every resource it manages
-unmatched, and those then show as unmanaged. Fix the read and scan again with `--refresh`.
+unmatched, and those then show as unmanaged. Fix the read and scan again with `--refresh`. A
+warning that a state is encrypted means the same for that state
+([encrypted state](/guides/encrypted-state)).
 
 ### A resource you know about shows as `unmanaged`
 

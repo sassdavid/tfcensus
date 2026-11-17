@@ -93,8 +93,11 @@ manages is other-iac with rule source/cloudformation; the finding names the stac
 state manages stays managed, and the report warns that a stack lists it too.
 
 scan caches the inventory and state index under $XDG_CACHE_HOME/tfcensus/scan for cache.ttl
-(default 1h), keyed by the accounts, regions, layers, types, units and scan.cloudformation. A re-run with other rules
-makes no AWS calls. --refresh lists again.
+(default 1h), keyed by the accounts, regions, layers, types, units, scan.cloudformation and
+state.decrypt_with_tofu. A re-run with other rules makes no AWS calls. --refresh lists again.
+
+scan warns about each state that is still OpenTofu-encrypted, because a resource only it manages
+shows as unmanaged. --decrypt-with-tofu reads those states.
 
 The exit code is 3 when --fail-on finds at least --min-count findings, 1 when a layer, a state
 read, a stack listing or discovery failed, 4 when every failure was a credential problem, and 0 otherwise.`
@@ -257,6 +260,7 @@ func runScan(cmd *cobra.Command, d *app.Deps, sink render.Sink, cfg *config.Conf
 		Warnings:   []string{}, Cached: snap.cached,
 	}
 	rep.Regions, rep.Accounts = scan.Summarize(findings)
+	rep.Warnings = append(rep.Warnings, scan.EncryptedStates(snap.Index)...)
 	rep.Warnings = append(rep.Warnings, scan.StackOverlaps(findings)...)
 	for _, name := range eng.Expired() {
 		msg := fmt.Sprintf("rule %q is past its expires date and no longer matches", name)
@@ -415,6 +419,7 @@ func (e *scanEnv) cacheKey(disc discovery.Result) (string, error) {
 		"all_regions": e.cfg.AllRegions,
 		"layers":      e.layers, "types": e.cfn, "cloudcontrol": e.cc, "units": units, "index": index,
 		"cloudformation": e.cfg.Scan.CloudFormation, "external_dns": e.cfg.Scan.ExternalDNS,
+		"decrypt_with_tofu": e.cfg.State.DecryptWithTofu,
 	})
 }
 
@@ -526,6 +531,7 @@ func collectLive(cmd *cobra.Command, d *app.Deps, m *typemap.Map, req liveReques
 	}
 	env := &inventory.Env{
 		Map: m, Limits: inventory.NewLimiters(nil), Logger: d.Logger, CloudControlTypes: req.cc,
+		S3PathStyle: accounts.PathStyle(d.Env.Lookup),
 		ExternalDNS: inventory.ExternalDNS{Prefix: req.externalDNS.TXTPrefix, Suffix: req.externalDNS.TXTSuffix},
 	}
 	col := inventory.NewCollector(inventory.Options{Env: env})

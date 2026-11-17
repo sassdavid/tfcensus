@@ -308,3 +308,24 @@ func Gate(findings []Finding, failOn []Category, types TypeMatcher) int {
 	}
 	return n
 }
+
+// EncryptedStates returns one warning per state in ix that is still encrypted: its resources
+// aren't in the index, so a resource only it manages shows as unmanaged.
+func EncryptedStates(ix *tfstate.Index) []string {
+	if ix == nil {
+		return nil
+	}
+	var out []string
+	for _, u := range ix.Units {
+		if u.Status != tfstate.StatusEncrypted {
+			continue
+		}
+		label := u.Unit
+		if u.Workspace != tfstate.DefaultWorkspace {
+			label += ":" + u.Workspace
+		}
+		out = append(out, fmt.Sprintf("state %s is encrypted and wasn't read, so a resource only it "+
+			"manages shows as unmanaged; --decrypt-with-tofu reads it", label))
+	}
+	return out
+}

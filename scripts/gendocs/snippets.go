@@ -288,7 +288,7 @@ func checkValue(c *cobra.Command, f *pflag.Flag, value string) string {
 		return ""
 	}
 	parts := []string{value}
-	if f.Value.Type() == "stringSlice" {
+	if f.Value.Type() == "stringSlice" || listFlag(c, fn, allowed) {
 		parts = strings.Split(value, ",")
 	}
 	for _, p := range parts {
@@ -300,6 +300,14 @@ func checkValue(c *cobra.Command, f *pflag.Flag, value string) string {
 		}
 	}
 	return ""
+}
+
+// listFlag reports whether fn completes a comma-separated list, as [complete.List] does: after
+// "a," it offers the other values with "a," in front.
+func listFlag(c *cobra.Command, fn cobra.CompletionFunc, allowed []string) bool {
+	done := allowed[0] + ","
+	comps, _ := fn(c, nil, done)
+	return len(comps) > 0 && strings.HasPrefix(comps[0], done)
 }
 
 // placeholder reports whether a word stands for a value the reader fills in, or is built by

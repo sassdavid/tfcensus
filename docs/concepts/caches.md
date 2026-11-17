@@ -28,7 +28,8 @@ again. After an admin turns on Resource Explorer or AWS Config, run `doctor --re
 A scan does two slow things: it lists the live resources of every account and region, and it reads
 every state. The scan cache keeps both as one snapshot, keyed by everything that changes what a
 scan collects: the tfcensus version, the accounts, regions, layers, types, Cloud Control types, the
-units with their backends and targets, `--index`, `scan.cloudformation` and `scan.external_dns`.
+units with their backends and targets, `--index`, `scan.cloudformation`, `scan.external_dns` and
+`state.decrypt_with_tofu`.
 
 Ownership rules aren't part of the key. A scan with the same inputs and other rules makes no AWS
 call: it applies the new rules to the cached snapshot. That makes trying a rule cheap: edit it, run

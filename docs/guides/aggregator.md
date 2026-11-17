@@ -68,6 +68,10 @@ An admin turns it on with `aws resource-explorer-2 create-index` in each region,
 `aws resource-explorer-2 create-view` and `associate-default-view`. The `doctor` notes name the
 regions that miss one or the other.
 
+A Resource Explorer aggregator index doesn't make the `re` layer faster. The layer searches each
+region in that region's own index. AWS copies the other regions into an aggregator index in the
+background, and that can take several hours, so the local index is the current one.
+
 ## Use fewer calls
 
 When AWS Config and Resource Explorer are on, a few more settings cut the work:

@@ -28,12 +28,11 @@ tfcensus inventory tf-fleet --profile acme-local
 tfcensus scan tf-fleet --profile acme-local --layers native
 ```
 
-When `AWS_ENDPOINT_URL` or `AWS_ENDPOINT_URL_S3` is set, tfcensus switches the S3 clients that
-read and write state to path-style addressing (`http://localhost:4566/<bucket>/<key>`), because an
-emulator can't serve a bucket name as a host name. That covers `inventory`, `audit backend`,
-`move` and the state reads of every other command. `scan`'s native lister of bucket settings
-(policy, versioning, lifecycle, encryption) still uses host-style addressing. The SDK's
-other service variables, such as `AWS_ENDPOINT_URL_STS`, work too, but don't switch S3 to
+When `AWS_ENDPOINT_URL` or `AWS_ENDPOINT_URL_S3` is set, tfcensus switches its S3 clients to
+path-style addressing (`http://localhost:4566/<bucket>/<key>`), because an emulator can't serve a
+bucket name as a host name. That covers the state reads of every command, the writes of `move`,
+and `scan`'s native lister of bucket settings (policy, versioning, lifecycle, encryption). The
+SDK's other service variables, such as `AWS_ENDPOINT_URL_STS`, work too, but don't switch S3 to
 path-style. An `endpoint_url` in the profile doesn't switch it either, so set the variable when
 the emulator serves S3.
 

@@ -18,8 +18,12 @@ tf-fleet/secure: state is encrypted with OpenTofu client-side encryption, so onl
 ```
 
 `scan` and `whois` can't match resources against a state they can't read. A resource that only an
-encrypted state manages shows as `unmanaged` in a scan until the state is decrypted, and the scan
-report doesn't name the encrypted state. Run `inventory` first to see which states are encrypted.
+encrypted state manages shows as `unmanaged` until the state is decrypted, so both print a warning
+for each encrypted state, and the exit code stays 0:
+
+```text
+warning: state tf-fleet/secure is encrypted and wasn't read, so a resource only it manages shows as unmanaged; --decrypt-with-tofu reads it
+```
 
 ## Turn decryption on
 
@@ -48,9 +52,8 @@ JSON from `tofu show` and keeps identifiers only, as it does for any state. The 
 later. `doctor --decrypt-with-tofu` checks that it is installed and lists `state encryption` among
 the features a version too old lacks.
 
-The [scan cache](/concepts/caches#the-scan-cache) doesn't record whether a snapshot was made with
-decryption on. When a scan without the flag ran less than `cache.ttl` ago, add `--refresh` to the
-first scan with it.
+The [scan cache](/concepts/caches#the-scan-cache) keys a snapshot on whether decryption was on,
+so the first scan with the flag reads the states again without `--refresh`.
 
 ## Keys and credentials
 

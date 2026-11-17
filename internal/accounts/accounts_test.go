@@ -341,3 +341,23 @@ func TestSelectionWants(t *testing.T) {
 		})
 	}
 }
+
+func TestPathStyle(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name string
+		env  app.Env
+		want bool
+	}{
+		{"no endpoint", app.Env{"AWS_REGION=eu-west-1"}, false},
+		{"global endpoint", app.Env{"AWS_ENDPOINT_URL=http://127.0.0.1:5000"}, true},
+		{"S3 endpoint", app.Env{"AWS_ENDPOINT_URL_S3=http://127.0.0.1:5000"}, true},
+		{"other service only", app.Env{"AWS_ENDPOINT_URL_STS=http://127.0.0.1:5000"}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			assert.Equal(t, tt.want, accounts.PathStyle(tt.env.Lookup))
+		})
+	}
+}

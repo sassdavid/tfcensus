@@ -541,30 +541,28 @@ If one session can't finish, the open pages carry over to a follow-up session be
   format list) and plan/cli.md (`-o`, `--out sarif=`, `move suggest` in 0.3, `codify --from`,
   `config path`). `docs/dogfood.md` stays unpublished as the spec says.
 - [x] README is reduced to the introduction, install and links. (docs-content criterion 5)
-- [ ] Troubleshooting, FAQ, scan accuracy (aggregates only), security and contributing pages
+- [x] Troubleshooting, FAQ, scan accuracy (aggregates only), security and contributing pages
   exist, and relgap's `drift --from-tfcensus` guide and this site link to each other.
   The five pages exist. `/concepts/state#feed-relgap` and `/faq` link relgap's
-  `/guides/from-tfcensus`; the link back is on relgap's M25 branch, not yet merged.
+  `/guides/from-tfcensus`, which links `/concepts/state#feed-relgap` back (relgap #74, merged).
 
-Found while writing M25, not fixed in it (code changes, outside a docs milestone). The pages
-describe today's behaviour; each fix updates the page named here.
-- `scan`'s native S3 bucket lister ignores emulator endpoints: `inventory.Env.S3PathStyle` is never
-  set in `internal/cli/scan.go`, so it uses host-style addressing while state reads, `audit backend`
-  and `move` switch to path-style. Page: `/guides/endpoints`.
-- The scan cache key (`cacheKey` in `internal/cli/scan.go`) leaves out `state.decrypt_with_tofu`, so
-  a snapshot taken without decryption is reused after `--decrypt-with-tofu` is turned on. Page:
-  `/guides/encrypted-state` (tells users to pass `--refresh`).
-- `scan` doesn't report encrypted states: only failed reads become problems, so a resource that
-  only an encrypted state manages shows as `unmanaged` with no warning. Page:
-  `/guides/encrypted-state` (tells users to run `inventory` first).
-- `doctor` suggests promoting a Resource Explorer index to an aggregator, but the `re` layer searches
-  each region through its default view (`reFilter` in `internal/inventory/re.go`). Check whether an
-  aggregator index helps tfcensus at all, then fix the note or the layer. Page: `/guides/aggregator`.
-- The snippet check (`checkValue` in `scripts/gendocs/snippets.go`, shared with relgap) splits values
-  on commas only for `stringSlice` flags, so `--layers config,native` fails although the help says
-  the flag takes a comma-separated list. `/concepts/inventory-layers` shows `--layers native`.
-- Neither tool repo has a `SECURITY.md`, which docs-content.md names as the source of `/security`.
-  Adding one is a shared change (both repos). `/security` links GitHub's private advisory form.
+Found while writing M25 and fixed in the M25 PR, each with a test:
+- `scan`'s native S3 bucket lister now uses path-style addressing under `AWS_ENDPOINT_URL` or
+  `AWS_ENDPOINT_URL_S3`, from the same `accounts.PathStyle` that state reads use
+  (`TestPathStyle`).
+- The scan cache key includes `state.decrypt_with_tofu`, so turning decryption on collects again
+  (`TestSpec_scan_4`).
+- `scan` and `whois` warn about each state that is still encrypted, because a resource only it
+  manages shows as unmanaged (`TestEncryptedStates`, `spec_whois_and_codify_1.txtar`). The exit
+  code stays 0, as ADR-0015 says for a run without `--decrypt-with-tofu`.
+- `doctor` no longer suggests promoting a Resource Explorer index to an aggregator. The `re` layer
+  searches each region in its own index, and AWS fills an aggregator index in the background
+  (UpdateIndexType API reference), so an aggregator makes it neither faster nor fresher.
+  `/guides/aggregator` says so.
+- The snippet check (`checkValue` in `scripts/gendocs/snippets.go`, shared with relgap) splits
+  values on commas for every flag that completes a comma-separated list, so
+  `--layers config,native` passes (`TestCheckValue`).
+- `SECURITY.md` is in both tool repos, with the same text once the tool name is swapped.
 
 ### M26: Polish and launch (shared) ([docs-site](specs/docs-site.md), [docs-design](specs/docs-design.md))
 Scope: social cards, icons, accessibility and performance, then the first deploy by a real
