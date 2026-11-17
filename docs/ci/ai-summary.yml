@@ -44,7 +44,7 @@ jobs:
           persist-credentials: false
       - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
         with:
-          version: 2026.11.7
+          version: 2026.11.8
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           role-to-assume: ${{ vars.DRIFT_ROLE_ARN }}
@@ -154,7 +154,7 @@ jobs:
       # mise.lock is present, so the action runs mise install --locked.
       - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
         with:
-          version: 2026.11.7
+          version: 2026.11.8
           cache_key_prefix: mise-v1-${{ env.MISE_ENABLE_TOOLS }}
       - name: copilot
         env:

@@ -36,7 +36,7 @@ jobs:
           persist-credentials: false
       - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
         with:
-          version: 2026.11.7
+          version: 2026.11.8
           install_args: node aube
       # Lifecycle scripts stay denied: only packages allowed in aube-workspace.yaml may build.
       - name: aube install
