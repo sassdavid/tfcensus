@@ -65,8 +65,13 @@
     },
     {
       "description": "Stable modules from active projects, not abandoned",
-      "matchPackageNames": ["github.com/google/go-cmp", "github.com/hashicorp/go-retryablehttp", "github.com/google/go-licenses/v2"],
+      "matchPackageNames": ["github.com/adrg/xdg", "github.com/google/go-cmp", "github.com/hashicorp/go-retryablehttp", "github.com/google/go-licenses/v2"],
       "abandonmentThreshold": null
+    },
+    {
+      "description": "Listing aws-sdk-go-v2's thousands of tags for release notes times out with GitHub 502s; the Renovate docs give this rule for it",
+      "matchSourceUrls": ["https://github.com/aws/aws-sdk-go-v2{/**,}"],
+      "fetchChangeLogs": "off"
     }
   ],
   "customManagers": [
