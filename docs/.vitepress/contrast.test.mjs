@@ -13,7 +13,7 @@ const decorative = ["rule"];
 const graphic = { control: 3 };
 
 test("both themes define the same tokens", () => {
-  assert.deepEqual(Object.keys(tokens.dark).sort(), Object.keys(tokens.light).sort());
+  assert.deepEqual(Object.keys(tokens.dark).toSorted(), Object.keys(tokens.light).toSorted());
   assert.ok(Object.keys(tokens.light).length >= surfaces.length + 3);
 });
 

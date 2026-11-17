@@ -64,7 +64,8 @@ The site lives in `docs/` and is built with VitePress. Its tools come from `mise
 MISE_ENV=docs mise install
 cd docs && aube install --frozen-lockfile && cd ..
 mise run docs:dev      # serve with live reload
-mise run docs:build    # stale checks, snippet check, build, link check
+mise run docs:build    # stale checks, snippet check, build, card and link checks
+mise run docs:a11y     # axe in both themes, needs Chrome (CHROME_PATH)
 ```
 
 Pages under `docs/cli/`, most pages under `docs/reference/`, and the tables in `docs/parts/` are

@@ -567,16 +567,52 @@ Found while writing M25 and fixed in the M25 PR, each with a test:
 ### M26: Polish and launch (shared) ([docs-site](specs/docs-site.md), [docs-design](specs/docs-design.md))
 Scope: social cards, icons, accessibility and performance, then the first deploy by a real
 release.
-- [ ] `social.mjs` and `social-check.mjs` generate and check a card per page with the bundled
+- [x] `social.mjs` and `social-check.mjs` generate and check a card per page with the bundled
   font and its license file. The glyph, favicons and manifest are in place. (docs-design
   criterion 4, docs-site criterion 8)
-- [ ] axe shows no WCAG 2.2 AA violation on the pages docs-site.md lists in both themes, and
+  `vitepress build` renders a 1200 by 630 card per page with `@napi-rs/canvas` 1.1.1 and the
+  site's Public Sans variable font from its fontsource package (OFL `LICENSE` in the package), at
+  weights 650 and 750. `social-check: 95 pages have a card and every icon`. `favicon.svg` (with a
+  dark variant), `site.webmanifest`, and `favicon.ico`, `apple-touch-icon.png`, `icon-192.png` and
+  `icon-512.png`, which `node docs/.vitepress/social.mjs` renders from `glyph.svg` with a stale
+  check. `social.test.mjs` covers wrapping, sections, the ICO and PNG headers and the check.
+- [x] axe shows no WCAG 2.2 AA violation on the pages docs-site.md lists in both themes, and
   Lighthouse gives accessibility 100 and best practices at least 95 on the home page and a CLI
   page. (docs-site criterion 9, docs-design criterion 5)
-- [ ] The built site makes no third-party request. (docs-site criterion 10)
-- [ ] `docs/README.md` is the contributor guide for the site: tasks, where pages go, generated
+  `mise run docs:a11y` (`a11y.mjs`: `@axe-core/playwright` 4.14.0 in headless Chrome driven by
+  playwright-core 1.65.1, WCAG 2.0 to 2.2 A and AA plus best practices) reports 0 violations on
+  `/`, `/guides/scan`, `/cli/audit/backend` and `/reference/config` in light and dark, and the
+  home page has 7 animations with motion and 0 with `prefers-reduced-motion: reduce`. `docs.yml`
+  runs it after `docs:build`. Lighthouse 13.6.0, run by hand against `vitepress preview`
+  (2026-11-17, chrome-headless-shell), gives accessibility 100 and best practices 100 on `/` and
+  `/cli/audit/backend`, desktop and mobile. Fixed on the way, in both repos: the search button's K
+  key moved into CSS (axe `label-content-name-mismatch`), the CLI sidebar group links `/cli/`
+  (`nested-interactive`), the home page wraps its components in `<main>` (Lighthouse
+  `landmark-one-main`), and tfcensus's hidden tally table no longer scrolls
+  (`scrollable-region-focusable`).
+- [x] The built site makes no third-party request. (docs-site criterion 10)
+  `third-party-check: 431 files load nothing from another host` (HTML `src` and resource `href`,
+  CSS `url()` and `@import`, and `fetch`, `import()`, WebSocket, EventSource and beacons in the
+  JS), and `docs:a11y` logs every request the four pages make in both themes and found none that
+  left the site.
+- [x] `docs/README.md` is the contributor guide for the site: tasks, where pages go, generated
   files, voice.
 - [x] A release created by release-please deployed the site through `workflow_call`, with the run
   ID in the evidence. (docs-site criterion 2) v0.5.0, release-please run 44053630046: the docs build
   and deploy jobs passed, and the site answers 200.
-- [ ] `mise run sibling:diff` passes in both repos. (docs-site criterion 11)
+- [x] `mise run sibling:diff` passes in both repos. (docs-site criterion 11)
+  "shared files match" in tfcensus, relgap and both action repos, with the six new shared files of
+  `docs/.vitepress` and `docs/.oxlintrc.json` on the identical list and `docs/README.md` on the
+  similar list.
+
+Found while writing M26:
+- aube refused puppeteer-core and lighthouse: chromium-bidi has published without provenance since
+  10.4.0, and `chromium-bidi@157.0.8090-0` is a trust downgrade (`ERR_AUBE_TRUST_DOWNGRADE`). The
+  trust policy stays as it is. `@axe-core/playwright` and playwright-core run the axe check, and
+  Lighthouse is measured by hand (docs-site.md "Checks").
+- Every Node dependency and docs tool was reviewed against npm (release dates, weekly downloads,
+  provenance), jdx's sites in `_reference` and current guides. `@resvg/resvg-js` (no stable release
+  since 2024-03, no variable font weights) became `@napi-rs/canvas`, the hand-written DevTools
+  client became playwright-core with `@axe-core/playwright`, oxlint joined oxfmt in `lint:docs`,
+  and the icons follow Evil Martians' favicon guide. VitePress stays at 1.6.4 (2.0 is alpha.21),
+  and oxfmt at 0.78.0 (0.79.0 is under the 3-day minimum age).

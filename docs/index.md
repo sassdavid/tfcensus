@@ -30,6 +30,11 @@ answers:
     link: /guides/move
 ---
 
+<!-- VitePress's home layout has no <main>, and Lighthouse wants one landmark. -->
+<main>
+
 <HomeHero />
 
 <AnswerRows />
+
+</main>

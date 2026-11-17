@@ -57,3 +57,19 @@ specifiers = ["0.78.0"]
 
 [tools.oxfmt.provenance]
 repository = "github.com/oxc-project/oxc"
+
+[[tools.oxlint]]
+version = "1.93.0"
+backend = "aqua:oxc-project/oxc/oxlint"
+specifiers = ["1.93.0"]
+
+[tools.oxlint."platforms.linux-x64"]
+checksum = "sha256:6d0d37cb51d01449714f04e2dff0d87dca66c39a72544f667b29808899d2db39"
+checksum_source = "mise-versions"
+url = "https://github.com/oxc-project/oxc/releases/download/oxlint_v1.93.0/oxlint-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/oxc-project/oxc/releases/assets/727292090"
+
+[tools.oxlint."platforms.macos-arm64"]
+checksum = "sha256:a622a29b36262b9d05683d28dbc5d8fb61601a6901ab371c9930c31c377b79b5"
+url = "https://github.com/oxc-project/oxc/releases/download/oxlint_v1.93.0/oxlint-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/oxc-project/oxc/releases/assets/727291968"

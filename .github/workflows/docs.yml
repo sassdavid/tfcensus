@@ -76,14 +76,17 @@ jobs:
       - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
         with:
           version: 2026.11.8
-          install_args: go node aube lychee oxfmt
+          install_args: go node aube lychee oxfmt oxlint
       - name: aube install
         working-directory: docs
         run: aube install --frozen-lockfile
-      - name: oxfmt
+      - name: oxfmt and oxlint
         run: mise run lint:docs
       - name: generators, tests, build and link check
         run: mise run docs:build
+      # ubuntu-latest ships Google Chrome, which docs:a11y drives with playwright-core.
+      - name: axe, reduced motion and third-party requests in Chrome
+        run: mise run docs:a11y
       - if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:

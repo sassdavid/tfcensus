@@ -95,7 +95,10 @@ body {
   outline-color: var(--tc-ink);
 }
 
-.tc-sr-only {
+/* .vp-doc table sets overflow-x: auto, which would make a hidden table a scroll region that
+   keyboard users can't reach (axe scrollable-region-focusable). */
+.tc-sr-only,
+.vp-doc table.tc-sr-only {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -105,4 +108,25 @@ body {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* The search button's name is "Search". VitePress prints the K of its shortcut as text, which
+   axe's label-content-name-mismatch reads as part of the visible label ("SearchK"). The K moves
+   into the ::after of the first key, where VitePress already draws Ctrl or the Command sign. */
+.VPNavBarSearch .DocSearch-Button .DocSearch-Button-Key + .DocSearch-Button-Key {
+  display: none;
+}
+
+.VPNavBarSearch .DocSearch-Button .DocSearch-Button-Key:first-child {
+  border-right: 1px solid var(--vp-c-divider);
+  border-radius: 4px;
+  padding-right: 6px;
+}
+
+.VPNavBarSearch .DocSearch-Button .DocSearch-Button-Key:first-child::after {
+  content: "Ctrl K";
+}
+
+.mac .VPNavBarSearch .DocSearch-Button .DocSearch-Button-Key:first-child::after {
+  content: "\2318 K";
 }

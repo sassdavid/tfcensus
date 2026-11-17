@@ -1,0 +1,16 @@
+{
+  "plugins": ["eslint", "import", "node", "promise", "typescript", "unicorn", "vue"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error"
+  },
+  "rules": {
+    "import/no-unassigned-import": [
+      "error",
+      {
+        "allow": ["**/*.css"]
+      }
+    ]
+  },
+  "ignorePatterns": [".vitepress/dist/**", ".vitepress/cache/**", "node_modules/**"]
+}

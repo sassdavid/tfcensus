@@ -40,7 +40,7 @@ function flatten(items: SidebarItem[]): SidebarItem[] {
 }
 
 // buildLlms returns llms.txt: the title, the summary, then one section per sidebar group with a
-// link and description per page.
+// link and description per page. A group with a link of its own lists that page first.
 export function buildLlms(opts: {
   site: string;
   title: string;
@@ -51,7 +51,7 @@ export function buildLlms(opts: {
   const lines = [`# ${opts.title}`, "", `> ${opts.summary}`];
   for (const group of opts.groups) {
     lines.push("", `## ${group.text ?? ""}`, "");
-    for (const item of flatten(group.items ?? [])) {
+    for (const item of flatten(group.link ? [group] : (group.items ?? []))) {
       const link = item.link ?? "";
       const page = opts.page(link);
       const url = /^https?:/.test(link) ? link : opts.site + link;
