@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.8.0](https://github.com/sassdavid/tfcensus/compare/v0.7.0...v0.8.0) (2026-11-17)
+
+
+### Features
+
+* **docs:** add the guides, concepts and help pages (M25) ([e676d37](https://github.com/sassdavid/tfcensus/commit/e676d37e271b244c4860be65c728c02e233c2179))
+
+
+### Bug Fixes
+
+* **docs:** take related link titles from the frontmatter title ([#90](https://github.com/sassdavid/tfcensus/issues/90)) ([2a36b04](https://github.com/sassdavid/tfcensus/commit/2a36b0498d50e4e4e72e896f7014ff78a9118c4b))
+* **doctor:** drop the advice to promote a Resource Explorer aggregator index ([e676d37](https://github.com/sassdavid/tfcensus/commit/e676d37e271b244c4860be65c728c02e233c2179))
+* **scan:** read states again when state decryption is turned on ([e676d37](https://github.com/sassdavid/tfcensus/commit/e676d37e271b244c4860be65c728c02e233c2179))
+* **scan:** use path-style S3 addressing for bucket settings under a custom endpoint ([e676d37](https://github.com/sassdavid/tfcensus/commit/e676d37e271b244c4860be65c728c02e233c2179))
+* **scan:** warn about encrypted states in scan and whois ([e676d37](https://github.com/sassdavid/tfcensus/commit/e676d37e271b244c4860be65c728c02e233c2179))
+
 ## [0.7.0](https://github.com/sassdavid/tfcensus/compare/v0.6.0...v0.7.0) (2026-11-17)
 
 
