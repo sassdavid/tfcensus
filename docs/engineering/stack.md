@@ -33,7 +33,7 @@ goreleaser, chezmoi, k9s, golangci-lint.
 | mise | **v2026.11.5** | pinned as `version:` of `jdx/mise-action` in workflows; `mise.lock` pins tool checksums |
 | zizmor | **v1.32.0** | local workflow audit (`mise x zizmor@1.32.0 -- zizmor .github/workflows`); CI uses `zizmor-action`. Every audit is on, `self-repository` included: same-repository workflows are called with `$/` |
 | jactionlint | **v2.5.0** | `mise run lint:actions`, with `profile: default` in `.github/jactionlint.yaml`. jdx's maintained fork of actionlint (MIT); mise deprecated `actionlint` in 2026.10.3 (jdx/mise#13960). It installs through the `packslip` backend, whose lock entry records the signing workflow. rhysd/actionlint has had no release since 1.7.12 (2026-03-30) |
-| shellcheck | **v0.11.0** | pinned so jactionlint checks `run:` scripts with the same version locally and in CI (the ubuntu runner ships its own) |
+| shellcheck | **v0.11.0** | pinned in `mise.ci.toml`, which only the CI lint job loads (`MISE_ENV=ci`), so jactionlint checks `run:` scripts with a fixed version (the ubuntu runner ships 0.9.0). Locally jactionlint uses the system shellcheck (Homebrew), and mise installs no second copy |
 
 ## Docs site (pinned in `mise.docs.toml` and `docs/package.json`)
 
@@ -45,10 +45,14 @@ age except where the docs-site spec names the version ([ADR-0016](adr/0016-docs-
 | node | **26.13.1** | current LTS line; only jobs with `MISE_ENV=docs` install it |
 | aube | **2.10.1** | installs `docs/` from `docs/aube-lock.yaml`; lifecycle scripts denied (`docs/aube-workspace.yaml`) |
 | lychee | **0.24.2** | `lychee --offline` on the built site |
-| oxfmt | **0.78.0** | formats `docs/.vitepress`; an npm tool, so its lockfile is under `.mise/locks/` |
+| oxfmt | **0.78.0** | formats `docs/.vitepress`; an npm tool, so its lockfile is under `.mise/locks/`. 0.79.0 is younger than the 3-day minimum age |
+| oxlint | **1.94.0** | lints `docs/.vitepress` (`docs/.oxlintrc.json`); an aqua binary from the oxc project, like oxfmt. The latest release, at the owner's request, although it is younger than the 3-day minimum age. ESLint is slower and needs plugins; Biome would replace oxfmt too |
 | VitePress | **1.6.4** | latest stable (2.0 is alpha) |
 | vue | **3.5.45** | the version VitePress resolves, pinned so Renovate updates it |
 | `@fontsource-variable/public-sans`, `@fontsource/ibm-plex-mono` | **5.3.0** | self-hosted OFL fonts ([docs-design](../plan/specs/docs-design.md)) |
+| `@napi-rs/canvas` | **1.1.1** | draws the social cards and raster icons with Skia and the site's variable font; zero dependencies, published with provenance. resvg-js, which jdx's sites use, ignores a variable font's weight axis and has had no stable release since 2024-03 |
+| playwright-core | **1.65.1** | drives the runner's Chrome for `mise run docs:a11y`; zero dependencies, downloads no browser. puppeteer-core 25 needs a chromium-bidi without provenance, which aube rejects |
+| `@axe-core/playwright` | **4.14.0** | runs axe-core 4.14.0 in those pages, the version Lighthouse 13.6.0 bundles |
 
 ## Libraries
 

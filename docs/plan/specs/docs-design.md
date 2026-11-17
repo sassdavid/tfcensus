@@ -175,19 +175,32 @@ zebra striping.
 ## Glyph and wordmark
 
 - Glyph: a 3 by 3 tally, nine squares with 1 px gaps. Six managed, two aws-managed, one
-  unmanaged in the bottom-right corner. It is drawn on a 16 px grid so the favicon stays sharp,
-  with a monochrome variant for `mask-icon`.
+  unmanaged in the bottom-right corner. It is drawn on a 16 px grid so the favicon stays sharp.
 - Wordmark: "tfcensus" in Public Sans 750, lowercase, set next to the glyph in the nav.
-- Files: `docs/public/glyph.svg`, `favicon.svg`, `favicon-32.png`, `apple-touch-icon.png`,
-  `site.webmanifest` with `theme_color` set to `--tc-brand` (light).
+- Files: `docs/public/glyph.svg`, `favicon.svg` (with a dark variant), `favicon.ico` (32 px),
+  `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`, and `site.webmanifest` with
+  `theme_color` set to `--tc-brand` (light).
 
 ## Social cards
 
-1200 by 630, generated at build time by `social.mjs` with resvg and the bundled Public Sans file
-(its OFL text kept as `docs/.vitepress/fonts/PublicSans.LICENSE`). Paper background, glyph and
-wordmark top left, the page title at 64 px weight 650 wrapping at two lines, the section name
-under it in `ink-muted`, and a single tally row along the bottom edge in the category colours.
-File names are content hashes.
+1200 by 630, generated at build time by `social.mjs` with `@napi-rs/canvas` and the site's Public
+Sans variable font from `@fontsource-variable/public-sans`, whose OFL text ships in the package.
+Paper background, glyph and wordmark top left, the page title at 64 px weight 650 wrapping at two
+lines, the section name under it in `ink-muted`, and a single tally row along the bottom edge in the
+category colours. File names are content hashes.
+
+Changes made at M26 (2026-11-17):
+
+- The cards are drawn with `@napi-rs/canvas`, which renders the variable font at the weights
+  above. resvg-js 2.6.2 ignores the weight axis, and its last stable release is from March 2024.
+- The icons follow Evil Martians' "How to Favicon" guide (updated 2026-01-21): `favicon.ico` at
+  32 px, the SVG favicon with a dark variant, the 180 px touch icon and 192 and 512 px manifest
+  icons. The `mask-icon` variant is dropped, because Safari has used the regular favicon since
+  version 12.
+- The tally row is the home page sample (`theme/data/home-tally.json`), one category mark per
+  resource, so the card shows a real count and the marks keep their shapes.
+- A page outside the sidebar, such as the home page, shows the site's host as its section. The
+  home card's title is the home headline.
 
 ## Code blocks
 

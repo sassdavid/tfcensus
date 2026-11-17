@@ -30,12 +30,21 @@ cli_identical=(
   .golangci.yml
   .gitignore
   docs/.oxfmtrc.json
+  docs/.oxlintrc.json
+  docs/.vitepress/a11y.mjs
   docs/.vitepress/contrast.test.mjs
   docs/.vitepress/llms.mts
   docs/.vitepress/llms.test.mjs
+  docs/.vitepress/social-check.mjs
+  docs/.vitepress/social.mjs
+  docs/.vitepress/social.test.mjs
   docs/.vitepress/theme/index.ts
+  docs/.vitepress/third-party-check.mjs
+  docs/.vitepress/third-party-check.test.mjs
   docs/.vitepress/tokens.mjs
   docs/aube-workspace.yaml
+  mise.ci.lock
+  mise.ci.toml
   mise.docs.lock
   mise.docs.toml
   mise.lock
@@ -166,6 +175,7 @@ cli_similar=(
   docs/engineering/adr/0008-lint-config.md
   docs/engineering/adr/0013-shell-completion-and-man-pages.md
   docs/install.md
+  docs/README.md
   docs/package.json
   docs/.vitepress/config.mts
   docs/.vitepress/sidebar.mts
@@ -185,6 +195,8 @@ action_identical=(
   .gitignore
   .shellcheckrc
   action.yml
+  mise.ci.lock
+  mise.ci.toml
   release-please-config.json
   renovate.json
   scripts/install.sh

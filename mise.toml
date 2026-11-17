@@ -11,7 +11,6 @@ goreleaser = "2.20.2"
 cosign = "3.1.4"
 syft = "1.57.1"
 jactionlint = "v2.6.0"
-shellcheck = "0.11.0"
 
 [tasks.check]
 description = "Lint, race tests and govulncheck: the single verification command"
@@ -38,9 +37,12 @@ description = "Fail on forbidden, restricted or unknown licenses compiled into t
 run = "bash scripts/licenses.sh -check"
 
 [tasks."lint:docs"]
-description = "oxfmt --check on the docs site's config, theme and components (tools from mise.docs.toml)"
+description = "oxfmt --check and oxlint on the docs site's config, scripts, theme and components (tools from mise.docs.toml)"
 dir = "docs"
-run = "MISE_ENV=docs mise exec -- oxfmt --check '.vitepress/**/*.{mts,ts,vue,css,mjs}'"
+run = [
+  "MISE_ENV=docs mise exec -- oxfmt --check '.vitepress/**/*.{mts,ts,vue,css,mjs}'",
+  "MISE_ENV=docs mise exec -- oxlint --deny-warnings .vitepress",
+]
 
 [tasks."lint:tidy"]
 description = "Fail when go.mod or go.sum differ from what go mod tidy would write"
@@ -94,17 +96,26 @@ dir = "docs"
 run = "MISE_ENV=docs mise exec -- aube exec vitepress dev ."
 
 [tasks."docs:build"]
-description = "Stale checks, llms.txt, the snippet check, unit tests, VitePress build, docs URL check, the never-on-the-site check and the offline link check"
+description = "Stale checks, llms.txt, PNG icons, the snippet check, unit tests, VitePress build with social cards, the card, third-party, docs URL and never-on-the-site checks, and the offline link check"
 run = [
   "mise run docs",
   "MISE_ENV=docs mise exec -- node docs/.vitepress/llms.mts",
+  "MISE_ENV=docs mise exec -- node docs/.vitepress/social.mjs",
   "go run ./scripts/gendocs -snippets",
   "MISE_ENV=docs mise exec -- node --test 'docs/.vitepress/*.test.mjs'",
   "cd docs && MISE_ENV=docs mise exec -- aube exec vitepress build .",
+  "MISE_ENV=docs mise exec -- node docs/.vitepress/social-check.mjs",
+  "MISE_ENV=docs mise exec -- node docs/.vitepress/third-party-check.mjs",
   "DOCS_DIST=\"$PWD/docs/.vitepress/dist\" go test -count=1 -run TestPaths ./internal/docsurl",
   "DOCS_DIST=\"$PWD/docs/.vitepress/dist\" go test -count=1 -run TestNeverOnSite ./scripts/gensite",
   "MISE_ENV=docs mise exec -- lychee --offline --include-fragments --no-progress --root-dir \"$PWD/docs/.vitepress/dist\" --fallback-extensions html --index-files index.html docs/.vitepress/dist",
 ]
+
+# Needs a built site and Chrome: CHROME_PATH, or google-chrome or chromium on PATH. CI runs it on
+# ubuntu-latest, which has Chrome; mise doesn't install a browser.
+[tasks."docs:a11y"]
+description = "axe (WCAG 2.2 AA) in both themes, the reduced-motion check and the third-party request check in headless Chrome, on the built site"
+run = "MISE_ENV=docs mise exec -- node docs/.vitepress/a11y.mjs / /guides/scan /cli/audit/backend /reference/config"
 
 [tasks."docs:preview"]
 description = "Serve the built site from docs/.vitepress/dist"

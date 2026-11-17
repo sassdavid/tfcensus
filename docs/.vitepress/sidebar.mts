@@ -92,10 +92,12 @@ export const sidebar: DefaultTheme.SidebarItem[] = [
     ],
   },
   {
+    // The group links its overview page: a collapsible group without a link renders as a button
+    // around the caret button, which axe reports as nested-interactive.
     text: "CLI",
+    link: "/cli/",
     collapsed: true,
     items: [
-      { text: "Overview", link: "/cli/" },
       { text: "Global flags", link: "/cli/global-flags" },
       ...(commands.children ?? []).filter((c) => !c.hidden).map(cliItem),
     ],

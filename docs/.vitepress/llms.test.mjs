@@ -25,6 +25,7 @@ test("buildLlms writes one section per group with nested pages", () => {
       { text: "Start", items: [{ text: "Install", link: "/install" }] },
       {
         text: "CLI",
+        link: "/cli/",
         items: [{ text: "a", link: "/cli/a/", items: [{ text: "b", link: "/cli/a/b" }] }],
       },
     ],
@@ -44,6 +45,7 @@ test("buildLlms writes one section per group with nested pages", () => {
       "",
       "## CLI",
       "",
+      "- [CLI](https://example.test/cli/)",
       "- [a](https://example.test/cli/a/)",
       "- [b](https://example.test/cli/a/b)",
       "",
