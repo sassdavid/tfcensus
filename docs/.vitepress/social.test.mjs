@@ -3,6 +3,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
+import { createCanvas } from "@napi-rs/canvas";
 import { checkIcons, checkPage, tags } from "./social-check.mjs";
 import {
   fontFiles,
@@ -13,6 +14,7 @@ import {
   pageLink,
   pngSize,
   renderCard,
+  sameImage,
   sectionOf,
   titleMeasure,
   width,
@@ -81,6 +83,21 @@ test("ico wraps one PNG behind a 22 byte header", () => {
   assert.equal(file.readUInt16LE(4), 1);
   assert.equal(file.readUInt32LE(18), 22);
   assert.deepEqual(pngSize(file.subarray(22)), { width: 32, height: 32 });
+});
+
+const draw = (shade) => {
+  const canvas = createCanvas(4, 4);
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = `rgb(${shade}, 0, 0)`;
+  ctx.fillRect(0, 0, 4, 4);
+  return canvas.encode("png");
+};
+
+test("sameImage allows the edge pixel drift between Skia builds", async () => {
+  const base = await draw(100);
+  assert.ok(await sameImage(base, await draw(101)));
+  assert.ok(!(await sameImage(base, await draw(110))));
+  assert.ok(await sameImage(ico(base, 4), base));
 });
 
 test("pngSize reads the header and rejects other files", () => {
@@ -171,7 +188,10 @@ test("checkIcons wants the icon sizes, the SVG favicon and the manifest colour",
 test("the committed raster icons are current", async () => {
   for (const [name, want] of Object.entries(await icons())) {
     const have = readFileSync(new URL(`../public/${name}`, import.meta.url));
-    assert.ok(have.equals(want), `run node docs/.vitepress/social.mjs to regenerate ${name}`);
+    assert.ok(
+      await sameImage(have, want),
+      `run node docs/.vitepress/social.mjs to regenerate ${name}`,
+    );
   }
 });
 

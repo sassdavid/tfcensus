@@ -46,7 +46,7 @@ age except where the docs-site spec names the version ([ADR-0016](adr/0016-docs-
 | aube | **2.10.1** | installs `docs/` from `docs/aube-lock.yaml`; lifecycle scripts denied (`docs/aube-workspace.yaml`) |
 | lychee | **0.24.2** | `lychee --offline` on the built site |
 | oxfmt | **0.78.0** | formats `docs/.vitepress`; an npm tool, so its lockfile is under `.mise/locks/`. 0.79.0 is younger than the 3-day minimum age |
-| oxlint | **1.93.0** | lints `docs/.vitepress` (`docs/.oxlintrc.json`); an aqua binary from the oxc project, like oxfmt. ESLint is slower and needs plugins; Biome would replace oxfmt too |
+| oxlint | **1.94.0** | lints `docs/.vitepress` (`docs/.oxlintrc.json`); an aqua binary from the oxc project, like oxfmt. The latest release, at the owner's request, although it is younger than the 3-day minimum age. ESLint is slower and needs plugins; Biome would replace oxfmt too |
 | VitePress | **1.6.4** | latest stable (2.0 is alpha) |
 | vue | **3.5.45** | the version VitePress resolves, pinned so Renovate updates it |
 | `@fontsource-variable/public-sans`, `@fontsource/ibm-plex-mono` | **5.3.0** | self-hosted OFL fonts ([docs-design](../plan/specs/docs-design.md)) |

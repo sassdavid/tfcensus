@@ -236,13 +236,33 @@ export async function icons() {
   };
 }
 
-// Writes the raster icons to public/ and exits 1 when a committed one changed.
+/** Returns the RGBA pixels of a PNG, or of the PNG inside a one-image ICO. */
+async function pixels(file) {
+  const png = file.readUInt16LE(2) === 1 && pngSize(file) === undefined ? file.subarray(22) : file;
+  const image = await loadImage(png);
+  const canvas = createCanvas(image.width, image.height);
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(image, 0, 0);
+  return ctx.getImageData(0, 0, image.width, image.height).data;
+}
+
+/**
+ * Reports whether two raster icons show the same image. Skia's x64 and arm64 builds can differ by
+ * a colour level on edge pixels (the @napi-rs/canvas README), so the bytes can't be compared and
+ * each channel may differ by up to tolerance.
+ */
+export async function sameImage(a, b, tolerance = 2) {
+  const [pa, pb] = await Promise.all([pixels(a), pixels(b)]);
+  return pa.length === pb.length && pa.every((v, i) => Math.abs(v - pb[i]) <= tolerance);
+}
+
+// Writes the raster icons to public/ and exits 1 when a committed one shows a different image.
 async function main() {
   let stale = false;
-  for (const [name, png] of Object.entries(await icons())) {
+  for (const [name, image] of Object.entries(await icons())) {
     const url = new URL(`../public/${name}`, here);
-    if (!existsSync(url) || !readFileSync(url).equals(png)) {
-      writeFileSync(url, png);
+    if (!existsSync(url) || !(await sameImage(readFileSync(url), image))) {
+      writeFileSync(url, image);
       console.error(`social: wrote docs/public/${name}`);
       stale = true;
     }
