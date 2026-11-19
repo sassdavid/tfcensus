@@ -5,6 +5,11 @@ stdout '^commit +\S+'
 stdout '^platform +\w+/\w+$'
 ! stderr .
 
+# --version prints the first line of the version command.
+exec tfcensus --version
+stdout '^tfcensus \S+$'
+! stderr .
+
 # JSON output is the shared envelope and validates against schemas/report-v1.json.
 exec tfcensus version --format json
 stdout '"schema_version": "1"'
