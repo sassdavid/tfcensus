@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/sassdavid/tfcensus/internal/app"
+	"github.com/sassdavid/tfcensus/internal/buildinfo"
 	"github.com/sassdavid/tfcensus/internal/complete"
 	"github.com/sassdavid/tfcensus/internal/config"
 	"github.com/sassdavid/tfcensus/internal/docsurl"
@@ -99,6 +100,7 @@ Docs: ` + docsurl.Base + `.`,
   tfcensus units
   tfcensus scan --profile 'acme-*' --fail-on unmanaged
   tfcensus audit backend --format md`,
+		Version:           buildinfo.Get().Version,
 		SilenceErrors:     true,
 		SilenceUsage:      true,
 		DisableAutoGenTag: true,
@@ -106,6 +108,7 @@ Docs: ` + docsurl.Base + `.`,
 			return g.setup(cmd, d)
 		},
 	}
+	root.SetVersionTemplate(config.AppName + " {{.Version}}\n")
 	root.SetIn(d.Stdin)
 	root.SetOut(d.Stdout)
 	root.SetErr(d.Stderr)
