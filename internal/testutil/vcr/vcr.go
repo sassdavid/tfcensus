@@ -33,7 +33,7 @@ func Recording() bool {
 
 // DefaultHeaders lists the headers a [Scrubber] always drops from requests and responses.
 func DefaultHeaders() []string {
-	return []string{"Authorization", "Proxy-Authorization", "Cookie", "Set-Cookie"}
+	return []string{"Authorization", "Proxy-Authorization", "Cookie", "Set-Cookie", "Private-Token", "Job-Token"}
 }
 
 // Replacement rewrites every match of Pattern with With.

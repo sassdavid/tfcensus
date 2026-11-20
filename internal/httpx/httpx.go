@@ -50,7 +50,7 @@ type RateLimitError struct {
 }
 
 func (e *RateLimitError) Error() string {
-	return fmt.Sprintf("%s rate limit reached (%d requests per hour, resets at %s)",
+	return fmt.Sprintf("%s rate limit reached (%d requests, resets at %s)",
 		e.Host, e.Limit, e.Reset.UTC().Format(time.TimeOnly+" UTC"))
 }
 
@@ -276,8 +276,9 @@ func (l *limiter) RoundTrip(req *http.Request) (*http.Response, error) {
 	return resp, nil
 }
 
-// watch reads the x-ratelimit headers of GitHub and Bitbucket Cloud. It turns an exhausted limit into a [RateLimitError]
-// and spreads the remaining requests until the reset when less than 10% is left.
+// watch reads the rate-limit headers of GitHub, GitLab and Bitbucket Cloud. It turns an exhausted
+// limit into a [RateLimitError] and spreads the remaining requests until the reset when less than
+// 10% is left.
 func (l *limiter) watch(ctx context.Context, host string, h *hostLimit, resp *http.Response) error {
 	if resp.Header.Get("X-Ratelimit-Nearlimit") == "true" && h.rate != nil {
 		// Bitbucket Cloud sends no remaining count, only this flag below 20% left.
@@ -316,21 +317,25 @@ func (l *limiter) warnLow(ctx context.Context, h *hostLimit, attrs ...any) {
 	}
 }
 
-// rateLimitHeaders parses x-ratelimit-remaining, -limit and -reset; ok is false when any is missing.
+// rateLimitHeaders parses x-ratelimit-remaining, -limit and -reset (GitHub), or GitLab's
+// ratelimit-remaining, -limit and -reset; ok is false when any is missing.
 func rateLimitHeaders(h http.Header) (int, int, time.Time, bool) {
-	remaining, err := strconv.Atoi(h.Get("X-Ratelimit-Remaining"))
-	if err != nil {
-		return 0, 0, time.Time{}, false
+	for _, prefix := range []string{"X-Ratelimit-", "Ratelimit-"} {
+		remaining, err := strconv.Atoi(h.Get(prefix + "Remaining"))
+		if err != nil {
+			continue
+		}
+		limit, err := strconv.Atoi(h.Get(prefix + "Limit"))
+		if err != nil || limit <= 0 {
+			continue
+		}
+		resetUnix, err := strconv.ParseInt(h.Get(prefix+"Reset"), 10, 64)
+		if err != nil {
+			continue
+		}
+		return remaining, limit, time.Unix(resetUnix, 0), true
 	}
-	limit, err := strconv.Atoi(h.Get("X-Ratelimit-Limit"))
-	if err != nil || limit <= 0 {
-		return 0, 0, time.Time{}, false
-	}
-	resetUnix, err := strconv.ParseInt(h.Get("X-Ratelimit-Reset"), 10, 64)
-	if err != nil {
-		return 0, 0, time.Time{}, false
-	}
-	return remaining, limit, time.Unix(resetUnix, 0), true
+	return 0, 0, time.Time{}, false
 }
 
 // logging sets the User-Agent and logs each attempt: a line at debug, headers at trace.
@@ -379,7 +384,8 @@ func redact(h http.Header) map[string]string {
 	for k, vs := range h {
 		v := fmt.Sprint(vs)
 		switch http.CanonicalHeaderKey(k) {
-		case "Authorization", "Proxy-Authorization", "Cookie", "Set-Cookie", "X-Amz-Security-Token", "X-Api-Key":
+		case "Authorization", "Proxy-Authorization", "Cookie", "Set-Cookie", "X-Amz-Security-Token", "X-Api-Key",
+			"Private-Token", "Job-Token":
 			v = "[redacted]"
 		}
 		out[k] = v
