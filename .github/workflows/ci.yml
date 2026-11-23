@@ -23,9 +23,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
+      - uses: jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a # v5.2.10
         with:
-          version: 2026.11.8
+          version: 2026.11.10
       - run: mise run lint
 
   # Go comes from mise.toml, the version lint, local builds and releases use
@@ -47,9 +47,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
+      - uses: jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a # v5.2.10
         with:
-          version: 2026.11.8
+          version: 2026.11.10
           install_args: go
       - run: go version
       - name: go test -race
@@ -76,7 +76,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
         with:
           go-version-file: go.mod
       - name: build tfcensus onto PATH
@@ -105,10 +105,10 @@ jobs:
       - name: fish
         if: runner.os == 'Linux'
         run: bash scripts/completion-shells.sh fish
-      - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
+      - uses: jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a # v5.2.10
         if: runner.os == 'Linux'
         with:
-          version: 2026.11.8
+          version: 2026.11.10
           install: false
       - name: nushell through the carapace snippet
         if: runner.os == 'Linux'
@@ -173,9 +173,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
+      - uses: jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a # v5.2.10
         with:
-          version: 2026.11.8
+          version: 2026.11.10
       - name: fuzz targets, 60s each
         run: mise run fuzz
 
@@ -188,9 +188,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
+      - uses: jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a # v5.2.10
         with:
-          version: 2026.11.8
+          version: 2026.11.10
       - name: generated docs are up to date
         run: mise run docs
 
@@ -204,9 +204,9 @@ jobs:
         with:
           fetch-depth: 0 # goreleaser derives the version from tags
           persist-credentials: false
-      - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
+      - uses: jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a # v5.2.10
         with:
-          version: 2026.11.8
+          version: 2026.11.10
       - run: goreleaser check
       - run: mise run snapshot
       - name: 6 archives, checksums and SBOMs

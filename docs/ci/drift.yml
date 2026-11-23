@@ -34,9 +34,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
+      - uses: jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a # v5.2.10
         with:
-          version: 2026.11.8
+          version: 2026.11.10
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           role-to-assume: ${{ vars.DRIFT_ROLE_ARN }}
@@ -53,7 +53,7 @@ jobs:
       # Exit 3: drift or a failed unit. Exit 1 or 2: tfcensus couldn't read the plans. The action
       # uploads the SARIF and writes the step summary before the step fails. It passes
       # <from>/report.json as --report-file.
-      - uses: sassdavid/tfcensus-action@f2cc1dccce5a5de868ff2f3f50dbec2603d197c7 # v1.0.1
+      - uses: sassdavid/tfcensus-action@f2e424405b36d9a380bf64f3ae4920652decff15 # v1.2.0
         with:
           mode: report
           from: ${{ runner.temp }}/plans
