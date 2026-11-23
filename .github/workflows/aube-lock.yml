@@ -39,9 +39,10 @@ jobs:
           version: 2026.11.10
           install_args: node aube
       # Lifecycle scripts stay denied: only packages allowed in aube-workspace.yaml may build.
+      # aube turns on --frozen-lockfile when CI is set. This flag lets it rewrite a stale lockfile.
       - name: aube install
         working-directory: docs
-        run: aube install
+        run: aube install --prefer-frozen-lockfile
       - name: changed
         id: changed
         run: |
