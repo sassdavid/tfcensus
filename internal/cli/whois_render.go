@@ -38,7 +38,8 @@ func writeWhois(w io.Writer, d *app.Deps, format render.Format, rep *whoisReport
 		return sarif.Write(w, scanSARIF(&scan.Report{Findings: findings}))
 	case render.FormatMD:
 		return writeWhoisMarkdown(w, rep, problems)
-	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatCSV, render.FormatGitHub:
+	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatCSV, render.FormatGitHub,
+		render.FormatOpenVEX:
 	}
 	return writeWhoisText(w, rep, problems)
 }

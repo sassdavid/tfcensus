@@ -292,7 +292,8 @@ func writeDoctor(d *app.Deps, format render.Format, data doctorData, res *accoun
 		render.FormatPlain,
 		render.FormatCSV,
 		render.FormatSARIF,
-		render.FormatGitHub:
+		render.FormatGitHub,
+		render.FormatOpenVEX:
 	}
 	return writeDoctorText(d.Stdout, data)
 }

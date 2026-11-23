@@ -30,7 +30,7 @@ func writeDrift(w io.Writer, d *app.Deps, format render.Format, rep *drift.Repor
 		return writeDriftGitHub(w, rep, problems)
 	case render.FormatMD:
 		return writeDriftMarkdown(w, rep, problems)
-	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatCSV:
+	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatCSV, render.FormatOpenVEX:
 	}
 	return writeDriftText(w, rep, problems)
 }

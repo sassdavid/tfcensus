@@ -188,7 +188,8 @@ func writeUnits(w io.Writer, format render.Format, d *app.Deps, res discovery.Re
 		render.FormatPlain,
 		render.FormatCSV,
 		render.FormatSARIF,
-		render.FormatGitHub:
+		render.FormatGitHub,
+		render.FormatOpenVEX:
 		return writeUnitsTable(w, units)
 	}
 	return writeUnitsTable(w, units)

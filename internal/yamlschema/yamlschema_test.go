@@ -36,6 +36,8 @@ func TestParse(t *testing.T) {
 		want []string
 	}{
 		{name: "valid", in: "name: a\nitems:\n  - n: 1\n"},
+		{name: "unquoted date is a string", in: "name: 2026-12-31\n"},
+		{name: "unquoted time is a string", in: "name: 2026-12-31T10:00:00Z\n"},
 		{name: "empty", in: "# only a comment\n"},
 		{name: "unknown key", in: "name: a\nnope: 1\n", want: []string{"f.yaml:2:1: nope: unknown key"}},
 		{
@@ -66,6 +68,9 @@ func TestParse(t *testing.T) {
 			if len(tt.want) == 0 {
 				assert.Empty(t, got)
 				require.NotNil(t, doc)
+				if data, ok := doc.Data.(map[string]any); ok && data["name"] != nil {
+					assert.IsType(t, "", data["name"])
+				}
 				return
 			}
 			assert.Equal(t, tt.want, got)

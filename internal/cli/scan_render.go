@@ -40,7 +40,7 @@ func writeScan(w io.Writer, d *app.Deps, format render.Format, rep *scan.Report,
 		return writeScanMarkdown(w, rep, problems, now)
 	case render.FormatGitHub:
 		return sarif.WriteGitHub(w, scanSARIF(rep))
-	case render.FormatAuto, render.FormatTTY, render.FormatPlain:
+	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatOpenVEX:
 	}
 	return writeScanText(w, rep, problems, now)
 }

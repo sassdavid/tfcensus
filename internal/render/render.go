@@ -14,19 +14,20 @@ type Format string
 
 // Output formats. FormatAuto resolves to tty or plain depending on stdout.
 const (
-	FormatAuto   Format = ""
-	FormatTTY    Format = "tty"
-	FormatPlain  Format = "plain"
-	FormatMD     Format = "md"
-	FormatJSON   Format = "json"
-	FormatCSV    Format = "csv"
-	FormatSARIF  Format = "sarif"
-	FormatGitHub Format = "github" // GitHub Actions workflow commands, which show as annotations
+	FormatAuto    Format = ""
+	FormatTTY     Format = "tty"
+	FormatPlain   Format = "plain"
+	FormatMD      Format = "md"
+	FormatJSON    Format = "json"
+	FormatCSV     Format = "csv"
+	FormatSARIF   Format = "sarif"
+	FormatGitHub  Format = "github"  // GitHub Actions workflow commands, which show as annotations
+	FormatOpenVEX Format = "openvex" // an OpenVEX v0.2.0 document
 )
 
 // AllFormats lists the formats --format accepts.
 func AllFormats() []Format {
-	return []Format{FormatTTY, FormatPlain, FormatMD, FormatJSON, FormatCSV, FormatSARIF, FormatGitHub}
+	return []Format{FormatTTY, FormatPlain, FormatMD, FormatJSON, FormatCSV, FormatSARIF, FormatGitHub, FormatOpenVEX}
 }
 
 // ParseFormat validates a --format value. The empty string means auto.
