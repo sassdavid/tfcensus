@@ -170,6 +170,7 @@ func (s *Schema) Parse(origin string, b []byte) (*Document, []Problem, error) {
 	if err := yaml.Unmarshal(b, &root); err != nil {
 		return nil, []Problem{syntaxProblem(origin, err)}, nil
 	}
+	textTimestamps(&root)
 	var data any
 	if err := root.Decode(&data); err != nil {
 		return nil, []Problem{syntaxProblem(origin, err)}, nil
@@ -199,6 +200,18 @@ func (s *Schema) Parse(origin string, b []byte) (*Document, []Problem, error) {
 	}
 	SortProblems(problems)
 	return nil, problems, nil
+}
+
+// textTimestamps retags each plain scalar YAML resolves to a timestamp as a string, so an unquoted
+// date such as until: 2026-12-31 decodes to the text written. No key is a time, and a [time.Time]
+// fails the decode into a string field. An explicit !!timestamp tag stays.
+func textTimestamps(n *yaml.Node) {
+	if n.Kind == yaml.ScalarNode && n.Style&yaml.TaggedStyle == 0 && n.ShortTag() == "!!timestamp" {
+		n.Tag = "!!str"
+	}
+	for _, c := range n.Content {
+		textTimestamps(c)
+	}
 }
 
 func syntaxProblem(origin string, err error) Problem {

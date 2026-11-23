@@ -272,7 +272,7 @@ func writeAudit(
 		return writeAuditMarkdown(w, rep)
 	case render.FormatGitHub:
 		return sarif.WriteGitHub(w, auditSARIF(rep))
-	case render.FormatAuto, render.FormatTTY, render.FormatPlain:
+	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatOpenVEX:
 	}
 	return writeAuditTable(w, rep)
 }

@@ -260,7 +260,8 @@ func writeInventory(w io.Writer, d *app.Deps, format render.Format, data invento
 		return writeInventoryCSV(w, data.Units)
 	case render.FormatMD:
 		return writeInventoryMarkdown(w, data)
-	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatSARIF, render.FormatGitHub:
+	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatSARIF, render.FormatGitHub,
+		render.FormatOpenVEX:
 	}
 	return writeInventoryTable(w, data)
 }
