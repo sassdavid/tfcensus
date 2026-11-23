@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.9.2](https://github.com/sassdavid/tfcensus/compare/v0.9.1...v0.9.2) (2026-11-23)
+
+
+### Bug Fixes
+
+* **ci:** let aube-lock rewrite a stale docs lockfile ([#106](https://github.com/sassdavid/tfcensus/issues/106)) ([6128bd7](https://github.com/sassdavid/tfcensus/commit/6128bd789a36dfead879cf85593336abebf79458))
+* **config:** read unquoted YAML dates as strings ([#109](https://github.com/sassdavid/tfcensus/issues/109)) ([7553f87](https://github.com/sassdavid/tfcensus/commit/7553f87f1e1991888ecf38bd7cd19b9380962ecb))
+* **deps:** update aws-sdk-go-v2 monorepo ([#101](https://github.com/sassdavid/tfcensus/issues/101)) ([63e02a5](https://github.com/sassdavid/tfcensus/commit/63e02a5422882e1d2f92ecc2beaa7a697a8dac4c))
+* **deps:** update dependency oxfmt to v0.79.0 ([#104](https://github.com/sassdavid/tfcensus/issues/104)) ([18ff7ac](https://github.com/sassdavid/tfcensus/commit/18ff7acd3ea682af6f70cb7e7b2e13114ff1fd1e))
+* **deps:** update module cel.dev/cel-go to v0.33.4 ([#102](https://github.com/sassdavid/tfcensus/issues/102)) ([7039556](https://github.com/sassdavid/tfcensus/commit/703955609ee5fc3c6f3e77a073c5beaa8be3dd8b))
+
 ## [0.9.1](https://github.com/sassdavid/tfcensus/compare/v0.9.0...v0.9.1) (2026-11-19)
 
 
