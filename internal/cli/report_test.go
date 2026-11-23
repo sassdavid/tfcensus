@@ -185,11 +185,24 @@ func browserSmoke(t *testing.T, page string) {
 	}
 	abs, err := filepath.Abs(page)
 	require.NoError(t, err)
-	out, err := exec.CommandContext(t.Context(), chrome, "--headless=new", "--disable-gpu", "--no-sandbox",
-		"--no-first-run", "--user-data-dir="+t.TempDir(), `--host-resolver-rules=MAP * ~NOTFOUND`,
-		"--virtual-time-budget=5000", "--dump-dom", mcptest.FileURI(abs)).
-		Output()
-	require.NoError(t, err)
+	// Chrome on the macOS runner sometimes exits with status 2 on a page that passes on the next
+	// run, so a second attempt with a fresh profile decides. Its stderr shows why it failed.
+	var out []byte
+	for attempt := 1; ; attempt++ {
+		var stderr bytes.Buffer
+		cmd := exec.CommandContext(t.Context(), chrome, "--headless=new", "--disable-gpu", "--no-sandbox",
+			"--no-first-run", "--user-data-dir="+t.TempDir(), `--host-resolver-rules=MAP * ~NOTFOUND`,
+			"--virtual-time-budget=5000", "--dump-dom", mcptest.FileURI(abs))
+		cmd.Stderr = &stderr
+		out, err = cmd.Output()
+		if err == nil {
+			break
+		}
+		if attempt == 2 {
+			require.NoError(t, err, "headless Chrome stderr:\n%s", stderr.String())
+		}
+		t.Logf("headless Chrome attempt %d: %v\nstderr:\n%s", attempt, err, stderr.String())
+	}
 	assert.Contains(t, string(out), `data-ready="ok"`, "the page script ran")
 	assert.Regexp(t, `\d+ of \d+ shown`, string(out), "the filters counted the rows")
 }
