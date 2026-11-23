@@ -9,3 +9,7 @@ ignores:
     job: sarif
     uses: github/codeql-action/upload-sarif
     reason: CODEQL_ACTION_TEST_MODE saves the payload instead of uploading it, so contents read is enough
+  - rule: unlocked-install
+    file: .github/workflows/aube-lock.yml
+    job: lockfile
+    reason: the job exists to rewrite docs/aube-lock.yaml after Renovate changes docs/package.json
