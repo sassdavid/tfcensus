@@ -106,7 +106,7 @@ is 1 when a unit or a repo failed and no gate matched, and 0 otherwise. terrafor
 				return err
 			}
 			a.paths = args
-			return runDrift(cmd, d, g.sink(cmd, d), &res.Config, a)
+			return runDrift(cmd, d, g.reportOut(cmd, d), &res.Config, a)
 		},
 	}
 	addDiscoveryFlags(cmd, &a.filters)
@@ -200,7 +200,7 @@ func newDriftSettings(cfg *config.Config, a driftArgs) (*driftSettings, error) {
 	return s, nil
 }
 
-func runDrift(cmd *cobra.Command, d *app.Deps, sink render.Sink, cfg *config.Config, a driftArgs) error {
+func runDrift(cmd *cobra.Command, d *app.Deps, out reportOut, cfg *config.Config, a driftArgs) error {
 	s, err := newDriftSettings(cfg, a)
 	if err != nil {
 		return err
@@ -227,8 +227,8 @@ func runDrift(cmd *cobra.Command, d *app.Deps, sink render.Sink, cfg *config.Con
 	for _, w := range rep.Warnings {
 		d.Logger.WarnContext(cmd.Context(), w)
 	}
-	if err = sink.Write(func(w io.Writer, f render.Format) error {
-		return writeDrift(w, d, f, rep, problems)
+	if err = out.Write(func(w io.Writer, f render.Format) error {
+		return writeDrift(w, d, f, out.width(f), rep, problems)
 	}); err != nil {
 		return err
 	}

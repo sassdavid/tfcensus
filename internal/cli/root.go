@@ -15,6 +15,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/config"
 	"github.com/sassdavid/tfcensus/internal/docsurl"
 	"github.com/sassdavid/tfcensus/internal/render"
+	"github.com/sassdavid/tfcensus/internal/term"
 )
 
 const (
@@ -64,6 +65,7 @@ type globals struct {
 	mdMaxChars int
 
 	outFormat render.Format
+	stdout    term.Stream // decided once in setup
 	outputs   []render.Output
 	started   bool
 	closers   []io.Closer
@@ -124,7 +126,7 @@ Docs: ` + docsurl.Base + `.`,
 	pf.StringVar(&g.logFormat, "log-format", string(app.LogFormatText),
 		complete.Usage("log format: {values}", logFormatChoices()))
 	pf.StringVar(&g.logFile, "log-file", "", "write logs to this file instead of stderr")
-	pf.StringVar(&g.color, "color", string(render.ColorAuto),
+	pf.StringVar(&g.color, "color", string(term.ColorAuto),
 		complete.Usage("colorize output: {values}", colorChoices()))
 	pf.BoolVar(&g.noInput, "no-input", false, "never prompt for input")
 	pf.StringVar(&g.tfPath, flagTFPath, def.Binaries.Terraform,
@@ -185,7 +187,7 @@ func (g *globals) setup(cmd *cobra.Command, d *app.Deps) error {
 	if err != nil {
 		return usageError(err)
 	}
-	colorMode, err := render.ParseColorMode(g.color)
+	colorMode, err := term.ParseColorMode(g.color)
 	if err != nil {
 		return usageError(err)
 	}
@@ -194,22 +196,23 @@ func (g *globals) setup(cmd *cobra.Command, d *app.Deps) error {
 		return usageError(err)
 	}
 
-	logW, logTTY := d.Stderr, app.IsTerminal(d.Stderr)
+	logW, logColor := d.Stderr, term.Detect(d.Stderr, colorMode, d.Env.Lookup).Color
 	if g.logFile != "" {
 		f, openErr := os.OpenFile(g.logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
 		if openErr != nil {
 			return usageError(fmt.Errorf("open log file: %w", openErr))
 		}
 		g.closers = append(g.closers, f)
-		logW, logTTY = f, false
+		logW, logColor = f, false // --color is about terminals; a log file stays plain text
 	}
 	d.Logger = app.NewLogger(logW, app.LogOptions{
 		Format:  logFormat,
 		Verbose: g.verbose,
 		Quiet:   g.quiet,
-		Color:   render.UseColor(colorMode, d.Env.Lookup, logTTY) && app.EnableVirtualTerminal(logW),
+		Color:   logColor,
 	})
-	g.outFormat = format.Resolve(app.IsTerminal(d.Stdout))
+	g.stdout = term.Detect(d.Stdout, colorMode, d.Env.Lookup)
+	g.outFormat = format.Resolve(g.stdout.TTY || g.stdout.Color)
 	if err = g.checkAnnotated(cmd); err != nil {
 		return err
 	}

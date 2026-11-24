@@ -34,42 +34,6 @@ func TestFormatResolve(t *testing.T) {
 	require.ErrorContains(t, render.FormatSARIF.Check(render.FormatJSON), `format "sarif" is not supported`)
 }
 
-func TestUseColor(t *testing.T) {
-	t.Parallel()
-	tests := []struct {
-		name string
-		mode render.ColorMode
-		env  map[string]string
-		tty  bool
-		want bool
-	}{
-		{"auto tty", render.ColorAuto, nil, true, true},
-		{"auto pipe", render.ColorAuto, nil, false, false},
-		{"NO_COLOR", render.ColorAuto, map[string]string{"NO_COLOR": "1"}, true, false},
-		{"empty NO_COLOR ignored", render.ColorAuto, map[string]string{"NO_COLOR": ""}, true, true},
-		{"CLICOLOR_FORCE", render.ColorAuto, map[string]string{"CLICOLOR_FORCE": "1"}, false, true},
-		{"CLICOLOR_FORCE=0", render.ColorAuto, map[string]string{"CLICOLOR_FORCE": "0"}, false, false},
-		{
-			"NO_COLOR beats CLICOLOR_FORCE",
-			render.ColorAuto,
-			map[string]string{"NO_COLOR": "1", "CLICOLOR_FORCE": "1"},
-			true,
-			false,
-		},
-		{"always beats NO_COLOR", render.ColorAlways, map[string]string{"NO_COLOR": "1"}, false, true},
-		{"never beats tty", render.ColorNever, nil, true, false},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-			lookup := func(k string) (string, bool) { v, ok := tt.env[k]; return v, ok }
-			assert.Equal(t, tt.want, render.UseColor(tt.mode, lookup, tt.tty))
-		})
-	}
-	_, err := render.ParseColorMode("sometimes")
-	require.Error(t, err)
-}
-
 func TestEnvelopeJSON(t *testing.T) {
 	t.Parallel()
 	now := time.Date(2026, 11, 10, 9, 30, 15, 999, time.FixedZone("CET", 3600))

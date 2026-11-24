@@ -4,12 +4,9 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
-	"os"
 	"slices"
 	"strings"
 	"time"
-
-	"github.com/mattn/go-isatty"
 
 	"github.com/sassdavid/tfcensus/internal/config"
 )
@@ -51,14 +48,4 @@ type Deps struct {
 	Logger *slog.Logger
 	// Config is nil until a command loads it.
 	Config *config.Result
-}
-
-// IsTerminal reports whether w is a terminal.
-func IsTerminal(w io.Writer) bool {
-	f, ok := w.(*os.File)
-	if !ok {
-		return false
-	}
-	fd := f.Fd()
-	return isatty.IsTerminal(fd) || isatty.IsCygwinTerminal(fd)
 }

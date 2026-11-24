@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -20,6 +19,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/render"
 	"github.com/sassdavid/tfcensus/internal/report"
 	"github.com/sassdavid/tfcensus/internal/scan"
+	"github.com/sassdavid/tfcensus/internal/term"
 	"github.com/sassdavid/tfcensus/internal/tfstate"
 )
 
@@ -145,16 +145,17 @@ func writeOutput(d *app.Deps, path string, data []byte) error {
 	return nil
 }
 
-// writeSaved prints a saved-report result as the envelope MCP returns, or as a table.
-func writeSaved(d *app.Deps, format render.Format, res *result, table func(io.Writer) error) error {
-	if format == render.FormatJSON {
+// writeSaved prints a saved-report result as the envelope MCP returns, or as the text that text
+// returns.
+func writeSaved(d *app.Deps, g *globals, res *result, text func() string) error {
+	if g.outFormat == render.FormatJSON {
 		env := render.NewEnvelope(buildinfo.Get().Version, d.Clock(), res.data)
 		if res.errs != nil {
 			env.Errors = res.errs
 		}
 		return render.JSON(d.Stdout, env)
 	}
-	return table(d.Stdout)
+	return writeText(g.textOut(d), text(), "output")
 }
 
 func newReportUnitsCmd(d *app.Deps, g *globals) *cobra.Command {
@@ -178,19 +179,19 @@ accounts and regions of their resources. It is what the units tool of tfcensus m
 				return err
 			}
 			u, _ := res.data.(*report.Units)
-			return writeSaved(d, g.outFormat, res, func(w io.Writer) error {
-				rows := [][]string{{colUnit, colWorkspace, colStatus, "INSTANCES", "ACCOUNTS", "REGIONS"}}
+			return writeSaved(d, g, res, func() string {
+				rows := term.Rows([][]string{{colUnit, colWorkspace, colStatus, "INSTANCES", "ACCOUNTS", "REGIONS"}})
 				for _, r := range u.Units {
-					rows = append(rows, []string{
-						r.Unit, r.Workspace, string(r.Status), strconv.Itoa(r.Instances),
-						dash(strings.Join(r.Accounts, ",")), dash(strings.Join(r.Regions, ",")),
+					rows = append(rows, []term.Cell{
+						{Text: r.Unit},
+						{Text: r.Workspace},
+						{Text: string(r.Status), Tone: stateStatusTone(r.Status)},
+						{Text: strconv.Itoa(r.Instances)},
+						{Text: dash(strings.Join(r.Accounts, ","))},
+						{Text: dash(strings.Join(r.Regions, ","))},
 					})
 				}
-				if werr := writeRows(w, rows); werr != nil {
-					return werr
-				}
-				_, werr := fmt.Fprintf(w, "\n%d of %d units\n", len(u.Units), u.Total)
-				return werr //nolint:wrapcheck // a write to stdout
+				return rowsText(rows) + fmt.Sprintf("\n%d of %d units\n", len(u.Units), u.Total)
 			})
 		},
 	}
@@ -228,19 +229,24 @@ what the inventory tool of tfcensus mcp returns.`,
 				return err
 			}
 			inv, _ := res.data.(*report.Inventory)
-			return writeSaved(d, g.outFormat, res, func(w io.Writer) error {
-				rows := [][]string{{colUnit, colWorkspace, "INSTANCES", "DOUBLE", "TYPES"}}
+			return writeSaved(d, g, res, func() string {
+				rows := term.Rows([][]string{{colUnit, colWorkspace, "INSTANCES", "DOUBLE", "TYPES"}})
 				for _, r := range inv.Units {
-					rows = append(rows, []string{
-						r.Unit, r.Workspace, strconv.Itoa(r.Instances),
-						strconv.Itoa(r.DoubleManaged), strconv.Itoa(len(r.Types)),
+					rows = append(rows, []term.Cell{
+						{Text: r.Unit},
+						{Text: r.Workspace},
+						{Text: strconv.Itoa(r.Instances)},
+						countCell(r.DoubleManaged, term.Severe),
+						{Text: strconv.Itoa(len(r.Types))},
 					})
 				}
-				if werr := writeRows(w, rows); werr != nil {
-					return werr
-				}
-				_, werr := fmt.Fprintf(w, "\n%d instances, %d double-managed\n", inv.Instances, inv.DoubleManaged)
-				return werr //nolint:wrapcheck // a write to stdout
+				return rowsText(
+					rows,
+				) + fmt.Sprintf(
+					"\n%d instances, %d double-managed\n",
+					inv.Instances,
+					inv.DoubleManaged,
+				)
 			})
 		},
 	}
@@ -287,7 +293,7 @@ tool of tfcensus mcp returns.`,
 				return err
 			}
 			sum, _ := res.data.(*report.ScanSummary)
-			return writeSaved(d, g.outFormat, res, func(w io.Writer) error { return writeScanSummaryText(w, sum) })
+			return writeSaved(d, g, res, func() string { return scanSummaryText(sum, g.textWidth(g.outFormat)) })
 		},
 	}
 	cmd.Flags().StringVar(&from, flagFrom, "", "scan JSON (default: the newest scan cache snapshot)")
@@ -312,41 +318,37 @@ tool of tfcensus mcp returns.`,
 	return cmd
 }
 
-func writeScanSummaryText(w io.Writer, s *report.ScanSummary) error {
-	rows := [][]string{summaryColumns()}
+func scanSummaryText(s *report.ScanSummary, width int) string {
+	var b strings.Builder
+	rows := [][]term.Cell{term.Rows([][]string{summaryColumns()})[0]}
 	for i := range s.Accounts {
-		rows = append(rows, summaryRow(&s.Accounts[i]))
+		rows = append(rows, summaryTones(summaryRow(&s.Accounts[i])))
 	}
-	if err := writeRows(w, rows); err != nil {
-		return err
-	}
-	if _, err := fmt.Fprintf(w, "\n%d matching findings by type:\n", s.Matching); err != nil {
-		return fmt.Errorf("write output: %w", err)
-	}
-	rows = [][]string{{colType, "COUNT"}}
+	b.WriteString(rowsText(rows))
+	fmt.Fprintf(&b, "\n%d matching findings by type:\n", s.Matching)
+	rows = term.Rows([][]string{{colType, "COUNT"}})
 	for _, tc := range s.Types {
-		rows = append(rows, []string{tc.Type, strconv.Itoa(tc.Count)})
+		rows = append(rows, []term.Cell{{Text: tc.Type}, {Text: strconv.Itoa(tc.Count)}})
 	}
-	if err := writeRows(w, rows); err != nil {
-		return err
-	}
-	if _, err := fmt.Fprintf(w, "\ntop %d:\n", len(s.Top)); err != nil {
-		return fmt.Errorf("write output: %w", err)
-	}
-	rows = [][]string{{colCategory, colAccount, colRegion, colType, "ARN OR ID", "RULE"}}
+	b.WriteString(rowsText(rows))
+	fmt.Fprintf(&b, "\ntop %d:\n", len(s.Top))
+	rows = term.Rows([][]string{{colCategory, colAccount, colRegion, colType, "ARN OR ID", "RULE"}})
 	for i := range s.Top {
 		f := &s.Top[i]
-		rows = append(rows, []string{string(f.Category), f.Account, dash(f.Region), f.Type(), f.Key(), f.Rule})
+		rows = append(rows, []term.Cell{
+			{Text: string(f.Category), Tone: f.Category.Tone()},
+			{Text: f.Account},
+			{Text: dash(f.Region)},
+			{Text: f.Type()},
+			{Text: f.Key()},
+			{Text: f.Rule},
+		})
 	}
-	if err := writeRows(w, rows); err != nil {
-		return err
-	}
+	b.WriteString(rowsText(rows))
 	for _, warn := range s.Warnings {
-		if _, err := fmt.Fprintf(w, "warning: %s\n", warn); err != nil {
-			return fmt.Errorf("write output: %w", err)
-		}
+		writeLines(&b, []string{"warning: " + warn}, width, "", "  ")
 	}
-	return nil
+	return b.String()
 }
 
 func newReportAuditCmd(d *app.Deps, g *globals) *cobra.Command {
@@ -369,12 +371,17 @@ first. It is what the audit_findings tool of tfcensus mcp returns.`,
 				return err
 			}
 			af, _ := res.data.(*report.AuditFindings)
-			return writeSaved(d, g.outFormat, res, func(w io.Writer) error {
-				rows := [][]string{{"SEVERITY", "CHECK", "TARGET", "REASON"}}
+			return writeSaved(d, g, res, func() string {
+				rows := term.Rows([][]string{{"SEVERITY", "CHECK", "TARGET", "REASON"}})
 				for _, fd := range af.Findings {
-					rows = append(rows, []string{string(fd.Severity), fd.Rule, fd.Target, fd.Reason})
+					rows = append(rows, []term.Cell{
+						{Text: string(fd.Severity), Tone: severityTone(fd.Severity)},
+						{Text: fd.Rule},
+						{Text: fd.Target},
+						{Text: fd.Reason},
+					})
 				}
-				return writeRows(w, rows)
+				return rowsText(rows)
 			})
 		},
 	}
@@ -415,7 +422,7 @@ drift_summary tool of tfcensus mcp returns.`,
 				return err
 			}
 			ds, _ := res.data.(*report.DriftSummary)
-			return writeSaved(d, g.outFormat, res, func(w io.Writer) error {
+			return writeSaved(d, g, res, func() string {
 				rows := [][]string{{colUnit, "ADDRESS", colType, "ACTION", "ATTRIBUTES"}}
 				for _, c := range ds.Changes {
 					rows = append(
@@ -423,7 +430,7 @@ drift_summary tool of tfcensus mcp returns.`,
 						[]string{c.Unit, c.Address, c.Type, string(c.Action), dash(strings.Join(c.Attributes, ","))},
 					)
 				}
-				return writeRows(w, rows)
+				return rowsText(term.Rows(rows))
 			})
 		},
 	}

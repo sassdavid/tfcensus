@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+
+	"github.com/sassdavid/tfcensus/internal/term"
 )
 
 // Output is one --out value: a format and the file it goes to.
@@ -51,38 +53,50 @@ type WriteFunc func(w io.Writer, f Format) error
 type Sink struct {
 	Stdout     io.Writer
 	Format     Format
+	Color      bool // keep the styles of the tty format on stdout
 	Outputs    []Output
 	MDMaxChars int    // 0 means no limit
 	Command    string // named in the truncation footer, such as "tfcensus drift"
 }
 
-// Write renders the report once per target. Markdown is cut to MDMaxChars.
+// Write renders the report once per target and writes each in one call. Styles reach stdout
+// only in the tty format with Color; Markdown is cut to MDMaxChars. When stdout is a pipe that
+// closed early, as with `| head`, the rest of stdout is dropped and the --out files are still
+// written.
 func (s Sink) Write(write WriteFunc) error {
-	if s.Format == FormatMD {
-		var buf bytes.Buffer
-		if err := write(&buf, s.Format); err != nil {
-			return err
-		}
-		if _, err := io.WriteString(s.Stdout, s.truncate(buf.String())); err != nil {
-			return fmt.Errorf("write output: %w", err)
-		}
-	} else if err := write(s.Stdout, s.Format); err != nil {
+	b, err := s.render(write, s.Format, s.Color && s.Format == FormatTTY)
+	if err != nil {
 		return err
 	}
+	if _, err = s.Stdout.Write(b); err != nil && !term.IsBrokenPipe(err) {
+		return fmt.Errorf("write output: %w", err)
+	}
 	for _, o := range s.Outputs {
-		var buf bytes.Buffer
-		if err := write(&buf, o.Format); err != nil {
+		if b, err = s.render(write, o.Format, false); err != nil {
 			return err
 		}
-		b := buf.Bytes()
-		if o.Format == FormatMD {
-			b = []byte(s.truncate(buf.String()))
-		}
-		if err := writeFile(o.Path, b); err != nil {
+		if err = writeFile(o.Path, b); err != nil {
 			return fmt.Errorf("write --out %s: %w", o.Path, err)
 		}
 	}
 	return nil
+}
+
+// render writes the report in format f to memory. The text formats pass through a color
+// profile writer, which drops the styles unless color is set.
+func (s Sink) render(write WriteFunc, f Format, color bool) ([]byte, error) {
+	var buf bytes.Buffer
+	var w io.Writer = &buf
+	if f == FormatTTY || f == FormatPlain {
+		w = term.Writer(&buf, term.Stream{Color: color}.Profile())
+	}
+	if err := write(w, f); err != nil {
+		return nil, err
+	}
+	if f == FormatMD {
+		return []byte(s.truncate(buf.String())), nil
+	}
+	return buf.Bytes(), nil
 }
 
 func (s Sink) truncate(md string) string {

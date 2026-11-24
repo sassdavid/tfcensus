@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"io"
 	"strings"
-	"text/tabwriter"
 
 	"github.com/sassdavid/tfcensus/internal/inventory"
 	"github.com/sassdavid/tfcensus/internal/match"
 	"github.com/sassdavid/tfcensus/internal/ownership"
+	"github.com/sassdavid/tfcensus/internal/term"
 )
 
 // Report is the result of a scan.
@@ -59,9 +59,27 @@ func Explain(results []match.Result, i int, src Sources) Explanation {
 	return e
 }
 
-// WriteExplanation prints an explanation as aligned text.
+// Tone is the style the text formats show c in: unmanaged red, double-managed bold red,
+// undetermined yellow, managed green, ignored faint, the rest plain.
+func (c Category) Tone() term.Tone {
+	switch c {
+	case CategoryManaged:
+		return term.Good
+	case CategoryDoubleManaged:
+		return term.Severe
+	case CategoryUnmanaged:
+		return term.Bad
+	case CategoryUndetermined:
+		return term.Warn
+	case CategoryIgnored:
+		return term.Muted
+	case CategoryOtherIaC, CategoryAWSManaged, CategoryDerived:
+	}
+	return term.Plain
+}
+
+// WriteExplanation prints an explanation as aligned text, with the category in its [Category.Tone].
 func WriteExplanation(w io.Writer, e *Explanation) error {
-	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0) //nolint:mnd // two spaces between columns
 	r := e.Resource
 	typ := r.Type
 	if typ == "" {
@@ -74,44 +92,42 @@ func WriteExplanation(w io.Writer, e *Explanation) error {
 	if region == "" {
 		region = inventory.GlobalColumn
 	}
-	lines := [][2]string{
-		{"resource", e.Finding.Key()},
-		{"type", typ},
-		{"where", r.Account + " " + region},
-		{"sources", strings.Join(r.Sources, ", ")},
-		{"match", fmt.Sprintf("%s: %s (%s)", e.Match.Category, e.Match.Reason, e.Match.Rule)},
+	row := func(k, v string) []term.Cell { return []term.Cell{{Text: k}, {Text: v}} }
+	rows := [][]term.Cell{
+		row("resource", e.Finding.Key()),
+		row("type", typ),
+		row("where", r.Account+" "+region),
+		row("sources", strings.Join(r.Sources, ", ")),
+		row("match", fmt.Sprintf("%s: %s (%s)", e.Match.Category, e.Match.Reason, e.Match.Rule)),
 	}
 	if s := e.Finding.Stack; s != nil {
-		lines = append(lines, [2]string{"stack", s.Text()})
-	}
-	for _, l := range lines {
-		_, _ = fmt.Fprintf(tw, "%s\t%s\n", l[0], l[1])
+		rows = append(rows, row("stack", s.Text()))
 	}
 	switch {
 	case e.Finding.Rule == RuleCloudFormation:
-		_, _ = fmt.Fprintf(tw, "rules\tnot evaluated: a CloudFormation stack lists it\n")
+		rows = append(rows, row("rules", "not evaluated: a CloudFormation stack lists it"))
 	case len(e.Trace) == 0:
-		_, _ = fmt.Fprintf(tw, "rules\tnot evaluated: matching decided\n")
+		rows = append(rows, row("rules", "not evaluated: matching decided"))
 	default:
-		_, _ = fmt.Fprintf(tw, "rules\tfirst match wins\n")
+		rows = append(rows, row("rules", "first match wins"))
 		for _, s := range e.Trace {
 			outcome := string(s.Outcome)
 			if s.Detail != "" {
 				outcome += ": " + s.Detail
 			}
-			_, _ = fmt.Fprintf(tw, "  %s\t%s\n", s.Rule, outcome)
+			rows = append(rows, row("  "+s.Rule, outcome))
 		}
 	}
 	for p, lead := e.Finding.Parent, "parent"; p != nil; p, lead = p.Parent, "  parent" {
-		_, _ = fmt.Fprintf(tw, "%s\t%s\n", lead, p.Text())
+		rows = append(rows, row(lead, p.Text()))
 	}
 	f := &e.Finding
 	verdict := fmt.Sprintf("%s: %s (%s)", f.Category, f.Reason, f.Rule)
 	if f.Owner != "" {
 		verdict = fmt.Sprintf("%s, owner %s: %s (%s)", f.Category, f.Owner, f.Reason, f.Rule)
 	}
-	_, _ = fmt.Fprintf(tw, "category\t%s\n", verdict)
-	if err := tw.Flush(); err != nil {
+	rows = append(rows, []term.Cell{{Text: "category"}, {Text: verdict, Tone: f.Category.Tone()}})
+	if _, err := io.WriteString(w, term.Table(nil, rows)); err != nil {
 		return fmt.Errorf("write explanation: %w", err)
 	}
 	return nil

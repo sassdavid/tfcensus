@@ -23,6 +23,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/notify"
 	"github.com/sassdavid/tfcensus/internal/render"
 	"github.com/sassdavid/tfcensus/internal/report"
+	"github.com/sassdavid/tfcensus/internal/term"
 )
 
 const (
@@ -94,7 +95,7 @@ refused token, and 1 for any other failure.`,
 			if err != nil {
 				return err
 			}
-			return runNotify(cmd, d, g.outFormat, &res.Config, a)
+			return runNotify(cmd, d, g, &res.Config, a)
 		},
 	}
 	f := cmd.Flags()
@@ -116,7 +117,7 @@ refused token, and 1 for any other failure.`,
 	return cmd
 }
 
-func runNotify(cmd *cobra.Command, d *app.Deps, format render.Format, cfg *config.Config, a notifyArgs) error {
+func runNotify(cmd *cobra.Command, d *app.Deps, g *globals, cfg *config.Config, a notifyArgs) error {
 	names := a.only
 	if len(names) == 0 {
 		names = cfg.Notify.Enabled
@@ -139,10 +140,10 @@ func runNotify(cmd *cobra.Command, d *app.Deps, format render.Format, cfg *confi
 	for _, name := range names {
 		failures = append(failures, publishAll(cmd, d, cfg, name, reports, a.dryRun, &data, &env)...)
 	}
-	if format == render.FormatJSON {
+	if g.outFormat == render.FormatJSON {
 		err = render.JSON(d.Stdout, env)
 	} else {
-		err = writeNotifyText(d.Stdout, &data, env.Errors)
+		err = writeNotifyText(g.textOut(d), &data, env.Errors, g.textWidth(g.outFormat))
 	}
 	if err != nil {
 		return err
@@ -214,28 +215,23 @@ func notifyExit(failures []error) error {
 	return err
 }
 
-func writeNotifyText(w io.Writer, data *notifyData, errs []render.Error) error {
+func writeNotifyText(w io.Writer, data *notifyData, errs []render.Error, width int) error {
 	var b strings.Builder
 	for _, r := range data.Results {
-		fmt.Fprintf(&b, "%s  %s\n", r.Notifier, r.Target)
+		b.WriteString(term.Heading.Paint(r.Notifier+"  "+r.Target) + "\n")
 		rows := make([][]string, 0, len(r.Actions))
 		for _, a := range r.Actions {
 			rows = append(rows, []string{"  " + string(a.Op), string(a.Kind), a.Scope, cmp.Or(a.Detail, a.Title)})
 		}
-		if err := writeRows(&b, rows); err != nil {
-			return err
-		}
+		b.WriteString(rowsText(term.Rows(rows)))
 	}
 	for _, e := range errs {
-		fmt.Fprintf(&b, "error: %s: %s\n", e.Target, e.Message)
+		writeToned(&b, term.Bad, "error: "+e.Target+": "+e.Message, width, "", "  ")
 	}
 	if data.DryRun {
 		fmt.Fprintf(&b, "\nno changes made (--%s)\n", flagDryRunNotify)
 	}
-	if _, err := io.WriteString(w, b.String()); err != nil {
-		return fmt.Errorf("write output: %w", err)
-	}
-	return nil
+	return writeText(w, b.String(), "output")
 }
 
 // newNotifier builds one notifier from the config, with secrets from the environment.

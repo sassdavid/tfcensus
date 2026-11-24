@@ -7,7 +7,6 @@ import (
 	"io"
 	"strconv"
 	"strings"
-	"text/tabwriter"
 
 	"github.com/spf13/cobra"
 
@@ -21,6 +20,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/match"
 	"github.com/sassdavid/tfcensus/internal/render"
 	"github.com/sassdavid/tfcensus/internal/sarif"
+	"github.com/sassdavid/tfcensus/internal/term"
 	"github.com/sassdavid/tfcensus/internal/tfstate"
 	"github.com/sassdavid/tfcensus/internal/typemap"
 )
@@ -112,7 +112,7 @@ run, and 4 when every failure was a credential problem.`,
 				return err
 			}
 			a.paths = args
-			return runAudit(cmd, d, g.sink(cmd, d), &res.Config, a)
+			return runAudit(cmd, d, g.reportOut(cmd, d), &res.Config, a)
 		},
 	}
 	addDiscoveryFlags(cmd, &a.filters)
@@ -147,7 +147,7 @@ func severityChoices() []complete.Choice {
 	}
 }
 
-func runAudit(cmd *cobra.Command, d *app.Deps, sink render.Sink, cfg *config.Config, a auditArgs) error {
+func runAudit(cmd *cobra.Command, d *app.Deps, out reportOut, cfg *config.Config, a auditArgs) error {
 	ctx := cmd.Context()
 	suppress, err := audit.NewSuppressions(cfg.Audit.Suppress)
 	if err != nil {
@@ -195,8 +195,8 @@ func runAudit(cmd *cobra.Command, d *app.Deps, sink render.Sink, cfg *config.Con
 	for _, w := range rep.Warnings {
 		d.Logger.WarnContext(ctx, w)
 	}
-	if err = sink.Write(func(w io.Writer, f render.Format) error {
-		return writeAudit(w, d, f, rep, disc, states)
+	if err = out.Write(func(w io.Writer, f render.Format) error {
+		return writeAudit(w, d, f, out.width(f), rep, disc, states)
 	}); err != nil {
 		return err
 	}
@@ -245,6 +245,7 @@ func writeAudit(
 	w io.Writer,
 	d *app.Deps,
 	format render.Format,
+	width int,
 	rep *audit.Report,
 	disc discovery.Result,
 	states []tfstate.UnitState,
@@ -274,7 +275,7 @@ func writeAudit(
 		return sarif.WriteGitHub(w, auditSARIF(rep))
 	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatOpenVEX:
 	}
-	return writeAuditTable(w, rep)
+	return writeAuditTable(w, rep, width)
 }
 
 func problemText(p audit.Problem) string {
@@ -347,12 +348,30 @@ func auditSARIF(rep *audit.Report) *sarif.Log {
 
 func findingColumns() []string { return []string{"SEVERITY", "CHECK", "TARGET", "REASON"} }
 
-func findingRow(f *audit.Finding) []string {
+func findingRow(f *audit.Finding) []term.Cell {
 	target := f.Target
 	if f.Key != "" && !strings.HasSuffix(target, f.Key) && f.Table != "" {
 		target += " " + f.Key
 	}
-	return []string{string(f.Severity), f.Rule, target, f.Reason}
+	return []term.Cell{
+		{Text: string(f.Severity), Tone: severityTone(f.Severity)},
+		{Text: f.Rule},
+		{Text: target},
+		{Text: f.Reason},
+	}
+}
+
+// severityTone shows high red, medium yellow, and low and info faint.
+func severityTone(s audit.Severity) term.Tone {
+	switch s {
+	case audit.SeverityHigh:
+		return term.Bad
+	case audit.SeverityMedium:
+		return term.Warn
+	case audit.SeverityLow, audit.SeverityInfo:
+		return term.Muted
+	}
+	return term.Plain
 }
 
 func bucketColumns() []string {
@@ -360,7 +379,7 @@ func bucketColumns() []string {
 		"BUCKET",
 		"ACCOUNT",
 		colRegion,
-		"SOURCE",
+		colSource,
 		"UNITS",
 		"STATES",
 		"VERSIONING",
@@ -369,8 +388,8 @@ func bucketColumns() []string {
 	}
 }
 
-func bucketRow(b *audit.Bucket) []string {
-	repl := "none"
+func bucketRow(b *audit.Bucket) []term.Cell {
+	repl := cellNone
 	if b.ReplicaOf != "" {
 		repl = "replica of " + b.ReplicaOf
 	}
@@ -381,25 +400,30 @@ func bucketRow(b *audit.Bucket) []string {
 		}
 		repl = strings.Join(parts, ", ")
 	}
-	return []string{
+	row := term.Rows([][]string{{
 		b.Name, dash(b.Account), dash(b.Region), b.Source, strconv.Itoa(b.Units), strconv.Itoa(b.StateKeys),
 		dash(b.Versioning), dash(b.Encryption), repl,
-	}
+	}})[0]
+	row[6].Tone = toneIf(b.Versioning == "Off" || b.Versioning == "Suspended", term.Bad)
+	row[7].Tone = toneIf(b.Encryption == cellNone, term.Bad)
+	return row
 }
 
 func tableColumns() []string {
 	return []string{"LOCK TABLE", colAccount, colRegion, "UNITS", "PITR", "ENCRYPTION", "LOCKS"}
 }
 
-func tableRow(t *audit.LockTable) []string {
+func tableRow(t *audit.LockTable) []term.Cell {
 	pitr := "-"
 	if t.PITR != nil {
 		pitr = map[bool]string{true: "on", false: "off"}[*t.PITR]
 	}
-	return []string{
+	row := term.Rows([][]string{{
 		t.Name, dash(t.Account), dash(t.Region), strconv.Itoa(t.Units), pitr, dash(t.Encryption),
 		strconv.Itoa(t.Locks),
-	}
+	}})[0]
+	row[4].Tone = toneIf(pitr == "off", term.Bad)
+	return row
 }
 
 // auditNotes lists suppressed findings, warnings and checks that couldn't run, one line each.
@@ -435,25 +459,13 @@ func auditSummary(rep *audit.Report) string {
 		len(rep.Incomplete))
 }
 
-func writeTab(w io.Writer, cols []string, rows [][]string) error {
-	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0) //nolint:mnd // two spaces between columns
-	_, _ = fmt.Fprintln(tw, strings.Join(cols, "\t"))
-	for _, r := range rows {
-		_, _ = fmt.Fprintln(tw, strings.Join(r, "\t"))
-	}
-	if err := tw.Flush(); err != nil {
-		return fmt.Errorf("write table: %w", err)
-	}
-	return nil
-}
-
 type auditSection struct {
 	cols []string
-	rows [][]string
+	rows [][]term.Cell
 }
 
 func auditSections(rep *audit.Report) []auditSection {
-	var findings, buckets, tables [][]string
+	var findings, buckets, tables [][]term.Cell
 	for i := range rep.Findings {
 		findings = append(findings, findingRow(&rep.Findings[i]))
 	}
@@ -470,26 +482,20 @@ func auditSections(rep *audit.Report) []auditSection {
 	return sections
 }
 
-func writeAuditTable(w io.Writer, rep *audit.Report) error {
+func writeAuditTable(w io.Writer, rep *audit.Report, width int) error {
+	var b strings.Builder
 	for i, s := range auditSections(rep) {
 		if i > 0 {
-			_, _ = fmt.Fprintln(w)
+			b.WriteString("\n")
 		}
-		if err := writeTab(w, s.cols, s.rows); err != nil {
-			return err
-		}
+		b.WriteString(term.Table(s.cols, s.rows))
 	}
 	if notes := auditNotes(rep); len(notes) > 0 {
-		_, _ = fmt.Fprintln(w)
-		for _, n := range notes {
-			_, _ = fmt.Fprintln(w, n)
-		}
+		b.WriteString("\n")
+		writeLines(&b, notes, width, "", "  ")
 	}
-	_, _ = fmt.Fprintln(w)
-	if _, err := fmt.Fprintln(w, auditSummary(rep)); err != nil {
-		return fmt.Errorf("write audit: %w", err)
-	}
-	return nil
+	b.WriteString("\n" + auditSummary(rep) + "\n")
+	return writeText(w, b.String(), "audit")
 }
 
 func writeAuditMarkdown(w io.Writer, rep *audit.Report) error {
@@ -500,7 +506,7 @@ func writeAuditMarkdown(w io.Writer, rep *audit.Report) error {
 		}
 		b.WriteString("| " + strings.Join(s.cols, " | ") + " |\n")
 		b.WriteString(strings.Repeat("| --- ", len(s.cols)) + "|\n")
-		for _, row := range s.rows {
+		for _, row := range cellRows(s.rows) {
 			for j, cell := range row {
 				row[j] = strings.ReplaceAll(cell, "|", `\|`)
 			}

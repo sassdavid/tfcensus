@@ -54,8 +54,6 @@ cli_identical=(
   internal/app/deps.go
   internal/app/doc.go
   internal/app/logger.go
-  internal/app/vt_other.go
-  internal/app/vt_windows.go
   internal/buildinfo/buildinfo.go
   internal/buildinfo/doc.go
   internal/cli/annotations.go
@@ -110,6 +108,19 @@ cli_identical=(
   internal/sarif/github_test.go
   internal/sarif/sarif.go
   internal/sarif/sarif_test.go
+  internal/term/color.go
+  internal/term/doc.go
+  internal/term/pipe.go
+  internal/term/pipe_other.go
+  internal/term/pipe_windows.go
+  internal/term/sanitize.go
+  internal/term/stream.go
+  internal/term/style.go
+  internal/term/table.go
+  internal/term/term_test.go
+  internal/term/vt_other.go
+  internal/term/vt_windows.go
+  internal/term/wrap.go
   internal/testutil/doc.go
   internal/testutil/fakebin/doc.go
   internal/testutil/fakebin/fakebin.go

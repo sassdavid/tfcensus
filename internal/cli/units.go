@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"text/tabwriter"
 
 	"github.com/spf13/cobra"
 
@@ -20,6 +19,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/discovery"
 	"github.com/sassdavid/tfcensus/internal/execx"
 	"github.com/sassdavid/tfcensus/internal/render"
+	"github.com/sassdavid/tfcensus/internal/term"
 )
 
 const (
@@ -60,7 +60,7 @@ the config, or the working directory.`,
 				return err
 			}
 			if err = g.sink(cmd, d).Write(func(w io.Writer, f render.Format) error {
-				return writeUnits(w, f, d, result)
+				return writeUnits(w, f, g.textWidth(f), d, result)
 			}); err != nil {
 				return err
 			}
@@ -169,7 +169,7 @@ type unitsData struct {
 	Units []discovery.Unit `json:"units"`
 }
 
-func writeUnits(w io.Writer, format render.Format, d *app.Deps, res discovery.Result) error {
+func writeUnits(w io.Writer, format render.Format, width int, d *app.Deps, res discovery.Result) error {
 	units := res.Units
 	if units == nil {
 		units = []discovery.Unit{}
@@ -190,9 +190,9 @@ func writeUnits(w io.Writer, format render.Format, d *app.Deps, res discovery.Re
 		render.FormatSARIF,
 		render.FormatGitHub,
 		render.FormatOpenVEX:
-		return writeUnitsTable(w, units)
+		return writeUnitsTable(w, units, width)
 	}
-	return writeUnitsTable(w, units)
+	return writeUnitsTable(w, units, width)
 }
 
 func unitColumns() []string {
@@ -238,17 +238,16 @@ func dash(s string) string {
 }
 
 // writeUnitsTable prints aligned columns, then the reasons and warnings that don't fit in a cell.
-func writeUnitsTable(w io.Writer, units []discovery.Unit) error {
-	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0) //nolint:mnd // two spaces between columns
-	_, _ = fmt.Fprintln(tw, strings.Join(unitColumns(), "\t"))
-	for i := range units {
-		_, _ = fmt.Fprintln(tw, strings.Join(unitRow(&units[i]), "\t"))
-	}
-	if err := tw.Flush(); err != nil {
-		return fmt.Errorf("write units: %w", err)
-	}
+// Unresolved units are red, and units with no lock or with warnings yellow.
+func writeUnitsTable(w io.Writer, units []discovery.Unit, width int) error {
+	rows := make([][]term.Cell, len(units))
 	var notes []string
-	for _, u := range units {
+	for i := range units {
+		u := &units[i]
+		rows[i] = term.Rows([][]string{unitRow(u)})[0]
+		rows[i][4].Tone = toneIf(u.Lock == discovery.LockNone, term.Warn)
+		rows[i][7].Tone = toneIf(u.Resolution == discovery.MethodUnresolved, term.Bad)
+		rows[i][8].Tone = toneIf(len(u.Warnings) > 0, term.Warn)
 		if u.Reason != "" {
 			notes = append(notes, fmt.Sprintf("%s/%s: unresolved: %s", u.Repo, u.Path, u.Reason))
 		}
@@ -256,18 +255,14 @@ func writeUnitsTable(w io.Writer, units []discovery.Unit) error {
 			notes = append(notes, fmt.Sprintf("%s/%s: %s", u.Repo, u.Path, warning))
 		}
 	}
+	var b strings.Builder
+	b.WriteString(term.Table(unitColumns(), rows))
 	if len(notes) > 0 {
-		_, _ = fmt.Fprintln(w)
-		for _, n := range notes {
-			_, _ = fmt.Fprintln(w, n)
-		}
+		b.WriteString("\n")
+		writeLines(&b, notes, width, "", "  ")
 	}
-	_, _ = fmt.Fprintln(w)
-	_, err := fmt.Fprintln(w, unitsSummary(units))
-	if err != nil {
-		return fmt.Errorf("write units: %w", err)
-	}
-	return nil
+	b.WriteString("\n" + unitsSummary(units) + "\n")
+	return writeText(w, b.String(), "units")
 }
 
 func unitsSummary(units []discovery.Unit) string {

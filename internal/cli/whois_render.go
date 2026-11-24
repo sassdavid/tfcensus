@@ -13,6 +13,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/render"
 	"github.com/sassdavid/tfcensus/internal/sarif"
 	"github.com/sassdavid/tfcensus/internal/scan"
+	"github.com/sassdavid/tfcensus/internal/term"
 	"github.com/sassdavid/tfcensus/internal/whois"
 )
 
@@ -22,7 +23,9 @@ type whoisReport struct {
 	Warnings []string       `json:"warnings"`
 }
 
-func writeWhois(w io.Writer, d *app.Deps, format render.Format, rep *whoisReport, problems []scan.Problem) error {
+func writeWhois(
+	w io.Writer, d *app.Deps, format render.Format, width int, rep *whoisReport, problems []scan.Problem,
+) error {
 	switch format {
 	case render.FormatJSON:
 		env := render.NewEnvelope(buildinfo.Get().Version, d.Clock(), rep)
@@ -41,7 +44,7 @@ func writeWhois(w io.Writer, d *app.Deps, format render.Format, rep *whoisReport
 	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatCSV, render.FormatGitHub,
 		render.FormatOpenVEX:
 	}
-	return writeWhoisText(w, rep, problems)
+	return writeWhoisText(w, rep, problems, width)
 }
 
 // answerHeadline is "managed by identity", "double-managed by arn" or the ownership category with
@@ -78,42 +81,39 @@ func answerDetail(a *whois.Answer) string {
 	return out + "; live: " + string(a.Live)
 }
 
-func writeWhoisText(w io.Writer, rep *whoisReport, problems []scan.Problem) error {
+func writeWhoisText(w io.Writer, rep *whoisReport, problems []scan.Problem, width int) error {
+	var b strings.Builder
 	for i := range rep.Answers {
 		a := &rep.Answers[i]
 		if i > 0 {
-			_, _ = fmt.Fprintln(w)
+			b.WriteString("\n")
 		}
-		_, _ = fmt.Fprintf(w, "%s: %s\n", a.Query, answerHeadline(a))
+		b.WriteString(term.Sanitize(a.Query) + ": " + a.Finding.Category.Tone().Paint(answerHeadline(a)) + "\n")
 		if a.Finding.Category == scan.CategoryDoubleManaged {
-			_, _ = fmt.Fprintf(w, "  warning: %d states manage it; keep it in one\n", len(a.ManagedBy))
+			b.WriteString(
+				term.Warn.Paint(fmt.Sprintf("  warning: %d states manage it; keep it in one", len(a.ManagedBy))),
+			)
+			b.WriteString("\n")
 		}
 		if len(a.ManagedBy) > 0 {
 			rows := make([][]string, 0, len(a.ManagedBy))
 			for j := range a.ManagedBy {
 				rows = append(rows, managerRow(&a.ManagedBy[j]))
 			}
-			if err := writeRows(w, rows); err != nil {
-				return err
-			}
+			b.WriteString(rowsText(term.Rows(rows)))
 			if a.Key == "" {
-				_, _ = fmt.Fprintln(w, "  "+answerDetail(a))
+				writeLines(&b, []string{answerDetail(a)}, width, "  ", "    ")
 			}
 			continue
 		}
-		_, _ = fmt.Fprintln(w, "  "+answerDetail(a))
+		writeLines(&b, []string{answerDetail(a)}, width, "  ", "    ")
 	}
 	if notes := whoisNotes(rep, problems); len(notes) > 0 {
-		_, _ = fmt.Fprintln(w)
-		for _, n := range notes {
-			_, _ = fmt.Fprintln(w, n)
-		}
+		b.WriteString("\n")
+		writeLines(&b, notes, width, "", "  ")
 	}
-	_, _ = fmt.Fprintln(w)
-	if _, err := fmt.Fprintln(w, whoisSummary(rep)); err != nil {
-		return fmt.Errorf("write whois: %w", err)
-	}
-	return nil
+	b.WriteString("\n" + whoisSummary(rep) + "\n")
+	return writeText(w, b.String(), "whois")
 }
 
 func whoisNotes(rep *whoisReport, problems []scan.Problem) []string {

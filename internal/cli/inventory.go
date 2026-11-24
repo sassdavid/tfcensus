@@ -11,7 +11,6 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"text/tabwriter"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -25,6 +24,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/execx"
 	"github.com/sassdavid/tfcensus/internal/match"
 	"github.com/sassdavid/tfcensus/internal/render"
+	"github.com/sassdavid/tfcensus/internal/term"
 	"github.com/sassdavid/tfcensus/internal/tfstate"
 	"github.com/sassdavid/tfcensus/internal/typemap"
 )
@@ -82,7 +82,7 @@ with zstd for a .zst name and gzip for .gz.`,
 			if err != nil {
 				return err
 			}
-			return runInventory(cmd, d, g.sink(cmd, d), &res.Config, inventoryArgs{
+			return runInventory(cmd, d, g.reportOut(cmd, d), &res.Config, inventoryArgs{
 				filters: filters, paths: args, saveIndex: saveIndex, concurrency: concurrency,
 			})
 		},
@@ -115,7 +115,7 @@ type inventoryData struct {
 	DoubleManaged []tfstate.DoubleManaged `json:"double_managed"`
 }
 
-func runInventory(cmd *cobra.Command, d *app.Deps, sink render.Sink, cfg *config.Config, a inventoryArgs) error {
+func runInventory(cmd *cobra.Command, d *app.Deps, out reportOut, cfg *config.Config, a inventoryArgs) error {
 	ctx := cmd.Context()
 	loader := newLoader(d)
 	disc, err := discoverUnits(cmd, d, cfg, a.filters, a.paths, loader)
@@ -151,8 +151,8 @@ func runInventory(cmd *cobra.Command, d *app.Deps, sink render.Sink, cfg *config
 	}
 	index := match.Index(m, states)
 	data := inventoryData{Units: states, DoubleManaged: index.DoubleManaged}
-	if err = sink.Write(func(w io.Writer, f render.Format) error {
-		return writeInventory(w, d, f, data, disc)
+	if err = out.Write(func(w io.Writer, f render.Format) error {
+		return writeInventory(w, d, f, out.width(f), data, disc)
 	}); err != nil {
 		return err
 	}
@@ -243,7 +243,9 @@ func stateClient(b *accounts.Backends) func(context.Context, *discovery.Unit) (t
 	}
 }
 
-func writeInventory(w io.Writer, d *app.Deps, format render.Format, data inventoryData, disc discovery.Result) error {
+func writeInventory(
+	w io.Writer, d *app.Deps, format render.Format, width int, data inventoryData, disc discovery.Result,
+) error {
 	switch format {
 	case render.FormatJSON:
 		env := render.NewEnvelope(buildinfo.Get().Version, d.Clock(), data)
@@ -263,7 +265,7 @@ func writeInventory(w io.Writer, d *app.Deps, format render.Format, data invento
 	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatSARIF, render.FormatGitHub,
 		render.FormatOpenVEX:
 	}
-	return writeInventoryTable(w, data)
+	return writeInventoryTable(w, data, width)
 }
 
 // stateLabel is repo/path, with :workspace for a workspace other than default.
@@ -385,26 +387,37 @@ func inventorySummary(data inventoryData) string {
 		len(data.Units), strings.Join(parts, ", "), instances, len(data.DoubleManaged))
 }
 
-func writeInventoryTable(w io.Writer, data inventoryData) error {
-	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0) //nolint:mnd // two spaces between columns
-	_, _ = fmt.Fprintln(tw, strings.Join(inventoryColumns(), "\t"))
+func writeInventoryTable(w io.Writer, data inventoryData, width int) error {
+	rows := make([][]term.Cell, len(data.Units))
 	for i := range data.Units {
-		_, _ = fmt.Fprintln(tw, strings.Join(inventoryRow(&data.Units[i]), "\t"))
+		u := &data.Units[i]
+		rows[i] = term.Rows([][]string{inventoryRow(u)})[0]
+		rows[i][3].Tone = stateStatusTone(u.Status)
 	}
-	if err := tw.Flush(); err != nil {
-		return fmt.Errorf("write inventory: %w", err)
-	}
+	var b strings.Builder
+	b.WriteString(term.Table(inventoryColumns(), rows))
 	if notes := inventoryNotes(data); len(notes) > 0 {
-		_, _ = fmt.Fprintln(w)
-		for _, n := range notes {
-			_, _ = fmt.Fprintln(w, n)
-		}
+		b.WriteString("\n")
+		writeLines(&b, notes, width, "", "  ")
 	}
-	_, _ = fmt.Fprintln(w)
-	if _, err := fmt.Fprintln(w, inventorySummary(data)); err != nil {
-		return fmt.Errorf("write inventory: %w", err)
+	b.WriteString("\n" + inventorySummary(data) + "\n")
+	return writeText(w, b.String(), "inventory")
+}
+
+// stateStatusTone shows ok green, error red, skipped faint, and absent, encrypted and unsupported
+// yellow, since tfcensus couldn't read their resources.
+func stateStatusTone(s tfstate.Status) term.Tone {
+	switch s {
+	case tfstate.StatusOK:
+		return term.Good
+	case tfstate.StatusError:
+		return term.Bad
+	case tfstate.StatusAbsent, tfstate.StatusEncrypted, tfstate.StatusUnsupported:
+		return term.Warn
+	case tfstate.StatusSkipped:
+		return term.Muted
 	}
-	return nil
+	return term.Plain
 }
 
 func writeInventoryMarkdown(w io.Writer, data inventoryData) error {

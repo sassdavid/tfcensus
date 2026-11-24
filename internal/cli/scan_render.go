@@ -17,13 +17,19 @@ import (
 	"github.com/sassdavid/tfcensus/internal/render"
 	"github.com/sassdavid/tfcensus/internal/sarif"
 	"github.com/sassdavid/tfcensus/internal/scan"
+	"github.com/sassdavid/tfcensus/internal/term"
 	"github.com/sassdavid/tfcensus/internal/tfstate"
 )
+
+// summaryLead is the number of summary columns before the counts: account and region.
+const summaryLead = 2
 
 // ownerTags are the tags the report shows next to an unmanaged resource, when present.
 func ownerTags() []string { return []string{"owner", "Owner", "created-by", "CreatedBy", "creator"} }
 
-func writeScan(w io.Writer, d *app.Deps, format render.Format, rep *scan.Report, problems []scan.Problem) error {
+func writeScan(
+	w io.Writer, d *app.Deps, format render.Format, width int, rep *scan.Report, problems []scan.Problem,
+) error {
 	now := d.Clock()
 	switch format {
 	case render.FormatJSON:
@@ -42,7 +48,7 @@ func writeScan(w io.Writer, d *app.Deps, format render.Format, rep *scan.Report,
 		return sarif.WriteGitHub(w, scanSARIF(rep))
 	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatOpenVEX:
 	}
-	return writeScanText(w, rep, problems, now)
+	return writeScanText(w, rep, problems, now, width)
 }
 
 func summaryColumns() []string {
@@ -222,81 +228,77 @@ func scanSummary(rep *scan.Report) string {
 	return line
 }
 
-func writeScanText(w io.Writer, rep *scan.Report, problems []scan.Problem, now time.Time) error {
-	if err := writeTab(w, summaryColumns(), summaryRows(rep)); err != nil {
-		return err
-	}
-	if err := writeUnmanagedText(w, rep, now); err != nil {
-		return err
-	}
+func writeScanText(w io.Writer, rep *scan.Report, problems []scan.Problem, now time.Time, width int) error {
+	var b strings.Builder
+	b.WriteString(term.Table(summaryColumns(), summaryCells(rep)))
+	writeUnmanagedText(&b, rep, now)
 	if n := countOf(rep, scan.CategoryDoubleManaged); n > 0 {
-		_, _ = fmt.Fprintf(w, "\nDouble-managed (%d)\n", n)
+		b.WriteString("\n" + term.Severe.Paint(fmt.Sprintf("Double-managed (%d)", n)) + "\n")
+		var lines []string
 		for i := range rep.Findings {
 			if f := &rep.Findings[i]; f.Category == scan.CategoryDoubleManaged {
-				_, _ = fmt.Fprintf(w, "  %s %s: %s\n", f.Type(), f.Key(), refsText(f.ManagedBy))
+				lines = append(lines, f.Type()+" "+f.Key()+": "+refsText(f.ManagedBy))
 			}
 		}
+		writeLines(&b, lines, width, "  ", "    ")
 	}
 	if lines := stackLines(rep); len(lines) > 0 {
-		_, _ = fmt.Fprintf(w, "\nCloudFormation stacks (%d)\n", len(lines))
-		for _, l := range lines {
-			_, _ = fmt.Fprintln(w, "  "+l)
-		}
+		b.WriteString("\n" + term.Heading.Paint(fmt.Sprintf("CloudFormation stacks (%d)", len(lines))) + "\n")
+		writeLines(&b, lines, width, "  ", "    ")
 	}
 	if reasons := undeterminedReasons(rep); len(reasons) > 0 {
-		_, _ = fmt.Fprintf(w, "\nUndetermined (%d)\n", countOf(rep, scan.CategoryUndetermined))
-		for _, r := range reasons {
-			_, _ = fmt.Fprintln(w, "  "+r)
-		}
+		head := fmt.Sprintf("Undetermined (%d)", countOf(rep, scan.CategoryUndetermined))
+		b.WriteString("\n" + term.Warn.Paint(head) + "\n")
+		writeLines(&b, reasons, width, "  ", "    ")
 	}
 	if notes := scanNotes(rep, problems); len(notes) > 0 {
-		_, _ = fmt.Fprintln(w)
-		for _, n := range notes {
-			_, _ = fmt.Fprintln(w, n)
-		}
+		b.WriteString("\n")
+		writeLines(&b, notes, width, "", "  ")
 	}
-	_, _ = fmt.Fprintln(w)
-	if _, err := fmt.Fprintln(w, scanSummary(rep)); err != nil {
-		return fmt.Errorf("write scan: %w", err)
-	}
-	return nil
+	b.WriteString("\n" + term.Sanitize(scanSummary(rep)) + "\n")
+	return writeText(w, b.String(), "scan")
 }
 
-// writeUnmanagedText prints the unmanaged findings grouped by type.
-func writeUnmanagedText(w io.Writer, rep *scan.Report, now time.Time) error {
+// summaryCells are the summary rows of rep in [summaryTones].
+func summaryCells(rep *scan.Report) [][]term.Cell {
+	rows := summaryRows(rep)
+	out := make([][]term.Cell, len(rows))
+	for i, r := range rows {
+		out[i] = summaryTones(r)
+	}
+	return out
+}
+
+// summaryTones turns a [summaryRow] into cells, with unmanaged, double-managed and undetermined
+// counts above zero in their category's tone.
+func summaryTones(row []string) []term.Cell {
+	out := term.Rows([][]string{row})[0]
+	for i, c := range scan.Categories() {
+		switch c {
+		case scan.CategoryUnmanaged, scan.CategoryDoubleManaged, scan.CategoryUndetermined:
+			out[summaryLead+i].Tone = toneIf(row[summaryLead+i] != "0", c.Tone())
+		case scan.CategoryManaged, scan.CategoryOtherIaC, scan.CategoryAWSManaged, scan.CategoryDerived,
+			scan.CategoryIgnored:
+		}
+	}
+	return out
+}
+
+// writeUnmanagedText adds the unmanaged findings grouped by type.
+func writeUnmanagedText(b *strings.Builder, rep *scan.Report, now time.Time) {
 	types, groups := byType(rep, scan.CategoryUnmanaged)
 	if len(types) == 0 {
-		return nil
+		return
 	}
-	_, _ = fmt.Fprintf(w, "\nUnmanaged (%d)\n", countOf(rep, scan.CategoryUnmanaged))
+	b.WriteString("\n" + term.Bad.Paint(fmt.Sprintf("Unmanaged (%d)", countOf(rep, scan.CategoryUnmanaged))) + "\n")
 	for _, t := range types {
-		_, _ = fmt.Fprintf(w, "%s (%d)\n", t, len(groups[t]))
+		b.WriteString(term.Heading.Paint(fmt.Sprintf("%s (%d)", t, len(groups[t]))) + "\n")
 		rows := make([][]string, 0, len(groups[t]))
 		for _, f := range groups[t] {
 			rows = append(rows, findingDetail(f, now))
 		}
-		if err := writeRows(w, rows); err != nil {
-			return err
-		}
+		b.WriteString(rowsText(term.Rows(rows)))
 	}
-	return nil
-}
-
-// writeRows prints aligned rows without a header, indented by two spaces.
-func writeRows(w io.Writer, rows [][]string) error {
-	if len(rows) == 0 {
-		return nil
-	}
-	var b strings.Builder
-	if err := writeTab(&b, rows[0], rows[1:]); err != nil {
-		return err
-	}
-	for line := range strings.Lines(b.String()) {
-		if _, err := io.WriteString(w, "  "+line); err != nil {
-			return fmt.Errorf("write scan: %w", err)
-		}
-	}
-	return nil
 }
 
 func countOf(rep *scan.Report, c scan.Category) int {

@@ -4,6 +4,7 @@ go 1.27.0
 
 require (
 	cel.dev/cel-go v0.33.4
+	charm.land/lipgloss/v2 v2.1.1
 	github.com/adrg/xdg v0.5.3
 	github.com/aws/aws-sdk-go-v2 v1.48.0
 	github.com/aws/aws-sdk-go-v2/config v1.33.21
@@ -26,6 +27,9 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sts v1.53.0
 	github.com/aws/smithy-go v1.28.9
 	github.com/carapace-sh/carapace v1.18.2
+	github.com/charmbracelet/colorprofile v0.4.3
+	github.com/charmbracelet/x/ansi v0.11.8
+	github.com/charmbracelet/x/term v0.2.2
 	github.com/google/go-cmp v0.7.0
 	github.com/google/jsonschema-go v0.4.3
 	github.com/hashicorp/go-retryablehttp v0.7.8
@@ -82,6 +86,11 @@ require (
 	github.com/carapace-sh/carapace-shlex/v2 v2.1.4 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
+	github.com/charmbracelet/ultraviolet v0.0.0-20260811164956-006e29f97886 // indirect
+	github.com/charmbracelet/x/termios v0.1.1 // indirect
+	github.com/charmbracelet/x/windows v0.2.2 // indirect
+	github.com/clipperhouse/displaywidth v0.11.0 // indirect
+	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/containerd/errdefs v1.0.0 // indirect
 	github.com/containerd/errdefs/pkg v0.3.0 // indirect
 	github.com/containerd/log v0.1.0 // indirect
@@ -101,8 +110,10 @@ require (
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/knadh/koanf/maps v0.1.3 // indirect
+	github.com/lucasb-eyer/go-colorful v1.4.1 // indirect
 	github.com/lufia/plan9stats v0.0.0-20260330125221-c963978e514e // indirect
 	github.com/magiconair/properties v1.18.12 // indirect
+	github.com/mattn/go-runewidth v0.0.24 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
@@ -115,11 +126,13 @@ require (
 	github.com/moby/sys/user v0.4.1 // indirect
 	github.com/moby/sys/userns v0.1.0 // indirect
 	github.com/moby/term v0.5.2 // indirect
+	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
 	github.com/pb33f/go-yaml v0.1.1 // indirect
 	github.com/pb33f/ordered-map/v2 v2.3.2 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
+	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/ryszard/goskiplist v0.0.0-20150312221310-2dfbae5fcf46 // indirect
 	github.com/segmentio/asm v1.1.3 // indirect
@@ -128,6 +141,7 @@ require (
 	github.com/sirupsen/logrus v1.9.4 // indirect
 	github.com/tklauser/go-sysconf v0.4.0 // indirect
 	github.com/tklauser/numcpus v0.12.0 // indirect
+	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect

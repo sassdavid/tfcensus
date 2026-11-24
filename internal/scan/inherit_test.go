@@ -12,6 +12,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/match"
 	"github.com/sassdavid/tfcensus/internal/ownership"
 	"github.com/sassdavid/tfcensus/internal/scan"
+	"github.com/sassdavid/tfcensus/internal/term"
 	"github.com/sassdavid/tfcensus/internal/testutil"
 	"github.com/sassdavid/tfcensus/internal/tfstate"
 	"github.com/sassdavid/tfcensus/internal/typemap"
@@ -224,6 +225,6 @@ func TestExplainInherit(t *testing.T) {
 	ex := scan.Explain(results, 1, inheritEngine(t))
 	require.NotNil(t, ex.Finding.Parent)
 	var b bytes.Buffer
-	require.NoError(t, scan.WriteExplanation(&b, &ex))
+	require.NoError(t, scan.WriteExplanation(term.Writer(&b, term.Stream{}.Profile()), &ex))
 	testutil.Golden(t, filepath.Join(goldenDir, "explain-inherit.golden"), b.Bytes())
 }

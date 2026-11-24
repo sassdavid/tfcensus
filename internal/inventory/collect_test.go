@@ -14,6 +14,7 @@ import (
 
 	"github.com/sassdavid/tfcensus/internal/inventory"
 	"github.com/sassdavid/tfcensus/internal/probe"
+	"github.com/sassdavid/tfcensus/internal/term"
 	"github.com/sassdavid/tfcensus/internal/testutil"
 	"github.com/sassdavid/tfcensus/internal/testutil/awstest"
 )
@@ -100,7 +101,7 @@ func TestSpec_inventory_3(t *testing.T) {
 	assert.Equal(t, []string{"aws_default_security_group", "aws_security_group"}, sg.TFTypes)
 
 	var cov bytes.Buffer
-	require.NoError(t, inventory.WriteCoverage(&cov, res.Coverage))
+	require.NoError(t, inventory.WriteCoverage(term.Writer(&cov, term.Stream{}.Profile()), res.Coverage, 0))
 	testutil.Golden(t, filepath.Join(goldenDir, "coverage-two-regions.golden"), cov.Bytes())
 
 	var lines []string
@@ -283,7 +284,7 @@ func TestSpec_inventory_4(t *testing.T) {
 		lines = append(lines, strings.Join(parts, " "))
 	}
 	var cov bytes.Buffer
-	require.NoError(t, inventory.WriteCoverage(&cov, res.Coverage))
+	require.NoError(t, inventory.WriteCoverage(term.Writer(&cov, term.Stream{}.Profile()), res.Coverage, 0))
 	out, err := json.MarshalIndent(map[string]any{"resources": lines, "runs": res.Runs}, "", "  ")
 	require.NoError(t, err)
 	testutil.Golden(t, filepath.Join(goldenDir, "cc-parents.golden.json"), append(out, '\n'))

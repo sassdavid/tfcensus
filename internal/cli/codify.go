@@ -20,6 +20,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/ownership"
 	"github.com/sassdavid/tfcensus/internal/render"
 	"github.com/sassdavid/tfcensus/internal/scan"
+	"github.com/sassdavid/tfcensus/internal/term"
 	"github.com/sassdavid/tfcensus/internal/typemap"
 )
 
@@ -88,7 +89,7 @@ input and 1 when a file can't be written.`,
 			if err != nil {
 				return err
 			}
-			return runCodify(cmd, d, g.outFormat, &res.Config, a)
+			return runCodify(cmd, d, g, &res.Config, a)
 		},
 	}
 	f := cmd.Flags()
@@ -136,7 +137,7 @@ type codifyReport struct {
 	Next  []string `json:"next"`
 }
 
-func runCodify(cmd *cobra.Command, d *app.Deps, format render.Format, cfg *config.Config, a codifyArgs) error {
+func runCodify(cmd *cobra.Command, d *app.Deps, g *globals, cfg *config.Config, a codifyArgs) error {
 	ctx := cmd.Context()
 	o := codify.Options{Types: scan.TypeMatcher(a.types), Query: a.query, ImportByID: a.importBy == codify.ByID}
 	var err error
@@ -190,10 +191,10 @@ func runCodify(cmd *cobra.Command, d *app.Deps, format render.Format, cfg *confi
 		Result: res, Into: a.into, Files: res.FileNames(),
 		Next: codify.NextSteps(a.into, tgErr == nil, o.Target, res),
 	}
-	if format == render.FormatJSON {
+	if g.outFormat == render.FormatJSON {
 		return render.JSON(d.Stdout, render.NewEnvelope(buildinfo.Get().Version, d.Clock(), rep))
 	}
-	return writeCodifyText(d.Stdout, rep)
+	return writeCodifyText(g.textOut(d), rep, g.textWidth(g.outFormat))
 }
 
 // readScanReport returns the findings of a scan --format json report.
@@ -222,7 +223,7 @@ func readScanReport(d *app.Deps, path string) ([]scan.Finding, error) {
 	return env.Data.Findings, nil
 }
 
-func writeCodifyText(w io.Writer, rep *codifyReport) error {
+func writeCodifyText(w io.Writer, rep *codifyReport, width int) error {
 	var b strings.Builder
 	switch {
 	case len(rep.Imports) == 0:
@@ -234,32 +235,30 @@ func writeCodifyText(w io.Writer, rep *codifyReport) error {
 				byIdentity++
 			}
 		}
-		fmt.Fprintf(&b, "Wrote %d import block(s) (%d by identity, %d by id) for %s (%s) into %s:\n",
+		head := fmt.Sprintf("Wrote %d import block(s) (%d by identity, %d by id) for %s (%s) into %s:",
 			len(rep.Imports), byIdentity, len(rep.Imports)-byIdentity, rep.Target, rep.Target.Source, rep.Into)
+		writeToned(&b, term.Good, head, width, "", "  ")
 		for _, f := range rep.Files {
-			fmt.Fprintf(&b, "  %s\n", f)
+			b.WriteString("  " + term.Sanitize(f) + "\n")
 		}
 	}
 	if len(rep.Skipped) > 0 {
-		fmt.Fprintf(&b, "\nSkipped (%d)\n", len(rep.Skipped))
+		b.WriteString("\n" + term.Warn.Paint(fmt.Sprintf("Skipped (%d)", len(rep.Skipped))) + "\n")
 		for _, s := range rep.Skipped {
-			fmt.Fprintf(&b, "  %s %s: %s\n", s.Type, s.Key, s.Reason)
+			writeLines(&b, []string{s.Type + " " + s.Key + ": " + s.Reason}, width, "  ", "    ")
 		}
 	}
 	if len(rep.Notes) > 0 {
 		b.WriteString("\n")
 		for _, n := range rep.Notes {
-			b.WriteString("note: " + n + "\n")
+			writeLines(&b, []string{"note: " + n}, width, "", "  ")
 		}
 	}
 	if len(rep.Next) > 0 {
-		b.WriteString("\nNext steps\n")
+		b.WriteString("\n" + term.Heading.Paint("Next steps") + "\n")
 		for _, n := range rep.Next {
-			b.WriteString("  " + n + "\n")
+			b.WriteString("  " + term.Sanitize(n) + "\n")
 		}
 	}
-	if _, err := io.WriteString(w, b.String()); err != nil {
-		return fmt.Errorf("write codify: %w", err)
-	}
-	return nil
+	return writeText(w, b.String(), "codify")
 }

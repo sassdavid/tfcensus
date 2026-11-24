@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-	"text/tabwriter"
 
 	"github.com/spf13/cobra"
 	"go.yaml.in/yaml/v4"
@@ -20,6 +19,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/config"
 	"github.com/sassdavid/tfcensus/internal/docsurl"
 	"github.com/sassdavid/tfcensus/internal/render"
+	"github.com/sassdavid/tfcensus/internal/term"
 )
 
 func newConfigCmd(d *app.Deps, g *globals) *cobra.Command {
@@ -122,15 +122,11 @@ func writeConfigYAML(d *app.Deps, res *config.Result) error {
 }
 
 func writeConfigSources(d *app.Deps, res *config.Result) error {
-	tw := tabwriter.NewWriter(d.Stdout, 0, 0, 2, ' ', 0) //nolint:mnd // column padding
-	_, _ = fmt.Fprintln(tw, "KEY\tVALUE\tSOURCE")
+	var rows [][]string
 	for _, k := range res.Keys() {
-		_, _ = fmt.Fprintf(tw, "%s\t%s\t%s\n", k, displayValue(res.Value(k)), res.Source(k))
+		rows = append(rows, []string{k, displayValue(res.Value(k)), res.Source(k).String()})
 	}
-	if err := tw.Flush(); err != nil {
-		return fmt.Errorf("write config: %w", err)
-	}
-	return nil
+	return writeText(d.Stdout, term.Table([]string{"KEY", "VALUE", colSource}, term.Rows(rows)), "config")
 }
 
 func displayValue(v any) string {
@@ -178,7 +174,7 @@ directory, and whether each one exists. --config or TFCENSUS_CONFIG replaces the
 }
 
 func writeFiles(d *app.Deps, files []config.File) error {
-	tw := tabwriter.NewWriter(d.Stdout, 0, 0, 2, ' ', 0) //nolint:mnd // column padding
+	var rows [][]string
 	for _, f := range files {
 		path, state := f.Path, "found"
 		switch {
@@ -190,12 +186,9 @@ func writeFiles(d *app.Deps, files []config.File) error {
 		if f.Explicit {
 			state += ", explicit"
 		}
-		_, _ = fmt.Fprintf(tw, "%s\t%s\t%s\n", f.Kind, state, path)
+		rows = append(rows, []string{string(f.Kind), state, path})
 	}
-	if err := tw.Flush(); err != nil {
-		return fmt.Errorf("write paths: %w", err)
-	}
-	return nil
+	return writeText(d.Stdout, term.Table(nil, term.Rows(rows)), "paths")
 }
 
 func newConfigValidateCmd(d *app.Deps, g *globals) *cobra.Command {

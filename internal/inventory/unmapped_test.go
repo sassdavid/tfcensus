@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/sassdavid/tfcensus/internal/inventory"
+	"github.com/sassdavid/tfcensus/internal/term"
 	"github.com/sassdavid/tfcensus/internal/testutil"
 	"github.com/sassdavid/tfcensus/internal/testutil/awstest"
 )
@@ -61,6 +62,6 @@ func TestSpec_scan_accuracy_8(t *testing.T) {
 	require.Len(t, res.Coverage.Errors, 1)
 	assert.Contains(t, res.Coverage.Errors[0], "us-east-1")
 	var b bytes.Buffer
-	require.NoError(t, inventory.WriteCoverage(&b, res.Coverage))
+	require.NoError(t, inventory.WriteCoverage(term.Writer(&b, term.Stream{}.Profile()), res.Coverage, 0))
 	testutil.Golden(t, filepath.Join(goldenDir, "coverage-unmapped.golden"), b.Bytes())
 }

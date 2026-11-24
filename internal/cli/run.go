@@ -6,10 +6,13 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/sassdavid/tfcensus/internal/app"
 	"github.com/sassdavid/tfcensus/internal/config"
+	"github.com/sassdavid/tfcensus/internal/term"
 )
 
 // Exit codes. [ExitCodes] describes each one for the docs site.
@@ -51,6 +54,11 @@ func universalExitCodes() []int { return []int{ExitOK, ExitError, ExitUsage, Exi
 
 // Run is the process entry point. args includes the program name, as [os.Args] does.
 func Run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
+	// Taking SIGPIPE turns a write to a closed pipe into an EPIPE error instead of a silent exit,
+	// so a report piped into head still writes its --out files and keeps its exit code.
+	pipe := make(chan os.Signal, 1)
+	signal.Notify(pipe, syscall.SIGPIPE)
+	defer signal.Stop(pipe)
 	d := &app.Deps{
 		Stdin:  os.Stdin,
 		Stdout: stdout,
@@ -84,6 +92,9 @@ func execute(ctx context.Context, d *app.Deps, args []string, withCarapace bool)
 	root.SetArgs(args)
 	cmd, err := root.ExecuteContextC(ctx)
 	g.close()
+	if term.IsBrokenPipe(err) {
+		err = nil // the reader has what it wanted
+	}
 	code := exitCode(ctx, err, g.started)
 	if err != nil || code == ExitInterrupted {
 		printError(d.Stderr, err, code, root.Name(), cmd.CommandPath())

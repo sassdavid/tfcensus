@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"io"
 	"slices"
+	"strconv"
 	"strings"
-	"text/tabwriter"
 
 	"github.com/sassdavid/tfcensus/internal/probe"
+	"github.com/sassdavid/tfcensus/internal/term"
 	"github.com/sassdavid/tfcensus/internal/typemap"
 )
 
@@ -190,53 +191,59 @@ func markRank(m string) string {
 }
 
 // WriteCoverage prints the matrix as an aligned table: one row per type, one column per account
-// and region. "-" marks a blind spot.
-func WriteCoverage(w io.Writer, c *Coverage) error {
-	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0) //nolint:mnd // two spaces between columns
+// and region. "-" marks a blind spot, shown in [term.Warn]. Notes wrap at width (0 for no wrapping).
+func WriteCoverage(w io.Writer, c *Coverage, width int) error {
 	header := []string{"TYPE"}
 	for _, col := range c.Columns {
 		header = append(header, col.Account+"/"+col.Region)
 	}
-	_, _ = fmt.Fprintln(tw, strings.Join(header, "\t"))
+	rows := make([][]term.Cell, 0, len(c.Rows))
 	for _, r := range c.Rows {
-		line := []string{r.CFNType}
+		line := []term.Cell{{Text: r.CFNType}}
 		for _, marks := range r.Cells {
 			if len(marks) == 0 {
-				line = append(line, "-")
+				line = append(line, term.Cell{Text: "-", Tone: term.Warn})
 				continue
 			}
-			line = append(line, strings.Join(marks, "+"))
+			line = append(line, term.Cell{Text: strings.Join(marks, "+")})
 		}
-		_, _ = fmt.Fprintln(tw, strings.Join(line, "\t"))
+		rows = append(rows, line)
 	}
-	if err := tw.Flush(); err != nil {
-		return fmt.Errorf("write coverage: %w", err)
-	}
+	var b strings.Builder
+	b.WriteString(term.Table(header, rows))
 	if len(c.Notes) > 0 {
-		_, _ = fmt.Fprintln(w, "\nLeft out of the inventory:")
+		b.WriteString("\nLeft out of the inventory:\n")
 	}
 	for _, n := range c.Notes {
 		where := n.Account + "/" + cmp.Or(n.Region, GlobalColumn)
-		_, _ = fmt.Fprintf(w, "  %s %s: %d %s\n", where, short(n.Layer), n.Count, n.Reason)
+		line := fmt.Sprintf("%s %s: %d %s", where, short(n.Layer), n.Count, n.Reason)
+		b.WriteString(term.Wrap(term.Sanitize(line), width, "  ", "    ") + "\n")
 	}
-	return writeUnmapped(w, c)
-}
-
-// writeUnmapped prints the AWS Config types scan doesn't map, one table per run.
-func writeUnmapped(w io.Writer, c *Coverage) error {
-	if len(c.Unmapped) == 0 && len(c.Errors) == 0 {
-		return nil
-	}
-	_, _ = fmt.Fprintln(w, "\nAWS Config types scan doesn't map:")
-	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0) //nolint:mnd // two spaces between columns
-	for _, u := range c.Unmapped {
-		_, _ = fmt.Fprintf(tw, "  %s/%s\t%s\t%d\n", u.Account, u.Region, u.Type, u.Count)
-	}
-	if err := tw.Flush(); err != nil {
+	writeUnmapped(&b, c, width)
+	if _, err := io.WriteString(w, b.String()); err != nil {
 		return fmt.Errorf("write coverage: %w", err)
 	}
-	for _, e := range c.Errors {
-		_, _ = fmt.Fprintf(w, "  not counted: %s\n", e)
-	}
 	return nil
+}
+
+// writeUnmapped adds the AWS Config types scan doesn't map, one row per run and type.
+func writeUnmapped(b *strings.Builder, c *Coverage, width int) {
+	if len(c.Unmapped) == 0 && len(c.Errors) == 0 {
+		return
+	}
+	b.WriteString("\nAWS Config types scan doesn't map:\n")
+	rows := make([][]term.Cell, len(c.Unmapped))
+	for i, u := range c.Unmapped {
+		rows[i] = []term.Cell{
+			{Text: u.Account + "/" + u.Region},
+			{Text: u.Type},
+			{Text: strconv.FormatInt(u.Count, 10)},
+		}
+	}
+	for line := range strings.Lines(term.Table(nil, rows)) {
+		b.WriteString("  " + line)
+	}
+	for _, e := range c.Errors {
+		b.WriteString(term.Wrap(term.Sanitize("not counted: "+e), width, "  ", "    ") + "\n")
+	}
 }

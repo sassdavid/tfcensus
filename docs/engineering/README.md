@@ -31,6 +31,7 @@ convention, not by shared code ([integration](../plan/integration.md)). Docs ind
 | [0014](adr/0014-report-outputs-and-pr-comment.md) | `--out`, Markdown cut at `--md-max-chars`, one GitHub pull request comment per report kind |
 | [0015](adr/0015-dependency-updates-renovate.md) | self-hosted Renovate per repo as a GitHub App, `config:best-practices`, 3-day cooldown |
 | [0016](adr/0016-docs-site.md) | docs site with VitePress, aube and GitHub Pages, deployed on release |
+| [0017](adr/0017-terminal-output.md) | `internal/term`: one color decision per stream, lipgloss v2 tables, sanitized third-party text |
 
 ADR format (Nygard): Status, Context, Decision, Reasons/Consequences, at most 60 lines.
 A superseded ADR stays in place with `Status: superseded by NNNN`.

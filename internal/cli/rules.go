@@ -8,7 +8,6 @@ import (
 	"io"
 	"os"
 	"strings"
-	"text/tabwriter"
 
 	"github.com/spf13/cobra"
 	"go.yaml.in/yaml/v4"
@@ -18,6 +17,8 @@ import (
 	"github.com/sassdavid/tfcensus/internal/complete"
 	"github.com/sassdavid/tfcensus/internal/ownership"
 	"github.com/sassdavid/tfcensus/internal/render"
+	"github.com/sassdavid/tfcensus/internal/scan"
+	"github.com/sassdavid/tfcensus/internal/term"
 )
 
 const flagResource = "resource"
@@ -84,7 +85,7 @@ the config's. rules test makes no AWS calls. Expired rules show as expired.`,
 			if err != nil {
 				return usageError(err)
 			}
-			return writeRuleTraces(d, g.outFormat, eng, samples)
+			return writeRuleTraces(d, g, eng, samples)
 		},
 	}
 	cmd.Flags().StringVar(&resource, flagResource, "", "JSON file with a resource or an array of resources to evaluate")
@@ -147,52 +148,62 @@ type ruleTrace struct {
 	Decision ownership.Decision `json:"decision"`
 }
 
-func writeRuleTraces(d *app.Deps, format render.Format, eng *ownership.Engine, samples []ownership.Resource) error {
+func writeRuleTraces(d *app.Deps, g *globals, eng *ownership.Engine, samples []ownership.Resource) error {
 	traces := make([]ruleTrace, len(samples))
 	for i := range samples {
 		traces[i] = ruleTrace{Resource: samples[i], Decision: eng.Evaluate(&samples[i], nil, true)}
 	}
-	if format == render.FormatJSON {
+	if g.outFormat == render.FormatJSON {
 		return render.JSON(d.Stdout, render.NewEnvelope(buildinfo.Get().Version, d.Clock(), traces))
 	}
-	w := d.Stdout
+	var b strings.Builder
 	for i := range traces {
 		t := &traces[i]
 		if i > 0 {
-			_, _ = fmt.Fprintln(w)
+			b.WriteString("\n")
 		}
 		r := &t.Resource
-		_, _ = fmt.Fprintf(
-			w,
-			"resource %d: %s %s\n",
-			i+1,
-			strings.TrimSpace(r.Type+" "+r.SourceType),
-			firstNonEmpty(r.ARN, r.ID, r.Name),
-		)
-		tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0) //nolint:mnd // two spaces between columns
-		for _, s := range t.Decision.Trace {
+		head := fmt.Sprintf("resource %d: %s %s", i+1, strings.TrimSpace(r.Type+" "+r.SourceType),
+			firstNonEmpty(r.ARN, r.ID, r.Name))
+		b.WriteString(term.Heading.Paint(head) + "\n")
+		rows := make([][]term.Cell, len(t.Decision.Trace))
+		for j, s := range t.Decision.Trace {
 			outcome := string(s.Outcome)
 			if s.Detail != "" {
 				outcome += ": " + s.Detail
 			}
-			_, _ = fmt.Fprintf(tw, "  %s\t%s\n", s.Rule, outcome)
+			rows[j] = []term.Cell{{Text: s.Rule}, {Text: outcome, Tone: outcomeTone(s.Outcome)}}
 		}
-		if err := tw.Flush(); err != nil {
-			return fmt.Errorf("write rules: %w", err)
-		}
+		b.WriteString(rowsText(rows))
 		dec := &t.Decision
 		verdict := "no rule matches (" + ownership.RuleNoMatch + ")"
+		tone := term.Plain
 		if dec.Matched {
 			verdict = fmt.Sprintf("%s: %s (%s)", dec.Category, dec.Reason, dec.Rule)
 			if dec.Owner != "" {
 				verdict = fmt.Sprintf("%s, owner %s: %s (%s)", dec.Category, dec.Owner, dec.Reason, dec.Rule)
 			}
+			tone = scan.Category(dec.Category).Tone()
 		}
-		if _, err := fmt.Fprintf(w, "  result: %s\n", verdict); err != nil {
-			return fmt.Errorf("write rules: %w", err)
-		}
+		b.WriteString("  result: " + tone.Paint(verdict) + "\n")
 	}
-	return nil
+	return writeText(g.textOut(d), b.String(), "rules")
+}
+
+// outcomeTone shows a match green, an error red, an expired or never-hide rule yellow, and
+// rules that didn't apply faint.
+func outcomeTone(o ownership.Outcome) term.Tone {
+	switch o {
+	case ownership.OutcomeMatch:
+		return term.Good
+	case ownership.OutcomeError:
+		return term.Bad
+	case ownership.OutcomeExpired, ownership.OutcomeNeverHide:
+		return term.Warn
+	case ownership.OutcomeNoMatch, ownership.OutcomePackOff, ownership.OutcomeSkipped:
+		return term.Muted
+	}
+	return term.Plain
 }
 
 func firstNonEmpty(values ...string) string {

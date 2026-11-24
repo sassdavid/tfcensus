@@ -9,7 +9,6 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"text/tabwriter"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
@@ -21,6 +20,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/execx"
 	"github.com/sassdavid/tfcensus/internal/probe"
 	"github.com/sassdavid/tfcensus/internal/render"
+	"github.com/sassdavid/tfcensus/internal/term"
 	"github.com/sassdavid/tfcensus/internal/toolcheck"
 )
 
@@ -33,6 +33,8 @@ const (
 	cellDenied       = "denied"
 	cellError        = "error"
 	cellNotFound     = "not found"
+	cellNone         = "none"
+	colSource        = "SOURCE"
 )
 
 func newDoctorCmd(d *app.Deps, g *globals) *cobra.Command {
@@ -77,7 +79,7 @@ warning. doctor exits 4 when every source fails, and 1 when a tool is older than
 			if err = checkRegions(cmd, &res.Config); err != nil {
 				return err
 			}
-			return runDoctor(cmd, d, g.outFormat, &res.Config, refresh)
+			return runDoctor(cmd, d, g, &res.Config, refresh)
 		},
 	}
 	addAccountFlags(cmd, d)
@@ -119,7 +121,7 @@ type doctorAggregator struct {
 	Cached  bool              `json:"cached,omitempty"`
 }
 
-func runDoctor(cmd *cobra.Command, d *app.Deps, format render.Format, cfg *config.Config, refresh bool) error {
+func runDoctor(cmd *cobra.Command, d *app.Deps, g *globals, cfg *config.Config, refresh bool) error {
 	ctx := cmd.Context()
 	loader := newLoader(d)
 	res, err := resolve(cmd, d, loader, targetSelection(cfg))
@@ -163,7 +165,7 @@ func runDoctor(cmd *cobra.Command, d *app.Deps, format render.Format, cfg *confi
 	if agg := cfg.Accounts.Aggregator; agg.Name != "" {
 		data.Aggregator = checkAggregator(cmd, loader, prober, agg)
 	}
-	if err = writeDoctor(d, format, data, res); err != nil {
+	if err = writeDoctor(d, g, data, res); err != nil {
 		return err
 	}
 	if len(res.Accounts) == 0 && len(res.Errors) > 0 {
@@ -277,8 +279,8 @@ func doctorSources(res *accounts.Result) []doctorSource {
 	return out
 }
 
-func writeDoctor(d *app.Deps, format render.Format, data doctorData, res *accounts.Result) error {
-	switch format {
+func writeDoctor(d *app.Deps, g *globals, data doctorData, res *accounts.Result) error {
+	switch g.outFormat {
 	case render.FormatJSON:
 		env := render.NewEnvelope(buildinfo.Get().Version, d.Clock(), data)
 		for _, e := range res.Errors {
@@ -295,7 +297,7 @@ func writeDoctor(d *app.Deps, format render.Format, data doctorData, res *accoun
 		render.FormatGitHub,
 		render.FormatOpenVEX:
 	}
-	return writeDoctorText(d.Stdout, data)
+	return writeDoctorText(g.textOut(d), data, g.textWidth(g.outFormat))
 }
 
 func sourceTarget(e *accounts.SourceError) string {
@@ -305,7 +307,7 @@ func sourceTarget(e *accounts.SourceError) string {
 	return e.Source
 }
 
-func sourceColumns() []string { return []string{"SOURCE", "KIND", colAccount, "NAME", colStatus} }
+func sourceColumns() []string { return []string{colSource, "KIND", colAccount, "NAME", colStatus} }
 
 func sourceRow(s doctorSource) []string {
 	return []string{s.Source, dash(string(s.Kind)), dash(s.Account), dash(s.Name), sourceStatus(s)}
@@ -390,7 +392,7 @@ func aggCell(a probe.AggCheck) string {
 		return strings.Join(a.Names, ", ")
 	case probe.StatusUnavailable:
 	}
-	return "none"
+	return cellNone
 }
 
 func accountLabel(r *probe.Report) string {
@@ -446,38 +448,33 @@ func aggregatorSources(sources []probe.AggSource) string {
 	return out + ". scan and whois read AWS Config through it where its sources are current"
 }
 
-func writeDoctorText(w io.Writer, data doctorData) error {
-	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0) //nolint:mnd // two spaces between columns
-	_, _ = fmt.Fprintln(tw, strings.Join(toolColumns(), "\t"))
-	for _, t := range data.Tools {
-		_, _ = fmt.Fprintln(tw, strings.Join(toolRow(t), "\t"))
-	}
-	if notes := toolNotes(data.Tools); len(notes) > 0 {
-		_, _ = fmt.Fprintln(tw)
-		for _, n := range notes {
-			_, _ = fmt.Fprintln(tw, n)
-		}
-	}
-	_, _ = fmt.Fprintln(tw)
-	_, _ = fmt.Fprintln(tw, strings.Join(sourceColumns(), "\t"))
-	for _, s := range data.Sources {
-		_, _ = fmt.Fprintln(tw, strings.Join(sourceRow(s), "\t"))
-	}
-	if len(data.Accounts) > 0 {
-		_, _ = fmt.Fprintln(tw)
-		_, _ = fmt.Fprintln(tw, strings.Join(regionColumns(), "\t"))
-		for _, r := range data.Accounts {
-			for i := range r.Regions {
-				_, _ = fmt.Fprintln(tw, strings.Join(regionRow(r, &r.Regions[i]), "\t"))
-			}
-		}
-	}
-	if err := tw.Flush(); err != nil {
-		return fmt.Errorf("write doctor report: %w", err)
-	}
+func writeDoctorText(w io.Writer, data doctorData, width int) error {
 	var b strings.Builder
+	tools := make([][]term.Cell, len(data.Tools))
+	for i, t := range data.Tools {
+		tools[i] = term.Rows([][]string{toolRow(t)})[0]
+		tools[i][4].Tone = toolTone(t.Status)
+	}
+	b.WriteString(term.Table(toolColumns(), tools))
+	if notes := toolNotes(data.Tools); len(notes) > 0 {
+		b.WriteString("\n")
+		writeLines(&b, notes, width, "", "  ")
+	}
+	sources := make([][]term.Cell, len(data.Sources))
+	for i, s := range data.Sources {
+		sources[i] = term.Rows([][]string{sourceRow(s)})[0]
+		sources[i][4].Tone = term.Warn
+		if s.Status == "ok" {
+			sources[i][4].Tone = term.Good
+		}
+	}
+	b.WriteString("\n" + term.Table(sourceColumns(), sources))
+	if len(data.Accounts) > 0 {
+		b.WriteString("\n" + term.Table(regionColumns(), regionCells(data.Accounts)))
+	}
 	if data.Aggregator != nil {
-		b.WriteString("\n" + aggregatorLine(data.Aggregator) + "\n")
+		b.WriteString("\n")
+		writeLines(&b, []string{aggregatorLine(data.Aggregator)}, width, "", "  ")
 	}
 	for _, r := range data.Accounts {
 		if len(r.Notes) == 0 {
@@ -485,13 +482,36 @@ func writeDoctorText(w io.Writer, data doctorData) error {
 		}
 		b.WriteString("\n")
 		for _, n := range r.Notes {
-			b.WriteString(accountLabel(r) + ": " + n + "\n")
+			writeLines(&b, []string{accountLabel(r) + ": " + n}, width, "", "  ")
 		}
 	}
-	if _, err := io.WriteString(w, b.String()); err != nil {
-		return fmt.Errorf("write doctor report: %w", err)
+	return writeText(w, b.String(), "doctor report")
+}
+
+// regionCells are the region rows of every account, with denied and failed checks red.
+func regionCells(reports []*probe.Report) [][]term.Cell {
+	var rows [][]term.Cell
+	for _, r := range reports {
+		for i := range r.Regions {
+			row := term.Rows([][]string{regionRow(r, &r.Regions[i])})[0]
+			for j := range row {
+				row[j].Tone = toneIf(row[j].Text == cellDenied || row[j].Text == cellError, term.Bad)
+			}
+			rows = append(rows, row)
+		}
 	}
-	return nil
+	return rows
+}
+
+// toolTone shows a usable tool green and a tool that is too old, missing or broken red.
+func toolTone(s toolcheck.Status) term.Tone {
+	switch s {
+	case toolcheck.StatusOK:
+		return term.Good
+	case toolcheck.StatusTooOld, toolcheck.StatusNotFound, toolcheck.StatusError:
+		return term.Bad
+	}
+	return term.Plain
 }
 
 func writeDoctorMarkdown(w io.Writer, data doctorData) error {
