@@ -238,14 +238,21 @@ func dash(s string) string {
 }
 
 // writeUnitsTable prints aligned columns, then the reasons and warnings that don't fit in a cell.
-// Unresolved units are red, and units with no lock or with warnings yellow.
+// Unresolved units are red, units with no lock or with warnings yellow, and a backend without
+// locking faint.
 func writeUnitsTable(w io.Writer, units []discovery.Unit, width int) error {
 	rows := make([][]term.Cell, len(units))
 	var notes []string
 	for i := range units {
 		u := &units[i]
 		rows[i] = term.Rows([][]string{unitRow(u)})[0]
-		rows[i][4].Tone = toneIf(u.Lock == discovery.LockNone, term.Warn)
+		switch u.Lock {
+		case discovery.LockNone:
+			rows[i][4].Tone = term.Warn
+		case "":
+			rows[i][4].Tone = term.Muted // the backend has no locking setting
+		case discovery.LockLockfile, discovery.LockDynamoDB, discovery.LockBoth:
+		}
 		rows[i][7].Tone = toneIf(u.Resolution == discovery.MethodUnresolved, term.Bad)
 		rows[i][8].Tone = toneIf(len(u.Warnings) > 0, term.Warn)
 		if u.Reason != "" {

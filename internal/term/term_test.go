@@ -143,3 +143,11 @@ func TestIsBrokenPipe(t *testing.T) {
 	assert.False(t, term.IsBrokenPipe(errors.New("disk full")))
 	assert.False(t, term.IsBrokenPipe(nil))
 }
+
+func TestNoteTone(t *testing.T) {
+	t.Parallel()
+	assert.Equal(t, term.Warn, term.NoteTone("warning: no token"))
+	assert.Equal(t, term.Bad, term.NoteTone("error: denied"))
+	assert.Equal(t, term.Bad, term.NoteTone("prod/eu-west-1: error: AccessDenied"))
+	assert.Equal(t, term.Plain, term.NoteTone("kubectl 1.30 (mise.toml:3): latest from tags"))
+}

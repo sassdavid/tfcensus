@@ -21,7 +21,8 @@ capability probe → discovery (F1) → state index (F3) → inventory layers �
 - Terminal handling follows engineering ADR-0017 for every command, not only scan: color is
   decided once per stream (`--color`, then `NO_COLOR`, `CLICOLOR_FORCE`/`FORCE_COLOR`,
   `CLICOLOR=0`/`TERM=dumb`, then the terminal), only the 16 basic ANSI colors are used, and the
-  text always carries the meaning without color. Auto format is tty when stdout is a terminal or
+  text always carries the meaning without color. Note lines labelled `warning:` are yellow and
+  `error:` red, and a LOCK of `-` (a backend without locking) is faint. Auto format is tty when stdout is a terminal or
   has color, so `CLICOLOR_FORCE=1` colors piped output. Tables measure display cells and never
   cut a cell. AWS names, tag values, ARNs, drift values and error messages show control
   characters in caret notation. A closed stdout pipe (`| head`) still writes the `--out` files

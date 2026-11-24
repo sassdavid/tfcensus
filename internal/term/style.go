@@ -1,6 +1,10 @@
 package term
 
-import "charm.land/lipgloss/v2"
+import (
+	"strings"
+
+	"charm.land/lipgloss/v2"
+)
 
 // Tone is what a piece of styled text means. Each tone uses one of the 16 basic ANSI colors, so
 // it follows the user's terminal theme, and the text itself always carries the meaning as well.
@@ -45,4 +49,16 @@ func (t Tone) Paint(s string) string {
 		return s
 	}
 	return t.Style().Render(s)
+}
+
+// NoteTone is the tone of a note line by its label: Warn for "warning: ...", Bad for
+// "error: ..." and "<target>: error: ...", Plain otherwise.
+func NoteTone(line string) Tone {
+	switch {
+	case strings.HasPrefix(line, "warning: "):
+		return Warn
+	case strings.HasPrefix(line, "error: ") || strings.Contains(line, ": error: "):
+		return Bad
+	}
+	return Plain
 }

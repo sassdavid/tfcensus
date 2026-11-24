@@ -48,11 +48,12 @@ func writeText(w io.Writer, s, what string) error {
 	return nil
 }
 
-// writeLines adds each line wrapped at width, starting with first and continuing with rest.
-// Control characters, as in AWS error messages, are made visible.
+// writeLines adds each line wrapped at width, starting with first and continuing with rest, in
+// the tone of its label ([term.NoteTone]). Control characters, as in AWS error messages, are
+// made visible.
 func writeLines(b *strings.Builder, lines []string, width int, first, rest string) {
 	for _, l := range lines {
-		b.WriteString(term.Wrap(term.Sanitize(l), width, first, rest) + "\n")
+		writeToned(b, term.NoteTone(l), l, width, first, rest)
 	}
 }
 
