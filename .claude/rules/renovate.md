@@ -99,7 +99,10 @@ Release notes are full of both, so quoted notes must be silenced.
   relgap's digest Markdown does (relgap's `docs/plan/specs/output-and-ci.md`), and relgap-action
   posts it as a comment on Renovate pull requests. relgap 0.4.0 and older quote the notes as they
   are: a comment on sassdavid/action-test#1 notified about 50 jq authors
-  (sassdavid/relgap-action#13). Run comment mode only with a relgap release that has the fix.
+  (sassdavid/relgap-action#13). 0.5.0 to 0.13.0 still let some through, such as a mention after a
+  non-ASCII letter or one written as a character reference (sassdavid/relgap#124). relgap-action
+  refuses comment mode below 0.13.1 (`TOOL_COMMENT_MIN_VERSION` in its `scripts/tool.env`); raise
+  that minimum when a relgap release closes another case.
 
 ## Changing the config
 
