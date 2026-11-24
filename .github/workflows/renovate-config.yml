@@ -52,6 +52,6 @@ jobs:
         with:
           # Required by the action; the validator makes no API calls.
           token: unused
-          renovate-version: 44.256.1 # Renovate updates it, see renovate.json
+          renovate-version: 44.257.2 # Renovate updates it, see renovate.json
           docker-cmd-file: ${{ runner.temp }}/validate.sh
           docker-volumes: ${{ github.workspace }}:/repo:ro

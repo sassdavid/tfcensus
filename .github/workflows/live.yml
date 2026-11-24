@@ -41,7 +41,7 @@ jobs:
           persist-credentials: false
       - uses: jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a # v5.2.10
         with:
-          version: 2026.11.10
+          version: 2026.11.11
       - name: inventory layers find ClickOps resources in moto and Floci
         env:
           TFCENSUS_MOTO_URL: http://localhost:5000
@@ -69,7 +69,7 @@ jobs:
           persist-credentials: false
       - uses: jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a # v5.2.10
         with:
-          version: 2026.11.10
+          version: 2026.11.11
           install_args: go terraform opentofu terragrunt
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -98,7 +98,7 @@ jobs:
           persist-credentials: false
       - uses: jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a # v5.2.10
         with:
-          version: 2026.11.10
+          version: 2026.11.11
           install_args: go terraform terragrunt
       - name: the pinned terragrunt reads tg-live into the recorded units
         run: mise run test:contract
