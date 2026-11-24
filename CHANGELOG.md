@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.0](https://github.com/sassdavid/tfcensus/compare/v0.9.2...v0.10.0) (2026-11-24)
+
+
+### Features
+
+* decide color per stream and render tables with lipgloss ([#112](https://github.com/sassdavid/tfcensus/issues/112)) ([e755d6c](https://github.com/sassdavid/tfcensus/commit/e755d6c90b53ab7981d765bad93582e076e887f1))
+
 ## [0.9.2](https://github.com/sassdavid/tfcensus/compare/v0.9.1...v0.9.2) (2026-11-23)
 
 
