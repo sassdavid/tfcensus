@@ -5,23 +5,23 @@ import (
 	"io"
 	"strconv"
 	"strings"
-	"text/tabwriter"
 
 	"github.com/sassdavid/tfcensus/internal/app"
 	"github.com/sassdavid/tfcensus/internal/buildinfo"
 	"github.com/sassdavid/tfcensus/internal/migrate"
 	"github.com/sassdavid/tfcensus/internal/render"
 	"github.com/sassdavid/tfcensus/internal/sarif"
+	"github.com/sassdavid/tfcensus/internal/term"
 )
 
-func writeMove(d *app.Deps, format render.Format, rep *migrate.Report) error {
-	switch format { //nolint:exhaustive // the command checks the format first
+func writeMove(d *app.Deps, g *globals, rep *migrate.Report) error {
+	switch g.outFormat { //nolint:exhaustive // the command checks the format first
 	case render.FormatJSON:
 		return render.JSON(d.Stdout, render.NewEnvelope(buildinfo.Get().Version, d.Clock(), rep))
 	case render.FormatSARIF:
 		return sarif.Write(d.Stdout, moveSARIF(rep))
 	default:
-		return writeMoveText(d.Stdout, rep)
+		return writeMoveText(g.textOut(d), rep, g.textWidth(g.outFormat))
 	}
 }
 
@@ -121,42 +121,58 @@ func moveVersions(v *migrate.VersionIDs) string {
 	return "version " + before + " -> " + v.After
 }
 
-func writeMoveText(w io.Writer, rep *migrate.Report) error {
+func writeMoveText(w io.Writer, rep *migrate.Report, width int) error {
 	var b strings.Builder
-	fmt.Fprintf(&b, "move %s %s\n", rep.Command, rep.File)
+	b.WriteString(term.Heading.Paint("move "+rep.Command+" "+rep.File) + "\n")
 	for i := range rep.Blocks {
-		writeMoveBlock(&b, rep.Command, &rep.Blocks[i])
+		writeMoveBlock(&b, rep.Command, &rep.Blocks[i], width)
 	}
-	if _, err := io.WriteString(w, b.String()); err != nil {
-		return fmt.Errorf("write move report: %w", err)
-	}
-	return nil
+	return writeText(w, b.String(), "move report")
 }
 
-func writeMoveBlock(b *strings.Builder, command string, br *migrate.BlockReport) {
+// moveResultTone shows a rejected block red, a partly applied one yellow and a skipped one faint.
+func moveResultTone(result string) term.Tone {
+	switch result {
+	case migrate.ResultRejected:
+		return term.Bad
+	case migrate.ResultPartial:
+		return term.Warn
+	case migrate.ResultSkipped:
+		return term.Muted
+	case migrate.ResultVerified, migrate.ResultApplied, migrate.ResultWritten, migrate.ResultRolledBack,
+		migrate.ResultMarked, migrate.ResultPlanned:
+		return term.Good
+	}
+	return term.Plain
+}
+
+func writeMoveBlock(b *strings.Builder, command string, br *migrate.BlockReport, width int) {
 	head := br.Status
 	if br.Result != "" {
 		head += ", " + br.Result
 	}
-	fmt.Fprintf(b, "\nBlock %s (%s): %s\n", br.Name, br.Strategy, head)
-	tw := tabwriter.NewWriter(b, 0, 0, 2, ' ', 0) //nolint:mnd // two spaces between columns
+	b.WriteString("\n" + term.Heading.Paint("Block "+br.Name+" ("+br.Strategy+"):") + " " +
+		moveResultTone(br.Result).Paint(head) + "\n")
+	rows := make([][]term.Cell, 0, len(br.Units))
 	for i := range br.Units {
 		u := &br.Units[i]
-		cols := []string{u.Label(), u.Role}
+		cols := []term.Cell{{Text: u.Label()}, {Text: u.Role}}
 		switch moveCommand(command) {
 		case moveStatus:
-			cols = append(cols, u.Status, moveVersions(u.VersionIDs))
+			tone := toneIf(u.Status == migrate.StatusPartial, term.Warn)
+			cols = append(cols, term.Cell{Text: u.Status, Tone: tone}, term.Cell{Text: moveVersions(u.VersionIDs)})
 		case moveRollback, moveMarkApplied:
-			cols = append(cols, moveVersions(u.VersionIDs))
+			cols = append(cols, term.Cell{Text: moveVersions(u.VersionIDs)})
 		case movePlan, moveApply:
-			cols = append(cols, moveChange(u), moveSerial(u), moveVersions(u.VersionIDs))
+			cols = append(cols, term.Cell{Text: moveChange(u)}, term.Cell{Text: moveSerial(u)},
+				term.Cell{Text: moveVersions(u.VersionIDs)})
 		}
-		fmt.Fprintf(tw, "  %s\n", strings.TrimRight(strings.Join(cols, "\t"), "\t"))
+		rows = append(rows, cols)
 	}
-	_ = tw.Flush()
+	b.WriteString(rowsText(rows))
 	moved, skipped := movedLines(br)
-	section(b, "Moved", moved)
-	section(b, "Data sources left in the source", skipped)
+	section(b, "Moved", moved, term.Plain, width)
+	section(b, "Data sources left in the source", skipped, term.Plain, width)
 	var findings []string
 	for _, f := range br.Findings {
 		line := f.Rule + " " + f.Unit
@@ -165,8 +181,8 @@ func writeMoveBlock(b *strings.Builder, command string, br *migrate.BlockReport)
 		}
 		findings = append(findings, line+": "+f.Reason)
 	}
-	section(b, "Findings", findings)
-	section(b, "Notes", br.Notes)
+	section(b, "Findings", findings, term.Bad, width)
+	section(b, "Notes", br.Notes, term.Plain, width)
 }
 
 // movedLines lists each moved address with its destination, and the data sources left behind.
@@ -187,12 +203,12 @@ func movedLines(br *migrate.BlockReport) ([]string, []string) {
 	return moved, skipped
 }
 
-func section(b *strings.Builder, title string, lines []string) {
+func section(b *strings.Builder, title string, lines []string, tone term.Tone, width int) {
 	if len(lines) == 0 {
 		return
 	}
-	fmt.Fprintf(b, "  %s\n", title)
+	b.WriteString("  " + term.Heading.Paint(title) + "\n")
 	for _, l := range lines {
-		fmt.Fprintf(b, "    %s\n", l)
+		writeToned(b, tone, l, width, "    ", "      ")
 	}
 }

@@ -10,7 +10,6 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-	"text/tabwriter"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -21,6 +20,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/probe"
 	"github.com/sassdavid/tfcensus/internal/render"
 	"github.com/sassdavid/tfcensus/internal/scan"
+	"github.com/sassdavid/tfcensus/internal/term"
 )
 
 func newCacheCmd(d *app.Deps, g *globals) *cobra.Command {
@@ -215,16 +215,12 @@ func writeCacheReport(
 	if g.outFormat == render.FormatJSON {
 		return render.JSON(d.Stdout, render.NewEnvelope(buildinfo.Get().Version, d.Clock(), rep))
 	}
-	tw := tabwriter.NewWriter(d.Stdout, 0, 0, 2, ' ', 0) //nolint:mnd // two spaces between columns
-	_, _ = fmt.Fprintf(tw, "dir\t%s\n\n", rep.Dir)
-	_, _ = fmt.Fprintln(tw, strings.Join(cols, "\t"))
-	for _, s := range rep.Caches {
-		_, _ = fmt.Fprintln(tw, strings.Join(row(s), "\t"))
+	rows := make([][]term.Cell, len(rep.Caches))
+	for i, s := range rep.Caches {
+		rows[i] = term.Rows([][]string{row(s)})[0]
 	}
-	if err := tw.Flush(); err != nil {
-		return fmt.Errorf("write output: %w", err)
-	}
-	return nil
+	out := term.Table(nil, term.Rows([][]string{{"dir", rep.Dir}})) + "\n" + term.Table(cols, rows)
+	return writeText(d.Stdout, out, "output")
 }
 
 // newScanCache returns the scan snapshot cache under $XDG_CACHE_HOME/tfcensus with cache.ttl.

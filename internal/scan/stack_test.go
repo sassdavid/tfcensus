@@ -11,6 +11,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/match"
 	"github.com/sassdavid/tfcensus/internal/ownership"
 	"github.com/sassdavid/tfcensus/internal/scan"
+	"github.com/sassdavid/tfcensus/internal/term"
 	"github.com/sassdavid/tfcensus/internal/tfstate"
 	"github.com/sassdavid/tfcensus/internal/typemap"
 )
@@ -125,7 +126,7 @@ func TestExplainStack(t *testing.T) {
 	ex := scan.Explain([]match.Result{res}, 0, src)
 	assert.Empty(t, ex.Trace)
 	var b bytes.Buffer
-	require.NoError(t, scan.WriteExplanation(&b, &ex))
+	require.NoError(t, scan.WriteExplanation(term.Writer(&b, term.Stream{}.Profile()), &ex))
 	assert.Contains(t, b.String(), "stack     CloudFormation stack billing as EventsQueue\n")
 	assert.Contains(t, b.String(), "rules     not evaluated: a CloudFormation stack lists it\n")
 	assert.Contains(t, b.String(), "category  other-iac, owner cloudformation: listed by CloudFormation stack billing "+

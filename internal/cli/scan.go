@@ -136,7 +136,7 @@ func newScanCmd(d *app.Deps, g *globals) *cobra.Command {
 				return err
 			}
 			a.paths = args
-			return runScan(cmd, d, g.sink(cmd, d), &res.Config, a)
+			return runScan(cmd, d, g.reportOut(cmd, d), &res.Config, a)
 		},
 	}
 	addDiscoveryFlags(cmd, &a.filters)
@@ -214,12 +214,11 @@ type scanEnv struct {
 	failOn []scan.Category
 }
 
-func runScan(cmd *cobra.Command, d *app.Deps, sink render.Sink, cfg *config.Config, a scanArgs) error {
-	if (a.explain != "" || a.explainCoverage) && len(sink.Outputs) > 0 {
+func runScan(cmd *cobra.Command, d *app.Deps, out reportOut, cfg *config.Config, a scanArgs) error {
+	if (a.explain != "" || a.explainCoverage) && len(out.Outputs) > 0 {
 		return usageError(fmt.Errorf("--%s writes the scan report; it doesn't work with --explain or "+
 			"--explain-coverage", flagOut))
 	}
-	format := sink.Format
 	e, err := newScanEnv(cmd, d, cfg, a)
 	if err != nil {
 		return err
@@ -244,10 +243,10 @@ func runScan(cmd *cobra.Command, d *app.Deps, sink render.Sink, cfg *config.Conf
 		Engine: eng, Map: e.m, Index: ownership.NewIndex(snap.Inventory.Resources), Stacks: stackIndex(snap.Inventory),
 	}
 	if a.explain != "" {
-		return e.writeExplain(format, results, src)
+		return e.writeExplain(out, results, src)
 	}
 	if a.explainCoverage {
-		return writeCoverage(d, format, snap.Inventory.Coverage)
+		return writeCoverage(d, out, snap.Inventory.Coverage)
 	}
 	findings := scan.Classify(results, src)
 	findings = slices.DeleteFunc(findings, func(f scan.Finding) bool {
@@ -267,8 +266,8 @@ func runScan(cmd *cobra.Command, d *app.Deps, sink render.Sink, cfg *config.Conf
 		rep.Warnings = append(rep.Warnings, msg)
 		d.Logger.WarnContext(cmd.Context(), "ownership rule expired", "rule", name)
 	}
-	if err = sink.Write(func(w io.Writer, f render.Format) error {
-		return writeScan(w, d, f, rep, snap.Problems)
+	if err = out.Write(func(w io.Writer, f render.Format) error {
+		return writeScan(w, d, f, out.width(f), rep, snap.Problems)
 	}); err != nil {
 		return err
 	}
@@ -728,7 +727,7 @@ func sortFindings(fs []scan.Finding) {
 	})
 }
 
-func (e *scanEnv) writeExplain(format render.Format, results []match.Result, src scan.Sources) error {
+func (e *scanEnv) writeExplain(out reportOut, results []match.Result, src scan.Sources) error {
 	want := e.a.explain
 	if strings.HasPrefix(want, "arn:") {
 		want = typemap.NormalizeARN(want)
@@ -737,18 +736,18 @@ func (e *scanEnv) writeExplain(format render.Format, results []match.Result, src
 		r := &results[i].Resource
 		if r.ARN == want || r.ID == want {
 			ex := scan.Explain(results, i, src)
-			if format == render.FormatJSON {
+			if out.Format == render.FormatJSON {
 				return render.JSON(e.d.Stdout, render.NewEnvelope(buildinfo.Get().Version, e.d.Clock(), ex))
 			}
-			return scan.WriteExplanation(e.d.Stdout, &ex)
+			return scan.WriteExplanation(out.stdout(), &ex)
 		}
 	}
 	return fmt.Errorf("no live resource has the ARN or ID %q", e.a.explain)
 }
 
-func writeCoverage(d *app.Deps, format render.Format, cov *inventory.Coverage) error {
-	if format == render.FormatJSON {
+func writeCoverage(d *app.Deps, out reportOut, cov *inventory.Coverage) error {
+	if out.Format == render.FormatJSON {
 		return render.JSON(d.Stdout, render.NewEnvelope(buildinfo.Get().Version, d.Clock(), cov))
 	}
-	return inventory.WriteCoverage(d.Stdout, cov)
+	return inventory.WriteCoverage(out.stdout(), cov, out.width(out.Format))
 }

@@ -23,6 +23,7 @@ import (
 	"github.com/sassdavid/tfcensus/internal/migrate"
 	"github.com/sassdavid/tfcensus/internal/prompt"
 	"github.com/sassdavid/tfcensus/internal/render"
+	"github.com/sassdavid/tfcensus/internal/term"
 	"github.com/sassdavid/tfcensus/internal/tfstate"
 
 	"github.com/sassdavid/tfcensus/internal/docsurl"
@@ -266,13 +267,9 @@ func runMove(
 	}
 	defer func() { _ = eng.Close() }()
 
-	gate := prompt.Gate{Yes: a.yes}
-	if prompt.Allowed(readerIsTerminal(d.Stdin), app.IsTerminal(d.Stdout), d.Env.Lookup, g.noInput) {
-		gate.Prompter = prompt.NewLine(d.Stdin, d.Stderr)
-	}
-	rep, err := runMoveCommand(ctx, eng, which, mf, blocks, gate, a.force)
+	rep, err := runMoveCommand(ctx, eng, which, mf, blocks, moveGate(d, g, a.yes), a.force)
 	if rep != nil && len(rep.Blocks) > 0 {
-		if werr := writeMove(d, g.outFormat, rep); werr != nil {
+		if werr := writeMove(d, g, rep); werr != nil {
 			return errors.Join(err, werr)
 		}
 	}
@@ -280,6 +277,18 @@ func runMove(
 		err = migrate.ErrRejected
 	}
 	return moveError(err)
+}
+
+// moveGate returns the confirmation gate, which prompts on stderr when stdin, stdout and stderr
+// are terminals and prompts are allowed.
+func moveGate(d *app.Deps, g *globals, yes bool) prompt.Gate {
+	gate := prompt.Gate{Yes: yes}
+	// The prompt is written to stderr, so it also needs stderr on a terminal to be seen.
+	outTTY := g.stdout.TTY && term.IsTerminal(d.Stderr)
+	if prompt.Allowed(readerIsTerminal(d.Stdin), outTTY, d.Env.Lookup, g.noInput) {
+		gate.Prompter = prompt.NewLine(d.Stdin, d.Stderr)
+	}
+	return gate
 }
 
 func runMoveCommand(
@@ -329,7 +338,7 @@ func moveError(err error) error {
 
 func readerIsTerminal(r io.Reader) bool {
 	f, ok := r.(*os.File)
-	return ok && app.IsTerminal(f)
+	return ok && term.IsTerminal(f)
 }
 
 // moveUnits discovers the repository and returns the units the blocks name, by unit reference,

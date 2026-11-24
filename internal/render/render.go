@@ -42,7 +42,8 @@ func ParseFormat(s string) (Format, error) {
 	return "", fmt.Errorf("invalid format %q: want one of %s", s, joinFormats(AllFormats()))
 }
 
-// Resolve turns FormatAuto into tty (stdout is a terminal) or plain.
+// Resolve turns FormatAuto into tty, when stdout is a terminal or gets color anyway (--color
+// always, CLICOLOR_FORCE), or plain.
 func (f Format) Resolve(stdoutIsTTY bool) Format {
 	if f != FormatAuto {
 		return f
@@ -67,45 +68,6 @@ func joinFormats(fs []Format) string {
 		s[i] = string(f)
 	}
 	return strings.Join(s, ", ")
-}
-
-// ColorMode is the --color flag value.
-type ColorMode string
-
-// Color modes.
-const (
-	ColorAuto   ColorMode = "auto"
-	ColorAlways ColorMode = "always"
-	ColorNever  ColorMode = "never"
-)
-
-// ParseColorMode validates a --color value.
-func ParseColorMode(s string) (ColorMode, error) {
-	switch m := ColorMode(s); m {
-	case ColorAuto, ColorAlways, ColorNever:
-		return m, nil
-	default:
-		return "", fmt.Errorf("invalid color mode %q: want auto, always or never", s)
-	}
-}
-
-// UseColor reports whether to emit ANSI colors. --color always or never wins, then
-// NO_COLOR, then CLICOLOR_FORCE, then terminal detection.
-func UseColor(mode ColorMode, lookup func(string) (string, bool), isTTY bool) bool {
-	switch mode {
-	case ColorAlways:
-		return true
-	case ColorNever:
-		return false
-	case ColorAuto:
-	}
-	if v, ok := lookup("NO_COLOR"); ok && v != "" {
-		return false
-	}
-	if v, ok := lookup("CLICOLOR_FORCE"); ok && v != "" && v != "0" {
-		return true
-	}
-	return isTTY
 }
 
 // SchemaVersion is the envelope version in schemas/report-v1.json.

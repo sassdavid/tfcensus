@@ -1,0 +1,63 @@
+# Color follows the stream, not the format flag alone. Output here is a pipe, so auto color is
+# off; CLICOLOR_FORCE and FORCE_COLOR turn it on and pick the tty layout, and they beat
+# TERM=dumb. NO_COLOR beats both, --format plain never colors, --color always beats NO_COLOR, and
+# JSON never colors. The harness sets NO_COLOR=1.
+env TEST_CASSETTE=$CASSETTES/aws/scan-fleet
+env TEST_NOW=2026-11-10T12:00:00Z
+env AWS_CONFIG_FILE=$WORK/aws/config
+cd $REPOS
+
+exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml
+! stdout '\x1b'
+stdout '^111111111111  global     1        1               2          0 '
+
+env NO_COLOR=
+exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml
+! stdout '\x1b'
+
+# Unmanaged counts are red, double-managed bold red, undetermined yellow; the columns stay aligned.
+env CLICOLOR_FORCE=1
+exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml
+stdout '^111111111111  global     1        \x1b\[1;31m1\x1b\[m               \x1b\[31m2\x1b\[m          0 '
+stdout '^111111111111  eu-west-1  5        0               \x1b\[31m3\x1b\[m .* \x1b\[33m1\x1b\[m  '
+stdout '^\x1b\[31mUnmanaged \(5\)\x1b\[m$'
+stdout '^\x1b\[1;31mDouble-managed \(1\)\x1b\[m$'
+! stdout ' +$'
+
+env CLICOLOR_FORCE=0
+exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml
+! stdout '\x1b'
+
+env CLICOLOR_FORCE=
+env FORCE_COLOR=1
+exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml
+stdout '\x1b\[31mUnmanaged \(5\)\x1b\[m'
+
+# A forced color beats TERM=dumb, which only turns off the color a terminal would get.
+env TERM=dumb
+exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml
+stdout '\x1b\[31mUnmanaged'
+env TERM=
+
+exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml --format plain
+! stdout '\x1b'
+
+exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml --color never
+! stdout '\x1b'
+
+env NO_COLOR=1
+exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml
+! stdout '\x1b'
+
+env FORCE_COLOR=
+exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml --color always
+stdout '\x1b\[31mUnmanaged \(5\)\x1b\[m'
+
+exec tfcensus scan tf-scan --config tf-scan/tfcensus.yaml --color always --format json
+! stdout '\x1b'
+
+-- aws/config --
+[default]
+region = eu-west-1
+aws_access_key_id = AKIAFAKEDEFAULT
+aws_secret_access_key = fake-default-secret

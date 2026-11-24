@@ -22,8 +22,13 @@ func EnvVars() []EnvVar {
 		{"USERPROFILE", "Home directory on Windows when HOME is not set."},
 		{"XDG_CONFIG_HOME", "Base of the user config file: $XDG_CONFIG_HOME/tfcensus/config.yaml."},
 		{"XDG_CACHE_HOME", "Base of the cache directory: $XDG_CACHE_HOME/tfcensus."},
-		{"NO_COLOR", "Turns color off with --color auto."},
-		{"CLICOLOR_FORCE", "Turns color on with --color auto, even when output is not a terminal."},
+		{"NO_COLOR", "Turns color off with --color auto when set to anything but an empty string."},
+		{"CLICOLOR_FORCE", "Turns color on with --color auto, even when output is not a terminal, unless it is 0 " +
+			"or NO_COLOR is set."},
+		{"FORCE_COLOR", "Turns color on like CLICOLOR_FORCE unless it is 0 or false."},
+		{"CLICOLOR", "Set to 0, turns color off with --color auto."},
+		{"TERM", "Set to dumb, turns color off with --color auto."},
+		{"COLUMNS", "Width in columns that tty output wraps notes and warnings at; default: the terminal's width."},
 		{
 			"CI",
 			"Any value turns prompts off, as no terminal does: move apply, rollback and mark-applied then need --yes.",

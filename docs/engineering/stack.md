@@ -68,9 +68,11 @@ age except where the docs-site spec names the version ([ADR-0016](adr/0016-docs-
 | HTTP retry | `github.com/hashicorp/go-retryablehttp` | v0.7.8 | latest (2025-06-18, rechecked 2026-11-12); used by terraform, tofu, trivy. In go.mod from M10: `internal/httpx`, shared with relgap, carries the notifier requests |
 | Rate limit | `golang.org/x/time` | v0.16.0 | `rate.Limiter` per account, region and service for inventory layers |
 | Compression | `github.com/klauspost/compress` (zstd: `inventory --save-index *.zst`, cache files) | v1.20.4 | gzip from the stdlib for `.gz`; zstd is what whois.md names |
-| Styling | `charm.land/lipgloss/v2` (+ `/table`) | **v2.1.0** (released today) | latest at M0; gh/terragrunt/goreleaser are on v2.0.x |
-| Markdown to terminal | `charm.land/glamour/v2` | v2.0.1 | |
-| TTY | `github.com/mattn/go-isatty` | v0.0.24 | |
+| Styling and tables | `charm.land/lipgloss/v2` (+ `/table`) | v2.1.1 | [ADR-0017](adr/0017-terminal-output.md). Styles and borderless tables in `internal/term`; display width from `clipperhouse/displaywidth` v0.11.0. Brings `ultraviolet`, `x/termios`, `x/windows`, `go-colorful` v1.4.1, `go-runewidth` v0.0.24, `uniseg` v0.4.7, `cancelreader` v0.2.2 and `xo/terminfo` as indirect modules, all MIT |
+| Color profile | `github.com/charmbracelet/colorprofile` | v0.4.3 | the writer that keeps (`ANSI`) or strips (`NoTTY`) styles; we pass the profile ourselves and never call `Detect` |
+| ANSI text | `github.com/charmbracelet/x/ansi` | v0.11.8 | display width and word wrap for prose; the version lipgloss v2.1.1 requires |
+| Terminal size | `github.com/charmbracelet/x/term` | v0.2.2 | `GetSize` for the wrap width; already required by lipgloss |
+| TTY | `github.com/mattn/go-isatty` | v0.0.24 | kept over `x/term.IsTerminal` because it also detects Cygwin and MSYS ptys |
 | Prompts | stdlib `bufio` → `charm.land/huh/v2` later | — / v2.0.3 | [ADR-0007](adr/0007-interactive-prompts.md) |
 | JSON Schema validate | `github.com/santhosh-tekuri/jsonschema/v6` | v6.0.3 | |
 | JSON Schema generate | `github.com/invopop/jsonschema` | v0.14.0 | config struct → schema; test-only (the schema sync test generates `schemas/config-v1.json`) |
@@ -136,7 +138,7 @@ module went to its latest: `golang.org/x/text` v0.44.0, `x/mod` v0.43.0, `x/tool
 
 | Concern | Module | Version | Why |
 |---|---|---|---|
-| Windows console colors | `golang.org/x/sys` (`windows`) | v0.50.0 | turns on VT processing so tint's ANSI colors render in conhost; already required by isatty |
+| Windows console colors | `golang.org/x/sys` (`windows`) | v0.50.0 | turns on VT processing on stdout and stderr so ANSI styles render in conhost; already required by isatty |
 | AWS SSO and sign-in credentials | `github.com/aws/aws-sdk-go-v2/service/sso` · `service/ssooidc` · `service/signin` | v1.39.5 · v1.44.5 · v1.13.1 | required by `config` for `sso-session`, legacy SSO and `aws login` profiles |
 | CEL runtime | `cel.dev/expr` · `github.com/antlr4-go/antlr/v4` · `google.golang.org/protobuf` · `google.golang.org/genproto/googleapis/api` · `googleapis/rpc` · `golang.org/x/exp` | v0.25.1 · v4.13.1 · v1.36.10 · v0.0.0-20240826202546-f6391c0de4c7 · same · v0.0.0-20240823005443-9b4947da3948 | required by cel-go at the versions it names; new at M6, none of them in relgap's go.mod, so relgap needs no change |
 | AWS SDK internals | `aws-sdk-go-v2/feature/ec2/imds` · `internal/configsources` · `internal/endpoints/v2` · `internal/v4a` · `service/internal/accept-encoding` · `service/internal/endpoint-discovery` · `service/internal/presigned-url` · `service/internal/checksum` · `service/internal/s3shared` · `aws/protocol/eventstream` | v1.20.9 · v1.5.12 · v2.8.12 · v1.5.12 · v1.13.25 · v1.13.12 · v1.14.12 · v1.11.13 · v1.20.12 · v1.7.27 | required by `config` and the service clients; `endpoint-discovery` by `dynamodb`; the last three by `s3` |

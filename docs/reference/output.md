@@ -6,12 +6,12 @@ description: The output formats of each tfcensus command, the --out flag, and th
 
 tfcensus writes data to stdout and logs to stderr, so `tfcensus scan --format json > scan.json`
 captures the report and nothing else. `--format` picks the format of stdout. Without it, tfcensus
-prints `tty` when stdout is a terminal and `plain` otherwise.
+prints `tty` when stdout is a terminal or gets color anyway, and `plain` otherwise.
 
 | Format | Output |
 |---|---|
-| `tty` | a table with color, for a terminal |
-| `plain` | the same table without color |
+| `tty` | a table with color, notes wrapped at the terminal width |
+| `plain` | the same table without color or wrapping |
 | `md` | Markdown, cut at a table row or section once it reaches `--md-max-chars` (60,000 characters by default, under GitHub's comment limit) |
 | `json` | the JSON envelope below, for scripts |
 | `csv` | comma-separated values, one row per finding or unit |
@@ -19,6 +19,36 @@ prints `tty` when stdout is a terminal and `plain` otherwise.
 | `github` | GitHub Actions workflow commands, which show as annotations |
 
 A command rejects a format it doesn't have with exit 2.
+
+## Color
+
+tfcensus decides color once for stdout and once for stderr (the logs). The first rule that
+applies wins:
+
+1. `--color always` or `--color never`.
+2. `NO_COLOR` set to anything but an empty string turns color off.
+3. `CLICOLOR_FORCE` or `FORCE_COLOR` set to anything but an empty string, `0` or `false` turns it
+   on, also when the output is a pipe or a file.
+4. `CLICOLOR=0` or `TERM=dumb` turns it off.
+5. Otherwise the stream gets color when it is a terminal.
+
+The tty format uses the 16 basic terminal colors, so it follows your terminal theme, and every
+colored cell also says what it means in text: unmanaged counts are red, double-managed bold red,
+undetermined yellow, drifted units yellow and failed ones red, high audit findings red. `plain`,
+`md`, `json`, `csv` and the `--out` files never contain color codes, and neither does a
+`--log-file`. `COLUMNS` sets the wrap width of notes and warnings; tables are never cut.
+
+CI logs are not terminals, so they stay plain, and so do the logs of tfcensus-action. GitHub
+Actions shows colors in step logs: add `--color always` or set `CLICOLOR_FORCE: "1"` on a step
+whose tty output you read in the log.
+
+AWS resource names, tag values, ARNs, drift values and error messages from AWS, terraform or tofu
+can contain control characters. The tty and plain formats show them in caret notation (`^[` for
+escape), so text from outside can't move the cursor, change the window title or write the
+clipboard.
+
+When stdout is a pipe that closes early, as in `tfcensus scan | head -3`, tfcensus stops writing
+stdout, still writes the `--out` files and exits with the code it would have used.
 
 ## Formats per command
 

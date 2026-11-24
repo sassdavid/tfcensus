@@ -9,7 +9,7 @@ import (
 
 	"github.com/sassdavid/tfcensus/internal/app"
 	"github.com/sassdavid/tfcensus/internal/complete"
-	"github.com/sassdavid/tfcensus/internal/render"
+	"github.com/sassdavid/tfcensus/internal/term"
 )
 
 // carapaceShell is a shell whose completion script comes from carapace, because cobra has none.
@@ -114,9 +114,9 @@ func logFormatChoices() []complete.Choice {
 
 func colorChoices() []complete.Choice {
 	return []complete.Choice{
-		{Value: string(render.ColorAuto), Desc: "color on a terminal unless NO_COLOR is set"},
-		{Value: string(render.ColorAlways), Desc: "always color"},
-		{Value: string(render.ColorNever), Desc: "never color"},
+		{Value: string(term.ColorAuto), Desc: "color on a terminal unless NO_COLOR is set"},
+		{Value: string(term.ColorAlways), Desc: "always color"},
+		{Value: string(term.ColorNever), Desc: "never color"},
 	}
 }
 

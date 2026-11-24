@@ -97,7 +97,7 @@ state read or a layer failed, 4 when every failure was a credential problem, and
 			if err != nil {
 				return err
 			}
-			return runWhois(cmd, d, g.sink(cmd, d), &res.Config, a)
+			return runWhois(cmd, d, g.reportOut(cmd, d), &res.Config, a)
 		},
 	}
 	addDiscoveryFlags(cmd, &a.filters)
@@ -169,7 +169,7 @@ func whoisQueries(d *app.Deps, args []string, stdin bool) ([]string, error) {
 	return uniq, nil
 }
 
-func runWhois(cmd *cobra.Command, d *app.Deps, sink render.Sink, cfg *config.Config, a whoisArgs) error {
+func runWhois(cmd *cobra.Command, d *app.Deps, out reportOut, cfg *config.Config, a whoisArgs) error {
 	failOn, err := parseFailOn(a.failOn)
 	if err != nil {
 		return err
@@ -211,8 +211,8 @@ func runWhois(cmd *cobra.Command, d *app.Deps, sink render.Sink, cfg *config.Con
 	for _, name := range eng.Expired() {
 		rep.Warnings = append(rep.Warnings, fmt.Sprintf("rule %q is past its expires date and no longer matches", name))
 	}
-	if err = sink.Write(func(w io.Writer, f render.Format) error {
-		return writeWhois(w, d, f, rep, problems)
+	if err = out.Write(func(w io.Writer, f render.Format) error {
+		return writeWhois(w, d, f, out.width(f), rep, problems)
 	}); err != nil {
 		return err
 	}

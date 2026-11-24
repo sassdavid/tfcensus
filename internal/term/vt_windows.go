@@ -1,6 +1,6 @@
 //go:build windows
 
-package app
+package term
 
 import (
 	"io"
@@ -9,9 +9,9 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-// EnableVirtualTerminal turns on ANSI escape handling when w is a Windows console. It
-// returns false only for a console that refuses, where colors would print as raw codes.
-func EnableVirtualTerminal(w io.Writer) bool {
+// enableVirtualTerminal turns on ANSI escape handling when w is a Windows console. It returns
+// false only for a console that refuses, where styles would print as raw codes.
+func enableVirtualTerminal(w io.Writer) bool {
 	f, ok := w.(*os.File)
 	if !ok {
 		return true

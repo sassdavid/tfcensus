@@ -67,8 +67,17 @@ func (g *globals) sink(cmd *cobra.Command, d *app.Deps) render.Sink {
 	return render.Sink{
 		Stdout:     d.Stdout,
 		Format:     g.outFormat,
+		Color:      g.stdout.Color,
 		Outputs:    g.outputs,
 		MDMaxChars: g.mdMaxChars,
 		Command:    cmd.CommandPath(),
 	}
+}
+
+// textWidth is the width to wrap the text formats at: the terminal's in the tty format, else 0.
+func (g *globals) textWidth(f render.Format) int {
+	if f == render.FormatTTY {
+		return g.stdout.Width
+	}
+	return 0
 }

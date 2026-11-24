@@ -17,7 +17,16 @@ capability probe → discovery (F1) → state index (F3) → inventory layers �
 | undetermined | type unmapped, or layer data insufficient | no, but shown prominently |
 
 ## Output
-- **tty:** a summary per account/region (counts per category, coverage %), then unmanaged findings grouped by type, with name, ARN, tags (owner/created-by if present), and age if Config has `resourceCreationTime`.
+- **tty:** a summary per account/region (counts per category, coverage %), then unmanaged findings grouped by type, with name, ARN, tags (owner/created-by if present), and age if Config has `resourceCreationTime`. Unmanaged counts and the "Unmanaged" heading are red, double-managed bold red, undetermined yellow, type headings bold; notes wrap at the terminal width. `plain` is the same table with no ANSI and no wrapping.
+- Terminal handling follows engineering ADR-0017 for every command, not only scan: color is
+  decided once per stream (`--color`, then `NO_COLOR`, `CLICOLOR_FORCE`/`FORCE_COLOR`,
+  `CLICOLOR=0`/`TERM=dumb`, then the terminal), only the 16 basic ANSI colors are used, and the
+  text always carries the meaning without color. Note lines labelled `warning:` are yellow and
+  `error:` red, and a LOCK of `-` (a backend without locking) is faint. Auto format is tty when stdout is a terminal or
+  has color, so `CLICOLOR_FORCE=1` colors piped output. Tables measure display cells and never
+  cut a cell. AWS names, tag values, ARNs, drift values and error messages show control
+  characters in caret notation. A closed stdout pipe (`| head`) still writes the `--out` files
+  and keeps the exit code.
 - **md:** the same, collapsible per account. For issues and wikis.
 - **json:** the full findings array (schema `schemas/scan-v1.json`). This is also the input for `codify` and `report html`.
 - **csv:** a flat list for spreadsheets (FinOps).
@@ -56,3 +65,9 @@ capability probe → discovery (F1) → state index (F3) → inventory layers �
   before the rules, a state before the stack, and `scan.cloudformation: false` makes no stack
   calls (`TestStacks`, `TestStackIndex`, `TestClassifyStacks`, `TestScanCloudFormationOff`, the
   `spec_scan_1` goldens).
+- [x] Color and layout follow the stream: `CLICOLOR_FORCE=1` and `FORCE_COLOR=1` color piped
+  output in the tty layout and beat `TERM=dumb`, `NO_COLOR` beats both, `--format plain` and
+  JSON never color, and `--color always` beats `NO_COLOR` (`TestSpec_scan_6`,
+  `spec_scan_6.txtar`). Table columns stay aligned with wide characters and styled cells, control
+  characters in third-party text show in caret notation (`TestTable`, `TestSanitize`), and a
+  closed stdout still writes every `--out` file with no error (`TestSinkBrokenPipe`).

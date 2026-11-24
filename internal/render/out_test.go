@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -74,4 +75,62 @@ func TestSinkWrite(t *testing.T) {
 
 	s.Outputs = []render.Output{{Format: render.FormatPlain, Path: filepath.Join(dir, "missing", "r.txt")}}
 	require.ErrorContains(t, s.Write(write), "write --out "+filepath.Join(dir, "missing", "r.txt"))
+}
+
+// brokenPipe fails every write the way a pipe whose reader has gone does.
+type brokenPipe struct{}
+
+func (brokenPipe) Write([]byte) (int, error) {
+	return 0, &os.PathError{Op: "write", Path: "/dev/stdout", Err: syscall.EPIPE}
+}
+
+func TestSinkBrokenPipe(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	out := filepath.Join(dir, "r.json")
+	s := render.Sink{
+		Stdout:  brokenPipe{},
+		Format:  render.FormatPlain,
+		Outputs: []render.Output{{Format: render.FormatJSON, Path: out}},
+	}
+	require.NoError(t, s.Write(func(w io.Writer, f render.Format) error {
+		_, err := fmt.Fprintf(w, "format %s\n", f)
+		return err
+	}), "a closed stdout is no error")
+	b, err := os.ReadFile(out)
+	require.NoError(t, err)
+	assert.Equal(t, "format json\n", string(b), "the --out file is still written")
+}
+
+func TestSinkColor(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	write := func(w io.Writer, _ render.Format) error {
+		_, err := io.WriteString(w, "\x1b[31mred\x1b[m\n")
+		return err
+	}
+	tests := []struct {
+		format render.Format
+		color  bool
+		want   string
+	}{
+		{render.FormatTTY, true, "\x1b[31mred\x1b[m\n"},
+		{render.FormatTTY, false, "red\n"},
+		{render.FormatPlain, true, "red\n"},
+	}
+	for _, tt := range tests {
+		var stdout bytes.Buffer
+		out := filepath.Join(dir, string(tt.format)+".txt")
+		s := render.Sink{
+			Stdout:  &stdout,
+			Format:  tt.format,
+			Color:   tt.color,
+			Outputs: []render.Output{{Format: render.FormatPlain, Path: out}},
+		}
+		require.NoError(t, s.Write(write))
+		assert.Equal(t, tt.want, stdout.String(), "%s color=%v", tt.format, tt.color)
+		b, err := os.ReadFile(out)
+		require.NoError(t, err)
+		assert.Equal(t, "red\n", string(b), "--out files never get styles")
+	}
 }

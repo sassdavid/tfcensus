@@ -329,3 +329,10 @@ func TestSpec_whois_and_codify_1(t *testing.T) {
 	t.Parallel()
 	testscript.Run(t, scriptParams(t, filepath.Join(scriptDir, "spec_whois_and_codify_1.txtar")))
 }
+
+// TestSpec_scan_6: color follows the stream and the color variables: CLICOLOR_FORCE and
+// FORCE_COLOR color piped output, NO_COLOR beats them, and --color always beats NO_COLOR.
+func TestSpec_scan_6(t *testing.T) {
+	t.Parallel()
+	testscript.Run(t, scriptParams(t, filepath.Join(scriptDir, "spec_scan_6.txtar")))
+}

@@ -11,12 +11,15 @@ import (
 	"github.com/sassdavid/tfcensus/internal/drift"
 	"github.com/sassdavid/tfcensus/internal/render"
 	"github.com/sassdavid/tfcensus/internal/sarif"
+	"github.com/sassdavid/tfcensus/internal/term"
 )
 
 // maxAnnotationMembers caps the units named in one annotation.
 const maxAnnotationMembers = 10
 
-func writeDrift(w io.Writer, d *app.Deps, format render.Format, rep *drift.Report, problems []driftProblem) error {
+func writeDrift(
+	w io.Writer, d *app.Deps, format render.Format, width int, rep *drift.Report, problems []driftProblem,
+) error {
 	switch format {
 	case render.FormatJSON:
 		env := render.NewEnvelope(buildinfo.Get().Version, d.Clock(), rep)
@@ -32,7 +35,7 @@ func writeDrift(w io.Writer, d *app.Deps, format render.Format, rep *drift.Repor
 		return writeDriftMarkdown(w, rep, problems)
 	case render.FormatAuto, render.FormatTTY, render.FormatPlain, render.FormatCSV, render.FormatOpenVEX:
 	}
-	return writeDriftText(w, rep, problems)
+	return writeDriftText(w, rep, problems, width)
 }
 
 // driftErrors lists the failed units, then the repos that failed.
@@ -100,22 +103,42 @@ func protectedNotes(rep *drift.Report) map[string]string {
 	return out
 }
 
-func unitRows(rep *drift.Report) ([]string, [][]string) {
+func unitRows(rep *drift.Report) ([]string, [][]term.Cell) {
 	cols := []string{colUnit, colStatus, "DRIFTED", "HIDDEN"}
 	full := rep.Mode == drift.ModeFull
 	if full {
 		cols = append(cols, "REVERTS", "PENDING")
 	}
 	cols = append(cols, "REASON")
-	rows := make([][]string, 0, len(rep.Units))
+	rows := make([][]term.Cell, 0, len(rep.Units))
 	for _, u := range rep.Units {
-		row := []string{u.Path, string(u.Status), strconv.Itoa(u.Drifted), strconv.Itoa(u.Hidden)}
-		if full {
-			row = append(row, strconv.Itoa(u.Reverts), strconv.Itoa(u.Pending))
+		row := []term.Cell{
+			{Text: u.Path},
+			{Text: string(u.Status), Tone: driftStatusTone(u.Status)},
+			countCell(u.Drifted, term.Warn),
+			{Text: strconv.Itoa(u.Hidden)},
 		}
-		rows = append(rows, append(row, cmpDash(u.Reason)))
+		if full {
+			row = append(row, term.Cell{Text: strconv.Itoa(u.Reverts)}, term.Cell{Text: strconv.Itoa(u.Pending)})
+		}
+		rows = append(rows, append(row, term.Cell{Text: cmpDash(u.Reason)}))
 	}
 	return cols, rows
+}
+
+// driftStatusTone shows drifted yellow, failed and early-exit red, clean green and excluded faint.
+func driftStatusTone(s drift.Status) term.Tone {
+	switch s {
+	case drift.StatusDrifted:
+		return term.Warn
+	case drift.StatusFailed, drift.StatusEarlyExit:
+		return term.Bad
+	case drift.StatusClean:
+		return term.Good
+	case drift.StatusExcluded:
+		return term.Muted
+	}
+	return term.Plain
 }
 
 func cmpDash(s string) string {
@@ -136,26 +159,27 @@ func driftNotes(rep *drift.Report, problems []driftProblem) []string {
 	return notes
 }
 
-func writeDriftText(w io.Writer, rep *drift.Report, problems []driftProblem) error {
+func writeDriftText(w io.Writer, rep *drift.Report, problems []driftProblem, width int) error {
+	var b strings.Builder
 	cols, rows := unitRows(rep)
-	if err := writeTab(w, cols, rows); err != nil {
-		return err
-	}
+	b.WriteString(term.Table(cols, rows))
 	withValues := hasValues(rep)
 	protected := protectedNotes(rep)
 	if len(rep.Groups) > 0 {
-		_, _ = fmt.Fprintf(w, "\nDrift (%d resources in %d groups)\n", rep.Summary.Resources, len(rep.Groups))
+		head := fmt.Sprintf("Drift (%d resources in %d groups)", rep.Summary.Resources, len(rep.Groups))
+		b.WriteString("\n" + term.Heading.Paint(head) + "\n")
 	}
 	for i := range rep.Groups {
 		g := &rep.Groups[i]
-		_, _ = fmt.Fprintf(w, "%s  %s\n", g.ID, groupHeading(g))
-		attrRows := make([][]string, 0, len(g.Attributes))
+		b.WriteString(term.Heading.Paint(g.ID+"  "+groupHeading(g)) + "\n")
+		attrRows := make([][]term.Cell, 0, len(g.Attributes))
 		for j := range g.Attributes {
-			attrRows = append(attrRows, attrCells(&g.Attributes[j], withValues))
+			a := &g.Attributes[j]
+			row := term.Rows([][]string{attrCells(a, withValues)})[0]
+			row[1].Tone = toneIf(a.ForcesReplacement, term.Bad)
+			attrRows = append(attrRows, row)
 		}
-		if err := writeRows(w, attrRows); err != nil {
-			return err
-		}
+		b.WriteString(rowsText(attrRows))
 		memberRows := make([][]string, 0, len(g.Members))
 		for _, m := range g.Members {
 			row := []string{m.Unit, m.Address}
@@ -164,29 +188,15 @@ func writeDriftText(w io.Writer, rep *drift.Report, problems []driftProblem) err
 			}
 			memberRows = append(memberRows, row)
 		}
-		_, _ = fmt.Fprintln(w, "  members:")
-		if err := writeRows(w, indentRows(memberRows)); err != nil {
-			return err
-		}
+		b.WriteString("  members:\n")
+		b.WriteString(indent(rowsText(term.Rows(memberRows)), "  "))
 	}
 	if notes := driftNotes(rep, problems); len(notes) > 0 {
-		_, _ = fmt.Fprintln(w)
-		for _, n := range notes {
-			_, _ = fmt.Fprintln(w, n)
-		}
+		b.WriteString("\n")
+		writeLines(&b, notes, width, "", "  ")
 	}
-	if _, err := fmt.Fprintln(w, "\n"+rep.Summary.Text()); err != nil {
-		return fmt.Errorf("write drift: %w", err)
-	}
-	return nil
-}
-
-// indentRows adds two more spaces in front of each row's first cell.
-func indentRows(rows [][]string) [][]string {
-	for _, r := range rows {
-		r[0] = "  " + r[0]
-	}
-	return rows
+	b.WriteString("\n" + rep.Summary.Text() + "\n")
+	return writeText(w, b.String(), "drift")
 }
 
 func hasValues(rep *drift.Report) bool {
